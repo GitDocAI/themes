@@ -14,7 +14,7 @@ export const metadata = {
 const navbar = (
   <Navbar
     logo={
-      <div className="flex flex-row items-center gap-5" style={{ alignItems: "center", gap: '30px' }}>
+      <div className="flex flex-row items-center gap-3" >
         <img className="w-5 h-5" src={site.logo} alt="" />
         <b > {site.name} </b>
         <VersionSwitcher versions={site.versions} defaultVersion={site.defaultVersion} />

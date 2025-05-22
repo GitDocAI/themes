@@ -1,10 +1,10 @@
 export default {
   'v1.0': {
-    title: 'My Homepage',
+    title: ' ',
     type: 'page',
   },
   'v2.1': {
-    title: 'Titulo',
+    title: ' ',
     type: 'page'
   },
 }

@@ -7,7 +7,8 @@ const VersionSwitcher = ({ versions = [], defaultVersion, placeholder = 'Select 
   const pathname = usePathname()
   const inputRef = useRef(null)
 
-  const [selectedVersion, setSelectedVersion] = useState('')
+  const current = pathname?.split('/')[1]
+  const [selectedVersion, setSelectedVersion] = useState(current ?? defaultVersion)
   const [filteredVersions, setFilteredVersions] = useState(versions)
   const [isOpen, setIsOpen] = useState(false)
 
@@ -55,7 +56,7 @@ const VersionSwitcher = ({ versions = [], defaultVersion, placeholder = 'Select 
   }
 
   return (
-    <div className="relative inline-block w-48">
+    <div className="relative inline-block ">
       <button
         ref={inputRef}
         type="text"
@@ -70,12 +71,12 @@ const VersionSwitcher = ({ versions = [], defaultVersion, placeholder = 'Select 
       </button>
 
       {isOpen && filteredVersions.length > 0 && (
-        <ul className="absolute z-10 mt-1 w-20 bg-zinc-900 border border-zinc-200 rounded-md text-white shadow-lg max-h-60 overflow-y-auto">
+        <ul className="absolute z-10 mt-1 w-20 bg-zinc-900  rounded-md text-white shadow-lg  overflow-y-auto">
           {filteredVersions.map(version => (
             <li
               key={version}
               onMouseDown={() => handleOptionClick(version)}
-              className={`px-4 py-2 hover:bg-zinc-800 cursor-pointer ${version === selectedVersion ? 'bg-zinc-700 font-bold' : ''}`}
+              className={`px-4 w-full py-2 hover:bg-zinc-800 border border-zinc-300/30 rounded-md cursor-pointer ${version === selectedVersion ? 'bg-zinc-700 !text-blue-100 font-bold' : ''}`}
             >
               {version}
             </li>
