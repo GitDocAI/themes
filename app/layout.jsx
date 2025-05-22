@@ -1,21 +1,9 @@
 import { Footer, Layout, Navbar } from 'nextra-theme-docs'
 import { Head } from 'nextra/components'
 import { getPageMap } from 'nextra/page-map'
-import 'nextra-theme-docs/style.css'
-import { Tabs } from 'nextra/components'
-
-const tabs = (
-  <Tabs items={['Pestaña 1', 'Pestaña 2']}>
-    <Tabs.Tab>
-      Contenido de la Pestaña 1
-    </Tabs.Tab>
-    <Tabs.Tab>
-      Contenido de la Pestaña 2
-    </Tabs.Tab>
-  </Tabs>
-
-)
-
+import './global.css'
+import site from "../site.config"
+import VersionSwitcher from '../components/VersionSwitcher.jsx'
 
 export const metadata = {
   // Define your metadata here
@@ -25,7 +13,13 @@ export const metadata = {
 
 const navbar = (
   <Navbar
-    logo={<b>dockitai</b>}
+    logo={
+      <div className="flex flex-row items-center gap-5" style={{ alignItems: "center", gap: '30px' }}>
+        <img className="w-5 h-5" src={site.logo} alt="" />
+        <b > {site.name} </b>
+        <VersionSwitcher versions={site.versions} defaultVersion={site.defaultVersion} />
+      </div>
+    }
   />
 
 )
@@ -33,9 +27,6 @@ const footer = <Footer>MIT {new Date().getFullYear()} © page.</Footer>
 
 export default async function RootLayout({ children }) {
   const pageMapV1 = await getPageMap()
-  const pageMapV2 = await getPageMap()
-  console.log(pageMapV1)
-  console.log(pageMapV2)
   return (
     <html
       // Not required, but good for SEO
@@ -53,7 +44,8 @@ export default async function RootLayout({ children }) {
         <Layout
           navbar={navbar}
           pageMap={pageMapV1}
-          docsRepositoryBase="https://github.com/shuding/nextra/tree/main/docs"
+          docsRepositoryBase={site.github}
+          editLink={null}
           footer={footer}
         >
           {children}
