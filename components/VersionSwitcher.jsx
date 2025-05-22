@@ -16,10 +16,6 @@ const VersionSwitcher = ({ versions = [], defaultVersion, placeholder = 'Select 
   useEffect(() => {
     if (!pathname) return
     const current = pathname.split('/')[1]
-    if (current === '') {
-      window.location.href = `/${defaultVersion}`
-      return
-    }
     if (versions.includes(current)) {
       setSelectedVersion(current)
     }
