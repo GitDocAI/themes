@@ -1,5 +1,5 @@
 /* app/globals.css */
 @tailwind utilities;
+ @import 'nextra-theme-docs/style.css'; /* o 'nextra-theme-blog/style.css' para el blog*/ 
 @import "tailwindcss";
-@import 'nextra-theme-docs/style.css'; /* o 'nextra-theme-blog/style.css' para el blog*/
 

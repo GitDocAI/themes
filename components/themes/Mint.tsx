@@ -1,7 +1,8 @@
 import { Footer, Layout } from 'nextra-theme-docs'
 import { Banner } from 'nextra/components'
 import VersionSwitcher from '../VersionSwitcher.jsx'
-import { Navbar } from '@/components/mint/Navbar'
+import { Navbar as NavBarMint } from '@/components/mint/Navbar'
+import { Sidebar } from '../mint/Sidebar'
 
 
 
@@ -12,7 +13,7 @@ export default async function MintLayout({ children, pageMap, site, versions, de
     site?.banner ? <Banner>{site.banner}</Banner> : <span></span>
   )
   const navbar = (
-    <Navbar
+    <NavBarMint
       pageMap={pageMap}
       logo={
         <div className="flex flex-row items-center gap-3" >
@@ -27,16 +28,26 @@ export default async function MintLayout({ children, pageMap, site, versions, de
   const footer = <Footer>MIT {new Date().getFullYear()} © page.</Footer>
 
   return (
-    <Layout
-      navbar={navbar}
-      banner={banner}
-      pageMap={pageMap}
-      docsRepositoryBase={site?.github}
-      editLink={null}
-      footer={footer}
-    >
-      {children}
-    </Layout>
+    <main className="flex flex-row gap-1">
+      <div className='flex flex-col w-full'>
+        <Layout
+          themeSwitch={{
+            dark: 'Темный',
+            light: 'Светлый',
+            system: 'Системный'
+          }}
+          navbar={navbar}
+          banner={banner}
+          pageMap={pageMap}
+          docsRepositoryBase={site?.github}
+          editLink={null}
+          footer={footer}
+        >
+          {children}
+        </Layout>
+      </div>
+      <Sidebar pageMap={pageMap} />
+    </main>
 
   )
 }

@@ -25,10 +25,10 @@ export const Navbar: FC<{ pageMap: PageMapItem[], logo: any }> = ({ pageMap, log
     >
       {logo}
       Hola Mundo
-      {topLevelNavbarItems.map(item => {
+      {topLevelNavbarItems.map((item, index) => {
         const route = item.route || ('href' in item ? item.href! : '')
         return (
-          <li key={route}>
+          <li key={`${route}-${index}`}>
             <Anchor href={route} style={{ textDecoration: 'none' }}>
               {item.title}
             </Anchor>

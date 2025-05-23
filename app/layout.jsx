@@ -1,19 +1,25 @@
-// import { Footer, Layout, Navbar } from 'nextra-theme-docs'
-import { Head } from 'nextra/components'
 import { getPageMap } from 'nextra/page-map'
 import './global.css'
-import site from "../site.config"
-import VersionSwitcher from '../components/VersionSwitcher.jsx'
 import { headers } from 'next/headers'
 import DefaultLayout from '../components/themes/DefaultLayout.jsx'
 import MintLayout from '../components/themes/Mint.tsx'
 import { redirect } from 'next/navigation'
+import CustomHead from '../components/CustomisableHead.jsx'
 
 export const metadata = {
 
 }
 
+import fs from 'fs'
+import path from 'path'
+
+const jsonPath = path.join(process.cwd(), 'site.json')
+const rawData = fs.readFileSync(jsonPath, 'utf-8')
+const site = JSON.parse(rawData)
+
 export default async function RootLayout({ children }) {
+
+
   const headersList = await headers()
   const currentPath = (headersList.get('x-current-path') || '/').split('/')[1];
   const pageMapV1 = await getPageMap()
@@ -26,13 +32,14 @@ export default async function RootLayout({ children }) {
   if (site[currentPath]) {
     switch (site[currentPath].theme) {
       case 'mint':
-        layout = (<MintLayout
-          children={children}
-          pageMap={pageMapV1}
-          site={site[currentPath]}
-          versions={site.versions}
-          defaultVersion={site.defaultVersion}
-        />
+        layout = (
+          <MintLayout
+            children={children}
+            pageMap={pageMapV1}
+            site={site[currentPath]}
+            versions={site.versions}
+            defaultVersion={site.defaultVersion}
+          />
         )
         break
       default:
@@ -63,10 +70,10 @@ export default async function RootLayout({ children }) {
       // Suggested by `next-themes` package https://github.com/pacocoursey/next-themes#with-app
       suppressHydrationWarning
     >
-      <Head
+      <CustomHead
+        colorscheme={site[currentPath]?.colors}
       >
-        {/* Your additional tags should be passed as `children` of `<Head>` element */}
-      </Head>
+      </CustomHead>
       <body>
         {layout}
       </body>

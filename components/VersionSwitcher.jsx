@@ -18,6 +18,8 @@ const VersionSwitcher = ({ versions = [], defaultVersion, placeholder = 'Select 
     const current = pathname.split('/')[1]
     if (versions.includes(current)) {
       setSelectedVersion(current)
+    } else {
+      window.location.href = `/${defaultVersion}`
     }
   }, [pathname, versions])
 
@@ -61,7 +63,7 @@ const VersionSwitcher = ({ versions = [], defaultVersion, placeholder = 'Select 
         onBlur={handleBlur}
         onClick={click}
         placeholder={placeholder}
-        className=" px-4 py-1 bg-zinc-900/40 text-white border border-zinc-200 rounded-full"
+        className="x:whitespace-nowrap x:transition-colors x:min-w-6 x:overflow-hidden x:text-ellipsis x:focus-visible:nextra-focus x:ring-inset x:hover:text-gray-900 x:dark:hover:text-gray-100 x:dark:border-gray-300 border rounded-full px-3 py-1"
       >
         {selectedVersion || defaultVersion}
       </button>
