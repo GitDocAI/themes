@@ -10,12 +10,7 @@ export const metadata = {
 
 }
 
-import fs from 'fs'
-import path from 'path'
-
-const jsonPath = path.join(process.cwd(), 'site.json')
-const rawData = fs.readFileSync(jsonPath, 'utf-8')
-const site = JSON.parse(rawData)
+import site from '../site.json'
 
 export default async function RootLayout({ children }) {
 
