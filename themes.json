@@ -1,8 +1,8 @@
 [
     {
-        "name": "mint",
+        "name": "basic",
         "description": "A modern, minimalistic theme for documentation.",
         "sample": "https://yhvcorp.com",
-        "preview": "https://storage.googleapis.com/dockitai/themes/previews/mint.png"
+        "preview": "https://storage.googleapis.com/dockitai/themes/previews/basic.png"
     }
 ]
