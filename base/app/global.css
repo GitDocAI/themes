@@ -1,0 +1,24 @@
+/* app/globals.css */
+@import 'tailwindcss';
+@import 'primeicons/primeicons.css';
+        
+
+:root {
+ --color-bg: 250 250 248;    
+  --color-main: 40 53 147;  
+  --color-muted: 102 112 133; 
+}
+
+.dark-theme {
+  --color-bg: 18 20 27;          
+  --color-main: 147 130 245;
+  --color-muted: 145 145 160;
+}
+
+
+@theme {
+  --color-background: rgb(var(--color-bg));
+  --color-primary: rgb(var(--color-main));
+  --color-secondary: rgb(var(--color-muted));
+  }
+

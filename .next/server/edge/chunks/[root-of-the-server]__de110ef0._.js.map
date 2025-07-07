@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 23, "column": 0}, "map": {"version":3,"sources":["turbopack:///[project]/middleware.ts"],"sourcesContent":["\n// middleware.ts\n// middleware to know current path an the current selected version\nimport { NextRequest, NextResponse } from 'next/server'\n\nexport function middleware(request: NextRequest) {\n  const pathname = request.nextUrl.pathname\n\n  const response = NextResponse.next()\n  response.headers.set('x-current-path', pathname)\n\n  return response\n}\n\n// Aplica a todas las rutas\nexport const config = {\n  matcher: '/:path*',\n}\n"],"names":[],"mappings":"AACA,gBAAgB;AAChB,kEAAkE;;;;;AAClE;AAAA;;AAEO,SAAS,WAAW,OAAoB;IAC7C,MAAM,WAAW,QAAQ,OAAO,CAAC,QAAQ;IAEzC,MAAM,WAAW,6LAAA,CAAA,eAAY,CAAC,IAAI;IAClC,SAAS,OAAO,CAAC,GAAG,CAAC,kBAAkB;IAEvC,OAAO;AACT;AAGO,MAAM,SAAS;IACpB,SAAS;AACX"}}]
+}

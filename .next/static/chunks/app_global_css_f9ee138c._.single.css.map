@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 1, "column": 0}, "map": {"version":3,"sources":["turbopack:///[project]/app/global.css"],"sourcesContent":["\n/* app/globals.css */\n@tailwind base;\n@tailwind components;\n@tailwind utilities;\n\n/* Opcional: importar estilos del tema de Nextra */\n@import 'nextra-theme-docs/style.css'; /* o 'nextra-theme-blog/style.css' según el tema que uses */\n"],"names":[],"mappings":"AAEA;;AACA;;AACA"}}]
+}
