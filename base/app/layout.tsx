@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 }
 
 
-import site from '../dockitai.config.json'
+const site = JSON.parse(process.env.SITE_CONFIG!)
 
 
 const RootLayout: FC<{ children: ReactNode }> = async ({ children }) => {

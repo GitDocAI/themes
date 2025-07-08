@@ -1,10 +1,22 @@
 import nextra from 'nextra'
+import fs from 'fs'
+import path from 'path'
 
-// Set up Nextra with its configuration
-const withNextra = nextra({
+const configPath = path.join(process.cwd(), 'dockitai.config.json')
 
-})
+let siteConfig = {}
 
-// Export the final Next.js config with Nextra included
+try {
+  const raw = fs.readFileSync(configPath, 'utf-8')
+  siteConfig = JSON.parse(raw)
+} catch (err) {
+  console.warn('Error reading dockitai.config.json')
+}
+
+const withNextra = nextra({})
+
 export default withNextra({
+  env: {
+    SITE_CONFIG: JSON.stringify(siteConfig),
+  },
 })
