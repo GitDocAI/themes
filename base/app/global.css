@@ -4,16 +4,18 @@
         
 
 :root {
- --color-bg: 250 250 248;    
-  --color-main: 40 53 147;  
   --color-muted: 102 112 133; 
+  --logo-light-display:block;
+  --logo-dark-display:none
+
 }
 
 .dark-theme {
-  --color-bg: 18 20 27;          
-  --color-main: 147 130 245;
   --color-muted: 145 145 160;
+  --logo-dark-display:block;
+  --logo-light-display:none;
 }
+
 
 
 @theme {
@@ -21,4 +23,8 @@
   --color-primary: rgb(var(--color-main));
   --color-secondary: rgb(var(--color-muted));
   }
+
+body {
+  background-image: var(--url-bg-url);
+}
 

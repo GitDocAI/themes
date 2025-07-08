@@ -19,7 +19,12 @@ export type ThemeInfo = {
   };
   favicon: string;
   background: {
-    colors: {
+    image?: {
+
+      dark: string;
+      light: string;
+    },
+    colors?: {
       dark: string;
       light: string;
     };
@@ -66,7 +71,8 @@ export type NavigationTab = {
 export type NavigationItem =
   | NavigationGroup
   | NavigationDropdown
-  | NavigationPage;
+  | NavigationPage
+  ;
 
 export type NavigationGroup = {
   type: 'group';

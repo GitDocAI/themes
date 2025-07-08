@@ -3,40 +3,42 @@
 import { usePathname } from 'next/navigation'
 import { useEffect, useState, useRef } from 'react'
 import { redirect } from 'next/navigation'
+import { Version } from '@/models/InnerConfiguration'
 
-const VersionSwitcher = ({ versions = [], defaultVersion, placeholder = 'Select a version' }) => {
+const VersionSwitcher = ({ versions }: { versions: Version[] }) => {
+
   const pathname = usePathname()
   const inputRef = useRef(null)
 
-  const current = pathname?.split('/')[1]
-  const [selectedVersion, setSelectedVersion] = useState(current ?? defaultVersion)
+  const [selectedVersion, setSelectedVersion] = useState(versions[0].version)
   const [filteredVersions, setFilteredVersions] = useState(versions)
   const [isOpen, setIsOpen] = useState(false)
 
   // Detectar versión desde la URL actual
   useEffect(() => {
     if (!pathname) return
-    const current = pathname.split('/')[1]
-    if (versions.includes(current)) {
-      setSelectedVersion(current)
+    const current = versions.find(v => v.paths.includes(pathname)) ?? versions[0]
+    if (!current) return
+    if (versions.find(v => (v.version == current!.version))) {
+      setSelectedVersion(current!.version)
     } else {
-      redirect(`/${defaultVersion}`)
+      redirect(versions[0].paths[0])
     }
   }, [pathname, versions])
 
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: any) => {
     const value = e.target.value
     setSelectedVersion(value)
     setFilteredVersions(
-      versions.filter(v => v.toLowerCase().includes(value.toLowerCase()))
+      e
     )
     setIsOpen(true)
   }
 
-  const handleOptionClick = (version) => {
+  const handleOptionClick = (version: string) => {
     setSelectedVersion(version)
     setIsOpen(false)
-    const newPath = `/${version}`
+    const newPath = versions.find(v => v.version == version)!.paths[0]
     redirect(newPath)
   }
 
@@ -49,7 +51,7 @@ const VersionSwitcher = ({ versions = [], defaultVersion, placeholder = 'Select 
     setTimeout(() => setIsOpen(false), 100) // Para permitir click antes de cerrar
   }
 
-  const click = (e) => {
+  const click = (e: any) => {
     e.preventDefault()
     e.stopPropagation();
   }
@@ -58,26 +60,24 @@ const VersionSwitcher = ({ versions = [], defaultVersion, placeholder = 'Select 
     <div className="relative inline-block ">
       <button
         ref={inputRef}
-        type="text"
         onChange={handleInputChange}
         onFocus={handleFocus}
         onBlur={handleBlur}
         onClick={click}
-        placeholder={placeholder}
         className="x:whitespace-nowrap x:transition-colors x:min-w-6 x:overflow-hidden x:text-ellipsis x:focus-visible:nextra-focus x:ring-inset bg-background border-primary text-secondary border rounded-full px-3 py-1"
       >
-        {selectedVersion || defaultVersion}
+        {selectedVersion}
       </button>
 
       {isOpen && filteredVersions.length > 0 && (
         <ul className="absolute z-10 mt-1 w-20 bg-zinc-900  rounded-md text-secondary shadow-lg  overflow-y-auto">
           {filteredVersions.map(version => (
             <li
-              key={version}
-              onMouseDown={() => handleOptionClick(version)}
-              className={`px-4 w-full py-2 hover:bg-background bg-background border border-background/30  cursor-pointer ${version === selectedVersion ? 'bg-background/80 !text-primary font-bold' : ''}`}
+              key={version.version}
+              onMouseDown={() => handleOptionClick(version.version)}
+              className={`px-4 w-full py-2 hover:bg-background bg-background border border-background/30  cursor-pointer ${version.version === selectedVersion ? 'bg-background/80 !text-primary font-bold' : ''}`}
             >
-              {version}
+              {version.version}
             </li>
           ))}
         </ul>

@@ -1,71 +1,64 @@
 'use client'
 
-import { usePathname, useRouter } from 'next/navigation'
-import type { PageMapItem } from 'nextra'
 import { Anchor } from 'nextra/components'
-import { useEffect, useMemo, useState } from 'react'
+import { NavigationItem, NavigationPage, ThemeInfo } from '../models/ThemeInfo'
+import { usePathname } from 'next/navigation'
+import { Version, Tab } from '../models/InnerConfiguration'
+import { useEffect, useState } from 'react'
+import { redirect } from 'next/navigation'
 
-type Tab = { key: string; title: string; route?: string }
-type GroupType = 'group' | 'dropdown' | 'page'
-type GroupItem = PageMapItem & { type: GroupType }
-
-export const Sidebar = ({ pageMap }: { pageMap: PageMapItem[] }) => {
+export const Sidebar = ({ themeinfo, versions, tabs }: { themeinfo: ThemeInfo, versions: Version[], tabs: Tab[] }) => {
   const pathname = usePathname()
-  const router = useRouter()
 
-  const basePath = '/' + pathname.split('/')[1]
+  const [items, setItems] = useState<NavigationItem[]>(themeinfo.navigation.items ?? [])
 
-  const [current, setCurrent] = useState<PageMapItem | undefined>(() =>
-    pageMap.find(m => m.route === basePath)
-  )
+  function getRedirection(element: any): string {
+    if (element.children) {
+      return getRedirection(element.children[0])
+    }
+    return element.page.split('.')[0]
+  }
+
+
+
 
   useEffect(() => {
-    const matched = pageMap.find(m => m.route === basePath)
-    setCurrent(matched)
-  }, [pathname, pageMap, basePath]) // Añadido basePath a dependencias para mayor seguridad
+    if (versions.length > 0) {
+      const matchedVersion = versions.find((v) =>
+        v.paths.includes(pathname)
+      )
 
-  const tabs: Tab[] = useMemo(() => {
-    console.log(current, ' ass')
-    if (!current?.children) return []
-    return current.children
-      .filter(it => it.name?.startsWith('tab:'))
-      .map(tab => ({
-        key: tab.name,
-        title: tab.title,
-        route: tab.route,
-      }))
-  }, [current])
+      if (!matchedVersion) redirect(versions[0].paths[0])
+      if (matchedVersion!.tabs.length > 0) {
+        const matchedTab = tabs.find(t => t.paths.includes(pathname))
+        const _items = themeinfo.navigation.versions!.find(v => v.version == matchedVersion?.version)!
+        setItems(_items.tabs!.find(t => t.tab == matchedTab!.tab)!.items!)
 
-  const selectedTab = useMemo(() => {
-    return tabs.find(tab => pathname.startsWith(tab.route ?? ''))
-  }, [tabs, pathname])
-
-  const visibleItems: GroupItem[] = useMemo(() => {
-    let children: PageMapItem[] = []
-
-    if (tabs.length > 0) {
-      const tabData = current?.children?.find(c => c.name === selectedTab?.key)
-      children = tabData?.children || []
-    } else {
-      children = current?.children || []
+      } else {
+        const _items = themeinfo.navigation.versions!.find(v => v.version == matchedVersion?.version)!.items!
+        setItems(_items)
+      }
+    } else if (tabs.length > 0) {
+      const matchedTab = tabs.find(t => t.paths.includes(pathname))
+      if (!matchedTab) redirect(tabs[0].paths[0])
+      const _items = themeinfo.navigation.tabs!.find(v => v.tab == matchedTab!.tab)!.items!
+      setItems(_items)
+    } else if (pathname == '/') {
+      redirect(getRedirection(items[0]))
     }
+  }, [pathname, versions, tabs])
 
-    return children.map(child => {
-      if (child.name?.startsWith('group:')) return { ...child, type: 'group' as GroupType }
-      if (child.name?.startsWith('dropdown:')) return { ...child, type: 'dropdown' as GroupType }
-      return { ...child, type: 'page' as GroupType }
-    })
-  }, [current, tabs, selectedTab])
 
-  const renderNestedItem = (item: PageMapItem, currentPath: string, depth = 0) => {
-    const isActive = item.route === currentPath
+  const renderNestedItem = (item: NavigationPage, currentPath: string, depth = 0) => {
     const paddingLeft = `pl-${depth * 4 + 4}`
+    item.page = item.page?.split('.')[0]
+    const isActive = item.page === pathname
 
     return (
-      (item.title || item.name) ?
+      (item.title) ?
         <Anchor
-          key={item.route + item.name}
-          href={item.route || '#'}
+          key={item.page + item.title}
+          href={item.page || '#'}
           className={`block py-1 px-2 rounded-md text-sm transition-colors duration-150 ease-in-out
           ${paddingLeft}
           ${isActive
@@ -73,7 +66,7 @@ export const Sidebar = ({ pageMap }: { pageMap: PageMapItem[] }) => {
               : 'text-secondary hover:bg-secondary/10 hover:text-primary'
             }`}
         >
-          {item.title == '' ? item.name : item.title}
+          {item.title}
         </Anchor> : <span className="hidden" key={`${currentPath}-${depth}`}></span>
 
     )
@@ -82,44 +75,26 @@ export const Sidebar = ({ pageMap }: { pageMap: PageMapItem[] }) => {
   return (
     <aside className="sticky top-0 h-screen w-64 flex-shrink-0 overflow-y-auto bg-background border-r border-secondary/10 px-4 py-6">
       {/* Pestañas (Tabs) si existen */}
-      {tabs.length > 0 && (
-        <div className="flex flex-wrap gap-2 pb-4 mb-4 border-b border-secondary/10">
-          {tabs.map(tab => (
-            <button
-              key={tab.key}
-              onClick={() => router.push(tab.route ?? '#')}
-              className={`flex-shrink-0 px-3 py-1 text-xs font-semibold rounded-full transition-colors duration-150 ease-in-out
-                ${tab.route === selectedTab?.route
-                  ? 'bg-primary text-background' // Pestaña activa: fondo sólido, texto contrastante
-                  : 'text-secondary hover:bg-secondary/20 hover:text-primary border border-transparent hover:border-secondary/30' // Pestaña inactiva: texto secundario, hover sutil
-                }`}
-            >
-              {tab.title}
-            </button>
-          ))}
-        </div>
-      )}
 
       <nav className="space-y-1">
-        {visibleItems.map(item => {
+        {items.map(item => {
           switch (item.type) {
             case 'group':
               return (
-                <div key={item.name} className="mb-4"> {/* Margen inferior para separar grupos */}
+                <div key={item.title} className="mb-4"> {/* Margen inferior para separar grupos */}
                   <div className="text-xs font-semibold uppercase text-secondary/60 mb-2 px-2 tracking-wide">
                     {item.title}
                   </div>
                   <div className="space-y-1">
-                    {item.children?.map(child => renderNestedItem(child, pathname, 1))}
+                    {item.children?.map(child => renderNestedItem(child as NavigationPage, pathname, 1))}
                   </div>
                 </div>
               )
 
             case 'dropdown':
-              const isDropdownOpen = pathname.startsWith(item.route!) || item.children?.some(child => pathname.startsWith(child.route!));
 
               return (
-                <details key={item.name} open={isDropdownOpen} className="group cursor-pointer">
+                <details key={item.title} open={false} className="group cursor-pointer">
                   <summary className="flex items-center justify-between py-1 px-2 text-sm font-medium rounded-md text-secondary hover:bg-secondary/10 hover:text-primary transition-colors duration-150 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background">
                     <span>{item.title}</span>
                     {/* Icono de flecha que rota */}
@@ -134,7 +109,7 @@ export const Sidebar = ({ pageMap }: { pageMap: PageMapItem[] }) => {
                     </svg>
                   </summary>
                   <div className="mt-1 space-y-1 pl-4 border-l border-secondary/20 ml-2"> {/* Indentación y línea vertical */}
-                    {item.children?.map(child => renderNestedItem(child, pathname, 1))}
+                    {item.children?.map(child => renderNestedItem(child as NavigationPage, pathname, 1))}
                   </div>
                 </details>
               )
