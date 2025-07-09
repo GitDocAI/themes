@@ -20,6 +20,7 @@ const RootLayout: FC<{ children: ReactNode }> = async ({ children }) => {
   const pageMap = await getPageMap()
 
 
+  console.log(site)
   return (
     <html lang="en" dir="ltr" >
       <Head >
