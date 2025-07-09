@@ -14,7 +14,8 @@ export const Navbar: FC<{
   logo: ReactNode
   name: string
   versions: Version[]
-}> = ({ navitems, versions, logo, name }) => {
+  themeMode: string
+}> = ({ navitems, versions, logo, themeMode }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const showVersionSwitcher = versions.length > 1
 
@@ -75,14 +76,14 @@ export const Navbar: FC<{
                 {item.label}
               </Anchor>
             ))}
-            <ThemeToggle />
+            <ThemeToggle defaultMode={themeMode} />
           </div>
 
           <div className='md:hidden flex items-center space-x-4'>
             {showVersionSwitcher && (
               <VersionSwitcher versions={versions} />
             )}
-            <ThemeToggle />
+            <ThemeToggle defaultMode={themeMode} />
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className='text-primary focus:outline-none focus:ring-2 focus:ring-secondary rounded-md p-1'

@@ -29,6 +29,7 @@ export const DefaultTheme: FC<{
       {themeinfo.banner ? <Banner content={themeinfo.banner} /> : <></>}
       <Navbar navitems={themeinfo.navbar} versions={versions}
         logo={logo} name={themeinfo.name}
+        themeMode={themeinfo.defaultThemeMode}
       />
       <TabList versions={versions} tablist={tabs} />
       <div className='flex bg-background text-secondary flex-1'>

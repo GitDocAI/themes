@@ -1,11 +1,11 @@
 'use client'
 import { useEffect, useState } from 'react'
 
-export default function ThemeToggle() {
+export default function ThemeToggle({ defaultMode }: { defaultMode: string }) {
   const [theme, setTheme] = useState<'light' | 'dark-theme'>('light')
   useEffect(() => {
     const saved = localStorage.getItem('theme') as 'light' | 'dark-theme' | null
-    const init = saved || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark-theme' : 'light')
+    const init = saved || (defaultMode == 'dark' ? 'dark-theme' : 'light')
     setTheme(init)
     document.documentElement.classList.toggle('dark-theme', init === 'dark-theme')
   }, [])
@@ -27,6 +27,7 @@ export default function ThemeToggle() {
       ) : (
         <i className="pi pi-moon text-primary text-xl transition-transform transform hover:scale-110" />
       )}
+
     </button>
   )
 

@@ -6,7 +6,6 @@
     "light": "#3A8DDE",
     "dark": "#655DC6"
   },
-  "defaultThemeMode": "light",
   "logo": {
   },
   "favicon": "/assets/favicon.svg",
@@ -27,6 +26,28 @@
       "type": "button",
       "label": "Online Demo",
       "reference": "https://dockitai.com/demo"
+    }
+  ],
+  "footer": [
+    {
+      "type": "x",
+      "reference": "https://x.com/dockitai"
+    },
+    {
+      "type": "github",
+      "reference": "https://github.com/dockitai"
+    },
+    {
+      "type": "linkedin",
+      "reference": "https://www.linkedin.com/company/dockitai/"
+    },
+    {
+      "type": "facebook",
+      "reference": "https://www.facebook.com/dockitai"
+    },
+    {
+      "type": "youtube",
+      "reference": "https://www.youtube.com/@dockitai"
     }
   ],
 
