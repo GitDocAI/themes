@@ -1,5 +1,29 @@
 /* app/globals.css */
-@tailwind utilities;
- @import 'nextra-theme-docs/style.css'; /* o 'nextra-theme-blog/style.css' para el blog*/ 
-@import "tailwindcss";
+@import 'tailwindcss';
+@import 'primeicons/primeicons.css';
+        
 
+:root {
+  --color-muted: 102 112 133; 
+  --logo-light-display:block;
+  --logo-dark-display:none
+
+}
+
+.dark-theme {
+  --color-muted: 145 145 160;
+  --logo-dark-display:block;
+  --logo-light-display:none;
+}
+
+
+
+@theme {
+  --color-background: rgb(var(--color-bg));
+  --color-primary: rgb(var(--color-main));
+  --color-secondary: rgb(var(--color-muted));
+  }
+
+body {
+  background-image: var(--url-bg-url);
+}
