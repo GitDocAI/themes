@@ -60,7 +60,7 @@ export const Navbar: FC<{
           </div>
 
           <div className='hidden md:flex items-center space-x-6'>
-            {navitems.map(item => (
+            {navitems?.map(item => (
               <Anchor
                 key={item.reference}
                 href={item.reference}
