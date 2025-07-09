@@ -3,14 +3,8 @@ export type ThemeInfo = {
   description: string;
   theme: string;
   colors: {
-    light: {
-      primary: string;
-      secondary: string;
-    };
-    dark: {
-      primary: string;
-      secondary: string;
-    };
+    light: string;
+    dark: string;
   };
   defaultThemeMode: 'light' | 'dark' | string;
   logo: {
@@ -18,7 +12,7 @@ export type ThemeInfo = {
     dark: string;
   };
   favicon: string;
-  background: {
+  background?: {
     image?: {
 
       dark: string;
@@ -55,7 +49,6 @@ export type NavigationVersion = {
   version: string;
   tabs?: Array<NavigationTab>;
   items?: Array<NavigationItem>;
-
 }
 
 export type FooterItem = {

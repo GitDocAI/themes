@@ -27,7 +27,7 @@ export const Navbar: FC<{ navitems: NavBarItem[], logo: ReactNode, name: string,
               href={item.reference}
               className={
                 ` hover:text-secondary transition-colors duration-200 ease-in-out font-medium flex flex-row items-center
-                  ${item.type === 'button' ? 'px-2 py-1 bg-primary/90 text-background  rounded-full' : 'text-primary'}`
+                  ${item.type === 'button' ? 'px-4 py-2 bg-primary text-white rounded-full shadow-sm hover:shadow-md' : 'text-primary'}`
               }
               style={{ textDecoration: 'none' }}
             >

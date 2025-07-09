@@ -44,8 +44,10 @@ export const TabList = ({
   }
 
   return (
-    <div className="flex bg-background gap-4 pt-2 px-2 ">
-      {visibleTabs.map((tabName) => {
+    <div className="bg-background pt-2">
+      <div className="container mx-auto px-4">
+        <div className="flex gap-4 pl-6">
+          {visibleTabs.map((tabName) => {
         const isActive = tabName === activeTab
 
         return (
@@ -60,7 +62,9 @@ export const TabList = ({
             {tabName}
           </button>
         )
-      })}
+          })}
+        </div>
+      </div>
     </div>
   )
 }

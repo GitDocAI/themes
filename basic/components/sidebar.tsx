@@ -62,8 +62,8 @@ export const Sidebar = ({ themeinfo, versions, tabs }: { themeinfo: ThemeInfo, v
           className={`block py-1 px-2 rounded-md text-sm transition-colors duration-150 ease-in-out
           ${paddingLeft}
           ${isActive
-              ? 'bg-primary/50 text-background font-medium'
-              : 'text-secondary hover:bg-secondary/10 hover:text-primary'
+              ? 'bg-primary text-white font-medium rounded-md'
+              : 'text-secondary hover:bg-secondary/10 hover:text-primary rounded-md'
             }`}
         >
           {item.title}
@@ -73,7 +73,7 @@ export const Sidebar = ({ themeinfo, versions, tabs }: { themeinfo: ThemeInfo, v
   }
 
   return (
-    <aside className="sticky top-0 h-screen w-64 flex-shrink-0 overflow-y-auto bg-background border-r border-secondary/10 px-4 py-6">
+    <aside className="sticky top-0 h-screen w-80 flex-shrink-0 overflow-y-auto bg-background border-r border-secondary/10 px-6 py-6">
       {/* Pestañas (Tabs) si existen */}
 
       <nav className="space-y-1">

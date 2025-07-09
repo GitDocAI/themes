@@ -31,13 +31,15 @@ export const DefaultTheme: FC<{
         logo={logo} name={themeinfo.name}
       />
       <TabList versions={versions} tablist={tabs} />
-      <div className='flex bg-background text-secondary  flex-1'>
-        <Sidebar themeinfo={themeinfo} versions={versions} tabs={tabs} />
-        <div className="flex flex-col gap-1 w-full flex-1">
-          <main className=" flex-1 flex flex-row">
-            {children}
-          </main>
-          <Footer name={themeinfo.name} items={themeinfo.footer} logo={logo} />
+      <div className='flex bg-background text-secondary flex-1'>
+        <div className="container mx-auto px-4 flex flex-1">
+          <Sidebar themeinfo={themeinfo} versions={versions} tabs={tabs} />
+          <div className="flex flex-col gap-1 w-full flex-1 min-h-0">
+            <main className="flex-1 flex flex-row overflow-y-auto">
+              {children}
+            </main>
+            <Footer name={themeinfo.name} items={themeinfo.footer} logo={logo} />
+          </div>
         </div>
       </div>
     </div>

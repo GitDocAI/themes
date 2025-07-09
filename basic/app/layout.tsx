@@ -43,16 +43,18 @@ const getPageRecords = (site: ThemeInfo) => {
     dark: site.colors?.dark ?? '147 130 245',
     type: 'color'
   }
+  
   const backgroundRecord: StyleRecord = {
     key: 'bg',
-    light: site.background.colors?.light ?? '250 250 248',
-    dark: site.background.colors?.dark ?? '18 20 27',
+    light: site.background?.colors?.light ?? '250 250 248',
+    dark: site.background?.colors?.dark ?? '18 20 27',
     type: 'color'
   }
+  
   const backgroundImage: StyleRecord = {
     key: 'bg-url',
-    light: site.background.image?.light ?? '',
-    dark: site.background.image?.dark ?? '',
+    light: site.background?.image?.light ?? '',
+    dark: site.background?.image?.dark ?? '',
     type: 'url'
   }
   return [colorRecord, backgroundRecord, backgroundImage]
