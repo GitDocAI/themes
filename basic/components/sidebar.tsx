@@ -9,119 +9,136 @@ import { redirect } from 'next/navigation'
 
 export const Sidebar = ({ themeinfo, versions, tabs }: { themeinfo: ThemeInfo, versions: Version[], tabs: Tab[] }) => {
   const pathname = usePathname()
-
   const [items, setItems] = useState<NavigationItem[]>(themeinfo.navigation.items ?? [])
+  const [isOpen, setIsOpen] = useState(false)
+
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
 
   function getRedirection(element: any): string {
-    if (element.children) {
-      return getRedirection(element.children[0])
-    }
+    if (element.children) return getRedirection(element.children[0])
     return element.page.split('.')[0]
   }
 
-
-
+  useEffect(() => {
+    const handleResize = () => setIsOpen(false)
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   useEffect(() => {
     if (versions.length > 0) {
-      const matchedVersion = versions.find((v) =>
-        v.paths.includes(pathname)
-      )
-
+      const matchedVersion = versions.find(v => v.paths.includes(pathname))
       if (!matchedVersion) redirect(versions[0].paths[0])
-      if (matchedVersion!.tabs.length > 0) {
-        const matchedTab = tabs.find(t => t.paths.includes(pathname))
-        const _items = themeinfo.navigation.versions!.find(v => v.version == matchedVersion?.version)!
-        setItems(_items.tabs!.find(t => t.tab == matchedTab!.tab)!.items!)
 
-      } else {
-        const _items = themeinfo.navigation.versions!.find(v => v.version == matchedVersion?.version)!.items!
-        setItems(_items)
-      }
+      const matchedTab = tabs.find(t => t.paths.includes(pathname))
+      const _items = themeinfo.navigation.versions!.find(v => v.version == matchedVersion?.version)!
+      setItems(
+        matchedVersion!.tabs.length > 0
+          ? _items.tabs!.find(t => t.tab == matchedTab!.tab)!.items!
+          : _items.items!
+      )
     } else if (tabs.length > 0) {
       const matchedTab = tabs.find(t => t.paths.includes(pathname))
       if (!matchedTab) redirect(tabs[0].paths[0])
       const _items = themeinfo.navigation.tabs!.find(v => v.tab == matchedTab!.tab)!.items!
       setItems(_items)
-    } else if (pathname == '/') {
+    } else if (pathname === '/') {
       redirect(getRedirection(items[0]))
     }
   }, [pathname, versions, tabs])
-
 
   const renderNestedItem = (item: NavigationPage, currentPath: string, depth = 0) => {
     const paddingLeft = `pl-${depth * 4 + 4}`
     item.page = item.page?.split('.')[0]
     const isActive = item.page === pathname
 
-    return (
-      (item.title) ?
-        <Anchor
-          key={item.page + item.title}
-          href={item.page || '#'}
-          className={`block py-1 px-2 rounded-md text-sm transition-colors duration-150 ease-in-out
-          ${paddingLeft}
-          ${isActive
-              ? 'sidebar-active font-medium rounded-md'
-              : 'text-secondary hover:bg-secondary/10 hover:text-primary rounded-md'
-            }`}
-        >
-          {item.title}
-        </Anchor> : <span className="hidden" key={`${currentPath}-${depth}`}></span>
-
-    )
+    return item.title ? (
+      <Anchor
+        key={item.page + item.title}
+        href={item.page || '#'}
+        className={`block py-1 px-2 rounded-md text-sm transition-colors duration-150 ease-in-out ${paddingLeft} ${isActive
+          ? 'sidebar-active font-medium text-primary'
+          : 'text-secondary hover:bg-secondary/10 hover:text-primary'
+          }`}
+      >
+        {item.title}
+      </Anchor>
+    ) : null
   }
 
   return (
-    <aside className="sticky top-0 h-screen w-80 flex-shrink-0 overflow-y-auto bg-background border-r border-secondary/10 px-6 py-6">
-      {/* Pestañas (Tabs) si existen */}
+    <>
+      {/* Mobile launcher button */}
+      <div className="md:hidden px-4 py-2 border-b border-secondary/10  sticky top-0 z-20 flex items-center gap-2">
 
-      <nav className="space-y-1">
-        {items.map(item => {
-          switch (item.type) {
-            case 'group':
-              return (
-                <div key={item.title} className="mb-4"> {/* Margen inferior para separar grupos */}
-                  <div className="text-xs font-semibold uppercase text-secondary/77 mb-2 px-2 tracking-wide">
-                    {item.title}
+        <div
+          onClick={() => setIsOpen(true)}
+        >
+
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </div>
+      </div>
+
+      {/* Sidebar full */}
+      <aside
+        className={`
+          fixed md:sticky top-0 left-0 h-full w-72 overflow-y-auto px-6 py-6 z-50
+          transition-transform duration-300 ease-in-out bg-background sm:bg-transparent
+          border-r border-secondary/10
+          ${isOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0
+          ${!isMobile ? 'bg-transparent' : ''}
+        `}
+      >
+        {/* Cerrar sidebar (solo móvil) */}
+        <div className="md:hidden flex justify-end mb-4">
+          <button
+            className="p-2 rounded-md text-secondary hover:text-primary hover:bg-secondary/10"
+            onClick={() => setIsOpen(false)}
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <nav className="space-y-1">
+          {items.map(item => {
+            switch (item.type) {
+              case 'group':
+                return (
+                  <div key={item.title} className="mb-4">
+                    <div className="text-xs font-semibold uppercase text-secondary/77 mb-2 px-2 tracking-wide">
+                      {item.title}
+                    </div>
+                    <div className="space-y-1 pl-2">
+                      {item.children?.map(child => renderNestedItem(child as NavigationPage, pathname, 1))}
+                    </div>
                   </div>
-                  <div className="space-y-1 pl-2">
-                    {item.children?.map(child => renderNestedItem(child as NavigationPage, pathname, 1))}
-                  </div>
-                </div>
-              )
-
-            case 'dropdown':
-
-              return (
-                <details key={item.title} open={false} className="group cursor-pointer">
-                  <summary className="flex items-center justify-between py-1 px-2 text-sm font-medium rounded-md text-secondary hover:bg-secondary/10 hover:text-primary transition-colors duration-150 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background">
-                    <span>{item.title}</span>
-                    {/* Icono de flecha que rota */}
-                    <svg
-                      className="w-4 h-4 text-primary transition-transform duration-200 group-open:rotate-90"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
-                    </svg>
-                  </summary>
-                  <div className="mt-1 space-y-1 pl-4 border-l border-secondary/20 ml-2"> {/* Indentación y línea vertical */}
-                    {item.children?.map(child => renderNestedItem(child as NavigationPage, pathname, 1))}
-                  </div>
-                </details>
-              )
-
-            case 'page':
-              return renderNestedItem(item, pathname)
-
-            default:
-              renderNestedItem(item, pathname)
-          }
-        })}
-      </nav>
-    </aside>
+                )
+              case 'dropdown':
+                return (
+                  <details key={item.title} className="group cursor-pointer">
+                    <summary className="flex items-center justify-between py-1 px-2 text-sm font-medium rounded-md text-secondary hover:bg-secondary/10 hover:text-primary">
+                      <span>{item.title}</span>
+                      <svg className="w-4 h-4 transition-transform group-open:rotate-90" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                      </svg>
+                    </summary>
+                    <div className="mt-1 space-y-1 pl-4 border-l border-secondary/20 ml-2">
+                      {item.children?.map(child => renderNestedItem(child as NavigationPage, pathname, 1))}
+                    </div>
+                  </details>
+                )
+              case 'page':
+                return renderNestedItem(item, pathname)
+              default:
+                return null
+            }
+          })}
+        </nav>
+      </aside>
+    </>
   )
 }

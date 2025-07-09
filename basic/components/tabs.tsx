@@ -44,25 +44,24 @@ export const TabList = ({
   }
 
   return (
-    <div className="bg-background pt-2">
-      <div className="container mx-auto px-4">
-        <div className="flex gap-4 pl-6">
+    <div className=" pt-2">
+      <div className="container mx-auto px-4 !text-xs">
+        <div className="flex gap-4 md:pl-6 overflow-x-auto">
           {visibleTabs.map((tabName) => {
-        const isActive = tabName === activeTab
+            const isActive = tabName === activeTab
 
-        return (
-          <button
-            key={tabName}
-            onClick={() => handleTabClick(tabName)}
-            className={`font-medium transition-colors pb-2 border-b-2 ${
-              isActive
-                ? 'tab-active'
-                : 'border-transparent text-secondary tab-hover'
-            }`}
-          >
-            {tabName}
-          </button>
-        )
+            return (
+              <button
+                key={tabName}
+                onClick={() => handleTabClick(tabName)}
+                className={`font-medium transition-colors pb-2 border-b-2 ${isActive
+                  ? 'tab-active'
+                  : 'border-transparent text-secondary tab-hover'
+                  }`}
+              >
+                {tabName}
+              </button>
+            )
           })}
         </div>
       </div>

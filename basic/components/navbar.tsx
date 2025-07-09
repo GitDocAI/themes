@@ -12,10 +12,9 @@ import SearchBar from './searchbar'
 export const Navbar: FC<{
   navitems: NavBarItem[]
   logo: ReactNode
-  name: string
+  defaultTheme: string,
   versions: Version[]
-  themeMode: string
-}> = ({ navitems, versions, logo, themeMode }) => {
+}> = ({ navitems, versions, logo, defaultTheme }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const showVersionSwitcher = versions.length > 1
 
@@ -50,18 +49,15 @@ export const Navbar: FC<{
         <div className='container mx-auto px-4 py-3 flex items-center justify-between h-16'>
           <div className='flex items-center space-x-3'>
             {logo && <div className='flex-shrink-0'>{logo}</div>}
-
-            {showVersionSwitcher && (
-              <VersionSwitcher versions={versions} />
-            )}
+            {showVersionSwitcher ? <VersionSwitcher versions={versions} /> : <></>}
           </div>
 
-          <div className="flex-1 max-w-sm flex ">
+          <span className="hidden sm:block max-w-sm">
             <SearchBar />
-          </div>
+          </span>
 
           <div className='hidden md:flex items-center space-x-6'>
-            {navitems?.map(item => (
+            {navitems.map(item => (
               <Anchor
                 key={item.reference}
                 href={item.reference}
@@ -76,25 +72,25 @@ export const Navbar: FC<{
                 {item.label}
               </Anchor>
             ))}
-            <ThemeToggle defaultMode={themeMode} />
+            <ThemeToggle defaultMode={defaultTheme} />
           </div>
 
           <div className='md:hidden flex items-center space-x-4'>
-            {showVersionSwitcher && (
-              <VersionSwitcher versions={versions} />
-            )}
-            <ThemeToggle defaultMode={themeMode} />
+            <span className="block sm:hidden">
+              <SearchBar />
+            </span>
+            <ThemeToggle defaultMode={defaultTheme} />
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className='text-primary focus:outline-none focus:ring-2 focus:ring-secondary rounded-md p-1'
               aria-label='Toggle mobile menu'
             >
               {isMobileMenuOpen ? (
-                <svg className='w-6 h-6' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                <svg className='w-6 h-6 text-secondary' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
                   <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M6 18L18 6M6 6l12 12' />
                 </svg>
               ) : (
-                <svg className='w-6 h-6' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                <svg className='w-6 h-6 text-secondary' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
                   <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M4 6h16M4 12h16M4 18h16' />
                 </svg>
               )}
@@ -103,20 +99,22 @@ export const Navbar: FC<{
         </div>
 
         {isMobileMenuOpen && (
-          <div className='md:hidden bg-background border-t border-secondary py-4 animate-fade-in-down'>
+          <div className='md:hidden bg-background border-t border-secondary p-4 animate-fade-in-down fixed right-0'>
             <ul className='flex flex-col items-center space-y-3'>
               {navitems.map(item => (
-                <li key={item.reference}>
-                  <Anchor
-                    href={item.reference}
-                    className={`py-2 px-4 rounded-md transition-colors duration-200 text-lg font-medium w-full text-center flex flex-row items-center ${item.type === 'button' ? 'custom-button' : 'text-primary'
-                      }`}
-                    style={{ textDecoration: 'none' }}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    {item.label}
-                  </Anchor>
-                </li>
+                <Anchor
+                  key={item.reference}
+                  href={item.reference}
+                  className={
+                    `hover:text-secondary transition-colors duration-200 ease-in-out font-medium flex flex-row items-center ${item.type === 'button'
+                      ? 'custom-button'
+                      : 'navbar-link text-primary'
+                    }`
+                  }
+                  style={{ textDecoration: 'none' }}
+                >
+                  {item.label}
+                </Anchor>
               ))}
             </ul>
           </div>

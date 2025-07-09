@@ -27,7 +27,7 @@ const RootLayout: FC<{ children: ReactNode }> = async ({ children }) => {
         <style>{generateCSSVars(getPageRecords(site as any)) as any}</style>
         <link rel="icon" href={site.favicon} />
       </Head>
-      <body style={{ margin: 0 }} className="bg-background">
+      <body style={{ margin: 0 }} >
         <DefaultTheme themeinfo={site as any} pageMap={pageMap} >{children}</DefaultTheme>
       </body>
     </html>
@@ -52,10 +52,27 @@ const getPageRecords = (site: ThemeInfo) => {
     type: 'color'
   }
 
+  let [bgimglight, bgimgdark] = [null, null] as [string | null, string | null]
+  if (site.background?.image) {
+
+    if (typeof site.background.image == "string") {
+      bgimglight = site.background.image
+      bgimgdark = site.background.image
+    } else {
+      bgimglight = site.background.image.light
+      bgimgdark = site.background.image.dark
+      if (!bgimglight) {
+        bgimglight = bgimgdark
+      }
+      if (!bgimgdark) {
+        bgimgdark = bgimglight
+      }
+    }
+  }
   const backgroundImage: StyleRecord = {
     key: 'bg-url',
-    light: site.background?.image?.light ?? '',
-    dark: site.background?.image?.dark ?? '',
+    light: bgimglight ?? '',
+    dark: bgimgdark ?? '',
     type: 'url'
   }
 
@@ -82,10 +99,13 @@ const generateCSSVars = (records: StyleRecord[]) => {
       let val = light ? r.light : r.dark;
       if (r.type == 'color') {
         const rgbValues = hexToRgb(val);
-        val = rgbValues ? rgbValues.join(' ') : (light ? '40 53 147' : '147 130 245'); // Fallback colors
+        val = rgbValues ? rgbValues.join(' ') : (light ? '255 255 255' : '0 0 0');
         return `--color-${r.key}: ${val};`
       } else {
-        return `--url-${r.key}: ${val};`
+        if (val == '') {
+          return ''
+        }
+        return `--url-${r.key}: url("${val}");`
       }
     })
       .join('\n')

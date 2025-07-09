@@ -1,7 +1,7 @@
 
 import { FC } from 'react'
 
-export const Logo: FC<{ light: string, dark: string }> = ({ light, dark }) => {
+export const Logo: FC<{ light?: string, dark?: string }> = ({ light, dark }) => {
   if (dark == "" && light == "" || !dark && !light) {
     return
   }

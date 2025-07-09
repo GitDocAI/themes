@@ -2,22 +2,22 @@ export type ThemeInfo = {
   name: string;
   description: string;
   theme: string;
-  colors: {
-    light: string;
-    dark: string;
+  colors?: {
+    light?: string;
+    dark?: string;
   };
   defaultThemeMode: 'light' | 'dark' | string;
-  logo: {
-    light: string;
-    dark: string;
+  logo?: {
+    light?: string;
+    dark?: string;
   };
-  favicon: string;
+  favicon?: string;
   background?: {
     image?: {
 
       dark: string;
       light: string;
-    },
+    } | string,
     colors?: {
       dark: string;
       light: string;

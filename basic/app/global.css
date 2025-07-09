@@ -25,7 +25,9 @@
   }
 
 body {
-  background-color: rgb(var(--color-bg));
+  background-image:var(--url-bg-url) !important;
+  background-size: cover;
+  background-position: center;
 }
 
 .tab-active {

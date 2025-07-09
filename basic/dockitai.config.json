@@ -6,16 +6,15 @@
     "light": "#3A8DDE",
     "dark": "#655DC6"
   },
+  "defaultThemeMode": "light",
   "logo": {
+    "light": "/assets/light.svg",
+    "dark": "/assets/dark.svg"
   },
   "favicon": "/assets/favicon.svg",
-"banner": {
-    "message": "🚀 Welcome to DockitAI!",
-    "colors": {
-      "light": "#3A8DDE",
-      "dark": "#655DC6"
-    }
+  "background": {
   },
+  "banner": "🚀 Welcome to DockitAI!",
   "navbar": [
     {
       "type": "link",
