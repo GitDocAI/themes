@@ -62,9 +62,9 @@ export const Sidebar = ({ themeinfo, versions, tabs }: { themeinfo: ThemeInfo, v
           className={`block py-1 px-2 rounded-md text-sm transition-colors duration-150 ease-in-out
           ${paddingLeft}
           ${isActive
-            ? 'sidebar-active font-medium rounded-md'
-            : 'text-secondary hover:bg-secondary/10 hover:text-primary rounded-md'
-          }`}
+              ? 'sidebar-active font-medium rounded-md'
+              : 'text-secondary hover:bg-secondary/10 hover:text-primary rounded-md'
+            }`}
         >
           {item.title}
         </Anchor> : <span className="hidden" key={`${currentPath}-${depth}`}></span>
@@ -82,10 +82,10 @@ export const Sidebar = ({ themeinfo, versions, tabs }: { themeinfo: ThemeInfo, v
             case 'group':
               return (
                 <div key={item.title} className="mb-4"> {/* Margen inferior para separar grupos */}
-                  <div className="text-xs font-semibold uppercase text-secondary/60 mb-2 px-2 tracking-wide">
+                  <div className="text-xs font-semibold uppercase text-secondary/77 mb-2 px-2 tracking-wide">
                     {item.title}
                   </div>
-                  <div className="space-y-1">
+                  <div className="space-y-1 pl-2">
                     {item.children?.map(child => renderNestedItem(child as NavigationPage, pathname, 1))}
                   </div>
                 </div>

@@ -39,3 +39,6 @@ turbo/
 
 # Optional: local next config override
 next.config.mjs.local
+dockitai.config.json
+content
+public/assets

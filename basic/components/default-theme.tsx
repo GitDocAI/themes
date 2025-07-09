@@ -32,7 +32,7 @@ export const DefaultTheme: FC<{
       />
       <TabList versions={versions} tablist={tabs} />
       <div className='flex bg-background text-secondary flex-1'>
-        <div className="container mx-auto px-4 flex flex-1">
+        <div className="container  mx-auto px-4 flex flex-1">
           <Sidebar themeinfo={themeinfo} versions={versions} tabs={tabs} />
           <div className="flex flex-col gap-1 w-full flex-1 min-h-0">
             <main className="flex-1 flex flex-row overflow-y-auto">

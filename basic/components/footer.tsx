@@ -10,7 +10,6 @@ export const Footer: FC<{
     <footer className="bg-background border-t border-secondary/10 py-6 px-4 sm:px-8">
       <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="flex items-center space-x-2">
-          {logo}
           <span className="text-sm font-semibold text-primary">{name}</span>
         </div>
 

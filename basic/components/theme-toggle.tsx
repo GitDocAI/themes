@@ -23,7 +23,7 @@ export default function ThemeToggle() {
       className="flex items-center justify-center w-10 h-10 rounded-lg bg-secondary/10 dark:bg-secondary/20 transition-colors duration-300"
     >
       {theme === 'dark-theme' ? (
-        <i className="pi pi-sun text-primary text-xl transition-transform transform hover:scale-110" />
+        <i className="pi pi-sun text-yellow-100 text-xl transition-transform transform hover:scale-110" />
       ) : (
         <i className="pi pi-moon text-primary text-xl transition-transform transform hover:scale-110" />
       )}

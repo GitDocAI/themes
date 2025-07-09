@@ -29,14 +29,11 @@ body {
 }
 
 .tab-active {
-  border-color: rgb(var(--color-primary)) !important;
-  color: rgb(var(--color-primary)) !important;
+  border-color: rgb(var(--color-muted)) !important;
+  color: rgb(var(--color-muted)) !important;
+  @apply font-extrabold;
 }
 
-.dark-theme .tab-active {
-  border-color: rgb(var(--color-primary)) !important;
-  color: rgb(var(--color-primary)) !important;
-}
 
 .sidebar-active {
   background-color: rgb(var(--color-primary));
@@ -48,12 +45,11 @@ body {
 }
 
 .tab-hover:hover {
-  color: rgb(var(--color-hover-tab)) !important;
+  color: rgb(var(--color-muted)) !important;
+  cursor:pointer;
+  opacity:0.8;
 }
 
-.dark-theme .tab-hover:hover {
-  color: rgb(var(--color-hover-tab)) !important;
-}
 
 .heading-strong {
   color: rgb(30 30 30); /* casi negro */

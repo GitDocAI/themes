@@ -7,6 +7,7 @@ import ThemeToggle from './theme-toggle'
 import type { NavBarItem } from '../models/ThemeInfo'
 import VersionSwitcher from './VersionSwitcher'
 import { Version } from '@/models/InnerConfiguration'
+import SearchBar from './searchbar'
 
 export const Navbar: FC<{
   navitems: NavBarItem[]
@@ -48,6 +49,14 @@ export const Navbar: FC<{
         <div className='container mx-auto px-4 py-3 flex items-center justify-between h-16'>
           <div className='flex items-center space-x-3'>
             {logo && <div className='flex-shrink-0'>{logo}</div>}
+
+            {showVersionSwitcher && (
+              <VersionSwitcher versions={versions} />
+            )}
+          </div>
+
+          <div className="flex-1 max-w-sm flex ">
+            <SearchBar />
           </div>
 
           <div className='hidden md:flex items-center space-x-6'>
@@ -56,10 +65,9 @@ export const Navbar: FC<{
                 key={item.reference}
                 href={item.reference}
                 className={
-                  `hover:text-secondary transition-colors duration-200 ease-in-out font-medium flex flex-row items-center ${
-                    item.type === 'button'
-                      ? 'custom-button'
-                      : 'navbar-link text-primary'
+                  `hover:text-secondary transition-colors duration-200 ease-in-out font-medium flex flex-row items-center ${item.type === 'button'
+                    ? 'custom-button'
+                    : 'navbar-link text-primary'
                   }`
                 }
                 style={{ textDecoration: 'none' }}
@@ -67,9 +75,6 @@ export const Navbar: FC<{
                 {item.label}
               </Anchor>
             ))}
-            {showVersionSwitcher && (
-              <VersionSwitcher versions={versions} />
-            )}
             <ThemeToggle />
           </div>
 
@@ -103,9 +108,8 @@ export const Navbar: FC<{
                 <li key={item.reference}>
                   <Anchor
                     href={item.reference}
-                    className={`py-2 px-4 rounded-md transition-colors duration-200 text-lg font-medium w-full text-center flex flex-row items-center ${
-                      item.type === 'button' ? 'custom-button' : 'text-primary'
-                    }`}
+                    className={`py-2 px-4 rounded-md transition-colors duration-200 text-lg font-medium w-full text-center flex flex-row items-center ${item.type === 'button' ? 'custom-button' : 'text-primary'
+                      }`}
                     style={{ textDecoration: 'none' }}
                     onClick={() => setIsMobileMenuOpen(false)}
                   >

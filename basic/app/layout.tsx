@@ -39,25 +39,25 @@ export default RootLayout
 const getPageRecords = (site: ThemeInfo) => {
   const colorRecord: StyleRecord = {
     key: 'primary',
-    light: site.colors?.light ?? '40 53 147',
-    dark: site.colors?.dark ?? '147 130 245',
+    light: site.colors?.light ?? '#000000',
+    dark: site.colors?.dark ?? '#ffffff',
     type: 'color'
   }
-  
+
   const backgroundRecord: StyleRecord = {
     key: 'bg',
-    light: site.background?.colors?.light ?? '250 250 248',
-    dark: site.background?.colors?.dark ?? '18 20 27',
+    light: site.background?.colors?.light ?? '#ffffff',
+    dark: site.background?.colors?.dark ?? '#000000',
     type: 'color'
   }
-  
+
   const backgroundImage: StyleRecord = {
     key: 'bg-url',
     light: site.background?.image?.light ?? '',
     dark: site.background?.image?.dark ?? '',
     type: 'url'
   }
-  
+
   const hoverTextRecord: StyleRecord = {
     key: 'hover-tab',
     light: '80 80 80',
