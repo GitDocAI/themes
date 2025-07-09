@@ -57,7 +57,15 @@ const getPageRecords = (site: ThemeInfo) => {
     dark: site.background?.image?.dark ?? '',
     type: 'url'
   }
-  return [colorRecord, backgroundRecord, backgroundImage]
+  
+  const hoverTextRecord: StyleRecord = {
+    key: 'hover-tab',
+    light: '80 80 80',
+    dark: '220 220 220',
+    type: 'color'
+  }
+
+  return [colorRecord, backgroundRecord, backgroundImage, hoverTextRecord]
 }
 
 type StyleRecord = {
@@ -72,7 +80,8 @@ const generateCSSVars = (records: StyleRecord[]) => {
     return records.map((r: StyleRecord) => {
       let val = light ? r.light : r.dark;
       if (r.type == 'color') {
-        val = hexToRgb(val)?.join(' ') ?? ''
+        const rgbValues = hexToRgb(val);
+        val = rgbValues ? rgbValues.join(' ') : (light ? '40 53 147' : '147 130 245'); // Fallback colors
         return `--color-${r.key}: ${val};`
       } else {
         return `--url-${r.key}: ${val};`

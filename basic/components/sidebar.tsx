@@ -62,9 +62,9 @@ export const Sidebar = ({ themeinfo, versions, tabs }: { themeinfo: ThemeInfo, v
           className={`block py-1 px-2 rounded-md text-sm transition-colors duration-150 ease-in-out
           ${paddingLeft}
           ${isActive
-              ? 'bg-primary text-white font-medium rounded-md'
-              : 'text-secondary hover:bg-secondary/10 hover:text-primary rounded-md'
-            }`}
+            ? 'sidebar-active font-medium rounded-md'
+            : 'text-secondary hover:bg-secondary/10 hover:text-primary rounded-md'
+          }`}
         >
           {item.title}
         </Anchor> : <span className="hidden" key={`${currentPath}-${depth}`}></span>

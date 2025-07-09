@@ -70,7 +70,7 @@ const VersionSwitcher = ({ versions }: { versions: Version[] }) => {
       </button>
 
       {isOpen && filteredVersions.length > 0 && (
-        <ul className="absolute z-10 mt-1 w-20 bg-zinc-900  rounded-md text-secondary shadow-lg  overflow-y-auto">
+        <ul className="absolute z-10 mt-1 w-20 bg-background border border-primary/20 rounded-md text-secondary shadow-lg overflow-y-auto">
           {filteredVersions.map(version => (
             <li
               key={version.version}
