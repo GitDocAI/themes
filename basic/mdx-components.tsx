@@ -12,17 +12,17 @@ const defaultComponents = getNextraComponents({
       </>
     )
   },
-  h1: ({ children }) => <h1 className="text-4xl font-bold mb-4">{children}</h1>,
-  h2: ({ children }) => <h2 className="text-3xl font-semibold mb-3 mt-8">{children}</h2>,
-  h3: ({ children }) => <h3 className="text-2xl font-semibold mb-2 mt-6">{children}</h3>,
+  h1: ({ children }) => <h1 className="heading-strong text-4xl font-bold mb-4">{children}</h1>,
+  h2: ({ children }) => <h2 className="heading-strong text-3xl font-semibold mb-3 mt-8">{children}</h2>,
+  h3: ({ children }) => <h3 className="heading-strong text-2xl font-semibold mb-2 mt-6">{children}</h3>,
   p: ({ children }) => <p className="mb-4 leading-7">{children}</p>,
   code: ({ children }) => (
-    <code className="bg-gray-100 dark:bg-gray-800 px-1 py-0.5 rounded text-sm font-mono">
+    <code className="bg-secondary/10 px-1 py-0.5 rounded text-sm font-mono text-primary">
       {children}
     </code>
   ),
   pre: ({ children }) => (
-    <pre className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto mb-4">
+    <pre className="bg-secondary/10 p-4 rounded-lg overflow-x-auto mb-4 text-primary">
       {children}
     </pre>
   ),
@@ -36,7 +36,7 @@ const defaultComponents = getNextraComponents({
   ),
   img: ({ src, alt, height, ...props }) => (
     <img 
-      src={src} 
+      src={src as string} 
       alt={alt} 
       className="rounded-lg mb-4 max-w-full" 
       style={{ height: height ? `${height}px` : 'auto' }}

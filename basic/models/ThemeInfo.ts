@@ -23,7 +23,13 @@ export type ThemeInfo = {
       light: string;
     };
   };
-  banner: string;
+  banner: string | {
+    message: string;
+    colors?: {
+      light?: string;
+      dark?: string;
+    };
+  };
   navbar: Array<
     NavBarItem
   >;

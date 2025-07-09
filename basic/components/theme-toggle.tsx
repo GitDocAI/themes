@@ -5,7 +5,7 @@ export default function ThemeToggle() {
   const [theme, setTheme] = useState<'light' | 'dark-theme'>('light')
   useEffect(() => {
     const saved = localStorage.getItem('theme') as 'light' | 'dark-theme' | null
-    const init = saved || (window.matchMedia('(prefers-color-scheme: dark-theme)').matches ? 'dark-theme' : 'light')
+    const init = saved || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark-theme' : 'light')
     setTheme(init)
     document.documentElement.classList.toggle('dark-theme', init === 'dark-theme')
   }, [])
@@ -23,9 +23,9 @@ export default function ThemeToggle() {
       className="flex items-center justify-center w-10 h-10 rounded-lg bg-secondary/10 dark:bg-secondary/20 transition-colors duration-300"
     >
       {theme === 'dark-theme' ? (
-        <i className="pi pi-sun text-yellow-500 text-xl transition-transform transform hover:scale-110" />
+        <i className="pi pi-sun text-primary text-xl transition-transform transform hover:scale-110" />
       ) : (
-        <i className="pi pi-moon text-gray-700 text-xl transition-transform transform hover:scale-110" />
+        <i className="pi pi-moon text-primary text-xl transition-transform transform hover:scale-110" />
       )}
     </button>
   )

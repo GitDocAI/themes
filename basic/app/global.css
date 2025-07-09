@@ -20,10 +20,45 @@
 
 @theme {
   --color-background: rgb(var(--color-bg));
-  --color-primary: rgb(var(--color-main));
+  --color-primary: rgb(var(--color-primary));
   --color-secondary: rgb(var(--color-muted));
   }
 
 body {
-  background-image: var(--url-bg-url);
+  background-color: rgb(var(--color-bg));
+}
+
+.tab-active {
+  border-color: rgb(var(--color-primary)) !important;
+  color: rgb(var(--color-primary)) !important;
+}
+
+.dark-theme .tab-active {
+  border-color: rgb(var(--color-primary)) !important;
+  color: rgb(var(--color-primary)) !important;
+}
+
+.sidebar-active {
+  background-color: rgb(var(--color-primary));
+  color: white !important;
+}
+
+.dark-theme .navbar-link {
+  color: white !important;
+}
+
+.tab-hover:hover {
+  color: rgb(var(--color-hover-tab)) !important;
+}
+
+.dark-theme .tab-hover:hover {
+  color: rgb(var(--color-hover-tab)) !important;
+}
+
+.heading-strong {
+  color: rgb(30 30 30); /* casi negro */
+}
+
+.dark-theme .heading-strong {
+  color: rgb(255 255 255); /* blanco fuerte en modo oscuro */
 }
