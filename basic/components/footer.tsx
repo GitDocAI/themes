@@ -14,7 +14,7 @@ export const Footer: FC<{
         </div>
 
         <div className="flex items-center space-x-4">
-          {items.map((it, idx) => (
+          {items?.map((it, idx) => (
             <a
               key={idx}
               href={it.reference}
@@ -28,6 +28,8 @@ export const Footer: FC<{
           ))}
         </div>
       </div>
+      <span className="flex flex-row items-center justify-center"> <small className="text-[0.6rem] text-secondary/60">© {(new Date()).getFullYear()} all rights reserved</small> </span>
     </footer>
   )
 }
+

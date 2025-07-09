@@ -17,26 +17,16 @@
       "dark": "#655DC6"
     }
   },
-  "footer": [
+  "navbar": [
     {
-      "type": "x",
-      "reference": "https://x.com/dockitai"
+      "type": "link",
+      "label": "Support",
+      "reference": "https://support.dockitai.com"
     },
     {
-      "type": "github",
-      "reference": "https://github.com/dockitai"
-    },
-    {
-      "type": "linkedin",
-      "reference": "https://www.linkedin.com/company/dockitai/"
-    },
-    {
-      "type": "facebook",
-      "reference": "https://www.facebook.com/dockitai"
-    },
-    {
-      "type": "youtube",
-      "reference": "https://www.youtube.com/@dockitai"
+      "type": "button",
+      "label": "Online Demo",
+      "reference": "https://dockitai.com/demo"
     }
   ],
 
