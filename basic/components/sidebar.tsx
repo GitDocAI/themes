@@ -47,23 +47,54 @@ export const Sidebar = ({ themeinfo, versions, tabs }: { themeinfo: ThemeInfo, v
     }
   }, [pathname, versions, tabs])
 
-  const renderNestedItem = (item: NavigationPage, currentPath: string, depth = 0) => {
+  function renderNestedItem(item: NavigationItem, depth: number) {
     const paddingLeft = `pl-${depth * 4 + 4}`
-    item.page = item.page?.split('.')[0]
-    const isActive = item.page === pathname
+    switch (item.type) {
+      case 'group':
+        return (
+          <div key={item.title} className={`mb-4 ${paddingLeft}`}>
+            <div className="text-xs font-semibold uppercase text-secondary/77 mb-2 px-2 tracking-wide">
+              {item.title}
+            </div>
+            <div className="space-y-1 pl-2">
+              {item.children?.map(child => renderNestedItem(child as NavigationPage, 1))}
+            </div>
+          </div>
+        )
+      case 'dropdown':
+        return (
+          <details key={item.title} className={`group cursor-pointer ${paddingLeft}`}>
+            <summary className="flex items-center justify-between py-1 px-2 text-sm font-medium rounded-md text-secondary hover:bg-secondary/10 hover:text-primary">
+              <span>{item.title}</span>
+              <svg className="w-4 h-4 transition-transform group-open:rotate-90" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+              </svg>
+            </summary>
+            <div className="mt-1 space-y-1 pl-4 border-l border-secondary/20 ml-2">
+              {item.children?.map(child => renderNestedItem(child as NavigationPage, 1))}
+            </div>
+          </details>
+        )
+      case 'page':
+        item.page = item.page?.split('.')[0]
+        const isActive = item.page === pathname
 
-    return item.title ? (
-      <Anchor
-        key={item.page + item.title}
-        href={item.page || '#'}
-        className={`block py-1 px-2 rounded-md text-sm transition-colors duration-150 ease-in-out ${paddingLeft} ${isActive
-          ? 'sidebar-active font-medium text-primary'
-          : 'text-secondary hover:bg-secondary/10 hover:text-primary'
-          }`}
-      >
-        {item.title}
-      </Anchor>
-    ) : null
+        return item.title ? (
+          <Anchor
+            key={item.page + item.title}
+            href={item.page || '#'}
+            className={`block py-1 px-2 rounded-md text-sm transition-colors duration-150 ease-in-out ${paddingLeft} ${isActive
+              ? 'sidebar-active font-medium text-primary'
+              : 'text-secondary hover:bg-secondary/10 hover:text-primary'
+              }`}
+          >
+            {item.title}
+          </Anchor>
+        ) : null
+      default:
+        return null
+    }
+
   }
 
   return (
@@ -84,7 +115,7 @@ export const Sidebar = ({ themeinfo, versions, tabs }: { themeinfo: ThemeInfo, v
       {/* Sidebar full */}
       <aside
         className={`
-          fixed md:sticky top-0 left-0 h-full w-72 overflow-y-auto px-6 py-6 z-50
+          fixed md:sticky top-0 left-0 h-full w-72 overflow-y-auto px-6 py-6 z-50 md:z-10
           transition-transform duration-300 ease-in-out bg-background sm:bg-transparent
           border-r border-secondary/10
           ${isOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0
@@ -105,40 +136,14 @@ export const Sidebar = ({ themeinfo, versions, tabs }: { themeinfo: ThemeInfo, v
 
         <nav className="space-y-1">
           {items.map(item => {
-            switch (item.type) {
-              case 'group':
-                return (
-                  <div key={item.title} className="mb-4">
-                    <div className="text-xs font-semibold uppercase text-secondary/77 mb-2 px-2 tracking-wide">
-                      {item.title}
-                    </div>
-                    <div className="space-y-1 pl-2">
-                      {item.children?.map(child => renderNestedItem(child as NavigationPage, pathname, 1))}
-                    </div>
-                  </div>
-                )
-              case 'dropdown':
-                return (
-                  <details key={item.title} className="group cursor-pointer">
-                    <summary className="flex items-center justify-between py-1 px-2 text-sm font-medium rounded-md text-secondary hover:bg-secondary/10 hover:text-primary">
-                      <span>{item.title}</span>
-                      <svg className="w-4 h-4 transition-transform group-open:rotate-90" stroke="currentColor" fill="none" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-                      </svg>
-                    </summary>
-                    <div className="mt-1 space-y-1 pl-4 border-l border-secondary/20 ml-2">
-                      {item.children?.map(child => renderNestedItem(child as NavigationPage, pathname, 1))}
-                    </div>
-                  </details>
-                )
-              case 'page':
-                return renderNestedItem(item, pathname)
-              default:
-                return null
-            }
+            return renderNestedItem(item, 0)
           })}
         </nav>
       </aside>
     </>
   )
 }
+
+
+
+

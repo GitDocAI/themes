@@ -181,6 +181,10 @@
             "type": "group",
             "title": "What's New",
             "children": [
+                        {
+            "type": "group",
+            "title": "What's New",
+            "children": [
               {
                 "type": "page",
                 "title": "Changelog",
@@ -193,22 +197,47 @@
               }
             ]
           },
-          {
+
+              {
+                "type": "page",
+                "title": "Changelog",
+                "page": "/v2/changelog.mdx"
+              },
+              {
+                "type": "page",
+                "title": "Migration Guide",
+                "page": "/v2/migration.mdx"
+              }
+            ]
+          },
+                    {
             "type": "dropdown",
             "title": "Core Concepts",
             "children": [
               {
                 "type": "page",
-                "title": "Architecture",
+                "title": "Security",
+                "page": "/v2/concepts/security.mdx"
+              },
+          {
+            "type": "group",
+            "title": "Concepts",
+            "children": [
+              {
+                "type": "page",
+                "title": "Architecture_",
                 "page": "/v2/concepts/architecture.mdx"
               },
               {
                 "type": "page",
-                "title": "Security",
+                "title": "Security_",
                 "page": "/v2/concepts/security.mdx"
               }
             ]
           }
+            ]
+          }
+
         ]
       }
     ]

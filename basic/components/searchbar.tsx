@@ -43,10 +43,10 @@ export default function SearchBar() {
         <kbd className="hidden sm:inline ml-auto text-xs text-secondary">{isMac ? '⌘+K' : 'Ctl+K'}</kbd>
       </button>
 
-      <Dialog open={isOpen} onClose={closeModal} className="relative z-50">
+      <Dialog open={isOpen} onClose={closeModal} className="relative z-50 ">
         <div className="fixed inset-0  backdrop-blur-sm " aria-hidden="true" />
         <div className="fixed inset-0 flex items-start justify-center ">
-          <Dialog.Panel className="w-full max-w-2xl rounded-xl bg-background p-0 shadow-xl mt-12 p-2 ">
+          <Dialog.Panel className="w-full max-w-2xl rounded-xl bg-background  shadow-xl mt-12 p-2 ">
             <input
               type="text"
               placeholder="Search"
