@@ -5,6 +5,7 @@ import type { FC, ReactNode } from 'react'
 import { DefaultTheme } from '../components/default-theme'
 import './global.css'
 import { ThemeInfo } from '../models/ThemeInfo'
+import InvalidConfigPage from '@/components/InvalidConfig'
 export const metadata: Metadata = {
   title: {
     absolute: '',
@@ -20,7 +21,11 @@ const RootLayout: FC<{ children: ReactNode }> = async ({ children }) => {
   const pageMap = await getPageMap()
 
 
-  console.log(site)
+  if (!site || Object.keys(site).length == 0) {
+    return (
+      <InvalidConfigPage />
+    )
+  }
   return (
     <html lang="en" dir="ltr" >
       <Head >

@@ -28,6 +28,7 @@ body {
   background-image:var(--url-bg-url) !important;
   background-size: cover;
   background-position: center;
+  background-color:rgb(var(--color-bg));
 }
 
 .tab-active {

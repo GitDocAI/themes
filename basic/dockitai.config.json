@@ -13,6 +13,10 @@
   },
   "favicon": "/assets/favicon.svg",
   "background": {
+    "image":{
+    "light": "/assets/light.svg"
+    "dark": "/assets/dark.svg"
+    }
   },
   "banner": "🚀 Welcome to DockitAI!",
   "navbar": [
