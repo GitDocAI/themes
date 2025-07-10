@@ -1,6 +1,7 @@
 /* app/globals.css */
 @import 'tailwindcss';
 @import 'primeicons/primeicons.css';
+@import 'nextra-theme-docs/style.css';
         
 
 :root {
@@ -61,3 +62,12 @@ body {
 .dark-theme .heading-strong {
   color: rgb(255 255 255); /* blanco fuerte en modo oscuro */
 }
+
+:root{
+  [style*="--shiki-light"] {
+    color: var(--shiki-light);
+  }
+ }
+/* .dark-theme [style*="--shiki-dark"] { */
+/*   color: var(--shiki-dark); */
+/* } */

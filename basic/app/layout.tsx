@@ -6,12 +6,17 @@ import { DefaultTheme } from '../components/default-theme'
 import './global.css'
 import { ThemeInfo } from '../models/ThemeInfo'
 import InvalidConfigPage from '@/components/InvalidConfig'
+import { GlobalScript } from '@/components/doc-components/GlobalScript'
+
+
 export const metadata: Metadata = {
   title: {
     absolute: '',
     template: '%s'
   }
 }
+
+
 
 
 const site = JSON.parse(process.env.SITE_CONFIG!)
@@ -34,6 +39,7 @@ const RootLayout: FC<{ children: ReactNode }> = async ({ children }) => {
       </Head>
       <body style={{ margin: 0 }} >
         <DefaultTheme themeinfo={site as any} pageMap={pageMap} >{children}</DefaultTheme>
+        <GlobalScript />
       </body>
     </html>
   )
