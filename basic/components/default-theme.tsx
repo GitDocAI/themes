@@ -28,8 +28,8 @@ export const DefaultTheme: FC<{
     <div className='min-h-screen bg-background/90 flex flex-col justify-between relative'>
       {themeinfo.banner ? <Banner content={themeinfo.banner} /> : <></>}
       <Navbar navitems={themeinfo.navbar} versions={versions}
-        logo={logo} name={themeinfo.name}
-        themeMode={themeinfo.defaultThemeMode}
+        logo={logo}
+        defaultTheme={themeinfo.defaultThemeMode ?? ''}
       />
       <TabList versions={versions} tablist={tabs} />
       <div className='flex  text-secondary flex-1'>

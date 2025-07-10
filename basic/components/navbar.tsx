@@ -52,7 +52,7 @@ export const Navbar: FC<{
             {showVersionSwitcher ? <VersionSwitcher versions={versions} /> : <></>}
           </div>
 
-          <span className="hidden sm:block max-w-sm">
+          <span className="hidden sm:block lg:min-w-sm  max-w-md">
             <SearchBar />
           </span>
 

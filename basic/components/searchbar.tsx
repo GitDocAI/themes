@@ -36,14 +36,14 @@ export default function SearchBar() {
     <>
       <button
         onClick={openModal}
-        className=" md:w-full flex items-center space-x-2 rounded-lg md:border md:border-secondary bg-background px-4 py-2 text-sm text-gray-600 shadow-sm transition hover:shadow-md "
+        className="md:w-full flex items-center space-x-2 rounded-lg md:border md:border-secondary bg-background px-4 py-2 text-sm text-gray-600 md:shadow-sm transition hover:md:shadow-md "
       >
-        <i className="w-4 h-4 pi pi-search" />
+        <i className="w-4 h-4 pi pi-search cursor-pointer" />
         <span className="hidden sm:inline">Search</span>
         <kbd className="hidden sm:inline ml-auto text-xs text-secondary">{isMac ? '⌘+K' : 'Ctl+K'}</kbd>
       </button>
 
-      <Dialog open={isOpen} onClose={closeModal} className="relative z-50 ">
+      <Dialog open={isOpen} onClose={closeModal} className="relative z-50">
         <div className="fixed inset-0  backdrop-blur-sm " aria-hidden="true" />
         <div className="fixed inset-0 flex items-start justify-center ">
           <Dialog.Panel className="w-full max-w-2xl rounded-xl bg-background  shadow-xl mt-12 p-2 ">
