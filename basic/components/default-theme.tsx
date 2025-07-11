@@ -25,15 +25,15 @@ export const DefaultTheme: FC<{
 
 
   return (
-    <div className='min-h-screen bg-background/90 flex flex-col justify-between relative'>
+    <div className='min-h-screen w-full bg-background/90 flex flex-col justify-between relative 2xl:container mx-auto'>
       {themeinfo.banner ? <Banner content={themeinfo.banner} /> : <></>}
       <Navbar navitems={themeinfo.navbar} versions={versions}
         logo={logo}
         defaultTheme={themeinfo.defaultThemeMode ?? ''}
       />
       <TabList versions={versions} tablist={tabs} />
-      <div className='flex  text-secondary flex-1'>
-        <div className="container mx-auto px-4 flex flex-col sm:flex-row flex-1">
+      <div className='flex text-secondary flex-1'>
+        <div className=" px-4 flex flex-col sm:flex-row flex-1">
           <Sidebar themeinfo={themeinfo} versions={versions} tabs={tabs} />
           <div className="flex flex-col gap-1 w-full flex-1 min-h-0">
             <main className="flex-1 flex flex-row overflow-y-auto">

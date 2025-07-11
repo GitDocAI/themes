@@ -68,6 +68,6 @@ body {
     color: var(--shiki-light);
   }
  }
-/* .dark-theme [style*="--shiki-dark"] { */
-/*   color: var(--shiki-dark); */
-/* } */
+.dark-theme [style*="--shiki-dark"] {
+  color: var(--shiki-dark);
+}

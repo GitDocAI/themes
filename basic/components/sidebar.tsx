@@ -100,7 +100,7 @@ export const Sidebar = ({ themeinfo, versions, tabs }: { themeinfo: ThemeInfo, v
   return (
     <>
       {/* Mobile launcher button */}
-      <div className="md:hidden px-4 py-2 border-b border-secondary/10  sticky top-0 z-20 flex items-center gap-2">
+      <div className="md:hidden   py-2 border-b border-secondary/10  sticky top-0 z-20 flex items-center gap-2">
 
         <div
           onClick={() => setIsOpen(true)}
@@ -115,7 +115,7 @@ export const Sidebar = ({ themeinfo, versions, tabs }: { themeinfo: ThemeInfo, v
       {/* Sidebar full */}
       <aside
         className={`
-          fixed md:sticky top-0 left-0 h-full w-72 overflow-y-auto px-6 py-6 z-50 md:z-10
+          fixed md:sticky top-0 left-0 h-full w-72 overflow-y-auto pl-2 px-6 py-6 z-50 md:z-10
           transition-transform duration-300 ease-in-out bg-background sm:bg-transparent
           border-r border-secondary/10
           ${isOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0

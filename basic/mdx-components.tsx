@@ -1,7 +1,10 @@
 import { useMDXComponents as getNextraComponents } from 'nextra/mdx-components'
 import { TOC } from './components/toc'
 import { AlertBlock } from './components/doc-components/AlertBlock'
+import { BlockQuote } from './components/doc-components/BlockQuote'
 import { CodeBlock } from './components/doc-components/CodeBlock'
+import { CheckList, CheckItem } from './components/doc-components/CheckList'
+import React from 'react';
 
 const defaultComponents = getNextraComponents({
   wrapper({ children, toc }) {
@@ -15,16 +18,27 @@ const defaultComponents = getNextraComponents({
     )
   },
 
-  // Títulos
   h1: ({ children }) => <h1 className="text-4xl font-bold mb-6">{children}</h1>,
   h2: ({ children }) => <h2 className="text-3xl font-semibold mb-5 mt-10">{children}</h2>,
   h3: ({ children }) => <h3 className="text-2xl font-medium mb-3 mt-8">{children}</h3>,
 
-  // Párrafos y listas
-  p: ({ children }) => <p className="mb-4 leading-7 text-base text-primary">{children}</p>,
-  ul: ({ children }) => <ul className="list-disc pl-6 mb-4">{children}</ul>,
+  p: ({ children }) => <p className="mb-4 leading-7 text-base text-secondary">{children}</p>,
+  ul: ({ children, className }) => {
+    return (
+      <ul className="list-disc pl-6 mb-4">{children}</ul>
+    )
+  },
   ol: ({ children }) => <ol className="list-decimal pl-6 mb-4">{children}</ol>,
-  li: ({ children }) => <li className="mb-1">{children}</li>,
+  li: ({ children }) => {
+    const childrenArray = React.Children.toArray(children).filter((ch: any) => ch.props?.type === 'checkbox');
+    if (childrenArray.length > 0) {
+      const inner = React.Children.toArray(children).filter((ch: any) => ch.props?.type !== 'checkbox');
+      return (<CheckItem variant={(childrenArray[0] as any)?.props?.checked ? 'do' : 'dont'}>{inner}</CheckItem>)
+    }
+    return (
+      <li className="mb-1">{children}</li>
+    )
+  },
   code: ({ children }) => (
     <CodeBlock>
       {children}
@@ -37,12 +51,7 @@ const defaultComponents = getNextraComponents({
   ),
 
   // Blockquote
-  blockquote: ({ children }) => (
-    <blockquote className="border-l-4 border-gray-300 dark:border-gray-600 pl-4 italic text-secondary mb-4">
-      {children}
-    </blockquote>
-  ),
-
+  blockquote: BlockQuote,
   // Imágenes
   img: ({ src, alt, height, ...props }) => (
     <img

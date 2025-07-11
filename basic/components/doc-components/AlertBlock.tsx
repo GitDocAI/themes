@@ -1,28 +1,54 @@
-import { ReactNode } from 'react'
-import clsx from 'clsx'
+import { ReactNode } from 'react';
+import clsx from 'clsx';
 
-type AlertType = 'tip' | 'note' | 'warning' | 'danger' | 'info'
 
-interface AlertBoxProps {
-  type?: AlertType
-  children: ReactNode
+export type AlertType = 'tip' | 'note' | 'warning' | 'danger' | 'info';
+
+interface AlertBlockProps {
+  type?: AlertType;
+  children: ReactNode;
 }
 
-const baseStyles = 'px-4 py-3 rounded-md border-l-4 my-4'
-const typeStyles: Record<AlertType, string> = {
-  tip: 'bg-green-50 dark:bg-green-900/20 border-green-400 dark:border-green-500 text-green-800 dark:text-green-100',
-  note: 'bg-blue-50 dark:bg-blue-900/20 border-blue-400 dark:border-blue-500 text-blue-800 dark:text-blue-100',
-  warning: 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-400 dark:border-yellow-500 text-yellow-800 dark:text-yellow-100',
-  danger: 'bg-red-50 dark:bg-red-900/20 border-red-400 dark:border-red-500 text-red-800 dark:text-red-100',
-  info: 'bg-sky-50 dark:bg-sky-900/20 border-sky-400 dark:border-sky-500 text-sky-800 dark:text-sky-100'
-}
+const alertConfig: Record<AlertType, { icon: string; colors: string }> = {
+  tip: {
+    icon: 'pi pi-lightbulb',
+    colors: 'bg-green-500/10 border-green-500/30 text-green-400',
+  },
+  note: {
+    icon: 'pi pi-pencil',
+    colors: 'bg-blue-500/10 border-blue-500/30 text-blue-400',
+  },
+  warning: {
+    icon: 'pi pi-exclamation-triangle',
+    colors: 'bg-yellow-500/10 border-yellow-500/30 text-yellow-400',
+  },
+  danger: {
+    icon: 'pi pi-times-circle',
+    colors: 'bg-red-500/10 border-red-500/30 text-red-400',
+  },
+  info: {
+    icon: 'pi pi-info-circle',
+    colors: 'bg-sky-500/10 border-sky-500/30 text-sky-400',
+  },
+};
 
-export const AlertBlock = ({ type = 'note', children }: AlertBoxProps) => {
+export const AlertBlock = ({ type = 'note', children }: AlertBlockProps) => {
+  const { icon, colors } = alertConfig[type];
+
   return (
-    <div className={clsx(baseStyles, typeStyles[type])}>
-      {children}
-    </div>
-  )
-}
+    <div
+      className={clsx(
+        'my-4 flex items-start gap-4 rounded-lg border p-4', // Estructura base con Flexbox
+        colors
+      )}
+    >
+      <i className={clsx(icon, 'mt-0.5 text-xl')} />
 
-export default AlertBlock
+      <div className="text-secondary w-full">
+        {children}
+      </div>
+    </div>
+  );
+};
+
+export default AlertBlock;
