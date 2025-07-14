@@ -100,12 +100,11 @@ export const Sidebar = ({ themeinfo, versions, tabs }: { themeinfo: ThemeInfo, v
   return (
     <>
       {/* Mobile launcher button */}
-      <div className="md:hidden   py-2 border-b border-secondary/10  sticky top-0 z-20 flex items-center gap-2">
+      <div className="sm:hidden   py-2 border-b border-secondary/10  sticky top-0 z-20 flex items-center gap-2">
 
         <div
           onClick={() => setIsOpen(true)}
         >
-
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
           </svg>
@@ -115,15 +114,15 @@ export const Sidebar = ({ themeinfo, versions, tabs }: { themeinfo: ThemeInfo, v
       {/* Sidebar full */}
       <aside
         className={`
-          fixed md:sticky top-0 left-0 h-full w-72 overflow-y-auto pl-2 px-6 py-6 z-50 md:z-10
+          fixed sm:sticky top-0 left-0 h-full w-72 overflow-y-auto pl-2 px-6 py-6 z-50 sm:z-10
           transition-transform duration-300 ease-in-out bg-background sm:bg-transparent
           border-r border-secondary/10
-          ${isOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0
+          ${isOpen ? 'translate-x-0' : '-translate-x-full'} sm:translate-x-0
           ${!isMobile ? 'bg-transparent' : ''}
         `}
       >
         {/* Cerrar sidebar (solo móvil) */}
-        <div className="md:hidden flex justify-end mb-4">
+        <div className="sm:hidden flex justify-end mb-4">
           <button
             className="p-2 rounded-md text-secondary hover:text-primary hover:bg-secondary/10"
             onClick={() => setIsOpen(false)}

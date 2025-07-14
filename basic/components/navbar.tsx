@@ -45,7 +45,7 @@ export const Navbar: FC<{
         }}
       />
 
-      <nav className='sticky top-0 left-0 right-0 z-50 bg-background text-primary border-b border-secondary/10 shadow-md'>
+      <nav className='sticky top-0 left-0 right-0 z-50 bg-background text-primary border-x-0 border-b border-secondary/10 '>
         <div className='px-4 py-3 flex items-center justify-between h-16'>
           <div className='flex items-center space-x-3'>
             {logo && <div className='flex-shrink-0'>{logo}</div>}
