@@ -8,6 +8,7 @@ import { type ThemeInfo, type NavigationItem, type NavigationTab, NavigationVers
 import { TabList } from './tabs'
 import { Version, Tab } from '@/models/InnerConfiguration'
 import { Logo } from './logo'
+import { PrevNextNavigation } from './prev-next-navigation'
 export const DefaultTheme: FC<{
   children: ReactNode
   pageMap: PageMapItem[]
@@ -33,16 +34,17 @@ export const DefaultTheme: FC<{
           defaultTheme={themeinfo.defaultThemeMode ?? ''}
         />
         <TabList versions={versions} tablist={tabs} />
-        <div className='flex text-secondary flex-1'>
+        <div className='flex text-secondary flex-1 flex-col'>
           <div className=" px-4 flex flex-col sm:flex-row flex-1">
             <Sidebar themeinfo={themeinfo} versions={versions} tabs={tabs} />
             <div className="flex flex-col gap-1 w-full flex-1 min-h-0">
               <main className="flex-1 flex flex-row overflow-y-auto">
                 {children}
               </main>
-              <Footer name={themeinfo.name} items={themeinfo.footer} logo={logo} />
+              <PrevNextNavigation themeinfo={themeinfo} versions={versions} tabs={tabs} />
             </div>
           </div>
+          <Footer name={themeinfo.name} items={themeinfo.footer} logo={logo} />
         </div>
       </div>
     </>
