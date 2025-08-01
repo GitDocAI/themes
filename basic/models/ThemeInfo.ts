@@ -73,6 +73,10 @@ export type NavigationItem =
   | NavigationPage
   ;
 
+export type NavigationAgrupation =
+  | NavigationGroup
+  | NavigationDropdown;
+
 export type NavigationGroup = {
   type: 'group';
   title: string;

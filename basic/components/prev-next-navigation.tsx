@@ -3,7 +3,7 @@
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { NavigationItem, ThemeInfo } from '../models/ThemeInfo'
+import { NavigationItem, ThemeInfo,NavigationPage,NavigationGroup,NavigationDropdown } from '../models/ThemeInfo'
 import { Version, Tab } from '../models/InnerConfiguration'
 import { redirect } from 'next/navigation'
 
@@ -41,16 +41,32 @@ export function PrevNextNavigation({ themeinfo, versions, tabs }: Props) {
     }
 
     if (pathname === '/') {
-      const fallback = themeinfo.navigation.items?.[0]
-      if (fallback?.children?.[0]?.page) {
-        redirect(fallback.children[0].page.split('.')[0])
+      const fallback = themeinfo.navigation.items![0]
+      if(isNavigationPage(fallback)){
+        return [fallback]
+      }else if(isNavigationGroup(fallback) || isNavigationDropdown(fallback)){
+        return fallback.children
       }
+
     }
 
     return themeinfo.navigation.items ?? []
   }
 
-  function flattenPages(items: NavigationItem[]): NavigationItem[] {
+
+ function isNavigationGroup(item: NavigationItem): item is NavigationGroup {
+  return item.type === 'group'
+}
+
+ function isNavigationDropdown(item: NavigationItem): item is NavigationDropdown {
+  return item.type === 'dropdown'
+}
+
+ function isNavigationPage(item: NavigationItem): item is NavigationPage {
+  return item.type === 'page'
+}
+
+  function flattenPages(items: NavigationItem[]): NavigationPage[] {
     return items.flatMap(item => {
       if (item.type === 'page') return [item]
       if (item.children) return flattenPages(item.children as NavigationItem[])
@@ -73,7 +89,7 @@ export function PrevNextNavigation({ themeinfo, versions, tabs }: Props) {
   const next = pages[currentIndex + 1] as any
 
   return (
-    <div className="mt-12 pt-6  flex  flex-row items-center justify-around gap-4 text-primary text-sm">
+    <div className="mt-12 pt-6  flex  flex-row items-center justify-between gap-4 text-primary text-sm px-6">
       {prev ? (
         <Link
           href={prev.page!}
@@ -89,7 +105,7 @@ export function PrevNextNavigation({ themeinfo, versions, tabs }: Props) {
               className="!text-primary font-medium">{prev.title}</span>
           </div>
         </Link>
-      ) : <div />}
+      ) : <div ></div>}
 
       {next ? (
         <Link
@@ -104,7 +120,7 @@ export function PrevNextNavigation({ themeinfo, versions, tabs }: Props) {
           </div>
           <i className="pi pi-arrow-right text-primary ml-2" />
         </Link>
-      ) : null}
+      ) : <div ></div>}
     </div>
   )
 }

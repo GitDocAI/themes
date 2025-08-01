@@ -47,6 +47,24 @@ export const Sidebar = ({ themeinfo, versions, tabs }: { themeinfo: ThemeInfo, v
     }
   }, [pathname, versions, tabs])
 
+
+
+function dropdownHasActiveChild(dropdown: NavigationItem, pathname: string): boolean {
+  if (dropdown.type == 'page') return false
+  return dropdown.children.some(child => {
+    if (child.type === 'page') {
+      return child.page?.split('.')[0] === pathname
+    }
+    if (child.type === 'dropdown') {
+      return dropdownHasActiveChild(child, pathname)
+    }
+    if (child.type === 'group') {
+      return child.children.some(grandchild => dropdownHasActiveChild(grandchild, pathname))
+    }
+    return false
+  })
+}
+
   function renderNestedItem(item: NavigationItem, depth: number) {
     const paddingLeft = `pl-${depth * 4 + 4}`
     switch (item.type) {
@@ -62,10 +80,13 @@ export const Sidebar = ({ themeinfo, versions, tabs }: { themeinfo: ThemeInfo, v
           </div>
         )
       case 'dropdown':
+       const isOpen = dropdownHasActiveChild(item, pathname)
         return (
-          <details key={item.title} className={`group cursor-pointer ${paddingLeft}`}>
+          <details key={item.title} className={`group cursor-pointer ${paddingLeft}`}
+ open={isOpen}
+          >
             <summary className="flex items-center justify-between py-1 px-2 text-sm font-medium rounded-md text-secondary hover:bg-secondary/10 hover:text-primary">
-              <span>{item.title}</span>
+              <span className="text-xs font-semibold uppercase text-secondary/77 mb-2 px-2 tracking-wide">{item.title}</span>
               <svg className="w-4 h-4 transition-transform group-open:rotate-90" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
               </svg>
