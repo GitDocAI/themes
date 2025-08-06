@@ -2,7 +2,7 @@ import nextra from 'nextra'
 import fs from 'fs'
 import path from 'path'
 
-const configPath = path.join(process.cwd(), 'dockitai.config.json')
+const configPath = path.join(process.cwd(), 'gitdocai.config.json')
 
 let siteConfig = {}
 
@@ -10,7 +10,7 @@ try {
   const raw = fs.readFileSync(configPath, 'utf-8')
   siteConfig = JSON.parse(raw)
 } catch (err) {
-  console.warn('Error reading dockitai.config.json')
+  console.warn('Error reading gitdocai.config.json')
 }
 
 const withNextra = nextra({
