@@ -89,18 +89,15 @@ export function PrevNextNavigation({ themeinfo, versions, tabs }: Props) {
   const next = pages[currentIndex + 1] as any
 
   return (
-    <div className="mt-12 pt-6  flex  flex-row items-center justify-between gap-4 text-primary text-sm px-6">
+    <div className="mt-auto pt-6  flex  flex-row items-center justify-between gap-4 text-primary text-sm px-6 [grid-area:nav]">
       {prev ? (
         <Link
           href={prev.page!}
-          className="group flex items-center border border-primary/20 rounded-lg px-4 py-3 w-full md:w-auto hover:bg-primary/5 transition-colors min-w-sm"
+          className="group flex items-center  rounded-lg px-4 py-3 w-full md:w-auto hover:bg-primary/5 transition-colors lg:min-w-sm"
 
         >
           <i className="pi pi-arrow-left text-primary mr-2" />
           <div className="flex flex-col text-lg">
-            <span className="text-lg text-gray-500 group-hover:text-primary/80 transition">
-              Prev
-            </span>
             <span
               className="!text-primary font-medium">{prev.title}</span>
           </div>
@@ -110,12 +107,9 @@ export function PrevNextNavigation({ themeinfo, versions, tabs }: Props) {
       {next ? (
         <Link
           href={next.page!}
-          className="group flex items-center border border-primary/20 rounded-lg px-4 py-3 w-full md:w-auto justify-end hover:bg-primary/5 transition-colors min-w-sm"
+          className="group flex items-center rounded-lg px-4 py-3 w-full md:w-auto justify-end hover:bg-primary/5 transition-colors lg:min-w-sm"
         >
           <div className="flex flex-col text-right text-lg">
-            <span className=" text-gray-500 group-hover:text-primary/80 transition">
-              Next
-            </span>
             <span className="text-primary font-medium">{next.title}</span>
           </div>
           <i className="pi pi-arrow-right text-primary ml-2" />

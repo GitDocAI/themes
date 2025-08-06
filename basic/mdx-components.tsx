@@ -3,17 +3,17 @@ import { TOC } from './components/toc'
 import { AlertBlock } from './components/doc-components/AlertBlock'
 import { BlockQuote } from './components/doc-components/BlockQuote'
 import { CodeBlock } from './components/doc-components/CodeBlock'
-import { CheckList, CheckItem } from './components/doc-components/CheckList'
+import {  CheckItem } from './components/doc-components/CheckList'
 import React from 'react';
 
 const defaultComponents = getNextraComponents({
   wrapper({ children, toc }) {
     return (
       <>
-        <div className="nextra-content flex-grow px-6 py-4">
-          {children}
-        </div>
-        <TOC toc={toc} />
+         <article id="mdx-content" className=" [grid-area:content] ">
+            {children}
+          </article>
+            <TOC toc={toc} />
       </>
     )
   },

@@ -38,10 +38,20 @@ export const DefaultTheme: FC<{
           <div className=" px-4 flex flex-col sm:flex-row flex-1">
             <Sidebar themeinfo={themeinfo} versions={versions} tabs={tabs} />
             <div className="flex flex-col gap-1 w-full flex-1 min-h-0">
-              <main className="flex-1 flex flex-row overflow-y-auto">
-                {children}
+              <main className="flex-1
+                  grid
+                  grid-cols-1
+                  grid-rows-[auto_auto]
+                  [grid-template-areas:'content''nav']
+
+                  lg:grid-cols-[1fr_auto]
+                  lg:grid-rows-[auto_auto]
+                  lg:[grid-template-areas:'content_toc''nav_toc']
+
+                  gap-4">
+                  {children}
+                  <PrevNextNavigation themeinfo={themeinfo} versions={versions} tabs={tabs} />
               </main>
-              <PrevNextNavigation themeinfo={themeinfo} versions={versions} tabs={tabs} />
             </div>
           </div>
           <Footer name={themeinfo.name} items={themeinfo.footer} logo={logo} />

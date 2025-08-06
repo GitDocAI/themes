@@ -135,8 +135,8 @@ function dropdownHasActiveChild(dropdown: NavigationItem, pathname: string): boo
       {/* Sidebar full */}
       <aside
         className={`
-          fixed sm:sticky top-0 left-0 h-full w-72 overflow-y-auto pl-2 px-6 py-6 z-50 sm:z-10
-          transition-transform duration-300 ease-in-out bg-background sm:bg-transparent
+          fixed sm:sticky top-24 left-0 h-full w-72 overflow-y-auto pl-2 px-6 py-6 z-50 sm:z-10
+          transition-transform duration-300 min-w-64 ease-in-out bg-background sm:bg-transparent
           border-r border-secondary/10
           ${isOpen ? 'translate-x-0' : '-translate-x-full'} sm:translate-x-0
           ${!isMobile ? 'bg-transparent' : ''}

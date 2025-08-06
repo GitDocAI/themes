@@ -3,7 +3,7 @@ import type { FC } from 'react'
 
 export const TOC: FC<{ toc: Heading[] }> = ({ toc }) => {
   return (
-    <div className=" hidden md:block w-64 flex-shrink-0 sticky top-0 h-full overflow-y-auto  px-6 py-6 text-secondary">
+    <aside className=" hidden lg:block w-64 flex-shrink-0 sticky top-18 h-full overflow-y-auto  px-6 py-6 text-secondary [grid-area:toc]">
       <h3 className="text-lg font-semibold mb-4">Table of Contents</h3>
       <ul className="space-y-2">
         {toc.map(heading => (
@@ -17,6 +17,6 @@ export const TOC: FC<{ toc: Heading[] }> = ({ toc }) => {
           </li>
         ))}
       </ul>
-    </div>
+    </aside>
   )
 }
