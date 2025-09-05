@@ -2,10 +2,10 @@
 @import 'tailwindcss';
 @import 'primeicons/primeicons.css';
 @import 'nextra-theme-docs/style.css';
-        
+
 
 :root {
-  --color-muted: 102 112 133; 
+  --color-muted: 102 112 133;
   --logo-light-display:block;
   --logo-dark-display:none
 
@@ -24,6 +24,8 @@
   --color-primary: rgb(var(--color-primary));
   --color-secondary: rgb(var(--color-muted));
   }
+
+@custom-variant dark (&:where(.dark-theme, .dark-theme *));
 
 body {
   background-image:var(--url-bg-url) !important;
@@ -67,7 +69,8 @@ body {
   [style*="--shiki-light"] {
     color: var(--shiki-light);
   }
- }
+  }
+
 .dark-theme [style*="--shiki-dark"] {
   color: var(--shiki-dark);
 }

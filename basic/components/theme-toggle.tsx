@@ -8,6 +8,7 @@ export default function ThemeToggle({ defaultMode }: { defaultMode: string }) {
     const init = saved || (defaultMode == 'dark' ? 'dark-theme' : 'light')
     setTheme(init)
     document.documentElement.classList.toggle('dark-theme', init === 'dark-theme')
+    document.documentElement.classList.toggle('dark', init === 'dark-theme')
   }, [])
 
   function toggle() {
@@ -15,6 +16,7 @@ export default function ThemeToggle({ defaultMode }: { defaultMode: string }) {
     setTheme(next)
     localStorage.setItem('theme', next)
     document.documentElement.classList.toggle('dark-theme', next === 'dark-theme')
+    document.documentElement.classList.toggle('dark', next === 'dark-theme')
   }
   return (
     <button

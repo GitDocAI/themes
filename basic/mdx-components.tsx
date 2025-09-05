@@ -7,10 +7,12 @@ import {  CheckItem } from './components/doc-components/CheckList'
 import React from 'react';
 
 const defaultComponents = getNextraComponents({
-  wrapper({ children, toc }) {
+  wrapper(some:any) {
+   console.log(some)
+    const { children, toc } = some
     return (
       <>
-         <article id="mdx-content" className=" [grid-area:content] ">
+         <article id="mdx-content" className=" [grid-area:content] p-3 ">
             {children}
           </article>
             <TOC toc={toc} />
