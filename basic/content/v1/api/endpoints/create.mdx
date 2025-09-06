@@ -1,0 +1,26 @@
+
+<ApiReference
+  title="Get User"
+  method="GET"
+  path="/api/users/{id}"
+  description="Devuelve la información de un usuario específico por su ID."
+  parameters={[
+    {
+      name: "id",
+      in: "path",
+      description: "El ID del usuario",
+      schema: { type: "string" }
+    }
+  ]}
+  responses={{
+    "200": {
+      description: "Usuario encontrado correctamente",
+      content: { "application/json": { example: { id: "123", name: "Alice" } } }
+    },
+    "404": {
+      description: "Usuario no encontrado",
+      content: {}
+    }
+  }}
+/>
+
