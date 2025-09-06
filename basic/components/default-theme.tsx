@@ -47,6 +47,7 @@ export const DefaultTheme: FC<{
                   lg:grid-cols-[1fr_auto]
                   lg:grid-rows-[auto_auto]
                   lg:[grid-template-areas:'content_toc''nav_toc']
+                  p-4
 
                   gap-4">
                   {children}

@@ -4,16 +4,16 @@ import { AlertBlock } from './components/doc-components/AlertBlock'
 import { BlockQuote } from './components/doc-components/BlockQuote'
 import { CodeBlock } from './components/doc-components/CodeBlock'
 import {  CheckItem } from './components/doc-components/CheckList'
+import  ApiReference from './components/doc-components/ApiReference'
 import React from 'react';
 
 const defaultComponents = getNextraComponents({
   wrapper(some:any) {
-   console.log(some)
     const { children, toc } = some
     return (
       <>
          <article id="mdx-content" className=" [grid-area:content] p-3 ">
-            {children}
+             {children}
           </article>
             <TOC toc={toc} />
       </>
@@ -55,6 +55,7 @@ const defaultComponents = getNextraComponents({
   // Blockquote
   blockquote: BlockQuote,
   // Imágenes
+  ApiReference,
   img: ({ src, alt, height, ...props }) => (
     <img
       src={src as string}
