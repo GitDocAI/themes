@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { NavigationItem, ThemeInfo,NavigationPage,NavigationGroup,NavigationDropdown } from '../models/ThemeInfo'
 import { Version, Tab } from '../models/InnerConfiguration'
 import { redirect } from 'next/navigation'
+import {splitPageUrl} from '../shared/splitPageUrl'
 
 type Props = {
   themeinfo: ThemeInfo
@@ -74,12 +75,14 @@ export function PrevNextNavigation({ themeinfo, versions, tabs }: Props) {
     })
   }
 
+
+
   useEffect(() => {
     const items = getNavigationItems()
     const flat = flattenPages(items)
     setPages(flat)
 
-    const index = flat.findIndex(i => i.page?.split('.')[0] === pathname)
+    const index = flat.findIndex(i => splitPageUrl(i.page)  === pathname)
     setCurrentIndex(index)
   }, [pathname, themeinfo, versions, tabs])
 

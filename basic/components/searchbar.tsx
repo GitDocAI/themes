@@ -32,6 +32,8 @@ export default function SearchBar() {
 
   const isMac = typeof window !== 'undefined' && navigator.platform.toUpperCase().includes('MAC');
 
+ const [message, setMessage] = useState('');
+
   return (
     <>
       <button
@@ -39,7 +41,7 @@ export default function SearchBar() {
         className="md:w-full flex items-center space-x-2 rounded-lg md:border md:border-secondary bg-background px-4 py-2 text-sm text-gray-600 md:shadow-sm transition hover:md:shadow-md "
       >
         <i className="w-4 h-4 pi pi-search cursor-pointer" />
-        <span className="hidden sm:inline">Search</span>
+        <span className="hidden sm:inline">Search{message}</span>
         <kbd className="hidden sm:inline ml-auto text-xs text-secondary">{isMac ? '⌘+K' : 'Ctl+K'}</kbd>
       </button>
 

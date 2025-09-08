@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation'
 import { Version, Tab } from '../models/InnerConfiguration'
 import { useEffect, useState } from 'react'
 import { redirect } from 'next/navigation'
-
+import {splitPageUrl} from '../shared/splitPageUrl'
 export const Sidebar = ({ themeinfo, versions, tabs }: { themeinfo: ThemeInfo, versions: Version[], tabs: Tab[] }) => {
   const pathname = usePathname()
   const [items, setItems] = useState<NavigationItem[]>(themeinfo.navigation.items ?? [])
@@ -16,7 +16,7 @@ export const Sidebar = ({ themeinfo, versions, tabs }: { themeinfo: ThemeInfo, v
 
   function getRedirection(element: any): string {
     if (element.children) return getRedirection(element.children[0])
-    return element.page.split('.')[0]
+    return splitPageUrl(element.page)
   }
 
   useEffect(() => {
@@ -43,7 +43,7 @@ export const Sidebar = ({ themeinfo, versions, tabs }: { themeinfo: ThemeInfo, v
       const _items = themeinfo.navigation.tabs!.find(v => v.tab == matchedTab!.tab)!.items!
       setItems(_items)
     } else if (pathname === '/') {
-      redirect(getRedirection(items[0]))
+      redirect( getRedirection(items[0]))
     }
   }, [pathname, versions, tabs])
 

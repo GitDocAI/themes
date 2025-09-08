@@ -9,6 +9,7 @@ import { TabList } from './tabs'
 import { Version, Tab } from '@/models/InnerConfiguration'
 import { Logo } from './logo'
 import { PrevNextNavigation } from './prev-next-navigation'
+import {splitPageUrl} from '../shared/splitPageUrl'
 export const DefaultTheme: FC<{
   children: ReactNode
   pageMap: PageMapItem[]
@@ -17,6 +18,7 @@ export const DefaultTheme: FC<{
 
   const versions = calculateVersions(themeinfo)
   const tabs = calculateTabs(themeinfo)
+
 
   let logo = (<div></div>)
   if (themeinfo.logo) {
@@ -99,17 +101,24 @@ function calculateTabs(themeinfo: ThemeInfo): Tab[] {
 }
 
 function getPathsFromTabOrVersion(itemContainer: NavigationTab | NavigationVersion) {
-  const versiontabs = (itemContainer as NavigationVersion).tabs
-  if (versiontabs) {
-    return versiontabs.map((tab: NavigationTab): string[] => (getPathsFromTabOrVersion(tab))).flat()
+  if ('tab' in itemContainer) {
+    // console.log(itemContainer.items)
+    // If it's a tab
+    return itemContainer.items?.map((it: NavigationItem) => getPaths(it)).flat() ?? [];
+  } else if ('tabs' in itemContainer) {
+    // If it's a version with tabs
+    return itemContainer.tabs.map((tab: NavigationTab): string[] => (getPathsFromTabOrVersion(tab))).flat();
   }
-  return itemContainer.items?.map((it: NavigationItem) => getPaths(it)).flat() ?? []
+  return [];
 }
 
 function getPaths(original: NavigationItem): string[] {
+  if(!original.type && original.page){
+    original.type = 'page'
+  }
   switch (original.type) {
     case 'page':
-      return [original.page.split('.')[0]]
+      return [splitPageUrl(original.page)]
     case 'group':
       return original.children.map((ch: NavigationItem) => (getPaths(ch))).flat()
     case 'dropdown':
