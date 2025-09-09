@@ -5,14 +5,14 @@ import { useEffect, useState, useRef } from "react"
 
 export const TOC: FC<{ toc: Heading[] }> = ({ toc }) => {
   const [activeId, setActiveId] = useState<string | null>(null)
-  const activeRef = useRef<HTMLAnchorElement | null>(null)
+  const activeRef = useRef<HTMLLIElement | null>(null)
 
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         const visible = entries.find((entry) => entry.isIntersecting)
         if (visible) {
-          setActiveId(visible.target.id)
+          setActiveId(visible.target.textContent.trim().toLowerCase())
         }
       },
       {
@@ -21,10 +21,13 @@ export const TOC: FC<{ toc: Heading[] }> = ({ toc }) => {
       }
     )
 
+    const tags = document.querySelectorAll('h1,h2,h3')
     toc.forEach((heading) => {
-      console.log(heading)
-      const el = document.getElementById(heading.id)
-      if (el) observer.observe(el)
+       tags.forEach(tag=>{
+        if(tag.textContent.trim() == heading.value){
+           observer.observe(tag)
+        }
+      })
     })
 
     return () => observer.disconnect()
@@ -40,26 +43,37 @@ export const TOC: FC<{ toc: Heading[] }> = ({ toc }) => {
   }, [activeId])
 
   return (
-    <aside className="hidden xl:block w-64 flex-shrink-0 sticky top-18 max-h-[90dvh] overflow-y-auto px-6 py-6 text-secondary [grid-area:toc]">
-      <h3 className="text-lg font-semibold mb-4">On this page</h3>
+    <aside className="hidden xl:block sidebar w-64 flex-shrink-0 sticky top-18 max-h-[90dvh] overflow-y-auto px-6 py-6  [grid-area:toc]">
+      <h3 className="text-lg font-semibold mb-4 text-secondary">On this page</h3>
       <ul className="space-y-2">
+
         {toc.map((heading) => (
           <li
             key={heading.id}
+            ref={activeId === heading.value.trim().toLowerCase() ? activeRef : null}
+            id={heading.value.toLowerCase().trim()}
             style={{ marginLeft: `${(heading.depth - 2) * 1.25}rem` }}
-            className="text-sm"
+            onClick={() => {
+              const tags = document.querySelectorAll('h1,h2,h3');
+              tags.forEach(tag => {
+                if (tag.textContent.trim() === heading.value) {
+                  tag.scrollIntoView({
+                    behavior: "smooth",
+                    block: "start",
+                  });
+                }
+              });
+            }}
           >
-            <a
-              ref={activeId === heading.id ? activeRef : null}
-              href={`#${heading.id}`}
-              className={`block transition-colors duration-150 ${
-                activeId === heading.id
-                  ? "text-primary font-medium"
+            <span
+              className={`block  transition-colors cursor-pointer duration-150 text-sm   ${
+                activeId === heading.value.trim().toLowerCase()
+                  ? "text-primary font-extrabold "
                   : "text-secondary hover:text-primary"
               }`}
             >
               {heading.value}
-            </a>
+            </span>
           </li>
         ))}
       </ul>
