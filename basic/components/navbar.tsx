@@ -16,7 +16,7 @@ export const Navbar: FC<{
   versions: Version[]
 }> = ({ navitems, versions, logo, defaultTheme }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const showVersionSwitcher = versions.length > 1
+  const showVersionSwitcher = true
 
   return (
     <>

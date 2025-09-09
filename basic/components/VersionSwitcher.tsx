@@ -48,7 +48,7 @@ const VersionSwitcher = ({ versions }: { versions: Version[] }) => {
   }
 
   const handleBlur = () => {
-    setTimeout(() => setIsOpen(false), 100) // Para permitir click antes de cerrar
+    setTimeout(() => setIsOpen(false), 100)
   }
 
   const click = (e: any) => {

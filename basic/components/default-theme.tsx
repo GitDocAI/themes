@@ -53,11 +53,11 @@ export const DefaultTheme: FC<{
 
                   gap-4">
                   {children}
+          <Footer name={themeinfo.name} items={themeinfo.footer} logo={logo} />
                   <PrevNextNavigation themeinfo={themeinfo} versions={versions} tabs={tabs} />
               </main>
             </div>
           </div>
-          <Footer name={themeinfo.name} items={themeinfo.footer} logo={logo} />
         </div>
       </div>
     </>
@@ -102,11 +102,8 @@ function calculateTabs(themeinfo: ThemeInfo): Tab[] {
 
 function getPathsFromTabOrVersion(itemContainer: NavigationTab | NavigationVersion) {
   if ('tab' in itemContainer) {
-    // console.log(itemContainer.items)
-    // If it's a tab
     return itemContainer.items?.map((it: NavigationItem) => getPaths(it)).flat() ?? [];
   } else if ('tabs' in itemContainer) {
-    // If it's a version with tabs
     return itemContainer.tabs.map((tab: NavigationTab): string[] => (getPathsFromTabOrVersion(tab))).flat();
   }
   return [];
