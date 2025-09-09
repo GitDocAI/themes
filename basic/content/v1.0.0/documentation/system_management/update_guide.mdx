@@ -1,0 +1,129 @@
+This guide provides comprehensive, step-by-step instructions for updating UTMStack to its latest version (v1.0.0), ensuring system security, optimal performance, and access to new features.
+
+## Importance of Updates
+
+Keeping your UTMStack software up to date is essential for maintaining system security, performance, and access to the latest features. Regular updates help ensure your system is protected against vulnerabilities and operates efficiently.
+
+## Understanding the Main Server
+
+The Main Server is the central component of UTMStack. It is responsible for managing security operations and collecting data across your environment. Updating this component is crucial for the overall health and functionality of your UTMStack instance.
+
+## Update Procedure
+
+Follow these steps to update your UTMStack Main Server to the latest version.
+
+### 1. Update Packages List
+
+Begin by updating your system's package list to ensure you have access to the latest software information.
+
+```bash
+sudo apt update
+```
+
+### 2. Install WGET (if necessary)
+
+Ensure `wget` is installed, as it is required to download the installer.
+
+```bash
+sudo apt install wget
+```
+
+### 3. Download the Latest Installer
+
+Download the latest version of the UTMStack installer from the official GitHub releases.
+
+```bash
+wget http://github.com/utmstack/UTMStack/releases/latest/download/installer
+```
+
+### 4. Change to Root User
+
+Switch to the root user to perform the installation with elevated privileges.
+
+```bash
+sudo su
+```
+
+### 5. Set Execution Permissions
+
+Grant execution permissions to the downloaded installer file.
+
+```bash
+chmod +x installer
+```
+
+### 6. Execute the Installer
+
+Run the installer to begin the update process.
+
+```bash
+./installer
+```
+
+## Related Documentation
+
+For further information on managing and configuring your UTMStack environment, refer to the following guides:
+
+### Getting Started
+*   [Introduction](/v10/Getting%20started/introduction)
+*   [Use Case](/v10/Getting%20started/use_case)
+*   [Quick Start](/v10/Getting%20started/quick_start)
+*   [Getting Started](/v10/Getting%20started/getting_started)
+*   [API Authentication](/v10/Getting%20started/api)
+
+### Installation
+*   [Architecture](/v10/Installation/architecture)
+*   [System Requirements](/v10/Installation/system_requirements)
+*   [Firewall Rules](/v10/Installation/firewall_rules)
+*   [Server Setup Guide](/v10/Installation/setup_guide)
+*   [SSL Certificate Management in UTMStack](/v10/Installation/ssl_certificate)
+*   [Generating and Renewing SSL Certificates with Certbot](/v10/Installation/ssl_certificate_cerbot)
+*   [Install Federation Service](/v10/Installation/federation_server)
+*   [Import the UTMStack instance into the Federation Service](/v10/Installation/import_federation_server)
+*   [Installation Guide for Azure](/v10/Installation/guide_for_azure)
+*   [Installing UTMStack from ISO](/v10/Installation/install_from_iso)
+
+### Configuration
+*   [Connection Key](/v10/configuration/conection_key)
+*   [Application Settings](/v10/configuration/application_settings)
+*   [Custom Logos and Report Covers](/v10/configuration/custom_logos_report)
+*   [Menu Management](/v10/configuration/menu_management)
+*   [User Access Audit](/v10/configuration/user_access_audit)
+*   [Data Retention](/v10/configuration/data_retention)
+*   [Application Logs Overview](/v10/configuration/logs_overview)
+*   [Index Management](/v10/configuration/index_management)
+*   [Index Patterns Management](/v10/configuration/patterns_management)
+
+### Dashboards
+*   [Dashboards](/v10/dashboards/dashboard)
+*   [Dashboards List](/v10/dashboards/dashboard_list)
+*   [Creating a Dashboard](/v10/dashboards/creatingdashboard)
+*   [Visualization List](/v10/dashboards/visualizationlist)
+*   [Creating a Visualization](/v10/dashboards/creatingvisualization)
+
+### Data Sources
+*   [Data Sources](/v10/data%20sources/data_sources)
+*   [Collectors](/v10/data%20sources/collectors)
+
+### Log Explorer
+*   [Log Explorer Module](/v10/logexplorer/logexplorer)
+
+### Correlation Rules
+*   [Correlation Rules](/v10/correlation%20rules/correlation_rules)
+*   [Customizable Rules](/v10/correlation%20rules/customizable_rules)
+
+### Threat Management
+*   [Alert Management](/v10/threat%20management/alertmanagement)
+*   [False Positive](/v10/threat%20management/falsepositive)
+*   [Threat Intelligence](/v10/threat%20management/threatintelligence)
+
+### Compliances
+*   [Compliance Management](/v10/compliance/compliance_management)
+*   [Compliance Schedule](/v10/compliance/compliance_schedule)
+
+### Features
+*   [SOC AI Feature](/v10/soc%20ia/soc_ia)
+
+## Summary
+
+This guide outlined the critical importance of keeping your UTMStack software updated for security, performance, and features. It provided a clear, step-by-step process for updating the UTMStack Main Server, which includes updating system packages, downloading and preparing the installer, and executing it. For further system management and configuration, a comprehensive list of related documentation pages has been provided.

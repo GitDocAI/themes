@@ -1,0 +1,97 @@
+This documentation guides you through configuring data retention policies and storage duration within the UTMStack platform. Implementing effective data retention policies is crucial for maintaining compliance with security regulations and optimizing storage efficiency.
+
+## Overview
+
+UTMStack defines policies for storing and managing log data, ensuring regulatory compliance and efficient storage usage. The platform features automated index rollover and snapshot archiving to manage data lifecycle, optimize storage, and maintain system performance.
+
+## Features
+
+*   [SOC AI Feature](/v10/soc ia/soc_ia)
+
+### Index Rollover
+
+UTMStack's Index Rollover feature automates data management by deleting indices once they meet specific conditions, such as data size or age. This helps in optimizing space and maintaining system performance.
+
+**How to Configure Index Rollover:**
+
+1.  Navigate to `Application Management` > `Data Retention`.
+2.  Set the desired retention period in days.
+3.  Click ‘Save’ to confirm your changes.
+
+**Key Features:**
+
+*   **Delete Days**: This setting defines how long data will be kept. After this period, data is flagged for deletion.
+*   The system automatically takes action when disk usage reaches 85% to prevent performance degradation.
+
+### Snapshot Archiving
+
+Snapshot Archiving is an essential feature for safeguarding data over extended periods. Even when indices are removed based on retention settings, snapshots ensure that a record of this data is retained for audits, compliance, or retrospective analysis.
+
+## Understanding Hot and Cold Storage
+
+To effectively manage data retention and archiving, it's important to understand the distinction between hot and cold storage:
+
+*   **Hot Storage**: This is where actively accessed data resides. It is designed for real-time access, ensuring swift operations and immediate analysis. In terms of log data, hot log storage refers to non-archived data that can be accessed for analysis at any time.
+*   **Cold Storage**: This storage type is meant for archived data. While not regularly accessed, this data is critical for audits, compliance, or retrospective analysis. Cold log storage refers to archived data that should be restored before it can be accessed.
+
+## Configuring Snapshot Path in Linux
+
+Snapshots are automatically saved to `/utmstack/opensearch/backups` by default. To redirect these snapshots to another drive or a remote location, follow these steps:
+
+1.  **Mount the Remote Drive or Different Drive**:
+    Use the `mount` command to link your desired storage location to the default snapshot directory.
+
+    ```bash
+    sudo mount -t nfs REMOTE-SERVER:/remote/path /utmstack/opensearch/backups
+    ```
+
+    Ensure to replace `REMOTE-SERVER:/remote/path` with your actual server and path details.
+
+2.  **Add to `/etc/fstab` for Persistence**:
+    Add the mount details to `/etc/fstab` to ensure the remote drive remains mounted automatically after system reboots.
+
+3.  **Test the Configuration**:
+    Verify that the mount works as expected.
+
+    ```bash
+    sudo mount -a
+    ```
+
+## Restoring Data Using Cerebro
+
+While UTMStack does not include Cerebro, this tool is crucial for snapshot management and restoration, facilitating the transition of data from cold to hot storage within OpenSearch environments.
+
+To allow Cerebro to communicate with OpenSearch during the restoration process, you must open the necessary port.
+
+**Open port 9200:**
+
+```bash
+docker service update --publish-add 9200:9200 utmstack_node1
+```
+
+Once the restoration is complete, it is critical to close the port immediately to minimize security risks.
+
+**Close port 9200:**
+
+```bash
+docker service update --publish-rm 9200:9200 utmstack_node1
+```
+
+Leaving the port open exposes your OpenSearch data to potential risks. Always ensure you close the port after completing the restoration process.
+
+## System Resource Recommendations for Hot Log Storage
+
+The following recommendations are based on assumptions where 60 data sources generate approximately 100 GB of monthly data. You may combine these tiers to allocate resources based on the number of devices and desired hot log storage retention.
+
+| Data Sources | Hot Log Storage | Cores | RAM    | Disk Space |
+| :----------- | :-------------- | :---- | :----- | :--------- |
+| 50           | 120 GB          | 4     | 16 GB  | 150 GB     |
+| 120          | 250 GB          | 8     | 16 GB  | 250 GB     |
+| 240          | 500 GB          | 16    | 32 GB  | 500 GB     |
+| 500          | 1000 GB         | 32    | 64 GB  | 1000 GB    |
+
+**Important**: Going above 500 data sources/devices requires adding secondary nodes for horizontal scaling.
+
+## Summary
+
+UTMStack's Data Retention features, including Index Rollover and Snapshot Archiving, are designed to help you manage log data efficiently, ensure compliance, and optimize storage. By configuring retention periods, understanding hot and cold storage, and managing snapshot paths, you can effectively control the lifecycle of your data. For data restoration, Cerebro plays a key role, requiring secure port management for OpenSearch communication. Proper resource allocation based on your data sources and retention needs is also crucial for system performance.

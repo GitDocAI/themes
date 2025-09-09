@@ -1,0 +1,64 @@
+# Security Controls
+
+UTMStack provides a comprehensive suite of security controls designed to protect digital infrastructure, detect threats, ensure compliance, and facilitate rapid response. These controls encompass robust data protection, advanced threat detection, and diligent compliance management, fortified by strong authentication and isolation mechanisms.
+
+## Core Security Mechanisms
+
+UTMStack implements fundamental security mechanisms to protect data and services:
+
+*   **Data in Transit Encryption**: All data in transit between agents and UTMStack servers is encrypted using TLS.
+*   **Service Isolation**: UTMStack services are isolated through the use of containers and microservices, each operating with strong authentication.
+*   **Strong Authentication**:
+    *   Connections to the UTMStack server are authenticated with a unique key of +24 characters.
+    *   User credentials are encrypted in the database.
+    *   Login attempts are protected by `fail2ban` mechanisms and Two-Factor Authentication (2FA).
+
+## Threat Detection Technologies
+
+The UTMStack threat detection engine integrates multiple technologies to provide a holistic analysis of events:
+
+*   **Heuristic and Rule-based Analysis Engine**: Leverages powerful correlation engines with a total of 154,000 detection rules. These engines aggregate, correlate, and analyze log data, network traffic, and system internal activity from on-premises, cloud devices, or SaaS. This includes Rule-based and heuristic analysis-based Host Intrusion Detection System with ATP capabilities, and Network traffic, protocol, and DNS analysis.
+*   **Machine Learning Anomaly-based Engine**: Analyzes the environment to define custom rules and baselines. This learning mechanism enables the system to identify abnormal and threatening behavior specific to the environment.
+*   **Threat Intelligence Database Correlation**: Analyzes all available security IP feeds related to online attacks, online service abuse, malware, botnets, command and control servers, and other cybercrime activities.
+
+## Compliance Management and Audit Support
+
+UTMStack simplifies compliance management by combining essential security tools into a single database, offering built-in reports, interactive dashboards, and an event and logs explorer for advanced analysis.
+
+*   **Supported Compliance Frameworks**: Provides reports for HIPAA, GLBA, SOC 2, GPDR, FISMA, CMMC, and PCI-DSS compliance.
+*   **Reporting and Dashboards**:
+    *   Offers compliance status dashboards for continuous monitoring.
+    *   Includes a custom compliance reports builder, allowing users to create, modify, and delete reports without writing code.
+    *   Generates custom reports for audits or compliance checks and assessments.
+*   **Streamlined CMMC Compliance**: The system automatically evaluates CMMC controls, gathers evidence, and provides options to export reports. Users can also override system evaluations and provide evidence for controls met through other means. The system is regularly updated with new reports and automated checks.
+
+## Security Operations and Monitoring
+
+UTMStack provides extensive capabilities for monitoring and analyzing security data across diverse environments.
+
+*   **Log Management (SIEM)**:
+    *   Performs log collection and correlation in real-time.
+    *   Offers log and event exploration for forensic analysis.
+    *   Includes a dashboard and report builder for personalized monitoring.
+*   **User and File Activity Monitoring**:
+    *   Tracks user activity and permissions.
+    *   Monitors suspicious activity.
+    *   Provides file classification.
+    *   Tracks file changes and access.
+    *   Performs file integrity monitoring.
+*   **Intrusion Detection**:
+    *   Includes Network and Host Intrusion Detection capabilities.
+    *   Conducts rule-based and heuristic analysis-based Host Intrusion Detection with ATP capabilities.
+    *   Analyzes network traffic, protocols, and DNS.
+
+## Incident Response and Endpoint Protection
+
+UTMStack includes features for rapid incident response and endpoint protection to mitigate threats.
+
+*   **Automated and On-demand Actions**: Supports automated and on-demand host lockdown, IP blocking, and remote-control console functionality.
+*   **Integration**: Facilitates integration with antivirus solutions, OSSEC, and Wazuh.
+*   **Investigation**: Allows aggregation and summarization of data, filtering, tracking, and exporting log data, and performing forensic analysis to investigate suspicious activities.
+
+## Summary
+
+UTMStack provides a robust security framework by integrating multiple layers of controls. These include strong technical safeguards like TLS encryption, container isolation, unique key authentication, and 2FA, alongside comprehensive threat detection capabilities utilizing rule-based engines, machine learning, and threat intelligence. The platform also offers extensive compliance management features and tools for proactive security operations and incident response, ensuring a holistic approach to cybersecurity.

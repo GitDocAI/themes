@@ -1,0 +1,119 @@
+This documentation page provides a comprehensive guide to Storage Management in UTMStack, covering data retention policies, the concepts of hot and cold storage, automated index rollover, snapshot archiving, and the process of restoring data for optimal performance and compliance.
+
+## On This Page
+
+*   [Introduction to Storage Management](#introduction-to-storage-management)
+*   [Understanding Hot and Cold Storage](#understanding-hot-and-cold-storage)
+*   [Data Retention Policies](#data-retention-policies)
+    *   [Index Rollover](#index-rollover)
+    *   [General Index Management](#general-index-management)
+*   [Snapshot Archiving](#snapshot-archiving)
+    *   [Configuring Snapshot Path in Linux](#configuring-snapshot-path-in-linux)
+*   [Restoring Data Using Cerebro](#restoring-data-using-cerebro)
+    *   [Secure Port Management for Restoration](#secure-port-management-for-restoration)
+    *   [Working with Cerebro for Restoration](#working-with-cerebro-for-restoration)
+*   [System Resource Recommendations for Storage](#system-resource-recommendations-for-storage)
+*   [Summary](#summary)
+
+## Introduction to Storage Management
+
+UTMStack defines policies for storing and managing log data, ensuring compliance with security regulations and optimizing storage efficiency. These features include automated index rollover and snapshot archiving, which are crucial for maintaining system performance and safeguarding data.
+
+## Understanding Hot and Cold Storage
+
+Effective storage management in UTMStack differentiates between actively accessed data and archived data:
+
+*   **Hot Storage**: This is where actively accessed data resides. It is designed for real-time access, ensuring swift operations and immediate analysis. In the context of logs, **Hot log storage** refers to unarchived data that can be accessed for analysis at any time.
+*   **Cold Storage**: This storage type is meant for archived data. While not regularly accessed, this data is critical for audits, compliance, or retrospective analysis. **Cold log storage** refers to archived data that must be restored before it can be accessed.
+
+## Data Retention Policies
+
+UTMStack's data retention features are designed to optimize storage, comply with security regulations, and maintain system performance.
+
+### Index Rollover
+
+UTMStack’s Index Rollover feature ensures optimal data management by automatically deleting indices once they meet specific conditions, such as data size or age.
+
+#### How to Configure Index Rollover:
+
+1.  Go to `Application Management` > `Data Retention`.
+2.  Set the desired retention period in days.
+3.  Click ‘Save’ to confirm your changes.
+
+**Key Features**:
+
+*   **Delete Days**: This allows you to define how long the data will be kept. After this period, data is flagged for deletion, which can help in optimizing space and maintaining system performance.
+
+**Note**: The system automatically takes action when the disk usage reaches 85%, ensuring it doesn’t affect system performance.
+
+### General Index Management
+
+Index management in UTMStack allows for maintaining the organization and performance of indices, similarly to Elasticsearch. It facilitates the administration of indices, including their deletion and monitoring.
+
+*   **Managing Indices**: To delete an index, click on the delete action (❌) next to the index you wish to remove. This action is irreversible.
+*   **Searching Within an Index**: Use the search bar at the top of the index table to filter and search for specific indices.
+*   **Index Naming and Status**: Indices are automatically named based on the date and type of logs they contain. The status `open` indicates that the index is active and can be written to or searched.
+*   **Tip**: Regularly monitor the size and document count of your indices to ensure optimal performance and storage management.
+
+## Snapshot Archiving
+
+Snapshot Archiving is an essential feature for safeguarding data over extended periods. Even as indices are removed based on retention settings, snapshots ensure that a record of this data is retained.
+
+### Configuring Snapshot Path in Linux:
+
+Snapshots are automatically saved to `/utmstack/opensearch/backups`. To redirect these snapshots to another drive or remote location:
+
+1.  **Mount the Remote Drive or Different Drive**:
+    ```bash
+    sudo mount -t nfs REMOTE-SERVER:/remote/path /utmstack/opensearch/backups
+    ```
+    Ensure to replace `REMOTE-SERVER:/remote/path` with your actual server and path details.
+2.  **Add to `/etc/fstab` for Persistence**:
+    Add the mount details to `/etc/fstab` to ensure the remote drive remains mounted after system reboots.
+3.  **Test the Configuration**:
+    Ensure that the mount works as expected.
+    ```bash
+    sudo mount -a
+    ```
+
+## Restoring Data Using Cerebro
+
+While UTMStack does not include Cerebro, this tool is crucial for snapshot management and restoration, enabling the transition of data from cold to hot storage.
+
+### Secure Port Management for Restoration
+
+To allow Cerebro to communicate with OpenSearch during the restoration process, you must open the necessary port.
+
+*   **Open port 9200**:
+    ```bash
+    docker service update --publish-add 9200:9200 utmstack_node1
+    ```
+*   **Close port 9200**: Once the restoration is complete, immediately close the port to minimize security risks. Leaving the port open exposes your OpenSearch data to potential risks.
+    ```bash
+    docker service update --publish-rm 9200:9200 utmstack_node1
+    ```
+
+### Working with Cerebro for Restoration:
+
+1.  **Installation & Access**:
+    *   Use the [official Cerebro installation guide](https://github.com/lmenezes/cerebro).
+    *   Once installed, access its interface, typically found at `http://localhost:9000`.
+2.  **Restoration Process**:
+    *   Link Cerebro with your OpenSearch node for seamless data restoration.
+    *   In the more dropdown menu within Cerebro, select “snapshot”.
+    *   In the snapshot view, select a repository to restore the backup.
+
+## System Resource Recommendations for Storage
+
+When planning your UTMStack deployment, consider the following resource recommendations for hot log storage based on the number of data sources and expected monthly data volume:
+
+*   **For 50 data sources (120 GB)** of hot log storage: 4 Cores, 16 GB RAM, 150 GB Disk Space
+*   **For 120 data sources (250 GB)** of hot log storage: 8 Cores, 16 GB RAM, 250 GB Disk Space
+*   **For 240 data sources (500 GB)** of hot log storage: 16 Cores, 32 GB RAM, 500 GB Disk Space
+*   **For 500 data sources (1000 GB)** of hot log storage: 32 Cores, 64 GB RAM, 1000 GB Disk Space
+
+These tiers can be combined to allocate resources based on your specific needs. Going above 500 data sources/devices requires adding secondary nodes for horizontal scaling.
+
+## Summary
+
+UTMStack's storage management capabilities are designed to provide efficient, compliant, and performant data handling. This includes automated index rollover for managing active data, a clear distinction between hot and cold storage for operational and archival needs, and robust snapshot archiving for long-term data preservation. When data restoration is required, Cerebro facilitates the process, allowing for the secure transition of data from cold to hot storage. Proper configuration of snapshot paths and adherence to system resource recommendations are key to optimizing your UTMStack environment.

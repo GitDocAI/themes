@@ -1,0 +1,55 @@
+# Network Configuration
+
+This guide outlines the required network ports, secure communication protocols, and initial access credentials essential for deploying and configuring UTMStack. Proper network configuration is crucial for the security and functionality of your UTMStack deployment.
+
+## Required Ports and Firewall Recommendations
+
+UTMStack requires specific ports to be open for its services. It is strongly recommended to implement firewall rules to restrict access to these ports only from authorized workstations (e.g., admin and security analyst workstations).
+
+| Port | Protocol | Description | Recommendation |
+| :--- | :------- | :---------- | :------------- |
+| 22 | TCP | Secure Shell (SSH) | Allow only from admin workstation. |
+| 80 | TCP | UTMStack Web-based Graphical User Interface Redirector | Allow only from admin and security analyst workstations. |
+| 443 | TCP | UTMStack Web-based Graphical User Interface | Allow only from admin and security analyst workstations. |
+| 9090 | TCP | Cockpit Web-based Graphical Interface for Servers | Allow only from admin workstation. |
+
+Additional ports may be required during the configuration of UTMStack's integrations to receive logs. Always follow the security recommendations provided in specific integration guides.
+
+For more detailed information on firewall setup, refer to the [Firewall Rules](/v10/Installation/firewall_rules) documentation.
+
+## Secure Communication
+
+UTMStack is designed with security in mind, ensuring secure communication and authentication:
+*   **TLS Encryption**: Data in transit between agents and UTMStack servers is encrypted using TLS.
+*   **Container Isolation**: UTMStack services are isolated by containers and microservices.
+*   **Strong Authentication**: Connections to the UTMStack server are authenticated with a unique key, which is over 24 characters long.
+*   **User Credentials**: User credentials are encrypted in the database and protected by fail2ban mechanisms and Two-Factor Authentication (2FA).
+
+## Initial Access and Credentials
+
+### Ubuntu Server Credentials
+When installing on Ubuntu Server, the default operating system credentials are:
+*   **User**: `utmstack`
+*   **Password**: `utmstack`
+
+### UTMStack Application Credentials
+Once UTMStack is installed, the default login credentials for the UTMStack web interface are:
+*   **User**: `admin`
+*   **Password**: The password generated during the installation process.
+
+You can find the generated password and other configurations in the `/root/utmstack.yml` file on your server.
+
+## Accessing the UTMStack Web Interface
+
+To access the UTMStack login page, use HTTPS in front of your server's name or IP address. For example: `https://your_server_ip` or `https://your_server_name`.
+
+## Network Features
+
+UTMStack provides robust network and host intrusion detection capabilities:
+*   **Rule-based Network Intrusion Detection**: Detects threats based on predefined rules.
+*   **Network Traffic, Protocol, and DNS Analysis**: Analyzes various aspects of network communication for anomalies and threats.
+*   **Threat Intelligence**: Incorporates threat intelligence related to spam, malware, botnets, service abuse IPs, Denial of Service (DoS), brute force attacks, and scanner IPs.
+
+## Summary
+
+Effective network configuration is fundamental to a secure UTMStack deployment. This includes configuring necessary firewall rules for required ports (22, 80, 443, 9090 TCP) and understanding the secure communication mechanisms like TLS encryption and strong authentication keys. Initial access involves using default Ubuntu server credentials and then the generated `admin` password for the UTMStack web interface, which should always be accessed via HTTPS. UTMStack further enhances network security through built-in network intrusion detection and threat intelligence.

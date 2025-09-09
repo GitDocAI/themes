@@ -1,0 +1,90 @@
+The Log Explorer module is a dynamic and interactive tool designed to provide comprehensive, real-time visibility into an organization’s log data. It streamlines log analysis by offering robust filtering capabilities and versatile data visualization options, allowing users to efficiently analyze logs in table or chart formats.
+
+### Overview of Log Explorer
+
+The Log Explorer module is a central element of UTMStack, purpose-built for exhaustive log data analysis. Its interface is designed for seamless navigation and efficient functionality, making data analysis user-friendly through visually intuitive representations like interactive charts and graphs. This enables an at-a-glance understanding of data trends and patterns. The module allows for a logical grouping of queries based on user-defined filters and the capacity to open multiple tabs for various queries. Users can also save their search criteria for future use, making the tool adaptable and time-efficient.
+
+### 1. Source Selection
+
+The source functionality is a crucial data filtering tool within the Log Explorer module. It allows users to narrow down their search to specific index patterns, such as logs originating exclusively from Office365, thereby reducing unnecessary data noise. The module also offers the flexibility to create custom index patterns or sources, enabling users to define search parameters that cater to their specific needs for a more targeted and efficient search experience.
+
+### 2. Filters
+
+Serving as the backbone of Log Explorer, the filtering functionality offers comprehensive data parsing based on user search requirements. Filters can be defined to track logs from a specific computer or to isolate logs pertaining to a specific operation, such as a log-in event, providing an unparalleled level of control over data analysis.
+
+**New Features in Filters:**
+
+*   **Clear Filter Button**: A "clear filter" button has been added to the far left, allowing users to instantly remove all active filters with a single click.
+*   **Default Time Filter**: A default time filter is now applied automatically. This filter appears on the right-hand side, defaults to the last 24 hours, and dynamically updates based on the selected time range.
+*   **Time Filter Limitation**: The maximum range for any selected time filter is 30 days to ensure optimal system performance while allowing deep log exploration.
+*   **Custom Filters**: Users can add additional custom filters using the "Add Filter" button for greater flexibility.
+*   **Single-Click Filter Creation**: The module simplifies filter creation by providing the option to add a filter based on a specific log field with a single click.
+
+### 3. Data Grid
+
+The Data Grid is the primary area for viewing log information, offering users the choice of viewing data in a table or chart format. This visualization is based on a selected field, allowing a high degree of customization. In Table mode, users can define the columns they want to see, either through the "Select fields" option on the left or by directly selecting a field in the log.
+
+### 4. The Log Section
+
+The Log section provides a comprehensive view of all log information, including details such as `agent_id`, `process name`, and `source IP`. This data can be viewed in two ways: either in a table view or in a JSON mode, depending on user preference. The Table mode also allows users to add filters based on the field and value of a specific log, or to create a column in the Data Grid table based on a specific field.
+
+#### 4.1 Log Field Options
+
+Each log field within the Log Explorer module provides two key options:
+
+*   **Adding a Filter**: Users can swiftly add a filter based on the field and value of a specific log. This fine-tunes the data presented in the Data Grid, refining log data to fit specific needs.
+*   **Creating a Column**: Users can choose to create a new column in the Data Grid Table based on the field for immediate visibility and accessibility of key data points.
+
+### 5. Personalize Fields
+
+Users can add or remove columns in the Data Grid view based on the fields of the logs. This offers an adaptable interface that caters to the specific requirements of individual users, whether streamlining data analysis by focusing on certain values or enhancing visibility of crucial data.
+
+### Saving and Exporting Information
+
+Users can refresh their data, save the current query for future use, or export the current data to a CSV file for offline analysis. Saving queries negates the need to repeat the filter creation process for frequently used searches, such as viewing all Office365 log-in activities. The option to view and manage stored queries also ensures that past investigations can be revisited with ease.
+
+### Office 365 Login Failure Analysis: Step-by-Step Guide Example
+
+This example demonstrates how to utilize the Log Explorer module to create, configure, and save a query focused on login failure events within Office 365 logs.
+
+#### Step 1. Source Selection
+
+1.  In the Source field, type and select "**log-o365-\***" from the dropdown list. This sets the data source to all Office 365 logs.
+
+#### Step 2. Filter Configuration:
+
+1.  Click on the ‘Add Filter’ button.
+2.  In the Field dropdown, find and select **logx.o365.Operation.keyword**.
+3.  In the Operator dropdown, select **is**.
+4.  Type **UserLoginFailed** in the Value input box, indicating a login failure in your log system.
+5.  Click **Add Filter** to apply this filter.
+
+After these steps, all logs about User login failures in Office 365 are displayed. Users can now personalize the columns for an easy overview.
+
+#### Step 3. Column Selection
+
+**Option A:**
+
+1.  Click on the ‘Select fields’ on the left side of the Data Grid.
+2.  From the dropdown list, find and select “Userid”, “Workload”, and “AuthenticationType”.
+
+**Option B:**
+
+1.  In the Log list, switch to the Table mode view.
+2.  From the field list, find and press the table icon next to the fields “userid”, “workload”, and “authenticationType”.
+
+These selected fields will be added to your Data Grid view.
+
+#### Save Query
+
+Once your filters and columns are set up:
+
+1.  Click on the ‘Save’ button at the top right corner of the Data Grid.
+2.  In the pop-up box, give your query a unique name, such as “Office365 Login Failures”, and provide a brief description if needed.
+3.  Click ‘Save’ to finalize the process.
+
+You can then go to the Query List view by clicking the **Queries** button in the top right corner and use that query whenever needed.
+
+### Summary
+
+The Log Explorer module provides a powerful platform for log filtering and analysis. It offers flexible source selection, comprehensive filtering options with new features like a clear filter button and default time filters, and a customizable Data Grid for viewing logs in table or chart formats. Users can personalize columns, view detailed log information in various modes, and save or export queries for efficient, repeatable analysis. This functionality is crucial for proactive monitoring and effective management of network activities and cybersecurity infrastructure.

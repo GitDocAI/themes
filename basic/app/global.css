@@ -74,3 +74,30 @@ body {
 .dark-theme [style*="--shiki-dark"] {
   color: var(--shiki-dark);
 }
+
+
+.sidebar {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(var(--color-primary)) rgb(var(--color-bg)); /* Firefox */
+}
+
+.sidebar::-webkit-scrollbar {
+  width: 12px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+  background: var(--color-bg); /* track */
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+  background-color: var(--color-primary); /* thumb */
+  border-radius: 6px;
+}
+
+.text-primary{
+  color:rgb(var(--color-primary));
+}
+
+h1,h2,h3,h4{
+ scroll-margin-top: 150px;
+}

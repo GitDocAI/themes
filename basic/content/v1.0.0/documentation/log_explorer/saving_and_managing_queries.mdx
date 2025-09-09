@@ -1,0 +1,72 @@
+The Log Explorer module provides robust capabilities for efficient log analysis, enabling users to save custom queries, export data, and manage past investigations. This functionality streamlines data exploration, making it easy to revisit and manage recurring analytical tasks without needing to recreate filters or configurations.
+
+### Benefits of Saving Queries
+
+Saving customized queries in the Log Explorer module offers several key advantages:
+*   **Efficiency**: It negates the need to repeat the filter creation process for frequently used searches, such as viewing all Office 365 login activities.
+*   **Adaptability**: Users can save their search criteria for future use, making the tool adaptable to specific requirements and time-efficient.
+*   **Revisit Past Investigations**: The option to view and manage stored queries ensures that previous analyses can be easily revisited and utilized.
+*   **Customization**: It empowers users to save their search criteria, ensuring a more efficient and tailored log exploration experience.
+
+### How to Save a Custom Query
+
+To save a custom query, you first need to configure your desired filters and columns in the Log Explorer.
+
+#### 1. Configure Your Query
+The Log Explorer module allows for extensive customization of data views through source selection, filter configuration, and column selection.
+
+**Example: Office 365 Login Failure Analysis**
+This example demonstrates how to create and configure a query to focus on login failure events within Office 365 logs.
+
+**Step 1. Source Selection**
+In the **Source** field, type and select “log-o365-\*” from the dropdown list. This sets the data source to all Office 365 logs.
+![Log Explorer](https://mintcdn.com/utmstack/c31KcEgLT8_kl3Nu/images/logexplorer/0365_selection.png?fit=max&auto=format&n=c31KcEgLT8_kl3Nu&q=85&s=43b0dce1d54e8535a55506532bd6ba5e)
+
+**Step 2. Filter Configuration**
+a. Click on the ‘Add Filter’ button.
+b. In the Field dropdown, find and select **logx.o365.Operation.keyword**.
+c. In the Operator dropdown, select **is**.
+d. Type **UserLoginFailed** in the Value input box, indicating a login failure in your log system. Click **Add Filter** to apply this filter.
+![Log Explorer](https://mintcdn.com/utmstack/OEt3XKGepmb6ogAs/images/logexplorer/filter_selection.png?fit=max&auto=format&n=OEt3XKGepmb6ogAs&q=85&s=32eae73fe5e4c6c1e7b8a3d3276244ce)
+
+After these steps, all logs about User login failures in Office 365 are displayed.
+
+**Step 3. Column Selection**
+Users can personalize the columns displayed in the Data Grid for an easy overview.
+
+**Option A:**
+a. Click on ‘Select fields’ on the left side of the Data Grid.
+b. From the dropdown list, find and select “Userid”, “Workload”, and “AuthenticationType”.
+![Log Explorer](https://mintcdn.com/utmstack/c31KcEgLT8_kl3Nu/images/logexplorer/examplefields.png?fit=max&auto=format&n=c31KcEgLT8_kl3Nu&q=85&s=74da55288b194cf7a7d0b1008b7ef13c)
+
+**Option B:**
+a. In the Log list, switch to the Table mode view.
+b. From the field list, find and press the table icon next to the fields “userid”, “workload”, and “authenticationType”.
+![Log Explorer](https://mintcdn.com/utmstack/c31KcEgLT8_kl3Nu/images/logexplorer/examplecolums.png?fit=max&auto=format&n=c31KcEgLT8_kl3Nu&q=85&s=29dca7a32e91b24c09f96d64fc07175e)
+
+These selected fields will be added to your Data Grid view.
+![Log Explorer](https://mintcdn.com/utmstack/OEt3XKGepmb6ogAs/images/logexplorer/exampleview.png?fit=max&auto=format&n=OEt3XKGepmb6ogAs&q=85&s=3f2131869e4fada2dbe67f7234bf8236)
+
+#### 2. Save the Query
+Once your filters and columns are set up, you can save your customized query.
+a. Click on the ‘Save’ button at the top right corner of the Data Grid.
+b. In the pop-up box, give your query a unique name, such as “Office365 Login Failures”, and provide a brief description if needed.
+c. Click ‘Save’ to finalize the process.
+![Log Explorer](https://mintcdn.com/utmstack/OEt3XKGepmb6ogAs/images/logexplorer/examplesavequery.png?fit=max&auto=format&n=OEt3XKGepmb6ogAs&q=85&s=692137bdd82146c1ab465c50bb6fa8c4)
+
+### Managing Saved Queries
+
+After saving a query, you can easily access and reuse it:
+*   Go to the Query List view by clicking the **Queries** button in the top right corner.
+*   From this list, you can select and use your saved query whenever needed, ensuring that past investigations can be revisited with ease.
+![Log Explorer](https://mintcdn.com/utmstack/c31KcEgLT8_kl3Nu/images/logexplorer/examplequerylist.png?fit=max&auto=format&n=c31KcEgLT8_kl3Nu&q=85&s=96d019b17f6704c092b9d2638263bc55)
+
+### Exporting Query Data
+
+In addition to saving queries, the Log Explorer module also allows you to export the current data for offline analysis:
+*   Users can export the current data to a CSV file. This option is typically found among the "Save the information" options.
+![Log Explorer](https://mintcdn.com/utmstack/OEt3XKGepmb6ogAs/images/logexplorer/options.png?fit=max&auto=format&n=OEt3XKGepmb6ogAs&q=85&s=bad497a5fb988007dcbcd080eace47d2)
+
+### Summary
+
+The Log Explorer module provides powerful tools for saving and managing queries, enhancing the efficiency and adaptability of log analysis. By allowing users to save customized search criteria and export data, it streamlines the process of investigating and monitoring log events, ensuring that valuable insights can be consistently accessed and analyzed.

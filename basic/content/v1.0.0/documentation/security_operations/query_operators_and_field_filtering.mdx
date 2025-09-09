@@ -1,0 +1,304 @@
+# Query Operators and Field Filtering
+
+This guide provides a comprehensive overview of using operators, values, and field aliases for querying and filtering data within UTMStack's logging and alerting systems, including Correlation Rules and the Log Explorer module. Efficient data analysis is crucial for threat detection, incident response, and compliance management.
+
+## Overview of Querying and Filtering
+
+UTMStack offers robust capabilities for analyzing log data through both automated correlation rules and interactive exploration.
+
+### Log Explorer Context
+The Log Explorer Module provides an exhaustive and comprehensive view of an organization’s log data. This dynamic and interactive tool delivers real-time visibility, allowing for immediate filtering and nuanced analysis. It supports customized, efficient data searches through saved criteria, intuitive visualizations, flexible source selection, and comprehensive filtering options. Users can save their search criteria for future use, adapting the tool to their specific needs.
+
+### Correlation Rules Context
+Correlation rules are defined frameworks that aid analysts in detecting network threats through automated log analysis. These rules swiftly identify potential security incidents by processing data pre-ingestion. They leverage fields, operators, and aliases to define conditions that, when met, generate alerts to notify of varying threat levels.
+
+## Field Referencing and Aliases
+
+Fields are fundamental to querying and filtering, allowing users to specify exact data points for comparison or extraction. Aliases provide a mechanism to simplify field names and standardize data for alerts.
+
+### Field Path Syntax
+A field is referenced using a series of keys separated by dots. Special wildcard characters and slice access methods are also supported:
+
+*   **Dot Notation**: `name.last`
+*   **Wildcards**:
+    *   `*`: Matches any sequence of characters (e.g., `child*.2`)
+    *   `?`: Matches any single character (e.g., `c?ildren.0`)
+*   **Slice Access**:
+    *   `#`: To get the number of elements in a slice or to access a child path (e.g., `children.#`, `friends.#.first`)
+    *   `index`: To access a slice value by its index (e.g., `children.1`, `friends.1.last`)
+*   **Escaping**: Dot and wildcard characters can be escaped with `\` (e.g., `fav\.movie`)
+
+### Querying Slices
+You can query a slice for specific matches using comparison and pattern matching operators:
+
+*   **First Match**: `# (...)`
+*   **All Matches**: `# (...) #`
+*   **Operators within slice queries**: `==`, `!=`, `<`, `<=`, `>`, `>=`, `%`, `!%`
+
+**Examples of Field Referencing and Slice Queries:**
+```json
+{
+  "name": {"first": "Tom", "last": "Anderson"},
+  "age":37,
+  "children": ["Sara","Alex","Jack"],
+  "fav.movie": "Deer Hunter",
+  "friends": [
+    {"first": "Dale", "last": "Murphy", "age": 44, "nets": ["ig", "fb", "tw"]},
+    {"first": "Roger", "last": "Craig", "age": 68, "nets": ["fb", "tw"]},
+    {"first": "Jane", "last": "Murphy", "age": 47, "nets": ["ig", "tw"]}
+  ]
+}
+```
+*   `"name.last"` >> `"Anderson"`
+*   `"age"` >> `37`
+*   `"children"` >> `["Sara","Alex","Jack"]`
+*   `"children.#"` >> `3`
+*   `"children.1"` >> `"Alex"`
+*   `"child*.2"` >> `"Jack"`
+*   `"c?ildren.0"` >> `"Sara"`
+*   `"fav\.movie"` >> `"Deer Hunter"`
+*   `"friends.#.first"` >> `["Dale","Roger","Jane"]`
+*   `"friends.1.last"` >> `"Craig"`
+*   `"friends.#(last=="Murphy").first"` >> `"Dale"`
+*   `"friends.#(last=="Murphy")#.first"` >> `["Dale","Jane"]`
+*   `"friends.#(age>45)#.last"` >> `["Craig","Murphy"]`
+*   `"friends.#(first%"D*").last"` >> `"Murphy"`
+*   `"friends.#(first!%"D*").last"` >> `"Craig"`
+*   `"friends.#(nets.#(=="fb"))#.first"` >> `["Dale","Roger"]`
+
+### Alert Detail Aliases
+In the last iteration of a correlation rule, the system uses specific aliases to populate alert details. Geolocation is automatically filled from `SourceIP` and `DestinationIP`, or generated from `SourceHost` and `DestinationHost` if the IP aliases don't exist. If `AlertName` or `AlertCategory` aliases are saved, their content will overwrite the alert name or category.
+
+The system uses the following aliases for alert details:
+*   Protocol
+*   SourceUser
+*   SourceHost
+*   SourceIP
+*   SourcePort
+*   DestinationUser
+*   DestinationHost
+*   DestinationIP
+*   DestinationPort
+
+### Saving Fields with Aliases
+When defining a `cache` or `search` iteration, you can specify fields to save for subsequent iterations or to complete alert information.
+*   `save -> field`: The original name of the field to store.
+*   `save -> alias`: The alias or name to access the field.
+    *   There cannot be two or more aliases with the same name within the same iteration.
+    *   In later iterations, an alias can be used as a `value` for comparison (e.g., `value: "{{.DestinationUser}}"`).
+
+## Query Operators
+
+Operators define the comparison logic between a field's content and a specified value.
+
+### Comparison Operators
+These operators compare the exact content of a field with a value.
+
+*   **`==` (Equal, Case-Sensitive)**
+    *   True if the field's content is exactly equal to the "value" content.
+    *   `hello == Hello` //False
+    *   `hello == hello` //True
+
+*   **`::` (Equal, Case-Insensitive)**
+    *   True if the field's content is equal to the "value" content, ignoring case.
+    *   `hello :: Hello` //True
+    *   `hello :: hello` //True
+
+*   **`!=` or `<>` (Unequal, Case-Sensitive)**
+    *   True if the field's content is unequal to the "value" content.
+    *   `hello != Hello` //True
+    *   `hello != hello` //False
+
+*   **`!!` (Unequal, Case-Insensitive)**
+    *   True if the field's content is unequal to the "value" content, ignoring case.
+    *   `hello !! Hello` //False
+    *   `hello !! hello` //False
+
+### String Containment Operators
+These operators check if a string value is part of another string.
+
+*   **`contains`**
+    *   True if the "value" content is part of the field content.
+    *   `“hello world” contains “world”` //True
+    *   `“hello world” contains “worlds”` //False
+
+*   **`not contain`**
+    *   True if the "value" content is not part of the field content.
+    *   `” hello world ” not contain ” world ”` //False
+    *   `” hello world ” not contain ” worlds”` //True
+
+*   **`in`**
+    *   True if the field content is part of the "value" content.
+    *   *Note: Source information for a complete example is not provided.*
+
+### Pattern Matching Operators (for slices)
+These operators are used within slice queries for simple pattern matching.
+*   `%`: Matches a pattern. (e.g., `first%"D*"`)
+*   `!%`: Does not match a pattern. (e.g., `first!%"D*"`)
+
+### Regular Expression Operators
+These operators use regular expressions for pattern matching.
+
+*   **`regexp`**
+    *   True if the field content matches the regular expression in "value".
+    *   `” hello world ” regexp ”^[a-z]+\[[0-9]+\]$”` //False
+
+*   **`not regexp`**
+    *   True if the field content does not match the regular expression in "value".
+    *   `” hello world ” not regexp ”^[a-z]+\[[0-9]+\]$”` //True
+
+### Existence Operators
+These operators check for the presence or absence of a field. The "value" must be left empty.
+
+*   **`exist`**
+    *   True if the field exists.
+
+*   **`not exist`**
+    *   True if the field does not exist.
+
+### CIDR Range Operators
+These operators check if an IP address falls within a specified CIDR range.
+
+*   **`in cidr`**
+    *   True if the IP in the field is within the value range.
+
+*   **`not in cidr`**
+    *   True if the IP in the field is not within the value range.
+
+### Classic Mathematical Operators
+These operators apply only to numbers. Use them only when both the field content and the "value" are numeric.
+
+*   `<` (Less than)
+*   `>` (Greater than)
+*   `<=` (Less than or equal to)
+*   `>=` (Greater than or equal to)
+
+## Filtering in Correlation Rules
+
+Correlation rules leverage `cache` or `search` fields to define iterations and apply filters.
+
+### Cache-Based Iterations (`cache`)
+The `cache` field declares that iterations will occur on the correlation engine's cache. It is mutually exclusive with the `search` field.
+
+*   **`allOf`**: All comparisons within this field must be met for the rule to generate an alert.
+*   **`oneOf`**: Any comparison within this field must be met for the rule to generate an alert.
+*   **`field`**: The field on which the comparison will be applied.
+*   **`operator`**: The operator to use in the comparison.
+*   **`value`**: The value to compare against the field's content. In subsequent iterations, an alias can be used as a value.
+*   **`timeLapse`**: How much time backward in seconds will be checked in the logs.
+*   **`minCount`**: The minimum number of logs that must be obtained as a result for this rule to be met.
+*   **`save`**: Required fields to save for use in the next cycle iteration or to complete alert information.
+
+**Example: Windows Authentication Failure (Cache-Based)**
+```yaml
+- name: Windows authentication failure
+  severity: Low
+  description: A Windows user was unable to authenticate with the server or workstation more than 5 times.
+  solution: Refer to NIST guidelines when creating password policies and set account lockout policies after a certain number of failed login attempts to prevent passwords from being guessed. Too strict a policy may create a denial of service condition and render environments un-usable, with all accounts used in the brute force being locked-out.
+  category: User Account Authentication
+  tactic: "Brute Force: Password Guessing"
+  dataTypes: ["wineventlog"] 
+  reference:
+    - "https://attack.mitre.org/techniques/T1110/001/"
+  frequency: 10
+  cache:
+    - allOf:
+        - field: logx.wineventlog.event_id
+          operator: "=="
+          value: 4625
+      minCount: 1
+      timeLapse: 15
+      save:
+        - field: logx.wineventlog.event_data.TargetUserName
+          alias: DestinationUser
+        - field: logx.wineventlog.host.name
+          alias: DestinationHost
+    - allOf:
+        - field: logx.wineventlog.event_id
+          operator: "=="
+          value: 4625
+        - field: logx.wineventlog.event_data.TargetUserName
+          operator: "=="
+          value: "{{.DestinationUser}}"
+        - field: logx.wineventlog.host.name
+          operator: "=="
+          value: "{{.DestinationHost}}"
+      minCount: 5
+      timeLapse: 60
+      save:
+        - field: logx.wineventlog.event_data.TargetUserName
+          alias: DestinationUser
+        - field: logx.wineventlog.host.name
+          alias: DestinationHost
+        - field: logx.wineventlog.event_data.WorkstationName
+          alias: SourceHost
+        - field: logx.wineventlog.event_data.IpAddress
+          alias: SourceIP
+```
+
+### Search-Based Iterations (`search`)
+The `search` field declares that iterations will occur on Elasticsearch or OpenSearch. It is mutually exclusive with the `cache` field.
+
+*   **`query`**: The Elasticsearch or OpenSearch query in JSON format. Remember to enclose the query in simple quotation marks.
+*   **`minCount`**: The minimum number of logs that must be obtained as a result for this rule to be met.
+*   **`save`**: Required fields to save for use in the next cycle iteration or to complete alert information.
+
+**Example: Windows Authentication Failure (Search-Based)**
+```yaml
+  search:
+    - query: '{"size": 500, "query": {"bool": {"must": [{"match_phrase": {"logx.wineventlog.event_id": 4625}}], "filter": [{"range": {"@timestamp": {"gte": "now-15s", "lte": "now"}}}], "should": [], "must_not": []}}}'
+      minCount: 1
+      save:
+        - field: logx.wineventlog.event_data.TargetUserName
+          alias: DestinationUser
+        - field: logx.wineventlog.host.name
+          alias: DestinationHost
+    - query: '{"size": 500, "query": {"bool": {"must": [{"match_phrase": {"logx.wineventlog.event_id": 4625}}, {"match_phrase": {"logx.wineventlog.event_data.TargetUserName": "{{.DestinationUser}}"}}], "filter": [{"range": {"@timestamp": {"gte": "now-60s", "lte": "now"}}}], "should": [], "must_not": [{"match_phrase": {"logx.wineventlog.event_data.TargetUserName": "{{.DestinationHost}}$"}}]}}}'
+      minCount: 5
+      save:
+        - field: logx.wineventlog.event_data.TargetUserName
+          alias: DestinationUser
+        - field: logx.wineventlog.host.name
+          alias: DestinationHost
+        - field: logx.wineventlog.event_data.WorkstationName
+          alias: SourceHost
+        - field: logx.wineventlog.event_data.IpAddress
+          alias: SourceIP
+```
+
+### When to Use Cache or Search
+*   **Cache**: Recommended for rules that will analyze logs within a maximum of 1 hour.
+*   **Search**: Recommended when the analysis period exceeds 1 hour or the rule’s complexity is very high and cannot be achieved using the cache.
+
+## Filtering in Log Explorer
+
+The Log Explorer module provides a user-friendly interface for applying filters to log data.
+
+### Source Selection
+The source functionality is a crucial data filtering tool that allows users to narrow down their search to specific index patterns. Users can confine their search to logs originating from a specific source, such as Office365, or create custom index patterns to define search parameters that cater to specific needs.
+
+### Filter Configuration
+The filtering functionality offers comprehensive data parsing based on user search requirements. Filters can be defined to track logs from a specific computer or to isolate logs pertaining to a specific operation, such as a log-in event.
+
+**New in filters:**
+*   A **clear filter** button has been added to instantly remove all active filters.
+*   A **default time filter** is now applied automatically, defaulting to the last 24 hours and dynamically updating based on the selected time range.
+
+### Saving and Managing Queries
+The Log Explorer allows users to save their customized search criteria and filters for future use. This negates the need to repeat the filter creation process for common investigations. The option to view and manage stored queries ensures that past investigations can be revisited with ease, streamlining data analysis.
+
+### Office 365 Login Failure Analysis: Step-by-Step Guide Example
+This example demonstrates how to utilize the Log Explorer module to create, configure, and save a query focusing on login failure events within Office 365 logs.
+
+**Step 1. Source Selection**
+In the Source field, type and select `log-o365-*` from the dropdown list to set the data source to all Office 365 logs.
+
+**Step 2. Filter Configuration**
+a. Click on the ‘Add Filter’ button.
+b. In the Field dropdown, find and select `logx.o365.Operation.keyword`.
+c. In the Operator dropdown, select `is`.
+d. Type `UserLoginFailed` in the Value input box, indicating a login failure. Click **Add Filter** to apply this filter.
+
+## Summary
+
+UTMStack provides powerful tools for querying and filtering log data, essential for effective security operations. Through structured field referencing, a comprehensive set of query operators, and flexible filtering mechanisms in both Correlation Rules and the Log Explorer, users can precisely define conditions to detect threats, analyze incidents, and manage compliance. The ability to use aliases, combine logical conditions, and save queries further enhances the efficiency and adaptability of these systems.

@@ -1,0 +1,116 @@
+The UTMStack Documentation serves as a comprehensive resource for users to understand, configure, and manage the UTMStack platform. This guide outlines the various documentation resources available, including guides, API references, integration instructions, and installation materials.
+
+The documentation aims to assist users through every stage, from initial setup to advanced management of UTMStack's features.
+
+## Types of Documentation Available
+
+The UTMStack documentation provides a range of resources designed to help users effectively utilize the platform:
+
+*   **Guides**: Comprehensive instructions for various aspects of UTMStack.
+*   **API References**: Detailed information for interacting with UTMStack programmatically.
+*   **Integration Instructions**: Steps and details for integrating UTMStack with other services.
+*   **Installation Resources**: Information required for deploying and updating UTMStack.
+
+## Key Documentation Areas
+
+The documentation is organized into several key areas, covering different functionalities and stages of using UTMStack.
+
+### Getting Started
+
+This section provides foundational information for new users and those looking to understand the basics of UTMStack:
+
+*   Introduction
+*   Use Case
+*   Quick Start
+*   Getting Started
+*   API Authentication
+
+### Installation
+
+The installation documentation offers detailed guidance for deploying and managing the UTMStack environment:
+
+*   **General Installation Topics**
+    *   Architecture
+    *   System Requirements
+    *   Firewall Rules
+    *   Server Setup Guide
+    *   Update Guide
+    *   SSL Certificate Management in UTMStack
+    *   Generating and Renewing SSL Certificates with Certbot
+    *   Install Federation Service
+    *   Import the UTMStack instance into the Federation Service
+    *   Installation Guide for Azure
+
+*   **Installation Recommendations (Ubuntu 22.04 LTS)**
+    *   **Operating System**: The installation guide provides instructions for performing the UTMStack installation on Ubuntu 22.04 LTS.
+    *   **System Resources**: Recommendations for hot log storage based on data sources and monthly data generation (assuming 60 data sources generate approximately 100 GB of monthly data).
+        *   **Definitions**:
+            *   *Hot log storage*: Not archived data that can be accessed for analysis at any time.
+            *   *Cold log storage*: Archived data that should be restored before accessing it.
+            *   *Data source*: Any individual source of logs, e.g., devices, agents, SaaS integrations.
+
+        | Data Sources | Hot Log Storage | Cores | RAM    | Disk Space |
+        | :----------- | :-------------- | :---- | :----- | :--------- |
+        | 50           | 120 GB          | 4     | 16 GB  | 150 GB     |
+        | 120          | 250 GB          | 8     | 16 GB  | 250 GB     |
+        | 240          | 500 GB          | 16    | 32 GB  | 500 GB     |
+        | 500          | 1000 GB         | 32    | 64 GB  | 1000 GB    |
+        *Note*: These tiers can be combined to allocate resources. Exceeding 500 data sources/devices requires adding secondary nodes for horizontal scaling.
+
+*   **Installation Methods**: The installation can be performed using an installer file or an ISO image. Instructions provided are for the installer file option.
+
+### Configuration
+
+This section covers various configuration options within UTMStack:
+
+*   Index Management
+*   Data Retention
+*   Connection Key
+
+### Compliance
+
+Documentation related to compliance features within the platform:
+
+*   Compliance Schedule
+
+### Log Explorer
+
+Guides for utilizing the Log Explorer module:
+
+*   Log Explorer Module
+
+### Dashboards
+
+Information regarding available dashboards:
+
+*   Dashboards List
+
+### Correlation Rules
+
+Documentation specific to understanding and configuring correlation rules:
+
+*   Correlation Rules
+
+## Security Information
+
+UTMStack ensures secure communication and authentication through several mechanisms:
+
+*   Data in transit between agents and UTMStack servers is encrypted using TLS.
+*   UTMStack services are isolated by containers and microservices with strong authentication.
+*   Connections to the UTMStack server are authenticated with a +24 characters unique key.
+*   User credentials are encrypted in the database and protected by fail2ban mechanisms and 2FA.
+
+## License
+
+UTMStack is open-source software licensed under the AGPL version 3.
+
+## Additional Resources
+
+Beyond the documentation, users can access:
+
+*   [Support](https://support.utmstack.com/)
+*   [Online Demo](https://utmstack.com/demo)
+
+## Summary
+
+The UTMStack Documentation provides comprehensive resources to help users get started, configure, and manage the platform. It includes detailed guides, API references, integration instructions, and installation resources, covering various modules like Log Explorer, Dashboards, and Correlation Rules, alongside critical information on system requirements, security, and licensing.

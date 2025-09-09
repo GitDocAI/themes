@@ -1,13 +1,23 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog } from '@headlessui/react';
-import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+
+interface SearchResult {
+  doc: {
+    path: string;
+    chunk: number;
+    content: string;
+  };
+  score: number;
+}
 
 export default function SearchBar() {
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState('');
-  const [results, setResults] = useState([]);
+  const [results, setResults] = useState<SearchResult[]>([]);
+  const router = useRouter();
 
   const openModal = () => setIsOpen(true);
   const closeModal = () => {
@@ -32,29 +42,38 @@ export default function SearchBar() {
 
   const isMac = typeof window !== 'undefined' && navigator.platform.toUpperCase().includes('MAC');
 
-  const handleSearch = async () => {
-    if (!query.trim()) return;
-
-    try {
-      const response = await fetch('/api/query', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ query }),
-      });
-
-      if (!response.ok) {
-        console.error('Failed to fetch search results');
+  useEffect(() => {
+    const handleSearch = async () => {
+      if (!query.trim()) {
+        setResults([]);
         return;
       }
 
-      const data = await response.json();
-      setResults(data.results || []);
-    } catch (error) {
-      console.error('Error during search:', error);
-    }
-  };
+      try {
+        const response = await fetch('/api/query', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ query }),
+        });
+
+        if (!response.ok) {
+          console.error('Failed to fetch search results');
+          return;
+        }
+
+        const data = await response.json();
+        setResults(data.results || []);
+      } catch (error) {
+        console.error('Error during search:', error);
+      }
+    };
+
+    const timerId = setTimeout(handleSearch, 300);
+
+    return () => clearTimeout(timerId);
+  }, [query]);
 
   return (
     <>
@@ -77,19 +96,27 @@ export default function SearchBar() {
               className=" w-full rounded-md border border-secondary px-4 py-2 text-sm focus:border-secondary focus:outline-none focus:ring text-secondary "
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') handleSearch();
-              }}
               autoFocus
             />
-            <ul className="mt-4">
-              {results.map((result, index) => (
-                <li key={index} className="p-2 border-b border-gray-300">
-                  <a href={result.filePath} className="text-blue-500 hover:underline">
-                    {result.filePath} (Score: {result.score.toFixed(2)})
-                  </a>
-                </li>
-              ))}
+            <ul className="mt-4 max-h-[60vh] overflow-y-auto space-y-2">
+              {results.map((result, index) => {
+                const path = result.doc.path.replace(/\.mdx$/, '');
+                const url = `/${path}?scroll=${result.doc.chunk * 10000}`;
+                return (
+                  <li key={index} className="rounded-md hover:bg-secondary/10">
+                    <button
+                      onClick={() => {
+                        closeModal();
+                        router.push(url);
+                      }}
+                      className="block p-2 w-full text-left"
+                    >
+                      <div className="font-semibold text-primary truncate">{path}</div>
+                      <div className="text-sm text-secondary mt-1 line-clamp-2">...{result.doc.content}...</div>
+                    </button>
+                  </li>
+                );
+              })}
             </ul>
           </Dialog.Panel>
         </div>

@@ -1,0 +1,58 @@
+This page outlines the hardware and software prerequisites and resource recommendations for installing UTMStack v1.0.0 on Ubuntu 22.04 LTS.
+
+### Operating System
+
+UTMStack installation is supported on:
+
+*   Ubuntu 22.04 LTS
+
+### System Resources
+
+Resource recommendations are based on the number of data sources and the amount of monthly data generated. The provided assumptions state that 60 data sources (devices) generate approximately 100 GB of monthly data.
+
+**Definitions:**
+
+*   **Hot log storage**: Data that is not archived and can be accessed for analysis at any time.
+*   **Cold log storage**: Archived data that requires restoration before access.
+*   **Data source**: Any individual source of logs, such as devices, agents, or SaaS integrations.
+
+**Resource Tiers for One Month of Hot Log Storage:**
+
+| Data Sources | Monthly Hot Log Data | Cores | RAM    | Disk Space |
+| :----------- | :------------------- | :---- | :----- | :--------- |
+| 50           | 120 GB               | 4     | 16 GB  | 150 GB     |
+| 120          | 250 GB               | 8     | 16 GB  | 250 GB     |
+| 240          | 500 GB               | 16    | 32 GB  | 500 GB     |
+| 500          | 1000 GB              | 32    | 64 GB  | 1000 GB    |
+
+**Scaling Notes:**
+
+*   These tiers can be combined to allocate resources based on the number of devices and desired hot log storage retention.
+*   For deployments exceeding 500 data sources/devices, horizontal scaling by adding secondary nodes is required.
+
+### Required Ports
+
+The following network ports are necessary for UTMStack operation:
+
+*   **22/TCP**: Secure Shell (SSH). It is recommended to create a firewall rule to allow access only from administrator workstations.
+*   **80/TCP**: UTMStack Web-based Graphical User Interface Redirector. It is recommended to create a firewall rule to allow access only from administrator and security analyst workstations.
+*   **443/TCP**: UTMStack Web-based Graphical User Interface (HTTPS). It is recommended to create a firewall rule to allow access only from administrator and security analyst workstations.
+*   **9090/TCP**: Cockpit Web-based Graphical Interface for Servers. It is recommended to create a firewall rule to allow access only from administrator workstations.
+*   **Other ports**: Additional ports will be required during the configuration of UTMStack's integrations to receive logs. It is advised to follow the security recommendations given on the respective integration guides.
+
+### Installation Prerequisites
+
+Before running the UTMStack installer, ensure the following software prerequisites are met on your Ubuntu Server:
+
+*   **Update packages list**:
+    ```bash
+    sudo apt update
+    ```
+*   **Install WGET**:
+    ```bash
+    sudo apt install wget
+    ```
+
+### Summary
+
+UTMStack v1.0.0 requires Ubuntu 22.04 LTS as its operating system. Hardware resources, including CPU cores, RAM, and disk space, must be scaled according to the number of data sources and the desired hot log storage capacity. Specific network ports need to be open for UTMStack's web interface, SSH, and other services. Additionally, essential utilities like `wget` must be installed prior to the main installation process.

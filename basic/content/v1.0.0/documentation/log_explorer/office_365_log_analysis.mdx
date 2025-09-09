@@ -1,0 +1,71 @@
+The Log Explorer module within UTMStack is a powerful, interactive tool designed to provide comprehensive visibility into an organization's log data. It enables real-time filtering, nuanced analysis, and efficient management of network activities, making it indispensable for cybersecurity operations. This documentation page provides a guide on how to leverage the Log Explorer module to analyze Office 365 login events, specifically focusing on identifying and filtering for user login failures.
+
+## Log Explorer Module Overview
+
+The Log Explorer module is a central component of UTMStack, purpose-built to deliver an exhaustive view of log data. It offers an adaptable interface with customizable options, allowing users to streamline data analysis by focusing on specific values and enhancing the visibility of crucial data. Key functionalities include:
+
+*   **Real-time Visibility**: Provides immediate insights into log data.
+*   **Filtering**: Offers comprehensive data parsing based on user search requirements, with options to track logs from specific sources or isolate logs related to specific operations. A clear filter button allows instant removal of active filters, and a default time filter is automatically applied.
+*   **Customizable Views**: Users can personalize the columns displayed in the Data Grid, add or remove columns based on log fields, and create new columns.
+*   **Saving Queries**: Allows users to save customized filter configurations and column selections for future use, eliminating the need to repeat the setup process.
+*   **Exporting Data**: Enables exporting the current data to a CSV file for offline analysis.
+
+UTMStack supports SaaS Monitoring for Office 365, making its logs accessible and analyzable within the Log Explorer.
+
+## Office 365 Login Failure Analysis: Step-by-Step Guide Example
+
+This example provides a comprehensive guide on how to utilize the Log Explorer module to create, configure, and save a query that focuses on all login failure events within Office 365 logs.
+
+### Step 1. Source Selection
+
+To begin, you need to specify Office 365 logs as your data source:
+
+1.  In the **Source** field, type and select `log-o365-*` from the dropdown list. This action sets the data source to include all Office 365 logs.
+
+### Step 2. Filter Configuration:
+
+Next, configure a filter to specifically identify login failure events:
+
+1.  Click on the ‘**Add Filter**’ button.
+2.  In the **Field** dropdown, find and select `logx.o365.Operation.keyword`.
+3.  In the **Operator** dropdown, select `is`.
+4.  Type `UserLoginFailed` in the **Value** input box. This value indicates a login failure in your log system.
+5.  Click **Add Filter** to apply this filter.
+
+After these steps, the Log Explorer will display all logs related to user login failures in Office 365.
+
+### Step 3. Column Selection
+
+To personalize the overview and make the analysis easier, you can customize the displayed columns:
+
+**Option A: Using the 'Select fields' menu**
+
+1.  Click on ‘**Select fields**’ on the left side of the Data Grid.
+2.  From the dropdown list, find and select “Userid”, “Workload”, and “AuthenticationType”.
+
+**Option B: Using the Table mode view**
+
+1.  In the Log list, switch to the **Table mode** view.
+2.  From the field list, find and press the table icon next to the fields “userid”, “workload”, and “authenticationType”.
+
+These selected fields will be added to your Data Grid view, providing a tailored overview of the login failure events.
+
+### Save Query
+
+Once your filters and columns are set up to your preference, you can save this query for future use:
+
+1.  Click on the ‘**Save**’ button located at the top right corner of the Data Grid.
+2.  In the pop-up box, provide a unique name for your query, such as “Office365 Login Failures”. You can also add a brief description if needed.
+3.  Click ‘**Save**’ to finalize the process.
+
+You can now access this saved query at any time by navigating to the **Queries** list view, available by clicking the **Queries** button in the top right corner.
+
+### Exporting Data for Offline Analysis
+
+For further analysis or reporting outside of the Log Explorer, you have the option to export the current data:
+
+*   Users can export the current data to a CSV file for offline analysis.
+
+## Summary
+
+The Log Explorer module provides an effective way to analyze Office 365 logs by offering robust filtering capabilities, customizable data views, and the ability to save and export queries. By following the steps outlined, users can efficiently identify and investigate Office 365 login failures, streamlining their security monitoring and forensic analysis efforts.

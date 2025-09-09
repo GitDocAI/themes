@@ -1,13 +1,14 @@
 import nextra from 'nextra';
 import fs from 'fs';
 import path from 'path';
-import { index_content_files } from './chunker/content_analizer';
-import { generateTfIdfMatrix } from './tfidf/vectorizer';
-import { saveSVDResults } from './svd/saveResults';
+import {init} from './shared/file_indexer/init_search_engine'
 
 const configPath = path.join(process.cwd(), 'gitdocai.config.json');
 
 let siteConfig = {};
+
+init().then(resp=>{
+})
 
 try {
   const raw = fs.readFileSync(configPath, 'utf-8');

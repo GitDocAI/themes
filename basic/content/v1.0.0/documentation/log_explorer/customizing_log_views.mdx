@@ -1,0 +1,111 @@
+# Customizing Log Views
+
+The Log Explorer module provides extensive capabilities for tailoring how log data is displayed, empowering users to customize data views, add or remove columns, and refine log displays for targeted analysis. This guide details the features available for personalizing your log exploration experience.
+
+## Overview of Log View Customization
+
+The Log Explorer module is designed for dynamic and interactive log data analysis. It allows users to filter and customize their log data views, add or remove columns in the Data Grid, and save or export queries for future use or offline analysis. This level of customization ensures that the tool is adaptable and time-efficient, enabling users to save their search criteria and focus on relevant information.
+
+## Data Grid Views and Options
+
+The Data Grid is the central area where the bulk of log information is viewed. It offers high customizability, allowing users to choose how data is presented.
+
+### Table Mode
+
+In Table mode, users can:
+*   Add filters based on the field and value of a specific log.
+*   Create a column in the Data Grid table based on a specific field.
+
+### The Log Section (Table and JSON)
+
+The Log section provides a comprehensive view of all log information, including details like `agent_id`, `process name`, and `source IP`. This data can be viewed in two formats:
+*   **Table view**
+*   **JSON mode**
+
+## Tailoring Displayed Columns
+
+Users have flexible options to customize the columns visible in the Data Grid view, based on the fields of the logs.
+
+### Personalizing Columns in the Data Grid
+
+You can add or remove columns in the Data Grid view. This can be done either through the "Select fields" option on the left side of the Data Grid or by directly selecting a field in the log.
+
+### Options for Creating Columns from Log Fields
+
+Each log field within the Log Explorer module offers two key options:
+*   **Adding a filter**: Users can swiftly add a filter based on the field and value of a specific log. This fine-tunes the data presented in the Data Grid to fit specific needs.
+*   **Creating a column**: Users can choose to create a new column in the Data Grid Table based on the field. This feature provides immediate visibility and accessibility of key data points.
+
+## Filtering Log Data for Targeted Analysis
+
+Filtering is a core functionality of the Log Explorer, offering comprehensive data parsing based on user search requirements.
+
+### General Filtering Capabilities
+
+Filters can be defined to track logs from a specific computer or to isolate logs pertaining to a specific operation, such as a log-in event. The source functionality also acts as a crucial data filtering tool, allowing users to narrow down their search to specific index patterns (e.g., Office365 logs) or create custom index patterns.
+
+### New Filter Features
+
+Recent enhancements to the filtering functionality include:
+*   A **clear filter** button on the far left to instantly remove all active filters.
+*   A **default time filter** applied automatically, appearing on the right-hand side and defaulting to the last 24 hours. This filter dynamically updates based on the selected time range.
+*   The **maximum range for any selected time filter is 30 days** to ensure optimal system performance.
+*   Users can add additional custom filters using the **Add Filter** button.
+*   Filters can be added based on a specific log field with a single click.
+
+## Saving and Managing Custom Queries
+
+The Log Explorer module allows users to save their customized filter and column configurations for future use, making the tool adaptable and time-efficient.
+
+### Saving Current Queries
+
+Once your filters and columns are set up, you can save the current query. This enables you to revisit specific investigations or frequently used search criteria without needing to recreate them. Users can also export the current data to a CSV file for offline analysis.
+
+### Accessing Saved Queries
+
+Saved queries can be accessed from the Query List view by clicking the **Queries** button. This ensures that past investigations can be revisited with ease.
+
+## Example: Customizing View for Office 365 Login Failures
+
+This example demonstrates how to create, configure, and save a query focused on login failure events within Office 365 logs.
+
+### Step 1. Source Selection
+
+In the Source field, type and select **log-o365-\*** from the dropdown list. This sets the data source to all Office 365 logs.
+
+### Step 2. Filter Configuration
+
+1.  Click on the **Add Filter** button.
+2.  In the Field dropdown, find and select **logx.o365.Operation.keyword**.
+3.  In the Operator dropdown, select **is**.
+4.  Type **UserLoginFailed** in the Value input box.
+5.  Click **Add Filter** to apply this filter.
+
+After these steps, all logs about User login failures in Office 365 will be displayed.
+
+### Step 3. Column Selection
+
+Users can personalize the columns they see for an easy overview using two options:
+
+**Option A:**
+1.  Click on the ‘Select fields’ on the left side of the Data Grid.
+2.  From the dropdown list, find and select “Userid”, “Workload”, and “AuthenticationType”.
+
+**Option B:**
+1.  In the Log list, switch to the Table mode view.
+2.  From the field list, find and press the table icon next to the fields “userid”, “workload”, and “authenticationType”.
+
+These selected fields will be added to your Data Grid view.
+
+### Save Query
+
+Once your filters and columns are set up:
+1.  Click on the ‘Save’ button at the top right corner of the Data Grid.
+2.  In the pop-up box, give your query a unique name (e.g., “Office365 Login Failures”) and provide a brief description if needed.
+3.  Click ‘Save’ to finalize the process.
+
+You can then access this saved query from the Query List view.
+
+## Summary
+
+The Log Explorer module offers robust customization options to enhance log analysis. Users can tailor their data views by selecting between Table and JSON modes, adding or removing specific columns, and applying comprehensive filters based on log fields or predefined parameters. Furthermore, the ability to save and manage custom queries streamlines workflows, allowing for efficient revisiting of investigations and adapting the interface to individual user requirements.

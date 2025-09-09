@@ -1,0 +1,39 @@
+The Connection Key in UTMStack is a critical security token that facilitates trusted communication and authentication across various system components. This guide outlines its purpose, usage, and essential security practices to ensure the integrity and stability of your UTMStack environment.
+
+## Overview of the Connection Key
+
+The Connection Key is a fundamental secure token within UTMStack, designed to establish trusted communication between different components of the system. It is essential for authenticating agents, enabling federation services, and maintaining secure interactions.
+
+## Key Purposes and Processes
+
+The Connection Key plays a crucial role in several core UTMStack operations:
+
+### Agent Installation
+
+*   **Purpose**: The Connection Key functions as a panel token integrated into the agent installation command line. This ensures that agents are authenticated and permitted to communicate with the central panel, thereby securing the environment.
+*   **Process**: When installing agents on target machines or devices, the Connection Key must be included in the command line instructions to successfully authenticate and link the agents to the central panel.
+
+### Federation Service Connection
+
+*   **Purpose**: This key enables the management of the UTMStack instance through a Federation Service, which is vital for multitenancy environments where multiple separate entities or administrative domains require system access.
+*   **Process**: The Connection Key facilitates a secure connection to a Federation Service, ensuring that all federated instances are properly managed and maintained within a centralized framework.
+
+## Security Best Practices for Connection Keys
+
+Maintaining the security of your Connection Key is paramount to protecting your UTMStack deployment. Adhere to the following best practices:
+
+*   **Regular Updates**: It is vital to change your Connection Key regularly to maintain its security integrity.
+*   **Immediate Action on Compromise**: If there is any suspicion that the Connection Key has been compromised, change it immediately.
+*   **Avoid Unauthorized Sharing**: Never share the Connection Key with untrusted parties.
+*   **Secure Distribution**: When a new key is generated, ensure it is distributed securely to all necessary parties and services.
+*   **Update All Configurations**: Always update the Connection Key across all deployed agents and services that use it to prevent service disruption.
+*   **Secure Backup**: Keep a secure backup of your Connection Key in a safe location.
+
+## Generating a New Connection Key
+
+If you need to generate a new Connection Key, the process is straightforward:
+
+1.  Navigate to the relevant configuration section within UTMStack.
+2.  Click the `Generate new connection key` button.
+
+This action will create a new, unique key that will replace the old one. After generating a new key, it is critical to ensure that the new key is distributed securely and updated in all configurations to prevent service disruption across all deployed agents and services that use it.
