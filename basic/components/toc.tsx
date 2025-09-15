@@ -12,7 +12,7 @@ export const TOC: FC<{ toc: Heading[] }> = ({ toc }) => {
       (entries) => {
         const visible = entries.find((entry) => entry.isIntersecting)
         if (visible) {
-          setActiveId(visible.target.textContent.trim().toLowerCase())
+          setActiveId(visible.target.textContent!.trim().toLowerCase())
         }
       },
       {
@@ -24,7 +24,7 @@ export const TOC: FC<{ toc: Heading[] }> = ({ toc }) => {
     const tags = document.querySelectorAll('h1,h2,h3')
     toc.forEach((heading) => {
        tags.forEach(tag=>{
-        if(tag.textContent.trim() == heading.value){
+        if(tag.textContent!.trim() == heading.value){
            observer.observe(tag)
         }
       })
@@ -47,7 +47,7 @@ export const TOC: FC<{ toc: Heading[] }> = ({ toc }) => {
       <h3 className="text-lg font-semibold mb-4 text-secondary">On this page</h3>
       <ul className="space-y-2">
 
-        {toc.map((heading) => (
+        {toc.map((heading:any) => (
           <li
             key={heading.id}
             ref={activeId === heading.value.trim().toLowerCase() ? activeRef : null}
@@ -56,7 +56,7 @@ export const TOC: FC<{ toc: Heading[] }> = ({ toc }) => {
             onClick={() => {
               const tags = document.querySelectorAll('h1,h2,h3');
               tags.forEach(tag => {
-                if (tag.textContent.trim() === heading.value) {
+                if (tag.textContent!.trim() === heading.value) {
                   tag.scrollIntoView({
                     behavior: "smooth",
                     block: "start",

@@ -1,7 +1,7 @@
 'use client'
 
 import { Anchor } from 'nextra/components'
-import { NavigationItem, NavigationPage, ThemeInfo } from '../models/ThemeInfo'
+import { NavigationItem,NavigationAgrupation, NavigationPage, ThemeInfo } from '../models/ThemeInfo'
 import { usePathname } from 'next/navigation'
 import { Version, Tab } from '../models/InnerConfiguration'
 import { useEffect, useState } from 'react'
@@ -58,6 +58,7 @@ export const Sidebar = ({ themeinfo, versions, tabs }: { themeinfo: ThemeInfo, v
 
 function dropdownHasActiveChild(dropdown: NavigationItem, pathname: string): boolean {
   if (dropdown.type == 'page') return false
+  dropdown = dropdown as NavigationAgrupation
   return dropdown.children.some(child => {
     if (child.type === 'page') {
       return  splitPageUrl(child.page) === pathname
@@ -78,7 +79,7 @@ function dropdownHasActiveChild(dropdown: NavigationItem, pathname: string): boo
       case 'group':
         return (
           <div key={item.title} className={`mb-4 ${paddingLeft}`}>
-            <div className="text-xs font-semibold uppercase text-secondary/77 mb-2 px-2 tracking-wide">
+            <div className="font-bold text-sm uppercase text-secondary mb-2 px-2 tracking-wide">
               {item.title}
             </div>
             <div className="space-y-1 pl-2">
@@ -93,7 +94,7 @@ function dropdownHasActiveChild(dropdown: NavigationItem, pathname: string): boo
  open={isOpen}
           >
             <summary className="flex items-center justify-between py-1 px-2 text-sm font-medium rounded-md text-secondary hover:bg-secondary/10 hover:text-primary">
-              <span className="text-xs font-semibold uppercase text-secondary/77 mb-2 px-2 tracking-wide">{item.title}</span>
+              <span className="font-bold text-sm uppercase text-secondary mb-2 px-2 tracking-wide">{item.title}</span>
               <svg className="w-4 h-4 transition-transform group-open:rotate-90" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
               </svg>

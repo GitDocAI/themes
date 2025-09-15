@@ -5,14 +5,14 @@
 
 
 :root {
-  --color-muted: 102 112 133;
+--color-muted: 130 140 160;
   --logo-light-display:block;
   --logo-dark-display:none
 
 }
 
 .dark-theme {
-  --color-muted: 145 145 160;
+ --color-muted: 180 180 195;
   --logo-dark-display:block;
   --logo-light-display:none;
 }

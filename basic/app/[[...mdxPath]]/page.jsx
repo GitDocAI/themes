@@ -30,6 +30,18 @@ export default async function Page(props) {
     )
   } catch (error) {
     console.error('Error loading page:', error)
-    return <div>Page not found</div>
-  }
+
+    return (
+        <>
+         <article id="mdx-content" className=" [grid-area:content] p-3 h-full flex-1 min-h-[60dvh]  ">
+
+            <div className="h-full flex items-center justify-center">
+            <h3 class="text-2xl">Page not found</h3>
+          </div>
+         </article>
+        <aside className="hidden xl:block sidebar w-64 flex-shrink-0 sticky top-18 max-h-[90dvh] overflow-y-auto px-6 py-6  [grid-area:toc]">
+        </aside>
+        </>
+    )
+   }
 }
