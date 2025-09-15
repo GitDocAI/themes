@@ -22,7 +22,7 @@ interface ApiReferenceProps {
   description: string;
   parameters: Parameter[];
   responses: Record<string, ResponseContent>;
-  tryItBaseUrl:string
+  tryItBaseUrl: string;
 }
 
 export default function ApiReference({
@@ -32,19 +32,55 @@ export default function ApiReference({
   description,
   parameters,
   responses,
-  tryItBaseUrl
+  tryItBaseUrl,
 }: ApiReferenceProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [formData, setFormData] = useState<Record<string, string>>({});
+  const [responseData, setResponseData] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
 
   const handleInputChange = (name: string, value: string) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSend = async () => {
+    setLoading(true);
+    setResponseData(null);
+    try {
+      let url = `${tryItBaseUrl}${path}`;
+      let options: RequestInit = {
+        method,
+        headers: { "Content-Type": "application/json" },
+      };
+
+      if (method === "GET") {
+        const query = new URLSearchParams(formData).toString();
+        if (query) url += `?${query}`;
+      } else {
+        options.body = JSON.stringify(formData);
+      }
+
+      const res = await fetch(url, options);
+      const text = await res.text();
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch {
+        data = text;
+      }
+      setResponseData({ status: res.status, body: data });
+    } catch (err: any) {
+      setResponseData({ error: err.message });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const methodColors: Record<string, string> = {
     GET: "bg-emerald-600",
     POST: "bg-blue-600",
     PUT: "bg-amber-600",
+    PATCH: "bg-amber-600",
     DELETE: "bg-rose-600",
   };
 
@@ -68,15 +104,17 @@ export default function ApiReference({
         <code className="bg-gray-100 dark:bg-neutral-800 px-3 py-1 rounded text-sm text-gray-900 dark:text-gray-100 font-mono">
           {path}
         </code>
-        {
-          tryItBaseUrl =="" || tryItBaseUrl==null? (<></>) :  (<button
-          onClick={() => setIsOpen(true)}
-          className="ml-auto flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-md shadow text-sm transition"
-        >
-          <i className="pi pi-play" />
-          Try it
-        </button>)
-        }
+        {tryItBaseUrl == "" || tryItBaseUrl == null ? (
+          <></>
+        ) : (
+          <button
+            onClick={() => setIsOpen(true)}
+            className="ml-auto flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-md shadow text-sm transition"
+          >
+            <i className="pi pi-play" />
+            Try it
+          </button>
+        )}
       </div>
 
       {/* Parameters */}
@@ -136,7 +174,11 @@ export default function ApiReference({
 
       {/* Modal */}
       <Transition show={isOpen} as={Fragment}>
-        <Dialog as="div" className="relative z-50" onClose={() => setIsOpen(false)}>
+        <Dialog
+          as="div"
+          className="relative z-50"
+          onClose={() => setIsOpen(false)}
+        >
           <Transition.Child
             as={Fragment}
             enter="ease-out duration-200"
@@ -187,10 +229,22 @@ export default function ApiReference({
                   >
                     Cancel
                   </button>
-                  <button className="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white shadow">
-                    Send
+                  <button
+                    onClick={handleSend}
+                    disabled={loading}
+                    className="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white shadow disabled:opacity-50"
+                  >
+                    {loading ? "Sending..." : "Send"}
                   </button>
                 </div>
+
+                {responseData && (
+                  <div className="mt-6 p-4 rounded-lg bg-gray-100 dark:bg-neutral-900 text-sm overflow-auto max-h-64">
+                    <pre className="whitespace-pre-wrap text-gray-800 dark:text-gray-200">
+                      {JSON.stringify(responseData, null, 2)}
+                    </pre>
+                  </div>
+                )}
               </Dialog.Panel>
             </Transition.Child>
           </div>
