@@ -33,6 +33,8 @@ export function search(query: string, docs: string[], index: any, topK = 5) {
   });
 
   return scores
+    .filter(res=>res.score >= 0.002)
     .sort((a, b) => b.score - a.score)
-    .slice(0, topK);
+    .slice(0, topK)
+    ;
 }

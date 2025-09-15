@@ -1,10 +1,14 @@
-
 import natural from "natural";
 
 const tokenizer = new natural.SentenceTokenizer();
 
 export function chunkText(text: string, maxWords = 100, overlap = 20): string[] {
-  const sentences = tokenizer.tokenize(text);
+  const sentences = tokenizer.tokenize(text.replace(/[#`*_|>~\-!\[\]\(\)\{\}]/g, ""));
+
+  if (!sentences || sentences.length === 0) {
+      return [];
+  }
+
   const chunks: string[] = [];
 
   let currentChunk: string[] = [];
@@ -13,6 +17,10 @@ export function chunkText(text: string, maxWords = 100, overlap = 20): string[] 
   for (let i = 0; i < sentences.length; i++) {
     const sentence = sentences[i];
     const wordCount = sentence.split(/\s+/).filter(Boolean).length;
+
+    if (wordCount === 0) {
+        continue;
+    }
 
     if (currentWordCount + wordCount > maxWords && currentChunk.length > 0) {
       chunks.push(currentChunk.join(" "));
@@ -32,3 +40,4 @@ export function chunkText(text: string, maxWords = 100, overlap = 20): string[] 
 
   return chunks;
 }
+

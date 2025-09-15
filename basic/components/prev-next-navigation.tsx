@@ -3,7 +3,7 @@
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { NavigationItem, ThemeInfo,NavigationPage,NavigationGroup,NavigationDropdown } from '../models/ThemeInfo'
+import { NavigationItem, ThemeInfo,NavigationAgrupation,NavigationPage,NavigationGroup,NavigationDropdown,NavigationApiref } from '../models/ThemeInfo'
 import { Version, Tab } from '../models/InnerConfiguration'
 import { redirect } from 'next/navigation'
 import {splitPageUrl} from '../shared/splitPageUrl'
@@ -67,9 +67,10 @@ export function PrevNextNavigation({ themeinfo, versions, tabs }: Props) {
   return item.type === 'page'
 }
 
-  function flattenPages(items: NavigationItem[]): NavigationPage[] {
+  function flattenPages(items: NavigationItem[]): (NavigationPage|NavigationApiref)[] {
     return items.flatMap(item => {
-      if (item.type === 'page') return [item]
+      if (item.type === 'swagger' || item.type === 'openapi'||item.type === 'page') return [item]
+      item = item as NavigationAgrupation
       if (item.children) return flattenPages(item.children as NavigationItem[])
       return []
     })

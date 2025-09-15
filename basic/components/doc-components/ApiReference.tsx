@@ -22,6 +22,7 @@ interface ApiReferenceProps {
   description: string;
   parameters: Parameter[];
   responses: Record<string, ResponseContent>;
+  tryItBaseUrl:string
 }
 
 export default function ApiReference({
@@ -31,6 +32,7 @@ export default function ApiReference({
   description,
   parameters,
   responses,
+  tryItBaseUrl
 }: ApiReferenceProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [formData, setFormData] = useState<Record<string, string>>({});
@@ -66,13 +68,15 @@ export default function ApiReference({
         <code className="bg-gray-100 dark:bg-neutral-800 px-3 py-1 rounded text-sm text-gray-900 dark:text-gray-100 font-mono">
           {path}
         </code>
-        <button
+        {
+          tryItBaseUrl =="" || tryItBaseUrl==null? (<></>) :  (<button
           onClick={() => setIsOpen(true)}
           className="ml-auto flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-md shadow text-sm transition"
         >
           <i className="pi pi-play" />
           Try it
-        </button>
+        </button>)
+        }
       </div>
 
       {/* Parameters */}

@@ -36,14 +36,16 @@ export type ThemeInfo = {
   footer: Array<
     FooterItem
   >;
-  navigation: {
+  navigation:NavigationConfig ;
+};
+
+export type NavigationConfig = {
     versions?: Array<
       NavigationVersion
     >;
     tabs?: Array<NavigationTab>;
     items?: Array<NavigationItem>;
-  };
-};
+  }
 
 export type NavBarItem = {
   type: 'link' | 'button' | string;
@@ -68,9 +70,9 @@ export type NavigationTab = {
 };
 
 export type NavigationItem =
-  | NavigationGroup
-  | NavigationDropdown
   | NavigationPage
+  | NavigationApiref
+  | NavigationAgrupation
   ;
 
 export type NavigationAgrupation =
@@ -94,3 +96,14 @@ export type NavigationPage = {
   title: string;
   page: string;
 };
+
+
+export type NavigationApiref = {
+  method:string;
+  type: 'openapi' | 'swagger';
+  title: string;
+  reference:string;
+  page:string;
+};
+
+

@@ -46,6 +46,7 @@ export const DefaultTheme: FC<{
                   grid-rows-[auto_auto]
                   [grid-template-areas:'content''nav']
 
+
                   lg:grid-cols-[1fr_auto]
                   lg:grid-rows-[auto_auto]
                   lg:[grid-template-areas:'content_toc''nav_toc']
@@ -104,19 +105,24 @@ function getPathsFromTabOrVersion(itemContainer: NavigationTab | NavigationVersi
   if ('tab' in itemContainer) {
     return itemContainer.items?.map((it: NavigationItem) => getPaths(it)).flat() ?? [];
   } else if ('tabs' in itemContainer) {
-    return itemContainer.tabs.map((tab: NavigationTab): string[] => (getPathsFromTabOrVersion(tab))).flat();
+    return itemContainer.tabs!.map((tab: NavigationTab): string[] => (getPathsFromTabOrVersion(tab))).flat();
   }
   return [];
 }
 
+
+
 function getPaths(original: NavigationItem): string[] {
-  if(!original.type && original.page){
-    original.type = 'page'
+  if(!original.type && (original as any).page){
+    (original as any).type = 'page'
   }
   switch (original.type) {
+    case 'openapi':
+    case 'swagger':
     case 'page':
       return [splitPageUrl(original.page)]
     case 'group':
+      const next_path = `{}`
       return original.children.map((ch: NavigationItem) => (getPaths(ch))).flat()
     case 'dropdown':
       return original.children.map((ch: NavigationItem) => (getPaths(ch))).flat()

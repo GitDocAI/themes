@@ -17,7 +17,7 @@ export async function loadDocuments(folderPath: string): Promise<DocumentData[]>
       } else if (entry.isFile()) {
         const content = await fs.promises.readFile(fullPath, "utf-8");
 
-        const chunks = chunkText(content, 120, 30); // maxWords=120, overlap=30
+        const chunks = chunkText(content, 10, 30); // maxWords=120, overlap=30
 
         chunks.forEach((chunk, index) => {
           docs.push({

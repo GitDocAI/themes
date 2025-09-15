@@ -21,7 +21,7 @@ function calculateTf(docTokens: string[]): Record<string, number> {
   });
 
   Object.keys(tf).forEach(term => {
-    tf[term] = tf[term] / totalTerms;
+    tf[term] = tf[term];
   });
 
   return tf;
@@ -41,7 +41,7 @@ export function buildTfIdf(docs: string[]): natural.TfIdf {
 
   const idf_list=[];
   vocabulary.forEach(term=>{
-    const term_idf =tfidf.idf(term,docs)
+    const term_idf=tfidf.idf(term,docs)
     idf_list.push(term_idf)
   })
 

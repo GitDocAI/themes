@@ -14,6 +14,13 @@ export const Sidebar = ({ themeinfo, versions, tabs }: { themeinfo: ThemeInfo, v
 
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
 
+  const methodColors: Record<string, string> = {
+    GET: "bg-emerald-600",
+    POST: "bg-blue-600",
+    PUT: "bg-amber-600",
+    DELETE: "bg-rose-600",
+  };
+
   function getRedirection(element: any): string {
     if (element.children) return getRedirection(element.children[0])
     return splitPageUrl(element.page)
@@ -112,6 +119,32 @@ function dropdownHasActiveChild(dropdown: NavigationItem, pathname: string): boo
             {item.title}
           </Anchor>
         ) : null
+
+      case 'swagger':
+      case 'openapi':
+        item.page = splitPageUrl(item.page)
+         const isActive_ = item.page === pathname;
+
+        return item.title ? (
+          <Anchor
+            key={item.page + item.title}
+            href={item.page || '#'}
+            className={`block py-1 px-2 rounded-md text-sm transition-colors duration-150 ease-in-out ${paddingLeft} ${isActive_
+              ? 'sidebar-active font-medium text-primary'
+              : 'text-secondary hover:bg-secondary/10 hover:text-primary'
+              }`}
+          >
+
+        <span
+          className={`px-3 py-1 rounded-md text-xs font-semibold text-white shadow mr-2 ${methodColors[item.method]}`}
+        >
+          {item.method}
+        </span>
+             {item.title}
+          </Anchor>
+        ) : null
+
+
       default:
         return null
     }

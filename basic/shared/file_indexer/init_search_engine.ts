@@ -13,6 +13,6 @@ export const init = async ()=>{
       const docs = await loadDocuments('content')
       const {vocabulary,tfidf,idf} = buildTfIdf(docs.map(doc=>doc.content))
       saveTfIdfIndex('public/static_data.json',docs.map(doc=>({...doc,content:doc.content.slice(1,100)})),{vocabulary,tfidf,idf})
-      return {vocabulary,idf,tfidf}
+      return {docs,vocabulary,idf,tfidf}
     }
 }

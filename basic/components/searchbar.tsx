@@ -99,6 +99,21 @@ export default function SearchBar() {
               autoFocus
             />
             <ul className="mt-4 max-h-[60vh] overflow-y-auto space-y-2">
+              {results.length==0?
+                  <li className="rounded-md hover:bg-secondary/10">
+                    <button
+                      onClick={() => {
+                        closeModal();
+                      }}
+                      className="block p-2 w-full text-left"
+                    >
+                      {/* <div className="font-semibold text-primary truncate">{path}</div> */}
+                      <div className="text-sm text-secondary mt-1 line-clamp-2">no results founded</div>
+                    </button>
+                  </li>
+                :<></>
+
+              }
               {results.map((result, index) => {
                 const path = result.doc.path.replace(/\.mdx$/, '');
                 const url = `/${path}?scroll=${result.doc.chunk * 10000}`;
