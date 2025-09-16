@@ -5,14 +5,14 @@
 
 
 :root {
---color-muted: 130 140 160;
+--color-muted: 55 65 81;
   --logo-light-display:block;
   --logo-dark-display:none
 
 }
 
 .dark-theme {
- --color-muted: 180 180 195;
+ --color-muted: 209 213 219;
   --logo-dark-display:block;
   --logo-light-display:none;
 }
@@ -23,6 +23,8 @@
   --color-background: rgb(var(--color-bg));
   --color-primary: rgb(var(--color-primary));
   --color-secondary: rgb(var(--color-muted));
+  --color-content-text: rgb(var(--color-content));
+  --color-heading-text: rgb(var(--color-heading));
   }
 
 @custom-variant dark (&:where(.dark-theme, .dark-theme *));
@@ -42,8 +44,9 @@ body {
 
 
 .sidebar-active {
-  background-color: rgb(var(--color-primary));
-  color: white !important;
+  background-color: rgb(var(--color-primary) / 0.08);
+  color: rgb(var(--color-primary) / 0.9) !important;
+  border-radius: 0.375rem;
 }
 
 .dark-theme .navbar-link {

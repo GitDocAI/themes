@@ -77,11 +77,11 @@ export default function ApiReference({
   };
 
   const methodColors: Record<string, string> = {
-    GET: "bg-emerald-600",
-    POST: "bg-blue-600",
-    PUT: "bg-amber-600",
-    PATCH: "bg-amber-600",
-    DELETE: "bg-rose-600",
+    GET: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300",
+    POST: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300",
+    PUT: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300",
+    PATCH: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300",
+    DELETE: "bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300",
   };
 
   return (
@@ -90,18 +90,18 @@ export default function ApiReference({
       <h2 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white mb-2">
         {title}
       </h2>
-      <p className="text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">
+      <p className="text-content mb-6 leading-relaxed">
         {description}
       </p>
 
       {/* Endpoint */}
-      <div className="flex items-center gap-3 mb-6">
+      <div className="flex items-start gap-3 mb-6">
         <span
-          className={`px-3 py-1 rounded-md text-sm font-semibold text-white shadow ${methodColors[method]}`}
+          className={`px-3 py-1 rounded-md text-sm font-semibold shadow flex-shrink-0 ${methodColors[method]}`}
         >
           {method}
         </span>
-        <code className="bg-gray-100 dark:bg-neutral-800 px-3 py-1 rounded text-sm text-gray-900 dark:text-gray-100 font-mono">
+        <code className="bg-gray-100 dark:bg-neutral-800 px-3 py-1 rounded text-sm text-gray-900 dark:text-gray-100 font-mono flex-grow min-w-0">
           {path}
         </code>
         {tryItBaseUrl == "" || tryItBaseUrl == null ? (
@@ -118,7 +118,7 @@ export default function ApiReference({
       </div>
 
       {/* Parameters */}
-      {parameters.length > 0 && (
+      {parameters && parameters.length > 0 && (
         <div className="mb-8">
           <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3">
             Parameters
@@ -137,7 +137,7 @@ export default function ApiReference({
                     {param.in}
                   </span>
                 </div>
-                <p className="text-gray-600 dark:text-gray-400 text-sm">
+                <p className="text-content text-sm">
                   {param.description}
                 </p>
                 <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
@@ -206,7 +206,7 @@ export default function ApiReference({
                   Try {title}
                 </Dialog.Title>
 
-                {parameters.map((param) => (
+                {parameters && parameters.map((param) => (
                   <div key={param.name} className="mb-4">
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       {param.name} ({param.in})

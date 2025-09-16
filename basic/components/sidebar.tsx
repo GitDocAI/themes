@@ -15,10 +15,10 @@ export const Sidebar = ({ themeinfo, versions, tabs }: { themeinfo: ThemeInfo, v
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
 
   const methodColors: Record<string, string> = {
-    GET: "bg-emerald-600",
-    POST: "bg-blue-600",
-    PUT: "bg-amber-600",
-    DELETE: "bg-rose-600",
+    GET: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300",
+    POST: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300",
+    PUT: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300",
+    DELETE: "bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300",
   };
 
   function getRedirection(element: any): string {
@@ -130,18 +130,19 @@ function dropdownHasActiveChild(dropdown: NavigationItem, pathname: string): boo
           <Anchor
             key={item.page + item.title}
             href={item.page || '#'}
-            className={`block py-1 px-2 rounded-md text-sm transition-colors duration-150 ease-in-out ${paddingLeft} ${isActive_
+            className={`flex items-center gap-2 py-1 px-2 rounded-md text-sm transition-colors duration-150 ease-in-out ${paddingLeft} ${isActive_
               ? 'sidebar-active font-medium text-primary'
               : 'text-secondary hover:bg-secondary/10 hover:text-primary'
               }`}
           >
-
-        <span
-          className={`px-3 py-1 rounded-md text-xs font-semibold text-white shadow mr-2 ${methodColors[item.method]}`}
-        >
-          {item.method}
-        </span>
-             {item.title}
+            <span
+              className={`px-2 py-0.5 rounded text-xs font-semibold shadow flex-shrink-0 ${methodColors[item.method]}`}
+            >
+              {item.method}
+            </span>
+            <span className="flex-grow min-w-0">
+              {item.title}
+            </span>
           </Anchor>
         ) : null
 
