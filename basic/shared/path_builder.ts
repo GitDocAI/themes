@@ -2,7 +2,7 @@ import { ThemeInfo,NavigationItem } from "../models/ThemeInfo";
 
 export const openapi_path_builder = (config: ThemeInfo): ThemeInfo => {
   const cleanPath = (str: string): string => {
-    return str.replace(/ /g, "_").toLowerCase();
+    return str.replaceAll(" ", "_").toLowerCase();
   };
 
   const appendPageToItem = (path: string, item: NavigationItem) => {

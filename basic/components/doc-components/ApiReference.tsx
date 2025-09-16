@@ -43,6 +43,8 @@ export default function ApiReference({
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  parameters = parameters??[]
+
   const handleSend = async () => {
     setLoading(true);
     setResponseData(null);
@@ -118,7 +120,11 @@ export default function ApiReference({
       </div>
 
       {/* Parameters */}
+<<<<<<< HEAD
       {parameters && parameters.length > 0 && (
+=======
+      { (!!parameters && parameters.length > 0) && (
+>>>>>>> a41b502 (fix(api_reference): fixed apiref page load)
         <div className="mb-8">
           <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3">
             Parameters
@@ -156,7 +162,7 @@ export default function ApiReference({
           Responses
         </h3>
         <div className="grid gap-3">
-          {Object.entries(responses).map(([code, res]) => (
+          {Object.entries(responses??{}).map(([code, res]) => (
             <div
               key={code}
               className="p-4 rounded-xl border border-gray-200 dark:border-neutral-800 bg-gray-50 dark:bg-neutral-900/60"

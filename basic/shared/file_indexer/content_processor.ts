@@ -27,7 +27,7 @@ function calculateTf(docTokens: string[]): Record<string, number> {
   return tf;
 }
 
-export function buildTfIdf(docs: string[]): natural.TfIdf {
+export function buildTfIdf(docs: string[]): {vocabulary:string[],tfidf:number[][],idf:number[]} {
   const tfidf = new natural.TfIdf();
 
   const vocabulary_set= new Set<string>()
@@ -39,13 +39,13 @@ export function buildTfIdf(docs: string[]): natural.TfIdf {
 
   const vocabulary = [...vocabulary_set]
 
-  const idf_list=[];
+  const idf_list:any=[];
   vocabulary.forEach(term=>{
-    const term_idf=tfidf.idf(term,docs)
+    const term_idf=tfidf.idf(term)
     idf_list.push(term_idf)
   })
 
-  const document_vectors=[]
+  const document_vectors:number[][]=[]
 
   docs.forEach((doc,index) => {
     const vector = new Array(vocabulary.length).fill(0);

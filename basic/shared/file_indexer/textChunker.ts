@@ -1,6 +1,6 @@
 import natural from "natural";
 
-const tokenizer = new natural.SentenceTokenizer();
+const tokenizer = new natural.SentenceTokenizer([]);
 
 export function chunkText(text: string, maxWords = 100, overlap = 20): string[] {
   const sentences = tokenizer.tokenize(text.replace(/[#`*_|>~\-!\[\]\(\)\{\}]/g, ""));

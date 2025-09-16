@@ -5,7 +5,7 @@ import {search} from '../../../shared/file_indexer/query'
 
 
 
-export async function POST(req) {
+export async function POST(req:any) {
   try {
     const body = await req.json();
     const { query } = body;
@@ -18,7 +18,7 @@ export async function POST(req) {
     }
 
     // Load the precomputed data
-    const data = await init()
+    const data = await init() as any
     const results = search(query, data.docs, data, 3);
 
     return new Response(JSON.stringify({ results }), {

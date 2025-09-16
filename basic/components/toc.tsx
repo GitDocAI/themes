@@ -8,26 +8,53 @@ export const TOC: FC<{ toc: Heading[] }> = ({ toc }) => {
   const activeRef = useRef<HTMLLIElement | null>(null)
 
   useEffect(() => {
+    // Crear un mapa de elementos observables con sus IDs correspondientes
+    const headingElements = new Map<Element, string>()
+
+    // Buscar todos los headings y mapearlos con los datos del TOC
+    toc.forEach((heading) => {
+      // Primero intentar encontrar por ID si existe
+      let element = heading.id ? document.getElementById(heading.id) : null
+
+      // Si no se encuentra por ID, buscar por contenido de texto
+      if (!element) {
+        const tags = document.querySelectorAll('h1, h2, h3, h4, h5, h6')
+        element = Array.from(tags).find(tag =>
+          tag.textContent?.trim() === String(heading.value).trim()
+        ) || null as any
+      }
+
+      if (element && heading.value) {
+        headingElements.set(element, String(heading.value).trim().toLowerCase())
+      }
+    })
+
+    if (headingElements.size === 0) return
+
     const observer = new IntersectionObserver(
       (entries) => {
-        const visible = entries.find((entry) => entry.isIntersecting)
-        if (visible) {
-          setActiveId(visible.target.textContent!.trim().toLowerCase())
+        // Encontrar la entrada que está intersectando y más cerca del top
+        const visibleEntries = entries
+          .filter(entry => entry.isIntersecting)
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)
+
+        if (visibleEntries.length > 0) {
+          const topEntry = visibleEntries[0]
+          const headingId = headingElements.get(topEntry.target)
+          if (headingId) {
+            setActiveId(headingId)
+          }
         }
       },
       {
-        rootMargin: "0% 0% -70% 0%",
-        threshold: [0, 1],
+        rootMargin: "0% 0% -80% 0%",
+        threshold: [0, 0.5, 1],
       }
     )
 
-    const tags = document.querySelectorAll('h1,h2,h3')
-    toc.forEach((heading) => {
-       tags.forEach(tag=>{
-        if(tag.textContent!.trim() == heading.value){
-           observer.observe(tag)
-        }
-      })
+    // Observar todos los elementos encontrados
+    headingElements.forEach((_, element) => {
+      observer.observe(element)
     })
 
     return () => observer.disconnect()
@@ -36,48 +63,71 @@ export const TOC: FC<{ toc: Heading[] }> = ({ toc }) => {
   useEffect(() => {
     if (activeRef.current) {
       activeRef.current.scrollIntoView({
+        behavior: "smooth",
         block: "nearest",
         inline: "nearest",
       })
     }
   }, [activeId])
 
+  const handleHeadingClick = (heading: Heading) => {
+    // Primero intentar scroll por ID
+    if (heading.id) {
+      const element = document.getElementById(heading.id)
+      if (element) {
+        element.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        })
+        return
+      }
+    }
+
+    // Si no hay ID, buscar por contenido de texto
+    const tags = document.querySelectorAll('h1, h2, h3, h4, h5, h6')
+    const targetElement = Array.from(tags).find(tag =>
+      tag.textContent?.trim() === String(heading.value).trim()
+    )
+
+    if (targetElement) {
+      targetElement.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      })
+    }
+  }
+
+  if (!toc || toc.length === 0) return null
+
   return (
-    <aside className="hidden xl:block sidebar w-64 flex-shrink-0 sticky top-18 max-h-[90dvh] overflow-y-auto px-6 py-6  [grid-area:toc]">
+    <aside className="hidden xl:block sidebar w-64 flex-shrink-0 sticky top-18 max-h-[90dvh] overflow-y-auto px-6 py-6 [grid-area:toc]">
       <h3 className="text-lg font-semibold mb-4 text-secondary">On this page</h3>
       <ul className="space-y-2">
+        {toc.map((heading) => {
+          const headingId = heading.value ? String(heading.value).trim().toLowerCase() : null
+          const isActive = activeId === headingId
 
-        {toc.map((heading:any) => (
-          <li
-            key={heading.id}
-            ref={activeId === heading.value.trim().toLowerCase() ? activeRef : null}
-            id={heading.value.toLowerCase().trim()}
-            style={{ marginLeft: `${(heading.depth - 2) * 1.25}rem` }}
-            onClick={() => {
-              const tags = document.querySelectorAll('h1,h2,h3');
-              tags.forEach(tag => {
-                if (tag.textContent!.trim() === heading.value) {
-                  tag.scrollIntoView({
-                    behavior: "smooth",
-                    block: "start",
-                  });
-                }
-              });
-            }}
-          >
-            <span
-              className={`block  transition-colors cursor-pointer duration-150 text-sm   ${
-                activeId === heading.value.trim().toLowerCase()
-                  ? "text-primary font-extrabold "
-                  : "text-secondary hover:text-primary"
-              }`}
+          return (
+            <li
+              key={heading.id || headingId || String(heading.value)}
+              ref={isActive ? activeRef : null}
+              style={{ marginLeft: `${Math.max(0, (heading.depth - 2)) * 1.25}rem` }}
+              className="cursor-pointer"
+              onClick={() => handleHeadingClick(heading)}
             >
-              {heading.value}
-            </span>
-          </li>
-        ))}
+              <span
+                className={`block transition-colors duration-150 text-sm hover:text-primary ${
+                  isActive
+                    ? "text-primary font-extrabold"
+                    : "text-secondary"
+                }`}
+              >
+                {String(heading.value)}
+              </span>
+            </li>
+          )
+        })}
       </ul>
     </aside>
   )
 }
-
