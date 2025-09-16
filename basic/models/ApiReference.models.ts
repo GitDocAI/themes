@@ -1,9 +1,35 @@
-interface Parameter {
-  name?: string;
-  in?: string;
+export interface Parameter  {
+  name: string;
+  in: "query" | "path" | "header" | "cookie";
   description?: string;
-  schema?: { type?: string; format?: string };
+  schema?: ApiSchema;
+  example?: any;
+  examples?: any;
+
+  type?: string;
+  format?: string;
+  enum?: string[];
+  items?: ApiSchema;
+  properties?: Record<string, ApiSchema>;
+  required?: string[];
+  minimum?: number;
+  maximum?: number;
+  default?: any;
 }
+
+export interface ApiSchema {
+  type?: string;
+  format?: string;
+  enum?: string[];
+  items?: ApiSchema;
+  properties?: Record<string, ApiSchema>;
+  required?: string[];
+  minimum?: number;
+  maximum?: number;
+  default?: any;
+}
+
+
 
 interface ResponseContent {
   description?: string;

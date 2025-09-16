@@ -6,6 +6,7 @@ import { createPortal } from "react-dom";
 import { CodeBlock } from "./CodeBlock";
 import {JsonHighlight} from "./HighlightedJSON"
 import {Security} from "./api-ref-components/Security"
+import {Parameters} from "./api-ref-components/Parameters"
 
 import {ApiReference as ApiReferenceProps} from '../../models/ApiReference.models'
 
@@ -146,33 +147,8 @@ export default function ApiReference({
 
 
         <Security security={security} securitySchemas={securitySchemas} />
+        <Parameters parameters={parameters} />
 
-        {parameters?.length ? (
-          <div className="mb-8">
-            <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3">Parameters</h3>
-            <div className="grid gap-3">
-              {parameters.map((param:any, i:number) => (
-                <div
-                  key={i}
-                  className="p-4 rounded-xl border border-gray-200 dark:border-neutral-800 bg-gray-50 dark:bg-neutral-900/60"
-                >
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="font-mono font-bold text-gray-900 dark:text-gray-100">
-                      {param.name}
-                    </span>
-                    <span className="text-xs px-2 py-0.5 rounded bg-gray-200 dark:bg-neutral-700 text-gray-700 dark:text-gray-300">
-                      {param.in}
-                    </span>
-                  </div>
-                  <p className="text-content text-sm">{param.description}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
-                    Type: {param.schema?.type} {param.schema?.format && `(${param.schema.format})`}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-        ) : null}
         {requestBody && (
           <div className="mb-8">
             <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3">Request Body</h3>
@@ -296,8 +272,39 @@ export default function ApiReference({
       </div>
       {asideRoot &&
         createPortal(
-          <aside className="hidden xl:block sidebar w-64 flex-shrink-0 sticky top-18 max-h-[90dvh] overflow-y-auto px-6 py-6 [grid-area:toc]">
-            <CodeBlock>{JSON.stringify(responseData, null, 2)}</CodeBlock>
+          <aside className="hidden xl:block sidebar w-[19rem] flex-shrink-0 sticky top-18 max-h-[90dvh] overflow-y-auto [grid-area:toc]">
+                  {Object.keys(responses).length > 0 && (
+                    <div className="w-[19rem]">
+                      <div className="grid gap-3 ">
+                        {Object.entries(responses).map(([code, res]:[any,any]) => (
+                          <div
+                            key={code}
+                            className="p-4 rounded-xl border border-gray-200 dark:border-neutral-800 bg-gray-50 dark:bg-neutral-900/60"
+                          >
+                            <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">
+                              {code}
+                            </span>
+                            <p className="text-gray-700 dark:text-gray-300 text-sm mt-1">{res.description}</p>
+                            {res.content && (
+                              <div className="mt-2 space-y-2">
+                                {Object.entries(res.content).map(([mime, body]: [any, any]) => (
+                                  <div key={mime} className="text-xs">
+                                    <p className="font-semibold text-gray-800 dark:text-gray-200">
+                                      Content-Type: {mime}
+                                    </p>
+                                    <CodeBlock>
+                                      {body.schema && <JsonHighlight json={body.schema}></JsonHighlight>}
+                                    </CodeBlock>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
           </aside>,
           asideRoot
         )}

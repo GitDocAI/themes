@@ -5,7 +5,7 @@ interface CodeBlockProps {
 }
 
 export const CodeBlock = ({ children }: CodeBlockProps) => {
-  const id = `code-${Math.random().toString(36).substring(2, 8)}`
+  const id = `code-`
   return (
     <span className="relative group" >
       <code id={id}>
