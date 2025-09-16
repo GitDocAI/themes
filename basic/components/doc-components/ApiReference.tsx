@@ -5,6 +5,7 @@ import { Dialog, Transition } from "@headlessui/react";
 import { createPortal } from "react-dom";
 import { CodeBlock } from "./CodeBlock";
 import {JsonHighlight} from "./HighlightedJSON"
+import {Security} from "./api-ref-components/Security"
 
 import {ApiReference as ApiReferenceProps} from '../../models/ApiReference.models'
 
@@ -143,31 +144,8 @@ export default function ApiReference({
           </div>
         )}
 
-        {(security || securitySchemas) && (
-          <div className="mt-8">
-            <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3 border border-transparent border-b-secondary/20 px-3">Authorizations</h3>
-            {security && securitySchemas && security.map((sec=>{
-              return Object.keys(sec).map(sectype=>{
-               return (<p>
-                  <JsonHighlight json={securitySchemas[sectype]}></JsonHighlight>
-                </p>)
-              })
-            }))
-            }
-            {securitySchemas && (
-              <div className="mt-4">
-                <h4 className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
-                  Security Schemas
-                </h4>
-                <CodeBlock>
-                  <JsonHighlight json={securitySchemas}></JsonHighlight>
-                </CodeBlock>
-              </div>
-            )}
-          </div>
-        )}
 
-
+        <Security security={security} securitySchemas={securitySchemas} />
 
         {parameters?.length ? (
           <div className="mb-8">
