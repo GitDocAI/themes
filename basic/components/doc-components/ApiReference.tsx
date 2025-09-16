@@ -6,48 +6,9 @@ import { createPortal } from "react-dom";
 import { CodeBlock } from "./CodeBlock";
 import {JsonHighlight} from "./HighlightedJSON"
 
-interface Parameter {
-  name?: string;
-  in?: string;
-  description?: string;
-  schema?: { type?: string; format?: string };
-}
+import {ApiReference as ApiReferenceProps} from '../../models/ApiReference.models'
 
-interface ResponseContent {
-  description?: string;
-  content?: any;
-}
 
-export interface ApiReferenceProps {
-  // Info general
-  title?: string;
-  summary?: string;
-  description?: string;
-  method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
-  path?: string;
-  deprecated?: boolean;
-  tags?: string[];
-  externalDocs?: { url?: string; description?: string };
-
-  // Inputs
-  parameters?: Parameter[];
-  requestBody?: {
-    description?: string;
-    required?: boolean;
-    content?: Record<string, any>;
-  };
-
-  // Outputs
-  responses?: Record<string, ResponseContent>;
-
-  // Opcional: server/base url
-  tryItBaseUrl?: string;
-
-  // Extra
-  security?: any[];
-  operationId?: string;
-  version?: string;
-}
 
 export default function ApiReference({
   title,
@@ -63,8 +24,7 @@ export default function ApiReference({
   responses = {},
   tryItBaseUrl,
   security,
-  operationId,
-  version,
+  securitySchemas,
 }: ApiReferenceProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [formData, setFormData] = useState<Record<string, string>>({});
@@ -90,14 +50,12 @@ export default function ApiReference({
         method,
         headers: { "Content-Type": "application/json" },
       };
-
       if (method === "GET") {
         const query = new URLSearchParams(formData).toString();
         if (query) url += `?${query}`;
       } else {
         options.body = JSON.stringify(formData);
       }
-
       const res = await fetch(url, options);
       const text = await res.text();
       let data;
@@ -125,23 +83,13 @@ export default function ApiReference({
   return (
     <>
       <div id="apiref" className="rounded-2xl p-6 transition">
-        {/* Header */}
-        <h2 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white mb-2">
-          {title ?? "Untitled endpoint"}
-        </h2>
-        {summary && <p className="italic text-gray-600 dark:text-gray-400">{summary}</p>}
-        {description && <p className="text-content mb-6 leading-relaxed">{description}</p>}
-        {deprecated && (
-          <p className="text-xs text-rose-600 dark:text-rose-400 font-semibold">⚠️ Deprecated</p>
-        )}
 
-        {/* Tags */}
         {tags?.length ? (
-          <div className="flex gap-2 mb-4 flex-wrap">
+          <div className="flex gap-2 mb-2 flex-wrap">
             {tags.map((tag) => (
               <span
                 key={tag}
-                className="px-2 py-1 text-xs rounded bg-gray-200 dark:bg-neutral-700 text-gray-700 dark:text-gray-200"
+                className="px-2 py-1 text-xs rounded bg-gray-200 dark:bg-neutral-700 text-primary"
               >
                 {tag}
               </span>
@@ -149,7 +97,14 @@ export default function ApiReference({
           </div>
         ) : null}
 
-        {/* External docs */}
+        <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white mb-2">
+          {title ?? "Untitled endpoint"}
+        </h1>
+        {summary && <p className="italic text-gray-600 dark:text-gray-400">{summary}</p>}
+        {description && <p className="text-content mb-6 leading-relaxed">{description}</p>}
+        {deprecated && (
+          <p className="text-xs text-rose-600 dark:text-rose-400 font-semibold">Deprecated</p>
+        )}
         {externalDocs?.url && (
           <a
             href={externalDocs.url}
@@ -160,24 +115,20 @@ export default function ApiReference({
             {externalDocs.description ?? "External docs"}
           </a>
         )}
-
-        {/* Endpoint */}
         {(path || method) && (
-          <div className="flex items-start gap-3 mb-6 mt-4 w-full border-secondary/30 border p-2 rounded-xl">
+          <div className="flex items-start gap-3 mb-6 mt-4 w-full border-secondary/20 border p-2 rounded-xl">
             {method && (
               <span
-                className={`px-3 py-1 rounded-md text-sm font-semibold shadow flex-shrink-0 ${methodColors[method]}`}
+                className={`px-3 py-1 my-auto rounded-md text-sm font-semibold shadow flex-shrink-0 ${methodColors[method]}`}
               >
                 {method}
               </span>
             )}
             {path && (
-              <pre className="w-full border-secondary/10 border p-0.5 rounded-lg pl-3">
-                  <CodeBlock >
-                    <p className="w-full min-w-md">
-                      {path}
-                    </p>
-                  </CodeBlock>
+              <pre className=" flex-1 border-secondary/10 border p-1 rounded-lg pl-3">
+                <CodeBlock>
+                  <p className="w-full ">{path}</p>
+                </CodeBlock>
               </pre>
             )}
             {tryItBaseUrl && (
@@ -192,14 +143,37 @@ export default function ApiReference({
           </div>
         )}
 
-        {/* Parameters */}
+        {(security || securitySchemas) && (
+          <div className="mt-8">
+            <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3 border border-transparent border-b-secondary/20 px-3">Authorizations</h3>
+            {security && securitySchemas && security.map((sec=>{
+              return Object.keys(sec).map(sectype=>{
+               return (<p>
+                  <JsonHighlight json={securitySchemas[sectype]}></JsonHighlight>
+                </p>)
+              })
+            }))
+            }
+            {securitySchemas && (
+              <div className="mt-4">
+                <h4 className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
+                  Security Schemas
+                </h4>
+                <CodeBlock>
+                  <JsonHighlight json={securitySchemas}></JsonHighlight>
+                </CodeBlock>
+              </div>
+            )}
+          </div>
+        )}
+
+
+
         {parameters?.length ? (
           <div className="mb-8">
-            <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3">
-              Parameters
-            </h3>
+            <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3">Parameters</h3>
             <div className="grid gap-3">
-              {parameters.map((param, i) => (
+              {parameters.map((param:any, i:number) => (
                 <div
                   key={i}
                   className="p-4 rounded-xl border border-gray-200 dark:border-neutral-800 bg-gray-50 dark:bg-neutral-900/60"
@@ -221,26 +195,32 @@ export default function ApiReference({
             </div>
           </div>
         ) : null}
-
-        {/* Request body */}
         {requestBody && (
           <div className="mb-8">
-            <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3">
-              Request Body
-            </h3>
+            <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3">Request Body</h3>
             <p className="text-sm text-gray-600 dark:text-gray-400">{requestBody.description}</p>
             {requestBody.required && <p className="text-xs text-rose-600">* Required</p>}
+            {requestBody.content && (
+              <div className="mt-3 space-y-2">
+                {Object.entries(requestBody.content).map(([mime, body]: [any, any]) => (
+                  <div key={mime} className="text-xs">
+                    <p className="font-semibold text-gray-800 dark:text-gray-200">
+                      Content-Type: {mime}
+                    </p>
+                    <CodeBlock>
+                      {body.schema && <JsonHighlight json={body.schema}></JsonHighlight>}
+                    </CodeBlock>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
-
-        {/* Responses */}
         {Object.keys(responses).length > 0 && (
           <div>
-            <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3">
-              Responses
-            </h3>
+            <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3">Responses</h3>
             <div className="grid gap-3">
-              {Object.entries(responses).map(([code, res]) => (
+              {Object.entries(responses).map(([code, res]:[any,any]) => (
                 <div
                   key={code}
                   className="p-4 rounded-xl border border-gray-200 dark:border-neutral-800 bg-gray-50 dark:bg-neutral-900/60"
@@ -248,57 +228,54 @@ export default function ApiReference({
                   <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">
                     {code}
                   </span>
-                  <p className="text-gray-700 dark:text-gray-300 text-sm mt-1">
-                    {res.description}
-                  </p>
-                 {res.content && (
-                      <div className="mt-2 space-y-2">
-                        {Object.entries(res.content).map(([mime, body]:[any,any]) => (
-                          <div key={mime} className="text-xs">
-                            <p className="font-semibold text-gray-800 dark:text-gray-200">
-                              Content-Type: {mime}
-                            </p>
+                  <p className="text-gray-700 dark:text-gray-300 text-sm mt-1">{res.description}</p>
+                  {res.content && (
+                    <div className="mt-2 space-y-2">
+                      {Object.entries(res.content).map(([mime, body]: [any, any]) => (
+                        <div key={mime} className="text-xs">
+                          <p className="font-semibold text-gray-800 dark:text-gray-200">
+                            Content-Type: {mime}
+                          </p>
                           <CodeBlock>
-                            {body.schema && (
-                                <JsonHighlight json={body.schema}>
-                                </JsonHighlight>
-                            )}
+                            {body.schema && <JsonHighlight json={body.schema}></JsonHighlight>}
                           </CodeBlock>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-
-
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
           </div>
         )}
-
-        {/* Extra info */}
-        {(operationId || version) && (
-          <div className="mt-6 text-xs text-gray-500 dark:text-gray-400">
-            {operationId && <p>Operation ID: {operationId}</p>}
-            {version && <p>Version: {version}</p>}
-          </div>
-        )}
-
-        {/* Modal */}
         <Transition show={isOpen} as={Fragment}>
           <Dialog as="div" className="relative z-50" onClose={() => setIsOpen(false)}>
-            <Transition.Child as={Fragment} enter="ease-out duration-200" enterFrom="opacity-0" enterTo="opacity-100" leave="ease-in duration-150" leaveFrom="opacity-100" leaveTo="opacity-0">
+            <Transition.Child
+              as={Fragment}
+              enter="ease-out duration-200"
+              enterFrom="opacity-0"
+              enterTo="opacity-100"
+              leave="ease-in duration-150"
+              leaveFrom="opacity-100"
+              leaveTo="opacity-0"
+            >
               <div className="fixed inset-0 bg-black/40" />
             </Transition.Child>
-
             <div className="fixed inset-0 flex items-center justify-center p-4">
-              <Transition.Child as={Fragment} enter="ease-out duration-200" enterFrom="opacity-0 scale-95" enterTo="opacity-100 scale-100" leave="ease-in duration-150" leaveFrom="opacity-100 scale-100" leaveTo="opacity-0 scale-95">
+              <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-200"
+                enterFrom="opacity-0 scale-95"
+                enterTo="opacity-100 scale-100"
+                leave="ease-in duration-150"
+                leaveFrom="opacity-100 scale-100"
+                leaveTo="opacity-0 scale-95"
+              >
                 <Dialog.Panel className="w-full max-w-lg rounded-2xl bg-white dark:bg-neutral-950 p-6 shadow-2xl">
                   <Dialog.Title className="text-lg font-bold text-gray-900 dark:text-white mb-4">
                     Try {title}
                   </Dialog.Title>
-
-                  {parameters?.map((param, i) => (
+                  {parameters?.map((param:any, i:number) => (
                     <div key={i} className="mb-4">
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         {param.name} ({param.in})
@@ -311,7 +288,6 @@ export default function ApiReference({
                       />
                     </div>
                   ))}
-
                   <div className="flex justify-end gap-3">
                     <button
                       onClick={() => setIsOpen(false)}
@@ -327,7 +303,6 @@ export default function ApiReference({
                       {loading ? "Sending..." : "Send"}
                     </button>
                   </div>
-
                   {responseData && (
                     <div className="mt-6 p-4 rounded-lg bg-gray-100 dark:bg-neutral-900 text-sm overflow-auto max-h-64">
                       <pre className="whitespace-pre-wrap text-gray-800 dark:text-gray-200">
@@ -341,8 +316,6 @@ export default function ApiReference({
           </Dialog>
         </Transition>
       </div>
-
-      {/* Portal para aside */}
       {asideRoot &&
         createPortal(
           <aside className="hidden xl:block sidebar w-64 flex-shrink-0 sticky top-18 max-h-[90dvh] overflow-y-auto px-6 py-6 [grid-area:toc]">
