@@ -1,51 +1,87 @@
 "use client";
-import { useState } from "react";
+
+import { useState, useEffect, Fragment } from "react";
 import { Dialog, Transition } from "@headlessui/react";
-import { Fragment } from "react";
+import { createPortal } from "react-dom";
+import { CodeBlock } from "./CodeBlock";
+import {JsonHighlight} from "./HighlightedJSON"
 
 interface Parameter {
-  name: string;
-  in: string;
-  description: string;
-  schema: { type: string; format?: string };
+  name?: string;
+  in?: string;
+  description?: string;
+  schema?: { type?: string; format?: string };
 }
 
 interface ResponseContent {
-  description: string;
-  content: any;
+  description?: string;
+  content?: any;
 }
 
-interface ApiReferenceProps {
-  title: string;
-  method: "GET" | "POST" | "PUT" | "DELETE";
-  path: string;
-  description: string;
-  parameters: Parameter[];
-  responses: Record<string, ResponseContent>;
-  tryItBaseUrl: string;
+export interface ApiReferenceProps {
+  // Info general
+  title?: string;
+  summary?: string;
+  description?: string;
+  method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+  path?: string;
+  deprecated?: boolean;
+  tags?: string[];
+  externalDocs?: { url?: string; description?: string };
+
+  // Inputs
+  parameters?: Parameter[];
+  requestBody?: {
+    description?: string;
+    required?: boolean;
+    content?: Record<string, any>;
+  };
+
+  // Outputs
+  responses?: Record<string, ResponseContent>;
+
+  // Opcional: server/base url
+  tryItBaseUrl?: string;
+
+  // Extra
+  security?: any[];
+  operationId?: string;
+  version?: string;
 }
 
 export default function ApiReference({
   title,
+  summary,
+  description,
   method,
   path,
-  description,
-  parameters,
-  responses,
+  deprecated,
+  tags,
+  externalDocs,
+  parameters = [],
+  requestBody,
+  responses = {},
   tryItBaseUrl,
+  security,
+  operationId,
+  version,
 }: ApiReferenceProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [formData, setFormData] = useState<Record<string, string>>({});
   const [responseData, setResponseData] = useState<any>(null);
   const [loading, setLoading] = useState(false);
+  const [asideRoot, setAsideRoot] = useState<HTMLElement | null>(null);
+
+  useEffect(() => {
+    setAsideRoot(document.getElementById("aside-root"));
+  }, []);
 
   const handleInputChange = (name: string, value: string) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  parameters = parameters??[]
-
   const handleSend = async () => {
+    if (!tryItBaseUrl || !method || !path) return;
     setLoading(true);
     setResponseData(null);
     try {
@@ -87,176 +123,234 @@ export default function ApiReference({
   };
 
   return (
-    <div className=" rounded-2xl p-6  transition ">
-      {/* Header */}
-      <h2 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white mb-2">
-        {title}
-      </h2>
-      <p className="text-content mb-6 leading-relaxed">
-        {description}
-      </p>
-
-      {/* Endpoint */}
-      <div className="flex items-start gap-3 mb-6">
-        <span
-          className={`px-3 py-1 rounded-md text-sm font-semibold shadow flex-shrink-0 ${methodColors[method]}`}
-        >
-          {method}
-        </span>
-        <code className="bg-gray-100 dark:bg-neutral-800 px-3 py-1 rounded text-sm text-gray-900 dark:text-gray-100 font-mono flex-grow min-w-0">
-          {path}
-        </code>
-        {tryItBaseUrl == "" || tryItBaseUrl == null ? (
-          <></>
-        ) : (
-          <button
-            onClick={() => setIsOpen(true)}
-            className="ml-auto flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-md shadow text-sm transition"
-          >
-            <i className="pi pi-play" />
-            Try it
-          </button>
+    <>
+      <div id="apiref" className="rounded-2xl p-6 transition">
+        {/* Header */}
+        <h2 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white mb-2">
+          {title ?? "Untitled endpoint"}
+        </h2>
+        {summary && <p className="italic text-gray-600 dark:text-gray-400">{summary}</p>}
+        {description && <p className="text-content mb-6 leading-relaxed">{description}</p>}
+        {deprecated && (
+          <p className="text-xs text-rose-600 dark:text-rose-400 font-semibold">⚠️ Deprecated</p>
         )}
-      </div>
 
-      {/* Parameters */}
-<<<<<<< HEAD
-      {parameters && parameters.length > 0 && (
-=======
-      { (!!parameters && parameters.length > 0) && (
->>>>>>> a41b502 (fix(api_reference): fixed apiref page load)
-        <div className="mb-8">
-          <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3">
-            Parameters
-          </h3>
-          <div className="grid gap-3">
-            {parameters.map((param) => (
-              <div
-                key={param.name}
-                className="p-4 rounded-xl border border-gray-200 dark:border-neutral-800 bg-gray-50 dark:bg-neutral-900/60"
+        {/* Tags */}
+        {tags?.length ? (
+          <div className="flex gap-2 mb-4 flex-wrap">
+            {tags.map((tag) => (
+              <span
+                key={tag}
+                className="px-2 py-1 text-xs rounded bg-gray-200 dark:bg-neutral-700 text-gray-700 dark:text-gray-200"
               >
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="font-mono font-bold text-gray-900 dark:text-gray-100">
-                    {param.name}
-                  </span>
-                  <span className="text-xs px-2 py-0.5 rounded bg-gray-200 dark:bg-neutral-700 text-gray-700 dark:text-gray-300">
-                    {param.in}
-                  </span>
-                </div>
-                <p className="text-content text-sm">
-                  {param.description}
-                </p>
-                <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
-                  Type: {param.schema.type}{" "}
-                  {param.schema.format && `(${param.schema.format})`}
-                </p>
-              </div>
+                {tag}
+              </span>
             ))}
           </div>
-        </div>
-      )}
+        ) : null}
 
-      {/* Responses */}
-      <div>
-        <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3">
-          Responses
-        </h3>
-        <div className="grid gap-3">
-          {Object.entries(responses??{}).map(([code, res]) => (
-            <div
-              key={code}
-              className="p-4 rounded-xl border border-gray-200 dark:border-neutral-800 bg-gray-50 dark:bg-neutral-900/60"
-            >
-              <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">
-                {code}
+        {/* External docs */}
+        {externalDocs?.url && (
+          <a
+            href={externalDocs.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 dark:text-blue-400 underline text-sm"
+          >
+            {externalDocs.description ?? "External docs"}
+          </a>
+        )}
+
+        {/* Endpoint */}
+        {(path || method) && (
+          <div className="flex items-start gap-3 mb-6 mt-4 w-full border-secondary/30 border p-2 rounded-xl">
+            {method && (
+              <span
+                className={`px-3 py-1 rounded-md text-sm font-semibold shadow flex-shrink-0 ${methodColors[method]}`}
+              >
+                {method}
               </span>
-              <p className="text-gray-700 dark:text-gray-300 text-sm mt-1">
-                {res.description}
-              </p>
+            )}
+            {path && (
+              <pre className="w-full border-secondary/10 border p-0.5 rounded-lg pl-3">
+                  <CodeBlock >
+                    <p className="w-full min-w-md">
+                      {path}
+                    </p>
+                  </CodeBlock>
+              </pre>
+            )}
+            {tryItBaseUrl && (
+              <button
+                onClick={() => setIsOpen(true)}
+                className="ml-auto flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-md shadow text-sm transition"
+              >
+                <i className="pi pi-play" />
+                Try it
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* Parameters */}
+        {parameters?.length ? (
+          <div className="mb-8">
+            <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3">
+              Parameters
+            </h3>
+            <div className="grid gap-3">
+              {parameters.map((param, i) => (
+                <div
+                  key={i}
+                  className="p-4 rounded-xl border border-gray-200 dark:border-neutral-800 bg-gray-50 dark:bg-neutral-900/60"
+                >
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="font-mono font-bold text-gray-900 dark:text-gray-100">
+                      {param.name}
+                    </span>
+                    <span className="text-xs px-2 py-0.5 rounded bg-gray-200 dark:bg-neutral-700 text-gray-700 dark:text-gray-300">
+                      {param.in}
+                    </span>
+                  </div>
+                  <p className="text-content text-sm">{param.description}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+                    Type: {param.schema?.type} {param.schema?.format && `(${param.schema.format})`}
+                  </p>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          </div>
+        ) : null}
+
+        {/* Request body */}
+        {requestBody && (
+          <div className="mb-8">
+            <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3">
+              Request Body
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400">{requestBody.description}</p>
+            {requestBody.required && <p className="text-xs text-rose-600">* Required</p>}
+          </div>
+        )}
+
+        {/* Responses */}
+        {Object.keys(responses).length > 0 && (
+          <div>
+            <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3">
+              Responses
+            </h3>
+            <div className="grid gap-3">
+              {Object.entries(responses).map(([code, res]) => (
+                <div
+                  key={code}
+                  className="p-4 rounded-xl border border-gray-200 dark:border-neutral-800 bg-gray-50 dark:bg-neutral-900/60"
+                >
+                  <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">
+                    {code}
+                  </span>
+                  <p className="text-gray-700 dark:text-gray-300 text-sm mt-1">
+                    {res.description}
+                  </p>
+                 {res.content && (
+                      <div className="mt-2 space-y-2">
+                        {Object.entries(res.content).map(([mime, body]:[any,any]) => (
+                          <div key={mime} className="text-xs">
+                            <p className="font-semibold text-gray-800 dark:text-gray-200">
+                              Content-Type: {mime}
+                            </p>
+                          <CodeBlock>
+                            {body.schema && (
+                                <JsonHighlight json={body.schema}>
+                                </JsonHighlight>
+                            )}
+                          </CodeBlock>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Extra info */}
+        {(operationId || version) && (
+          <div className="mt-6 text-xs text-gray-500 dark:text-gray-400">
+            {operationId && <p>Operation ID: {operationId}</p>}
+            {version && <p>Version: {version}</p>}
+          </div>
+        )}
+
+        {/* Modal */}
+        <Transition show={isOpen} as={Fragment}>
+          <Dialog as="div" className="relative z-50" onClose={() => setIsOpen(false)}>
+            <Transition.Child as={Fragment} enter="ease-out duration-200" enterFrom="opacity-0" enterTo="opacity-100" leave="ease-in duration-150" leaveFrom="opacity-100" leaveTo="opacity-0">
+              <div className="fixed inset-0 bg-black/40" />
+            </Transition.Child>
+
+            <div className="fixed inset-0 flex items-center justify-center p-4">
+              <Transition.Child as={Fragment} enter="ease-out duration-200" enterFrom="opacity-0 scale-95" enterTo="opacity-100 scale-100" leave="ease-in duration-150" leaveFrom="opacity-100 scale-100" leaveTo="opacity-0 scale-95">
+                <Dialog.Panel className="w-full max-w-lg rounded-2xl bg-white dark:bg-neutral-950 p-6 shadow-2xl">
+                  <Dialog.Title className="text-lg font-bold text-gray-900 dark:text-white mb-4">
+                    Try {title}
+                  </Dialog.Title>
+
+                  {parameters?.map((param, i) => (
+                    <div key={i} className="mb-4">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        {param.name} ({param.in})
+                      </label>
+                      <input
+                        type="text"
+                        value={formData[param.name ?? ""] || ""}
+                        onChange={(e) => handleInputChange(param.name ?? "", e.target.value)}
+                        className="w-full border rounded-lg p-2 dark:bg-neutral-900 dark:border-neutral-700 dark:text-white focus:ring-2 focus:ring-emerald-500 outline-none"
+                      />
+                    </div>
+                  ))}
+
+                  <div className="flex justify-end gap-3">
+                    <button
+                      onClick={() => setIsOpen(false)}
+                      className="px-4 py-2 rounded-lg bg-gray-200 dark:bg-neutral-800 text-gray-800 dark:text-gray-200"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleSend}
+                      disabled={loading}
+                      className="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white shadow disabled:opacity-50"
+                    >
+                      {loading ? "Sending..." : "Send"}
+                    </button>
+                  </div>
+
+                  {responseData && (
+                    <div className="mt-6 p-4 rounded-lg bg-gray-100 dark:bg-neutral-900 text-sm overflow-auto max-h-64">
+                      <pre className="whitespace-pre-wrap text-gray-800 dark:text-gray-200">
+                        {JSON.stringify(responseData, null, 2)}
+                      </pre>
+                    </div>
+                  )}
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
+          </Dialog>
+        </Transition>
       </div>
 
-      {/* Modal */}
-      <Transition show={isOpen} as={Fragment}>
-        <Dialog
-          as="div"
-          className="relative z-50"
-          onClose={() => setIsOpen(false)}
-        >
-          <Transition.Child
-            as={Fragment}
-            enter="ease-out duration-200"
-            enterFrom="opacity-0"
-            enterTo="opacity-100"
-            leave="ease-in duration-150"
-            leaveFrom="opacity-100"
-            leaveTo="opacity-0"
-          >
-            <div className="fixed inset-0 bg-black/40" />
-          </Transition.Child>
-
-          <div className="fixed inset-0 flex items-center justify-center p-4">
-            <Transition.Child
-              as={Fragment}
-              enter="ease-out duration-200"
-              enterFrom="opacity-0 scale-95"
-              enterTo="opacity-100 scale-100"
-              leave="ease-in duration-150"
-              leaveFrom="opacity-100 scale-100"
-              leaveTo="opacity-0 scale-95"
-            >
-              <Dialog.Panel className="w-full max-w-lg rounded-2xl bg-white dark:bg-neutral-950 p-6 shadow-2xl">
-                <Dialog.Title className="text-lg font-bold text-gray-900 dark:text-white mb-4">
-                  Try {title}
-                </Dialog.Title>
-
-                {parameters && parameters.map((param) => (
-                  <div key={param.name} className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      {param.name} ({param.in})
-                    </label>
-                    <input
-                      type="text"
-                      value={formData[param.name] || ""}
-                      onChange={(e) =>
-                        handleInputChange(param.name, e.target.value)
-                      }
-                      className="w-full border rounded-lg p-2 dark:bg-neutral-900 dark:border-neutral-700 dark:text-white focus:ring-2 focus:ring-emerald-500 outline-none"
-                    />
-                  </div>
-                ))}
-
-                <div className="flex justify-end gap-3">
-                  <button
-                    onClick={() => setIsOpen(false)}
-                    className="px-4 py-2 rounded-lg bg-gray-200 dark:bg-neutral-800 text-gray-800 dark:text-gray-200"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleSend}
-                    disabled={loading}
-                    className="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white shadow disabled:opacity-50"
-                  >
-                    {loading ? "Sending..." : "Send"}
-                  </button>
-                </div>
-
-                {responseData && (
-                  <div className="mt-6 p-4 rounded-lg bg-gray-100 dark:bg-neutral-900 text-sm overflow-auto max-h-64">
-                    <pre className="whitespace-pre-wrap text-gray-800 dark:text-gray-200">
-                      {JSON.stringify(responseData, null, 2)}
-                    </pre>
-                  </div>
-                )}
-              </Dialog.Panel>
-            </Transition.Child>
-          </div>
-        </Dialog>
-      </Transition>
-    </div>
+      {/* Portal para aside */}
+      {asideRoot &&
+        createPortal(
+          <aside className="hidden xl:block sidebar w-64 flex-shrink-0 sticky top-18 max-h-[90dvh] overflow-y-auto px-6 py-6 [grid-area:toc]">
+            <CodeBlock>{JSON.stringify(responseData, null, 2)}</CodeBlock>
+          </aside>,
+          asideRoot
+        )}
+    </>
   );
 }
 

@@ -7,7 +7,7 @@ interface CodeBlockProps {
 export const CodeBlock = ({ children }: CodeBlockProps) => {
   const id = `code-${Math.random().toString(36).substring(2, 8)}`
   return (
-    <div className="relative group" >
+    <span className="relative group" >
       <code id={id}>
         {children}
       </code>
@@ -18,7 +18,7 @@ export const CodeBlock = ({ children }: CodeBlockProps) => {
       >
         <i className="pi pi-clone"> </i>
       </button>
-    </div >
+    </span >
   )
 }
 

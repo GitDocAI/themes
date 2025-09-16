@@ -6,17 +6,24 @@ import { useEffect, useState, useRef } from "react"
 export const TOC: FC<{ toc: Heading[] }> = ({ toc }) => {
   const [activeId, setActiveId] = useState<string | null>(null)
   const activeRef = useRef<HTMLLIElement | null>(null)
+  const [activeToc, setActiveToc] = useState<boolean>(true)
 
   useEffect(() => {
-    // Crear un mapa de elementos observables con sus IDs correspondientes
+
+    const el = document.getElementById('apiref')
+
+    if(el){
+       setActiveToc(false)
+    }else{
+       setActiveToc(true)
+    }
+
+
     const headingElements = new Map<Element, string>()
 
-    // Buscar todos los headings y mapearlos con los datos del TOC
     toc.forEach((heading) => {
-      // Primero intentar encontrar por ID si existe
       let element = heading.id ? document.getElementById(heading.id) : null
 
-      // Si no se encuentra por ID, buscar por contenido de texto
       if (!element) {
         const tags = document.querySelectorAll('h1, h2, h3, h4, h5, h6')
         element = Array.from(tags).find(tag =>
@@ -33,7 +40,6 @@ export const TOC: FC<{ toc: Heading[] }> = ({ toc }) => {
 
     const observer = new IntersectionObserver(
       (entries) => {
-        // Encontrar la entrada que está intersectando y más cerca del top
         const visibleEntries = entries
           .filter(entry => entry.isIntersecting)
           .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)
@@ -52,7 +58,6 @@ export const TOC: FC<{ toc: Heading[] }> = ({ toc }) => {
       }
     )
 
-    // Observar todos los elementos encontrados
     headingElements.forEach((_, element) => {
       observer.observe(element)
     })
@@ -71,7 +76,6 @@ export const TOC: FC<{ toc: Heading[] }> = ({ toc }) => {
   }, [activeId])
 
   const handleHeadingClick = (heading: Heading) => {
-    // Primero intentar scroll por ID
     if (heading.id) {
       const element = document.getElementById(heading.id)
       if (element) {
@@ -83,7 +87,6 @@ export const TOC: FC<{ toc: Heading[] }> = ({ toc }) => {
       }
     }
 
-    // Si no hay ID, buscar por contenido de texto
     const tags = document.querySelectorAll('h1, h2, h3, h4, h5, h6')
     const targetElement = Array.from(tags).find(tag =>
       tag.textContent?.trim() === String(heading.value).trim()
@@ -97,10 +100,11 @@ export const TOC: FC<{ toc: Heading[] }> = ({ toc }) => {
     }
   }
 
-  if (!toc || toc.length === 0) return null
+
+  if(!activeToc) return null
 
   return (
-    <aside className="hidden xl:block sidebar w-64 flex-shrink-0 sticky top-18 max-h-[90dvh] overflow-y-auto px-6 py-6 [grid-area:toc]">
+    <aside id="toc" className="hidden xl:block sidebar w-64 flex-shrink-0 sticky top-18 max-h-[90dvh] overflow-y-auto px-6 py-6 [grid-area:toc]">
       <h3 className="text-lg font-semibold mb-4 text-secondary">On this page</h3>
       <ul className="space-y-2">
         {toc.map((heading) => {

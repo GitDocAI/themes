@@ -37,7 +37,6 @@ export const TabList = ({
 
   const handleTabClick = (tabName: string) => {
     const tabInfo = tablist.find((t) => t.tab === tabName)
-    console.log("asasasasass",tabInfo,"joiibpjpoi ")
     const firstPath = tabInfo?.paths[0]
     if (firstPath) {
       router.push(firstPath)
