@@ -6,17 +6,21 @@ import { useEffect, useState, useRef } from "react"
 export const TOC: FC<{ toc: Heading[] }> = ({ toc }) => {
   const [activeId, setActiveId] = useState<string | null>(null)
   const activeRef = useRef<HTMLLIElement | null>(null)
-  const [activeToc, setActiveToc] = useState<boolean>(true)
+  const [activeToc, setActiveToc] = useState<boolean>(false)
+
 
   useEffect(() => {
-
     const el = document.getElementById('apiref')
-
     if(el){
        setActiveToc(false)
     }else{
        setActiveToc(true)
     }
+  },[])
+
+
+  useEffect(() => {
+
 
 
     const headingElements = new Map<Element, string>()

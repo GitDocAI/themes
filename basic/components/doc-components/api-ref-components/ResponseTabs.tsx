@@ -49,7 +49,7 @@ console.log(responseEntries)
 
   return (
 
-    <div className={`pt-4 px-1 rounded-xl border border-secondary/5  bg-secondary/5 ${className}`}>
+    <div className={`pt-4 px-1 rounded-xl border border-secondary/5   bg-secondary/5 ${className}`}>
       {/* Tab Headers */}
       <div className="flex flex-wrap gap-1 ">
 
@@ -70,7 +70,7 @@ console.log(responseEntries)
           );
         })}
         <button
-          onClick={() => handleCopy(jsonContent!.schema, `${jsonContent!.contentType}`)}
+          onClick={() => handleCopy(generateExample(jsonContent!.schema), `${jsonContent!.contentType}`)}
           className=" ml-auto  px-2 py-1 rounded text-xs font-medium flex items-center gap-1 transition-colors duration-200 cursor-pointer bg-secondary/0 hover:bg-secondary/5 my-auto"
           title={copied === `${jsonContent?.contentType}` ? "Copied!" : "Copy JSON"}
         >
@@ -100,7 +100,7 @@ console.log(responseEntries)
               {jsonContent?.schema ? (
                 <div className="relative">
                   <div className="">
-                    <div className="space-y-2 bg-background rounded-xl p-4">
+                    <div className="space-y-2 bg-background rounded-xl p-4 min-w-64">
                       <JsonHighlight
                         json={generateExample(jsonContent.schema)}
                         className="overflow-y-auto max-h-[80dvh]"

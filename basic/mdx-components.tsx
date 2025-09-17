@@ -16,7 +16,7 @@ const defaultComponents = getNextraComponents({
              {children}
           </article>
           <TOC toc={toc} />
-          <div id="aside-root" />
+          <div id="aside-root" className="[grid-area:toc]" />
       </>
     )
   },
