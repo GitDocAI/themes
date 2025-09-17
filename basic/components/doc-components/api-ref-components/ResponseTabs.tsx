@@ -100,7 +100,7 @@ console.log(responseEntries)
               {jsonContent?.schema ? (
                 <div className="relative">
                   <div className="">
-                    <div className="space-y-2 bg-background rounded-xl p-4 min-w-64">
+                    <div className="space-y-2 bg-background rounded-xl p-4  min-w-64">
                       <JsonHighlight
                         json={generateExample(jsonContent.schema)}
                         className="overflow-y-auto max-h-[80dvh]"
@@ -139,6 +139,9 @@ function generateExample(schema: any): any {
 
 function generateExampleValue(prop: any): any {
   switch (prop.type) {
+    case 'array':
+    case 'object':
+    return generateExample(prop);
     case 'string':
       if (prop.format === 'date-time') return new Date().toISOString();
       if (prop.enum) return prop.enum[0];
@@ -149,6 +152,8 @@ function generateExampleValue(prop: any): any {
       return 1.0;
     case 'boolean':
       return true;
+    case 'enum':
+      return prop.enum[0];
     default:
       return null;
   }

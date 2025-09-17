@@ -4,14 +4,14 @@ import { useEffect, useState } from "react";
 interface JsonHighlightProps {
   json: any;
   className?: string;
-  fontSize?: number;
+  fontSize?: string;
   fontFamily?: string;
 }
 
 export function JsonHighlight({
   json,
   className = "",
-  fontSize = 14,
+  fontSize = '1rem',
   fontFamily = "ui-monospace, SFMono-Regular, 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace"
 }: JsonHighlightProps) {
   const [highlighted, setHighlighted] = useState("");
@@ -64,7 +64,7 @@ export function JsonHighlight({
         className="json-highlight rounded-xl overflow-hidden overflow-x-auto [&>pre]:!bg-transparent [&>pre]:!border-none [&>pre]:!shadow-none [&>pre]:!m-0 [&>pre]:!p-0"
         style={{
           fontFamily,
-          fontSize: `${fontSize}px`,
+          fontSize: `${fontSize}`,
           lineHeight: 1.5,
           backgroundColor: 'transparent'
         }}
