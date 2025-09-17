@@ -100,7 +100,7 @@ console.log(responseEntries)
               {jsonContent?.schema ? (
                 <div className="relative">
                   <div className="">
-                    <div className="space-y-2 bg-background rounded-xl p-4  min-w-64">
+                    <div className="space-y-2 bg-background rounded-xl p-4 min-w-64">
                       <JsonHighlight
                         json={generateExample(jsonContent.schema)}
                         className="overflow-y-auto max-h-[80dvh]"
@@ -132,6 +132,8 @@ function generateExample(schema: any): any {
       example[key] = generateExampleValue(prop);
     });
     return example;
+  }else if(!schema.properties){
+    return{}
   }
 
   return generateExampleValue(schema);
