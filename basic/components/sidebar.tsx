@@ -78,8 +78,8 @@ function dropdownHasActiveChild(dropdown: NavigationItem, pathname: string): boo
     switch (item.type) {
       case 'group':
         return (
-          <div key={item.title} className={`mb-4 ${paddingLeft}`}>
-            <div className="font-bold text-sm uppercase text-secondary mb-2 px-2 tracking-wide">
+          <div key={item.title} className={`mb-10 ${paddingLeft}`}>
+            <div className="font-extrabold text-sm uppercase text-secondary mb-2 px-2 tracking-wide">
               {item.title}
             </div>
             <div className="space-y-1 pl-2">
