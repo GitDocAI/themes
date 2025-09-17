@@ -12,21 +12,6 @@ export function tokenize(text: string): string[] {
 }
 
 
-function calculateTf(docTokens: string[]): Record<string, number> {
-  const tf: Record<string, number> = {};
-  const totalTerms = docTokens.length;
-
-  docTokens.forEach(term => {
-    tf[term] = (tf[term] || 0) + 1;
-  });
-
-  Object.keys(tf).forEach(term => {
-    tf[term] = tf[term];
-  });
-
-  return tf;
-}
-
 export function buildTfIdf(docs: string[]): {vocabulary:string[],tfidf:number[][],idf:number[]} {
   const tfidf = new natural.TfIdf();
 

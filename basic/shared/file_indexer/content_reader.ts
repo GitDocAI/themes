@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { DocumentData } from "./model/DocumentData";
+import { DocumentData,Chunk } from "./model/DocumentData";
 import { chunkText } from "./textChunker";
 
 export async function loadDocuments(folderPath: string): Promise<DocumentData[]> {
@@ -19,11 +19,10 @@ export async function loadDocuments(folderPath: string): Promise<DocumentData[]>
 
         const chunks = chunkText(content, 10, 30); // maxWords=120, overlap=30
 
-        chunks.forEach((chunk, index) => {
+        chunks.forEach((chunk:Chunk, index:number) => {
           docs.push({
             path: path.relative(folderPath, fullPath),
-            chunk: index,
-            content: chunk,
+            chunk: chunk,
           });
         });
       }

@@ -11,8 +11,8 @@ export const init = async ()=>{
     }
     catch(e){
       const docs = await loadDocuments('content')
-      const {vocabulary,tfidf,idf} = buildTfIdf(docs.map(doc=>doc.content))
-      saveTfIdfIndex('public/static_data.json',docs.map(doc=>({...doc,content:doc.content.slice(1,100)})),{vocabulary,tfidf,idf})
+      const {vocabulary,tfidf,idf} = buildTfIdf(docs.map(doc=>doc.chunk.text))
+      saveTfIdfIndex('public/static_data.json',docs,{vocabulary,tfidf,idf})
       return {docs,vocabulary,idf,tfidf}
     }
 }

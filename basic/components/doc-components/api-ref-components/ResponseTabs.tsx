@@ -103,7 +103,7 @@ console.log(responseEntries)
                     <div className="space-y-2 bg-background rounded-xl p-4 min-w-64">
                       <JsonHighlight
                         json={generateExample(jsonContent.schema)}
-                        className="overflow-y-auto max-h-[80dvh]"
+                        className="overflow-y-auto sidebar max-h-[80dvh]"
                       />
                     </div>
                   </div>
