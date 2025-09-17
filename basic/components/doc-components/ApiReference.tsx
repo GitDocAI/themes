@@ -8,6 +8,7 @@ import {JsonHighlight} from "./HighlightedJSON"
 import {Security} from "./api-ref-components/Security"
 import {Parameters} from "./api-ref-components/Parameters"
 import {RequestBody} from "./api-ref-components/RequestBody"
+import {Response} from "./api-ref-components/Response"
 
 import {ApiReference as ApiReferenceProps} from '../../models/ApiReference.models'
 
@@ -147,63 +148,13 @@ export default function ApiReference({
         )}
 
 
+        <div className="flex flex-col gap-4">
         <Security security={security} securitySchemas={securitySchemas} />
         <Parameters parameters={parameters} />
         <RequestBody reqBody={requestBody as any} />
+        <Response responses={responses}/>
+        </div>
 
-        {requestBody && (
-          <div className="mb-8">
-            <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3">Request Body</h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400">{requestBody.description}</p>
-            {requestBody.required && <p className="text-xs text-rose-600">* Required</p>}
-            {requestBody.content && (
-              <div className="mt-3 space-y-2">
-                {Object.entries(requestBody.content).map(([mime, body]: [any, any]) => (
-                  <div key={mime} className="text-xs">
-                    <p className="font-semibold text-gray-800 dark:text-gray-200">
-                      Content-Type: {mime}
-                    </p>
-                    <CodeBlock>
-                      {body.schema && <JsonHighlight json={body.schema}></JsonHighlight>}
-                    </CodeBlock>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-        {Object.keys(responses).length > 0 && (
-          <div>
-            <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3">Responses</h3>
-            <div className="grid gap-3">
-              {Object.entries(responses).map(([code, res]:[any,any]) => (
-                <div
-                  key={code}
-                  className="p-4 rounded-xl border border-gray-200 dark:border-neutral-800 bg-gray-50 dark:bg-neutral-900/60"
-                >
-                  <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">
-                    {code}
-                  </span>
-                  <p className="text-gray-700 dark:text-gray-300 text-sm mt-1">{res.description}</p>
-                  {res.content && (
-                    <div className="mt-2 space-y-2">
-                      {Object.entries(res.content).map(([mime, body]: [any, any]) => (
-                        <div key={mime} className="text-xs">
-                          <p className="font-semibold text-gray-800 dark:text-gray-200">
-                            Content-Type: {mime}
-                          </p>
-                          <CodeBlock>
-                            {body.schema && <JsonHighlight json={body.schema}></JsonHighlight>}
-                          </CodeBlock>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
         <Transition show={isOpen} as={Fragment}>
           <Dialog as="div" className="relative z-50" onClose={() => setIsOpen(false)}>
             <Transition.Child

@@ -2,8 +2,9 @@
 
 import { ReactNode } from 'react';
 import { useState } from "react";
-import { Parameter } from "../../../models/ApiReference.models";
+import { Parameter,ApiSchema } from "../../../models/ApiReference.models";
 import "primeicons/primeicons.css";
+import {ApiSchemaRenderer} from './ApiRefRenderer'
 
 interface Props {
   parameters: Parameter[];
@@ -212,7 +213,13 @@ export function Parameters({ parameters }: Props) {
           <h3 className="text-lg font-bold mb-3 flex items-center gap-2">
             Query Parameters
           </h3>
-          {queryParams.map((p) => renderParam(p))}
+          {queryParams.map((p) => (
+             <ApiSchemaRenderer
+              key={p.name}
+              propName={p.name}
+              propSchema={{...p.schema,required:p.required} as ApiSchema}
+            />
+          ))}
         </section>
       )}
 
@@ -221,7 +228,13 @@ export function Parameters({ parameters }: Props) {
           <h3 className="text-lg font-bold mb-3 flex items-center gap-2">
             Parameters
           </h3>
-          {otherParams.map((p) => renderParam(p))}
+          {otherParams.map((p) => (
+             <ApiSchemaRenderer
+              key={p.name}
+              propName={p.name}
+              propSchema={{...p.schema,required:p.required} as ApiSchema}
+            />
+          ))}
         </section>
       )}
     </div>

@@ -44,18 +44,18 @@ export const DefaultTheme: FC<{
                   grid
                   grid-cols-1
                   grid-rows-[auto_auto]
-                  [grid-template-areas:'content''nav']
 
+                  [grid-template-areas:'content''nav''toc''footer']
 
-                  lg:grid-cols-[1fr_auto]
+                  lg:grid-cols-[auto_auto]
                   lg:grid-rows-[auto_auto]
-                  lg:[grid-template-areas:'content_toc''nav_toc']
+                  lg:[grid-template-areas:'content_toc''nav_toc''footer_toc']
                   p-4
 
                   gap-4">
                   {children}
-          <Footer name={themeinfo.name} items={themeinfo.footer} logo={logo} />
                   <PrevNextNavigation themeinfo={themeinfo} versions={versions} tabs={tabs} />
+                  <Footer name={themeinfo.name} items={themeinfo.footer} logo={logo} />
               </main>
             </div>
           </div>

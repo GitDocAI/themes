@@ -41,11 +41,19 @@ export interface ApiSchema {
   required_fields:any;
 }
 
-
-interface ResponseContent {
-  description?: string;
-  content?: any;
+export interface ResponseSchema {
+  [statusCode: string]: {
+    description: string;
+    content?: {
+      [mediaType: string]: {
+        schema:ApiSchema;
+      };
+    };
+  };
 }
+
+
+
 
 interface SecuritySchema {
   type?: string;
@@ -72,12 +80,8 @@ export interface ApiReference {
   tags?: string[];
   externalDocs?: { url?: string; description?: string };
   parameters?: Parameter[];
-  requestBody?: {
-    description?: string;
-    required?: boolean;
-    content?: Record<string, any>;
-  };
-  responses?: Record<string, ResponseContent>;
+  requestBody?: RequestBody;
+  responses?: Record<string, ResponseSchema>;
   tryItBaseUrl?: string;
   security?: any[];
   securitySchemas?: Record<string, SecuritySchema>;

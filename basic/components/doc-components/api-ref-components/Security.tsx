@@ -36,7 +36,7 @@ export const Security =({security,securitySchemas}:ApiReference)=>{
                     return (
                       <div key={sectype} className="p-3 rounded-md">
                         <span className=" flex-row items-center text-primary mb-1 flex flex-1 gap-6">
-                            <h1>Authorization</h1>
+                            <h1 className="font-semibold">Authorization</h1>
                             <div className="flex gap-2 flex-row items-center justify-center">
                               {tags.map(tag => (
                                 <span
@@ -65,7 +65,7 @@ export const Security =({security,securitySchemas}:ApiReference)=>{
                   if (sectype === "ApiKeyAuth") {
                     return (
                       <div key={sectype} className="p-3 rounded-md  ">
-                        <span className="block  font-mono text-primary mb-1">
+                        <span className="block  font-semibold text-primary mb-1">
                           {schema.name}
                         </span>
                         <p className="text-sm text-secondary/70">
@@ -78,7 +78,7 @@ export const Security =({security,securitySchemas}:ApiReference)=>{
 
                 return (
                   <div key={sectype} className="p-3 rounded-md">
-                    <span className="block font-mono text-primary mb-1">{sectype}</span>
+                    <span className="block font-semibold text-primary mb-1">{sectype}</span>
 
                     <div className="mt-2 space-y-1">
                       {Object.entries(schema).map(([key, value]) => (
