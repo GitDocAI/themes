@@ -9,7 +9,7 @@ import {Security} from "./api-ref-components/Security"
 import {Parameters} from "./api-ref-components/Parameters"
 import {RequestBody} from "./api-ref-components/RequestBody"
 import {Response} from "./api-ref-components/Response"
-
+import {ResponseTabs} from "./api-ref-components/ResponseTabs"
 import {ApiReference as ApiReferenceProps} from '../../models/ApiReference.models'
 
 
@@ -225,38 +225,11 @@ export default function ApiReference({
       </div>
       {asideRoot &&
         createPortal(
-          <aside className="hidden xl:block sidebar w-[19rem] flex-shrink-0 sticky top-18 max-h-[90dvh] overflow-y-auto [grid-area:toc]">
-                  {Object.keys(responses).length > 0 && (
-                    <div className="w-[19rem]">
-                      <div className="grid gap-3 ">
-                        {Object.entries(responses).map(([code, res]:[any,any]) => (
-                          <div
-                            key={code}
-                            className="p-4 rounded-xl border border-gray-200 dark:border-neutral-800 bg-gray-50 dark:bg-neutral-900/60"
-                          >
-                            <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">
-                              {code}
-                            </span>
-                            <p className="text-gray-700 dark:text-gray-300 text-sm mt-1">{res.description}</p>
-                            {res.content && (
-                              <div className="mt-2 space-y-2">
-                                {Object.entries(res.content).map(([mime, body]: [any, any]) => (
-                                  <div key={mime} className="text-xs">
-                                    <p className="font-semibold text-gray-800 dark:text-gray-200">
-                                      Content-Type: {mime}
-                                    </p>
-                                    <CodeBlock>
-                                      {body.schema && <JsonHighlight json={body.schema}></JsonHighlight>}
-                                    </CodeBlock>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+          <aside className="hidden xl:block sidebar  flex-shrink-0 sticky top-18 max-h-[90dvh] overflow-y-auto [grid-area:toc]">
+
+                  <ResponseTabs responses={responses}/>
+
+
 
           </aside>,
           asideRoot
