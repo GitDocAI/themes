@@ -41,7 +41,7 @@ export const Security =({security,securitySchemas}:ApiReference)=>{
                               {tags.map(tag => (
                                 <span
                                   key={tag}
-                                  className="rounded-md bg-secondary/20 px-2 py-0.5 text-xs  text-secondary"
+                                  className="rounded-md bg-secondary/5 px-2 py-0.5 text-xs  text-secondary"
                                 >
                                   {tag}
                                 </span>

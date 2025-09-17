@@ -27,8 +27,19 @@ export interface ApiSchema {
   minimum?: number;
   maximum?: number;
   default?: any;
+  minLength:number;
+  maxLength:number;
+  pattern:any;
+  example:any;
+  multipleOf:number;
+  uniqueItems:any;
+  unique_items:any;
+  nullable:boolean;
+  deprecated:boolean;
+  readOnly:boolean;
+  writeOnly:boolean;
+  required_fields:any;
 }
-
 
 
 interface ResponseContent {
@@ -42,6 +53,13 @@ interface SecuritySchema {
   in?: string;
   scheme?: string;
   bearerFormat?: string;
+}
+
+
+export interface RequestBody{
+    description?: string;
+    required?: boolean;
+    content?: any
 }
 
 export interface ApiReference {

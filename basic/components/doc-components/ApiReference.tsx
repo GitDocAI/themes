@@ -7,6 +7,7 @@ import { CodeBlock } from "./CodeBlock";
 import {JsonHighlight} from "./HighlightedJSON"
 import {Security} from "./api-ref-components/Security"
 import {Parameters} from "./api-ref-components/Parameters"
+import {RequestBody} from "./api-ref-components/RequestBody"
 
 import {ApiReference as ApiReferenceProps} from '../../models/ApiReference.models'
 
@@ -148,6 +149,7 @@ export default function ApiReference({
 
         <Security security={security} securitySchemas={securitySchemas} />
         <Parameters parameters={parameters} />
+        <RequestBody reqBody={requestBody as any} />
 
         {requestBody && (
           <div className="mb-8">

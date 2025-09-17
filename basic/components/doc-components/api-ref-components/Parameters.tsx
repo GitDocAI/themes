@@ -1,4 +1,6 @@
 "use client";
+
+import { ReactNode } from 'react';
 import { useState } from "react";
 import { Parameter } from "../../../models/ApiReference.models";
 import "primeicons/primeicons.css";
@@ -18,21 +20,65 @@ export function Parameters({ parameters }: Props) {
   };
 
   const renderConstraints = (schema: any) => {
-    const constraints: string[] = [];
+    const constraints: ReactNode[] = [];
     if (!schema) return null;
 
     if (schema.minimum !== undefined)
-      constraints.push(`Required range x>=  ${schema.minimum}`);
+      constraints.push(
+        <span>Required range x &ge;
+              <span
+                className="rounded-md bg-secondary/5 px-2 py-0.5 text-xs text-secondary"
+              >
+          {schema.minimum}
+            </span>
+        </span>
+
+      );
     if (schema.maximum !== undefined)
-      constraints.push(`Required range x<=  ${schema.maximum}`);
+      constraints.push(
+        <span>Required range x &le;
+              <span
+                className="rounded-md bg-secondary/5 px-2 py-0.5 text-xs text-secondary"
+              >
+          {schema.maximum}
+            </span>
+        </span>
+        );
     if (schema.minLength !== undefined)
-      constraints.push(`Min Length: ${schema.minLength}`);
+      constraints.push(
+        <span> Min Length
+              <span
+                className="rounded-md bg-secondary/5 px-2 py-0.5 text-xs text-secondary"
+              >
+                {schema.minLength}
+            </span>
+        </span>
+      );
     if (schema.maxLength !== undefined)
-      constraints.push(`Max Length: ${schema.maxLength}`);
+      constraints.push(
+        <span> Max Length
+              <span
+                className="rounded-md bg-secondary/5 px-2 py-0.5 text-xs text-secondary"
+              >
+                {schema.maxLength}
+            </span>
+        </span>
+      );
+
     if (schema.pattern !== undefined)
       constraints.push(`Pattern: ${schema.pattern}`);
-    if (schema.enum !== undefined)
-      constraints.push(`Aviable Options: [${schema.enum.join(", ")}]`);
+    if (schema.enum !== undefined){
+      constraints.push(
+        <span key="enum" className="flex flex-wrap">Available Options:
+            {schema.enum.map((option:string)=>(
+                <span className="rounded-md bg-secondary/5 px-2 py-0.5 text-xs text-secondary ml-1">
+                    {option}
+                </span>
+            ))}
+        </span>
+      );
+    }
+
     if (schema.default !== undefined)
       constraints.push(`Default: ${JSON.stringify(schema.default)}`);
     if (schema.example !== undefined)
@@ -53,7 +99,7 @@ export function Parameters({ parameters }: Props) {
     return constraints.length > 0 ? (
       <div className="flex flex-col mt-1 text-sm text-secondary">
         {constraints.map((c, i) => (
-          <span key={i} className="">
+          <span key={i} className="text-secondary/60">
             {c}
           </span>
         ))}
@@ -69,7 +115,7 @@ export function Parameters({ parameters }: Props) {
       <div className="flex justify-between items-start flex-col">
         <div className="flex flex-row gap-2 mb-2 flex-wrap">
           {!parentName ? (
-            <span className="font-semibold">{param.name}</span>
+            <span className="text-primary font-semibold">{param.name}</span>
           ) : (
             <span className="font-semibold">
               {parentName}.
@@ -83,7 +129,7 @@ export function Parameters({ parameters }: Props) {
             {(param.in == "query" || !param.in) ? null : (
               <span
                 key={param.in}
-                className="rounded-md bg-secondary/20 px-2 py-0.5 text-xs text-secondary"
+                className="rounded-md bg-secondary/5 px-2 py-0.5 text-xs text-secondary"
               >
                 {param.in}
               </span>
@@ -92,7 +138,7 @@ export function Parameters({ parameters }: Props) {
             {param.schema?.format && (
               <span
                 key={param.schema?.format}
-                className="rounded-md bg-secondary/20 px-2 py-0.5 text-xs text-secondary"
+                className="rounded-md bg-secondary/5 px-2 py-0.5 text-xs text-secondary"
               >
                 {param.schema?.type !== "array" ? param.schema?.type : null}
                 &lt;{param.schema?.format}&gt;
@@ -103,7 +149,7 @@ export function Parameters({ parameters }: Props) {
             {param.schema?.type && !param.schema?.format && (
               <span
                 key={param.schema?.type}
-                className="rounded-md bg-secondary/20 px-2 py-0.5 text-xs text-secondary"
+                className="rounded-md bg-secondary/5 px-2 py-0.5 text-xs text-secondary"
               >
                 {param.schema?.type}
               </span>
