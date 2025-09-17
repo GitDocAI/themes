@@ -64,13 +64,13 @@ const VersionSwitcher = ({ versions }: { versions: Version[] }) => {
         onFocus={handleFocus}
         onBlur={handleBlur}
         onClick={click}
-        className="x:whitespace-nowrap x:transition-colors x:min-w-6 x:overflow-hidden x:text-ellipsis x:focus-visible:nextra-focus x:ring-inset bg-background border-primary text-secondary border rounded-full px-3 py-1"
+        className="x:whitespace-nowrap x:transition-colors x:min-w-6 x:overflow-hidden x:text-ellipsis x:focus-visible:nextra-focus x:ring-inset bg-background border-secondary/30 text-secondary border rounded-full px-3 py-1"
       >
         {selectedVersion}
       </button>
 
       {isOpen && filteredVersions.length > 0 && (
-        <ul className="absolute z-10 mt-1 w-20 bg-background border border-primary/20 rounded-md text-secondary shadow-lg overflow-y-auto">
+        <ul className="absolute z-10 mt-1 w-20 bg-background border border-secondary/20 rounded-md text-secondary shadow-lg overflow-y-auto">
           {filteredVersions.map(version => (
             <li
               key={version.version}

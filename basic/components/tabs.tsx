@@ -44,8 +44,8 @@ export const TabList = ({
   }
 
   return (
-    <div className="pt-2 container sticky top-14 ">
-      <div className="px-4 !text-xs">
+    <div className="pt-2 container sticky top-14 px-4">
+      <div className="text-sm">
         <div className="flex gap-4  overflow-x-auto">
           {visibleTabs.map((tabName) => {
             const isActive = tabName === activeTab

@@ -17,6 +17,7 @@ export default function SearchBar() {
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResult[]>([]);
+  const [isMac, setIsMac] = useState<boolean | null>(null);
   const router = useRouter();
 
   const openModal = () => setIsOpen(true);
@@ -40,7 +41,9 @@ export default function SearchBar() {
     return () => window.removeEventListener('keydown', handler);
   }, []);
 
-  const isMac = typeof window !== 'undefined' && navigator.platform.toUpperCase().includes('MAC');
+  useEffect(() => {
+    setIsMac(navigator.platform.toUpperCase().includes('MAC'));
+  }, []);
 
   useEffect(() => {
     const handleSearch = async () => {
@@ -79,11 +82,13 @@ export default function SearchBar() {
     <>
       <button
         onClick={openModal}
-        className="md:w-full flex items-center space-x-2 rounded-lg md:border md:border-secondary bg-background px-4 py-2 text-sm text-gray-600 md:shadow-sm transition hover:md:shadow-md "
+        className="md:w-full flex items-center space-x-2 rounded-lg md:border md:border-secondary/30 bg-background px-4 py-2 text-sm text-gray-600 md:shadow-sm transition hover:md:shadow-md "
       >
         <i className="w-4 h-4 pi pi-search cursor-pointer" />
         <span className="hidden sm:inline">Search</span>
-        <kbd className="hidden sm:inline ml-auto text-xs text-secondary">{isMac ? '⌘+K' : 'Ctl+K'}</kbd>
+        {isMac !== null && (
+          <kbd className="hidden sm:inline ml-auto text-xs text-secondary">{isMac ? '⌘+K' : 'Ctl+K'}</kbd>
+        )}
       </button>
 
       <Dialog open={isOpen} onClose={closeModal} className="relative z-50">

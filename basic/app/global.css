@@ -105,3 +105,31 @@ body {
 h1,h2,h3,h4{
  scroll-margin-top: 150px;
 }
+
+/* Fix copy button position in code blocks */
+/* Make the pre element the positioning context */
+pre {
+  position: relative !important;
+}
+
+/* Make the span.relative.group expand to full size of pre */
+pre > span.relative.group {
+  position: static !important;
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Position the button relative to the pre element */
+pre button[data-copy-target] {
+  position: absolute !important;
+  top: 0.5rem !important;
+  right: 0.5rem !important;
+  opacity: 0;
+  transition: opacity 200ms;
+}
+
+/* Show button on hover of pre element */
+pre:hover button[data-copy-target] {
+  opacity: 1 !important;
+}
