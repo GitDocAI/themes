@@ -34,6 +34,7 @@ body {
   background-size: cover;
   background-position: center;
   background-color:rgb(var(--color-bg));
+  font-family: 'Roboto', Arial, sans-serif;
 }
 
 .tab-active {

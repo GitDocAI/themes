@@ -35,6 +35,8 @@ const RootLayout: FC<{ children: ReactNode }> = async ({ children }) => {
     <html lang="en" dir="ltr" >
       <Head >
         <style>{generateCSSVars(getPageRecords(site as any)) as any}</style>
+
+        <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet"/>
         <link rel="icon" href={site.favicon} />
       </Head>
       <body style={{ margin: 0 }} >

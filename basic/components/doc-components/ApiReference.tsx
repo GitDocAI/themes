@@ -226,11 +226,7 @@ export default function ApiReference({
       {asideRoot &&
         createPortal(
           <aside className="hidden xl:block sidebar  flex-shrink-0 sticky top-18 max-h-[90dvh] overflow-y-auto [grid-area:toc]">
-
                   <ResponseTabs responses={responses}/>
-
-
-
           </aside>,
           asideRoot
         )}
