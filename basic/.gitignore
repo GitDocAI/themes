@@ -39,8 +39,4 @@ turbo/
 
 # Optional: local next config override
 next.config.mjs.local
-gitdocai.config.json
-content
-public
-public/assets
 package-lock.json

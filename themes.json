@@ -2,7 +2,7 @@
     {
         "name": "basic",
         "description": "A modern, minimalistic theme for documentation.",
-        "sample": "https://yhvcorp.com",
-        "preview": "https://yhvcorp.com/wp-content/uploads/2025/03/dasboard-1.png"
+        "sample": "https://themes-basic.gitdoc.ai",
+        "preview": "/api/v1/site-appearance/preview/basic.png"
     }
 ]

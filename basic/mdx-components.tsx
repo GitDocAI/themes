@@ -3,7 +3,7 @@ import { TOC } from './components/toc'
 import { AlertBlock } from './components/doc-components/AlertBlock'
 import { BlockQuote } from './components/doc-components/BlockQuote'
 import { CodeBlock } from './components/doc-components/CodeBlock'
-import {  CheckItem } from './components/doc-components/CheckList'
+import { CheckItem, CheckList } from './components/doc-components/CheckList'
 import  ApiReference from './components/doc-components/ApiReference'
 import React from 'react';
 
@@ -26,7 +26,7 @@ const defaultComponents = getNextraComponents({
   h3: ({ children }) => <h3 className="text-2xl font-medium mb-3 mt-8">{children}</h3>,
 
   p: ({ children }) => <p className="mb-4 leading-7 text-base text-secondary">{children}</p>,
-  ul: ({ children, className }) => {
+  ul: ({ children }) => {
     return (
       <ul className="list-disc pl-6 mb-4">{children}</ul>
     )
@@ -113,6 +113,8 @@ const defaultComponents = getNextraComponents({
       {children}
     </AlertBlock>
   ),
+  CheckList,
+  CheckItem,
 })
 
 export const useMDXComponents = (components: any) => ({

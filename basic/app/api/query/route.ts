@@ -1,6 +1,6 @@
 import { readFile } from 'fs/promises';
 import path from 'path';
-import {init} from '../../../shared/file_indexer/init_search_engine'
+import {loadTfIdfIndex} from '../../../shared/file_indexer/buildIndex'
 import {search} from '../../../shared/file_indexer/query'
 
 
@@ -17,8 +17,9 @@ export async function POST(req:any) {
       });
     }
 
-    // Load the precomputed data
-    const data = await init() as any
+    // Load the precomputed data from static file
+    const staticDataPath = path.join(process.cwd(), 'public', 'static_data.json');
+    const data = loadTfIdfIndex(staticDataPath) as any;
     const results = search(query, data.docs, data, 3);
 
     return new Response(JSON.stringify({ results }), {

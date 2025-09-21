@@ -1,0 +1,788 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Acme Platform API",
+    "description": "Comprehensive API for managing applications, users, and resources on Acme Platform",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Acme Platform Support",
+      "url": "https://acmecorp.com/support",
+      "email": "api-support@acmecorp.com"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://api.acmecorp.com/v1",
+      "description": "Production server"
+    },
+    {
+      "url": "https://staging-api.acmecorp.com/v1",
+      "description": "Staging server"
+    }
+  ],
+  "security": [
+    {
+      "bearerAuth": []
+    },
+    {
+      "ApiKeyAuth": []
+    }
+  ],
+  "paths": {
+    "/api/applications": {
+      "get": {
+        "summary": "Get All Applications",
+        "description": "Retrieve a list of all applications with optional filtering and pagination",
+        "operationId": "getAllApplications",
+        "tags": ["Applications"],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number for pagination",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "Number of applications per page",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Filter by application status",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["running", "stopped", "deploying", "failed"]
+            }
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "description": "Filter by application name",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "applications": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Application"
+                      }
+                    },
+                    "pagination": {
+                      "$ref": "#/components/schemas/Pagination"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create Application",
+        "description": "Create a new application in your workspace",
+        "operationId": "createApplication",
+        "tags": ["Applications"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateApplicationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Application created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Application"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/applications/{id}": {
+      "put": {
+        "summary": "Update Application",
+        "description": "Update an existing application by its ID",
+        "operationId": "updateApplication",
+        "tags": ["Applications"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Application ID",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateApplicationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Application updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Application"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete Application",
+        "description": "Delete an application and all its resources",
+        "operationId": "deleteApplication",
+        "tags": ["Applications"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Application ID",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Application deleted successfully"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/auth/keys": {
+      "post": {
+        "summary": "Generate API Key",
+        "description": "Generate a new API key for authentication",
+        "operationId": "generateApiKey",
+        "tags": ["Authentication"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenerateApiKeyRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "API key generated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiKeyResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/auth/validate": {
+      "post": {
+        "summary": "Validate Token",
+        "description": "Validate an API token or JWT",
+        "operationId": "validateToken",
+        "tags": ["Authentication"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ValidateTokenRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Token is valid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenValidationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/management/logs": {
+      "get": {
+        "summary": "Get All Logs",
+        "description": "Retrieve system logs with filtering options",
+        "operationId": "getAllLogs",
+        "tags": ["System"],
+        "parameters": [
+          {
+            "name": "level",
+            "in": "query",
+            "description": "Filter by log level",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["DEBUG", "INFO", "WARN", "ERROR"]
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of log entries to return",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000,
+              "default": 100
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/LogEntry"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "put": {
+        "summary": "Change Log Level",
+        "description": "Update the logging level for system components",
+        "operationId": "changeLogLevel",
+        "tags": ["System"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LogLevelRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Log level updated successfully"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Application": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unique identifier for the application"
+          },
+          "name": {
+            "type": "string",
+            "description": "Application name"
+          },
+          "description": {
+            "type": "string",
+            "description": "Application description"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["running", "stopped", "deploying", "failed"],
+            "description": "Application status"
+          },
+          "region": {
+            "type": "string",
+            "description": "Deployment region"
+          },
+          "runtime": {
+            "type": "string",
+            "enum": ["nodejs18", "nodejs20", "python3.9", "python3.11", "java17"],
+            "description": "Runtime environment"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "Application URL"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Application creation timestamp"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Application last update timestamp"
+          },
+          "owner": {
+            "$ref": "#/components/schemas/User"
+          },
+          "environment": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Environment variables"
+          }
+        },
+        "required": ["id", "name", "status", "region", "runtime", "createdAt", "updatedAt"]
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "role": {
+            "type": "string",
+            "enum": ["admin", "developer", "viewer"]
+          }
+        },
+        "required": ["id", "name", "email", "role"]
+      },
+      "CreateApplicationRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "description": "Application name"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 500,
+            "description": "Application description"
+          },
+          "region": {
+            "type": "string",
+            "enum": ["us-east-1", "us-west-2", "eu-west-1", "ap-south-1"],
+            "description": "Deployment region"
+          },
+          "runtime": {
+            "type": "string",
+            "enum": ["nodejs18", "nodejs20", "python3.9", "python3.11", "java17"],
+            "description": "Runtime environment"
+          },
+          "environment": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Environment variables"
+          }
+        },
+        "required": ["name", "region", "runtime"]
+      },
+      "UpdateApplicationRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "description": "Application name"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 500,
+            "description": "Application description"
+          },
+          "environment": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Environment variables"
+          }
+        }
+      },
+      "GenerateApiKeyRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "description": "API key name for identification"
+          },
+          "scopes": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": ["applications:read", "applications:write", "system:read", "system:write"]
+            },
+            "description": "API key permissions"
+          },
+          "expiresIn": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 365,
+            "description": "Number of days until the API key expires"
+          }
+        },
+        "required": ["name", "scopes"]
+      },
+      "ApiKeyResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string",
+            "description": "The generated API key (only shown once)"
+          },
+          "scopes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": ["id", "name", "key", "scopes", "createdAt"]
+      },
+      "ValidateTokenRequest": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "description": "The token to validate"
+          }
+        },
+        "required": ["token"]
+      },
+      "TokenValidationResponse": {
+        "type": "object",
+        "properties": {
+          "valid": {
+            "type": "boolean",
+            "description": "Whether the token is valid"
+          },
+          "user": {
+            "$ref": "#/components/schemas/User"
+          },
+          "scopes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Token permissions"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Token expiration time"
+          }
+        },
+        "required": ["valid"]
+      },
+      "LogEntry": {
+        "type": "object",
+        "properties": {
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Log entry timestamp"
+          },
+          "level": {
+            "type": "string",
+            "enum": ["DEBUG", "INFO", "WARN", "ERROR"],
+            "description": "Log level"
+          },
+          "logger": {
+            "type": "string",
+            "description": "Logger name"
+          },
+          "message": {
+            "type": "string",
+            "description": "Log message"
+          },
+          "component": {
+            "type": "string",
+            "description": "System component that generated the log"
+          }
+        },
+        "required": ["timestamp", "level", "logger", "message"]
+      },
+      "LogLevelRequest": {
+        "type": "object",
+        "properties": {
+          "level": {
+            "type": "string",
+            "enum": ["DEBUG", "INFO", "WARN", "ERROR"],
+            "description": "New log level"
+          },
+          "component": {
+            "type": "string",
+            "description": "System component to update (optional, updates all if not specified)"
+          }
+        },
+        "required": ["level"]
+      },
+      "Pagination": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "description": "Current page number"
+          },
+          "size": {
+            "type": "integer",
+            "description": "Number of items per page"
+          },
+          "total": {
+            "type": "integer",
+            "description": "Total number of items"
+          },
+          "totalPages": {
+            "type": "integer",
+            "description": "Total number of pages"
+          }
+        },
+        "required": ["page", "size", "total", "totalPages"]
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Error code"
+          },
+          "message": {
+            "type": "string",
+            "description": "Error message"
+          },
+          "details": {
+            "type": "object",
+            "description": "Additional error details"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Error timestamp"
+          }
+        },
+        "required": ["code", "message", "timestamp"]
+      }
+    },
+    "responses": {
+      "BadRequest": {
+        "description": "Bad request - invalid input parameters",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "Unauthorized": {
+        "description": "Unauthorized - authentication required",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "Resource not found",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "InternalServerError": {
+        "description": "Internal server error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "JWT Bearer token authentication"
+      },
+      "ApiKeyAuth": {
+        "type": "apiKey",
+        "name": "X-API-Key",
+        "in": "header",
+        "description": "API key for authentication"
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Applications",
+      "description": "Application management operations"
+    },
+    {
+      "name": "Authentication",
+      "description": "Authentication and authorization operations"
+    },
+    {
+      "name": "System",
+      "description": "System management and monitoring operations"
+    }
+  ]
+}
