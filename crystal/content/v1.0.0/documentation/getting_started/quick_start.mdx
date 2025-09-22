@@ -1,0 +1,151 @@
+# Quick Start Guide
+
+Get your first Crystal Platform application running in under 5 minutes.
+
+![Crystal Platform Dashboard - Modern gradient interface](https://images.unsplash.com/photo-1557682224-5b8590cd9ec5?w=800&h=400&fit=crop&auto=format&q=90)
+
+## Step 1: Create Your Project
+
+Initialize a new Crystal Platform project:
+
+```bash
+mkdir my-app && cd my-app
+crystal init
+```
+
+> [!TIP]
+> You can also initialize Crystal Platform in an existing project directory.
+
+## Step 2: Basic Configuration
+
+Your `crystal.config.json` should look like this:
+
+```json
+{
+  "name": "My Crystal App",
+  "description": "A sample application built with Crystal Platform",
+  "environment": "development",
+  "region": "us-east-1",
+  "runtime": "nodejs20"
+}
+```
+
+## Step 3: Create Your First Function
+
+Create a simple API endpoint:
+
+```bash
+mkdir -p src/api
+echo "export default function handler(req, res) {
+  res.json({ message: 'Hello from Crystal!' });
+}" > src/api/hello.js
+```
+
+## Step 4: Deploy Your Application
+
+Deploy to the cloud:
+
+```bash
+crystal deploy
+```
+
+<CheckList>
+  <CheckItem variant="do">
+    Platform will build your application automatically
+  </CheckItem>
+  <CheckItem variant="do">
+    Set up load balancing and auto-scaling
+  </CheckItem>
+  <CheckItem variant="do">
+    Configure monitoring and logging
+  </CheckItem>
+</CheckList>
+
+## Step 5: Test Your Deployment
+
+Your application will be available at a generated URL:
+
+```bash
+crystal status
+```
+
+> [!INFO]
+> The deployment usually takes 2-3 minutes. You'll receive a URL once it's ready.
+
+## What's Next?
+
+### Add Environment Variables
+
+Configure environment-specific settings:
+
+```json
+{
+  "env": {
+    "DATABASE_URL": "postgres://localhost/myapp",
+    "API_KEY": "${SECRET_API_KEY}",
+    "NODE_ENV": "production"
+  }
+}
+```
+
+### Set Up Custom Domains
+
+Configure your custom domain:
+
+```json
+{
+  "domains": [
+    {
+      "name": "api.mycompany.com",
+      "ssl": true
+    }
+  ]
+}
+```
+
+### Configure Scaling Rules
+
+Set up automatic scaling based on load:
+
+```json
+{
+  "scaling": {
+    "minInstances": 1,
+    "maxInstances": 10,
+    "targetCPU": 70
+  }
+}
+```
+
+> [!WARNING]
+> Remember to set appropriate scaling limits to control costs.
+
+## Advanced Features
+
+Explore these powerful features once you're comfortable with the basics:
+
+<CheckList>
+  <CheckItem variant="do">
+    **Database Integration**: Connect to managed databases
+  </CheckItem>
+  <CheckItem variant="do">
+    **CI/CD Pipelines**: Automated testing and deployment
+  </CheckItem>
+  <CheckItem variant="do">
+    **Monitoring**: Real-time performance metrics
+  </CheckItem>
+  <CheckItem variant="do">
+    **Logging**: Centralized log management
+  </CheckItem>
+</CheckList>
+
+## Next Steps
+
+- Explore [Cloud Services](/v1.0.0/documentation/core_features/ai_documentation) integration
+- Learn about [Security Configuration](/v1.0.0/documentation/core_features/theme_system)
+- Set up [Monitoring & Analytics](/v1.0.0/documentation/core_features/version_control)
+
+---
+
+> [!NOTE]
+> This quick start guide covers the essentials. For detailed configuration options, check out our comprehensive documentation sections.

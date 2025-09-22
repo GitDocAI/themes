@@ -4,5 +4,11 @@
         "description": "A modern, minimalistic theme for documentation.",
         "sample": "https://themes-basic.gitdoc.ai",
         "preview": "/api/v1/site-appearance/preview/basic.png"
+    },
+    {
+        "name": "crystal",
+        "description": "Modern, elegant documentation with crystal-clear design and seamless user experience.",
+        "sample": "https://themes-crystal.gitdoc.ai",
+        "preview": "/api/v1/site-appearance/preview/crystal.png"
     }
 ]
