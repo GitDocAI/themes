@@ -12,3 +12,6 @@ export const init = async ()=>{
     console.log('Search index regenerated successfully')
     return {docs,vocabulary,idf,tfidf}
 }
+
+
+init()

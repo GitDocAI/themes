@@ -16,5 +16,11 @@
         "description": "Modern, clean documentation with Prisma-inspired design and seamless user experience.",
         "sample": "https://themes-lupe.gitdoc.ai",
         "preview": "/api/v1/site-appearance/previews/lupe.png"
+    },
+    {
+        "name": "lume",
+        "description": "Modern, clean documentation with NuxtUI-inspired design and seamless user experience.",
+        "sample": "https://themes-lupe.gitdoc.ai",
+        "preview": "/api/v1/site-appearance/previews/lupe.png"
     }
 ]

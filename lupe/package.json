@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "prebuild":"node ./shared/file_indexer/init_search_engine.ts",
     "dev": "next --turbopack",
     "build": "next build",
     "start": "next start",
