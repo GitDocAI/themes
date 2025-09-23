@@ -23,7 +23,7 @@ function vectorizeQuery(query: string, vocabulary: string[], idf: number[]): num
   });
 }
 
-export function search(query: string, docs: string[], index: any, topK = 5) {
+export function search(query: string, docs: any[], index: any, topK = 5) {
   const { vocabulary, idf, tfidf } = index;
 
   const queryVec = vectorizeQuery(query, vocabulary, idf);
