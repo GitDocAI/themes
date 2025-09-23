@@ -17,8 +17,14 @@ export async function POST(req:any) {
       });
     }
 
+
+
+    const isProduction = process.env.NODE_ENV === 'production';
+
+    const staticDataPath = isProduction
+      ? path.join(process.cwd(), 'static_data.json')   // Sin 'public' en producción
+      : path.join(process.cwd(), 'public', 'static_data.json');  // Con 'public' en desarrollo
     // Load the precomputed data from static file
-    const staticDataPath = path.join(process.cwd(), 'public', 'static_data.json');
     const data = loadTfIdfIndex(staticDataPath) as any;
     const results = search(query, data.docs, data, 3);
 
@@ -34,4 +40,7 @@ export async function POST(req:any) {
     });
   }
 }
+
+
+
 

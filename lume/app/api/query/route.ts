@@ -1,6 +1,6 @@
 import { readFile } from 'fs/promises';
 import path from 'path';
-import {init} from '../../../shared/file_indexer/init_search_engine'
+import {loadTfIdfIndex} from '../../../shared/file_indexer/buildIndex'
 import {search} from '../../../shared/file_indexer/query'
 
 
@@ -17,8 +17,15 @@ export async function POST(req:any) {
       });
     }
 
-    // Load the precomputed data
-    const data = await init() as any
+
+
+    const isProduction = process.env.NODE_ENV === 'production';
+
+    const staticDataPath = isProduction
+      ? path.join(process.cwd(), 'static_data.json')   // Sin 'public' en producción
+      : path.join(process.cwd(), 'public', 'static_data.json');  // Con 'public' en desarrollo
+    // Load the precomputed data from static file
+    const data = loadTfIdfIndex(staticDataPath) as any;
     const results = search(query, data.docs, data, 3);
 
     return new Response(JSON.stringify({ results }), {
@@ -33,4 +40,5 @@ export async function POST(req:any) {
     });
   }
 }
+
 
