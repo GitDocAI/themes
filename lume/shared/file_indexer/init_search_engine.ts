@@ -18,4 +18,3 @@ export const init = async ()=>{
 }
 
 
-init()
