@@ -124,7 +124,7 @@ export const TOC: FC<{ toc: Heading[] }> = ({ toc }) => {
               onClick={() => handleHeadingClick(heading)}
             >
               <span
-                className={`block  text-sm hover:text-primary transition-colors duration-300 ${
+                className={`block transition-colors duration-150 text-sm hover:text-primary ${
                   isActive
                     ? "text-primary font-extrabold"
                     : "text-secondary"

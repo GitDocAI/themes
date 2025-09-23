@@ -1,1 +1,182 @@
-{"banner":{"message":"✨ Welcome to Lume Documentation - Modern, Elegant, Fast","colors":{"dark":"#305080","light":"#6096ba"}},"name":"Lume Documentation","background":{"colors":{"dark":"#1a2232","light":"#f0f5f5"},"image":"/assets/subtle_blue_pattern.svg"},"logo":{"dark":"/assets/dark.svg","light":"/assets/light.svg"},"colors":{"dark":"#306080","light":"#6096ba"},"defaultThemeMode":"light","navigation":{"versions":[{"version":"v1.0.0","tabs":[{"tab":"Documentation","items":[{"title":"Getting Started","children":[{"title":"Platform Overview","type":"page","page":"/v1.0.0/documentation/getting_started/introduction.mdx"},{"title":"Installation Guide","type":"page","page":"/v1.0.0/documentation/getting_started/installation.mdx"},{"title":"Quick Start","type":"page","page":"/v1.0.0/documentation/getting_started/quick_start.mdx"}],"type":"group"},{"title":"Core Features","children":[{"title":"Cloud Services","type":"page","page":"/v1.0.0/documentation/core_features/cloud_services.mdx"},{"title":"Security Configuration","type":"page","page":"/v1.0.0/documentation/core_features/security_configuration.mdx"},{"title":"Monitoring & Analytics","type":"page","page":"/v1.0.0/documentation/core_features/monitoring_analytics.mdx"}],"type":"group"}]},{"tab":"API Reference","items":[{"title":"Applications","children":[{"reference":"/api/applications","title":"Get All Applications","method":"GET","type":"openapi","path":"/v1.0.0/api_reference/openapi.json"},{"reference":"/api/applications","title":"Create Application","method":"POST","type":"openapi","path":"/v1.0.0/api_reference/openapi.json"},{"reference":"/api/applications/{id}","title":"Update Application","method":"PUT","type":"openapi","path":"/v1.0.0/api_reference/openapi.json"},{"reference":"/api/applications/{id}","title":"Delete Application","method":"DELETE","type":"openapi","path":"/v1.0.0/api_reference/openapi.json"}],"type":"group"},{"title":"Authentication","children":[{"reference":"/api/auth/keys","title":"Generate API Key","method":"POST","type":"openapi","path":"/v1.0.0/api_reference/openapi.json"},{"reference":"/api/auth/validate","title":"Validate Token","method":"POST","type":"openapi","path":"/v1.0.0/api_reference/openapi.json"}],"type":"group"},{"title":"System","children":[{"reference":"/management/logs","title":"Get All Logs","method":"GET","type":"openapi","path":"/v1.0.0/api_reference/openapi.json"},{"reference":"/management/logs","title":"Change Log Level","method":"PUT","type":"openapi","path":"/v1.0.0/api_reference/openapi.json"}],"type":"group"}]}]}]},"favicon":"/assets/favicon.svg","description":"Modern, elegant documentation with crystal-clear design and seamless user experience.","theme":"crystal","navbar":[{"label":"Support","type":"link","reference":"https://crystal-docs.com/support"},{"label":"Try Crystal","type":"button","reference":"https://demo.crystal-docs.com"}],"footer":[{"type":"github","reference":"https://github.com/crystal-docs"}]}
+{
+  "name": "Acme Corp Documentation",
+  "description": "Comprehensive documentation for our awesome product suite.",
+  "theme": "basic",
+  "colors": {
+    "light": "#F59E0B",
+    "dark": "#FEF3C7"
+  },
+  "defaultThemeMode": "light",
+  "logo": {
+    "light": "/assets/light.svg",
+    "dark": "/assets/dark.svg"
+  },
+  "favicon": "/assets/favicon.svg",
+  "background": {
+    "colors": {
+      "dark": "#1F1611",
+      "light": "#FFFEF7"
+    }
+  },
+  "banner": {
+    "message": "Welcome to Acme Corp!",
+    "colors": {
+      "light": "#F59E0B",
+      "dark": "#FEF3C7"
+    }
+  },
+  "navbar": [
+    {
+      "type": "link",
+      "label": "Support",
+      "reference": "https://acmecorp.com/support"
+    },
+    {
+      "type": "button",
+      "label": "Try Demo",
+      "reference": "https://demo.acmecorp.com"
+    }
+  ],
+  "footer": [
+    {
+      "type": "github",
+      "reference": "https://github.com/acmecorp"
+    }
+  ],
+
+  "navigation": {
+    "versions": [
+      {
+        "version": "v1.0.0",
+        "tabs": [
+          {
+            "tab": "Documentation",
+            "items": [
+              {
+                "type": "group",
+                "title": "Getting Started",
+                "children": [
+                  {
+                    "type": "page",
+                    "title": "Platform Overview",
+                    "page": "/v1.0.0/documentation/getting_started/introduction.mdx"
+                  },
+                  {
+                    "type": "page",
+                    "title": "Installation Guide",
+                    "page": "/v1.0.0/documentation/getting_started/installation.mdx"
+                  },
+                  {
+                    "type": "page",
+                    "title": "Quick Start",
+                    "page": "/v1.0.0/documentation/getting_started/quick_start.mdx"
+                  }
+                ]
+              },
+              {
+                "type": "group",
+                "title": "Core Features",
+                "children": [
+                  {
+                    "type": "page",
+                    "title": "Cloud Services",
+                    "page": "/v1.0.0/documentation/core_features/cloud_services.mdx"
+                  },
+                  {
+                    "type": "page",
+                    "title": "Security Configuration",
+                    "page": "/v1.0.0/documentation/core_features/security_configuration.mdx"
+                  },
+                  {
+                    "type": "page",
+                    "title": "Monitoring & Analytics",
+                    "page": "/v1.0.0/documentation/core_features/monitoring_analytics.mdx"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "tab": "API Reference",
+            "items": [
+              {
+                "type": "group",
+                "title": "Applications",
+                "children": [
+                  {
+                    "type": "openapi",
+                    "title": "Get All Applications",
+                    "method": "GET",
+                    "reference": "/api/applications",
+                    "path": "/v1.0.0/api_reference/openapi.json"
+                  },
+                  {
+                    "type": "openapi",
+                    "title": "Create Application",
+                    "method": "POST",
+                    "reference": "/api/applications",
+                    "path": "/v1.0.0/api_reference/openapi.json"
+                  },
+                  {
+                    "type": "openapi",
+                    "title": "Update Application",
+                    "method": "PUT",
+                    "reference": "/api/applications/{id}",
+                    "path": "/v1.0.0/api_reference/openapi.json"
+                  },
+                  {
+                    "type": "openapi",
+                    "title": "Delete Application",
+                    "method": "DELETE",
+                    "reference": "/api/applications/{id}",
+                    "path": "/v1.0.0/api_reference/openapi.json"
+                  }
+                ]
+              },
+              {
+                "type": "group",
+                "title": "Authentication",
+                "children": [
+                  {
+                    "type": "openapi",
+                    "title": "Generate API Key",
+                    "method": "POST",
+                    "reference": "/api/auth/keys",
+                    "path": "/v1.0.0/api_reference/openapi.json"
+                  },
+                  {
+                    "type": "openapi",
+                    "title": "Validate Token",
+                    "method": "POST",
+                    "reference": "/api/auth/validate",
+                    "path": "/v1.0.0/api_reference/openapi.json"
+                  }
+                ]
+              },
+              {
+                "type": "group",
+                "title": "System",
+                "children": [
+                  {
+                    "type": "openapi",
+                    "title": "Get All Logs",
+                    "method": "GET",
+                    "reference": "/management/logs",
+                    "path": "/v1.0.0/api_reference/openapi.json"
+                  },
+                  {
+                    "type": "openapi",
+                    "title": "Change Log Level",
+                    "method": "PUT",
+                    "reference": "/management/logs",
+                    "path": "/v1.0.0/api_reference/openapi.json"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

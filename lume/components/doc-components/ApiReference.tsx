@@ -108,7 +108,7 @@ export default function ApiReference({
         <Response responses={responses}/>
         </div>
       </div>
-          <aside className="hidden min-w-64 xl:block sidebar [grid-area:side]  flex-shrink-0 sticky top-30 max-h-[90dvh] overflow-y-auto w-full">
+          <aside className="hidden min-w-64 xl:block sidebar [grid-area:side]  flex-shrink-0 sticky top-18 max-h-[90dvh] overflow-y-auto w-full">
                   <ResponseTabs responses={responses}/>
           </aside>,
     </div>

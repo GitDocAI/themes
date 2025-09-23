@@ -10,9 +10,21 @@ const VersionSwitcher = ({ versions }: { versions: Version[] }) => {
   const pathname = usePathname()
   const inputRef = useRef(null)
 
-  const [selectedVersion, setSelectedVersion] = useState(versions[0].version)
+  const [selectedVersion, setSelectedVersion] = useState(versions[0]?.version || 'v1.0.0')
   const [filteredVersions, setFilteredVersions] = useState(versions)
   const [isOpen, setIsOpen] = useState(false)
+
+  // Si no hay versiones, mostrar una versión por defecto
+  if (!versions || versions.length === 0) {
+    return (
+      <div className="w-full flex items-center px-4 py-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 font-medium text-sm shadow-sm">
+        <div className="flex items-center space-x-2">
+          <div className="w-1.5 h-1.5 bg-amber-400 rounded-full"></div>
+          <span>v1.0.0</span>
+        </div>
+      </div>
+    )
+  }
 
   // Detectar versión desde la URL actual
   useEffect(() => {
@@ -54,31 +66,40 @@ const VersionSwitcher = ({ versions }: { versions: Version[] }) => {
   const click = (e: any) => {
     e.preventDefault()
     e.stopPropagation();
+    setIsOpen(!isOpen)
   }
 
   return (
-    <div className="relative inline-block ">
+    <div className="relative">
       <button
         ref={inputRef}
-        onChange={handleInputChange}
-        onFocus={handleFocus}
-        onBlur={handleBlur}
         onClick={click}
-        className=" overflow-hidden x:text-ellipsis text-sm  text-primary border border-primary rounded-full px-3 py-1 bg-primary"
+        onBlur={handleBlur}
+        className="w-full flex items-center justify-between px-4 py-3 bg-amber-50 hover:bg-amber-100 border border-amber-200 hover:border-amber-300 rounded-lg text-amber-800 font-medium text-sm transition-all duration-200 hover:shadow-md group"
       >
-        {selectedVersion}
+        <div className="flex items-center space-x-2">
+          <div className="w-1.5 h-1.5 bg-amber-400 rounded-full"></div>
+          <span>{selectedVersion}</span>
+        </div>
+        {filteredVersions.length > 1 && (
+          <i className={`pi pi-chevron-down text-xs ml-2 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''} text-amber-600 group-hover:text-amber-800`}></i>
+        )}
       </button>
 
-      {isOpen && filteredVersions.length > 0 && (
-        <ul className="absolute z-10 mt-1 w-30 bg-background border border-secondary/20 rounded-md text-secondary shadow-lg overflow-y-auto">
+      {isOpen && filteredVersions.length > 1 && (
+        <ul className="absolute z-50 mt-1 w-full bg-white border border-amber-200 rounded-lg shadow-xl overflow-hidden">
           {filteredVersions.map(version => (
             <li
               key={version.version}
               onMouseDown={() => handleOptionClick(version.version)}
-              className={`px-4 w-full text-sm py-2 hover:bg-background flex flex-row gap-2 items-center bg-background border border-background/30  cursor-pointer text-primary ${version.version === selectedVersion ? 'bg-primary/30 text-secondary  font-bold' : ''}`}
+              className={`px-4 py-3 cursor-pointer transition-all duration-200 flex items-center space-x-2 text-sm ${
+                version.version === selectedVersion
+                  ? 'bg-amber-100 text-amber-800 font-medium border-l-2 border-amber-400'
+                  : 'text-amber-700 hover:bg-amber-50 hover:text-amber-800'
+              }`}
             >
-              <i className={`pi pi-check text-primary ${version.version === selectedVersion ? '' : 'hidden'}`}> </i>
-              {version.version}
+              <div className={`w-1.5 h-1.5 rounded-full ${version.version === selectedVersion ? 'bg-amber-400' : 'bg-amber-300'}`}></div>
+              <span>{version.version}</span>
             </li>
           ))}
         </ul>

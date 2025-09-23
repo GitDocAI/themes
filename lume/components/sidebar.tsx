@@ -7,8 +7,6 @@ import { Version, Tab } from '../models/InnerConfiguration'
 import { useEffect, useState } from 'react'
 import { redirect } from 'next/navigation'
 import {splitPageUrl} from '../shared/splitPageUrl'
-
-
 export const Sidebar = ({ themeinfo, versions, tabs }: { themeinfo: ThemeInfo, versions: Version[], tabs: Tab[] }) => {
   const pathname = usePathname()
   const [items, setItems] = useState<NavigationItem[]>(themeinfo.navigation.items ?? [])
@@ -81,7 +79,7 @@ function dropdownHasActiveChild(dropdown: NavigationItem, pathname: string): boo
       case 'group':
         return (
           <div key={item.title} className={`mb-10`}>
-            <div className="font-extrabold text-sm uppercase text-primary mb-2 tracking-wide">
+            <div className="font-extrabold text-sm uppercase text-secondary mb-2 tracking-wide">
               {item.title}
             </div>
             <div className="space-y-1 pl-2">
@@ -173,14 +171,13 @@ function dropdownHasActiveChild(dropdown: NavigationItem, pathname: string): boo
       <aside
         className={`
           sidebar
-          fixed sm:sticky top-24 pl-6 sm:pl-auto left-0 h-[90dvh] w-72 overflow-y-auto py-6 z-50 sm:z-10
-          transition-transform duration-300 min-w-64 ease-in-out bg-background
+          fixed sm:sticky top-24 left-0 h-full max-h-[90dvh] w-72 overflow-y-auto py-6 z-50 sm:z-10
+          transition-transform duration-300 min-w-64 ease-in-out bg-background sm:bg-transparent
           border-r border-secondary/10
           ${isOpen ? 'translate-x-0' : '-translate-x-full'} sm:translate-x-0
-          ${!isMobile ? 'bg-background/60 backdrop-blur-xl' : ''}
+          ${!isMobile ? 'bg-transparent' : ''}
         `}
       >
-
         {/* Cerrar sidebar (solo móvil) */}
         <div className="sm:hidden flex justify-end mb-4">
           <button

@@ -10,7 +10,7 @@ export const Footer: FC<{
     <footer className=" border-t border-secondary/10 py-6 px-4 sm:px-8 [grid-area:footer]">
       <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="flex items-center space-x-2">
-          <span className="text-sm text-secondary font-semibold ">{name}</span>
+          <span className="text-sm font-semibold ">{name}</span>
         </div>
 
         <div className="flex items-center space-x-4">

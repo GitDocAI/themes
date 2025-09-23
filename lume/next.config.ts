@@ -28,5 +28,3 @@ export default async function config() {
   });
 }
 
-
-

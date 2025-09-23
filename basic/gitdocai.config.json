@@ -19,7 +19,7 @@
     }
   },
   "banner": {
-    "message": "🚀 Welcome to Acme Corp!",
+    "message": "Welcome to Acme Corp!",
     "colors": {
       "light": "#3A8DDE",
       "dark": "#655DC6"

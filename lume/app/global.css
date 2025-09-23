@@ -30,12 +30,25 @@
 @custom-variant dark (&:where(.dark-theme, .dark-theme *));
 
 body {
-  background-image:var(--url-bg-url) !important;
-  background-size: cover;
-  background-position: center;
-  background-color:rgb(var(--color-bg));
+  background: linear-gradient(180deg,
+    rgb(var(--color-primary) / 0.05) 0%,
+    rgb(var(--color-primary) / 0.05) 64px,
+    rgb(var(--color-primary) / 0.25) 64px,
+    rgb(var(--color-primary) / 0.15) 30%,
+    rgb(var(--color-primary) / 0.08) 60%,
+    rgb(var(--color-bg)) 100%);
+  min-height: 100vh;
   font-family: 'Roboto', Arial, sans-serif;
-  font-size:1.5rem;
+}
+
+.dark-theme body {
+  background: linear-gradient(180deg,
+    rgb(var(--color-bg)) 0%,
+    rgb(var(--color-bg)) 64px,
+    rgb(var(--color-primary) / 0.25) 64px,
+    rgb(var(--color-primary) / 0.15) 30%,
+    rgb(var(--color-primary) / 0.08) 60%,
+    rgb(var(--color-bg)) 100%);
 }
 
 .tab-active {
@@ -51,9 +64,31 @@ body {
   border-radius: 0.375rem;
 }
 
-.dark-theme .navbar-link {
-  color: white !important;
+.navbar-gradient {
+  position: relative;
+  background: transparent;
 }
+
+.navbar-gradient::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  right: 50%;
+  bottom: 0;
+  width: 100vw;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  background: rgb(var(--color-bg));
+  border-bottom: 1px solid rgb(var(--color-primary) / 0.3);
+  z-index: -1;
+}
+
+.dark-theme .navbar-gradient::before {
+  background: rgb(var(--color-bg));
+  border-bottom: 1px solid rgb(var(--color-primary) / 0.3);
+}
+
 
 .tab-hover:hover {
   color: rgb(var(--color-muted)) !important;

@@ -1,8 +1,9 @@
 'use client';
-import { useState, useEffect, ReactNode } from 'react';
+import { useState, useEffect } from 'react';
+import {ReactNode} from 'react'
 import { Dialog } from '@headlessui/react';
 import { useRouter } from 'next/navigation';
-import { Chunk } from '@/shared/file_indexer/model/DocumentData';
+import {Chunk} from '@/shared/file_indexer/model/DocumentData'
 
 interface SearchResult {
   doc: {
@@ -124,28 +125,7 @@ export default function SearchBar() {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isMac, setIsMac] = useState<boolean | null>(null);
-  const [searchHistory, setSearchHistory] = useState<string[]>([]);
   const router = useRouter();
-
-  useEffect(() => {
-    const storedHistory = localStorage.getItem('searchHistory');
-    if (storedHistory) {
-      setSearchHistory(JSON.parse(storedHistory));
-    }
-  }, []);
-
-  const updateSearchHistory = (newQuery: string) => {
-    if (!newQuery.trim()) return;
-
-    const updatedHistory = [
-      newQuery,
-      ...searchHistory.filter(item => item.toLowerCase() !== newQuery.toLowerCase()),
-    ].slice(0, 5);
-
-    setSearchHistory(updatedHistory);
-    localStorage.setItem('searchHistory', JSON.stringify(updatedHistory));
-  };
-
 
   const openModal = () => setIsOpen(true);
   const closeModal = () => {
@@ -177,7 +157,6 @@ export default function SearchBar() {
         setResults([]);
         return;
       }
-      updateSearchHistory(query);
 
       try {
         const response = await fetch('/api/query', {
@@ -208,15 +187,16 @@ export default function SearchBar() {
     <>
       <button
         onClick={openModal}
-        className="flex items-center space-x-2 rounded-md bg-gray-100 dark:bg-gray-800 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 shadow-sm transition hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-opacity-50"
+        className="w-10 h-10 rounded-full bg-primary/10 hover:bg-primary/20 border border-primary/20 flex items-center justify-center transition-all duration-200 hover:scale-105"
+        title={`Search ${isMac ? '(⌘+K)' : '(Ctrl+K)'}`}
       >
-        <i className="w-4 h-4 pi pi-search cursor-pointer" />
+        <i className="pi pi-search text-primary text-sm" />
       </button>
 
       <Dialog open={isOpen} onClose={closeModal} className="relative z-50">
         <div className="fixed inset-0 backdrop-blur-sm" aria-hidden="true" />
-        <div className="fixed inset-0 flex items-center justify-center p-4">
-          <Dialog.Panel className="w-full max-w-2xl rounded-xl bg-background shadow-xl p-2">
+        <div className="fixed inset-0 flex items-start justify-center">
+          <Dialog.Panel className="w-full max-w-2xl rounded-xl bg-background shadow-xl mt-12 p-2">
             <input
               type="text"
               placeholder="Search"
@@ -225,23 +205,6 @@ export default function SearchBar() {
               onChange={(e) => setQuery(e.target.value)}
               autoFocus
             />
-            {query.trim() === '' && searchHistory.length > 0 && (
-              <div className="mt-4">
-                <h3 className="text-sm font-semibold text-secondary px-4">Recent Searches</h3>
-                <ul className="mt-2 space-y-1">
-                  {searchHistory.map((item, index) => (
-                    <li key={index}>
-                      <button
-                        onClick={() => setQuery(item)}
-                        className="w-full text-left px-4 py-2 text-sm text-secondary hover:bg-secondary/10 rounded-md transition-colors"
-                      >
-                        {item}
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
             <ul className="mt-4 max-h-[60vh] overflow-y-auto space-y-2">
               {results.length === 0 && query.trim() ? (
                 <li className="rounded-md">
@@ -254,7 +217,7 @@ export default function SearchBar() {
               ) : null}
 
               {results.map((result, index) => {
-                const path = result.doc.path.replace(/\\.mdx$/, '');
+                const path = result.doc.path.replace(/\.mdx$/, '');
                 const url = `/${path}#${result.doc.chunk.headingPath[result.doc.chunk.headingPath.length-1]}`;
 
                 const contextText = createContextWindow(result.doc.chunk.text, query, 120);

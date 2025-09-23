@@ -10,6 +10,7 @@ import { Version, Tab } from '@/models/InnerConfiguration'
 import { Logo } from './logo'
 import { PrevNextNavigation } from './prev-next-navigation'
 import {splitPageUrl} from '../shared/splitPageUrl'
+import VersionSwitcher from './VersionSwitcher'
 export const DefaultTheme: FC<{
   children: ReactNode
   pageMap: PageMapItem[]
@@ -30,15 +31,21 @@ export const DefaultTheme: FC<{
   return (
     <>
       {themeinfo.banner ? <Banner content={themeinfo.banner} /> : <></>}
-      <div className='min-h-screen w-full bg-background/70 flex flex-col justify-between relative 2xl:container mx-auto'>
+      <div className='min-h-screen w-full flex flex-col justify-between relative 2xl:container mx-auto'>
         <Navbar navitems={themeinfo.navbar} versions={versions}
           logo={logo}
           defaultTheme={themeinfo.defaultThemeMode ?? ''}
+          tablist={tabs}
         />
-        <TabList versions={versions} tablist={tabs} />
         <div className='flex text-secondary flex-1 flex-col'>
+          {/* Version Switcher debajo del logo */}
+          <div className="px-4 py-4">
+            <div className="w-64">
+              <VersionSwitcher versions={versions} />
+            </div>
+          </div>
           <div className="px-4 flex flex-col sm:flex-row flex-1">
-            <Sidebar  themeinfo={themeinfo} versions={versions} tabs={tabs} />
+            <Sidebar themeinfo={themeinfo} versions={versions} tabs={tabs} />
             <div className="flex flex-col gap-1 w-full flex-1 min-h-0">
               <main className="flex-1
                   grid
@@ -55,11 +62,11 @@ export const DefaultTheme: FC<{
                   gap-4">
                   {children}
                   <PrevNextNavigation themeinfo={themeinfo} versions={versions} tabs={tabs} />
+                  <Footer name={themeinfo.name} items={themeinfo.footer} logo={logo} />
               </main>
             </div>
           </div>
         </div>
-                  <Footer name={themeinfo.name} items={themeinfo.footer} logo={logo} />
       </div>
     </>
   )
@@ -122,6 +129,7 @@ function getPaths(original: NavigationItem): string[] {
     case 'page':
       return [splitPageUrl(original.page)]
     case 'group':
+      const next_path = `{}`
       return original.children.map((ch: NavigationItem) => (getPaths(ch))).flat()
     case 'dropdown':
       return original.children.map((ch: NavigationItem) => (getPaths(ch))).flat()

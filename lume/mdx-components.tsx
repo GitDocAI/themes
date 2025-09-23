@@ -3,9 +3,10 @@ import { TOC } from './components/toc'
 import { AlertBlock } from './components/doc-components/AlertBlock'
 import { BlockQuote } from './components/doc-components/BlockQuote'
 import { CodeBlock } from './components/doc-components/CodeBlock'
-import {  CheckItem } from './components/doc-components/CheckList'
+import { CheckItem, CheckList } from './components/doc-components/CheckList'
 import  ApiReference from './components/doc-components/ApiReference'
 import React from 'react';
+
 const defaultComponents = getNextraComponents({
   wrapper(some:any) {
     const { children, toc } = some
@@ -20,22 +21,17 @@ const defaultComponents = getNextraComponents({
     )
   },
 
-  h1: ({ children,id }) => <h1 id={id } className="text-4xl text-primary font-bold mb-6 w-full">{children}</h1>,
-  h2: ({ children,id }) => <h2 id={id} className="text-3xl font-semibold text-primary mb-5 mt-10 w-full">{children}</h2>,
-  h3: ({ children,id }) => <h3 id={id} className="text-2xl font-medium mb-3 mt-8 w-full">{children}</h3>,
+  h1: ({ children }) => <h1 className="text-4xl font-bold mb-6">{children}</h1>,
+  h2: ({ children }) => <h2 className="text-3xl font-semibold mb-5 mt-10">{children}</h2>,
+  h3: ({ children }) => <h3 className="text-2xl font-medium mb-3 mt-8">{children}</h3>,
 
-  p: ({ children }) => <p className="mb-4 leading-7 text-base text-secondary w-full">{children}</p>,
-  CheckList:({children})=>{
+  p: ({ children }) => <p className="mb-4 leading-7 text-base text-secondary">{children}</p>,
+  ul: ({ children }) => {
     return (
-      <ul className="list-disc pl-6 mb-4 w-full">{children}</ul>
+      <ul className="list-disc pl-6 mb-4">{children}</ul>
     )
   },
-  ul: ({ children, className }) => {
-    return (
-      <ul className="list-disc pl-6 mb-4 w-full">{children}</ul>
-    )
-  },
-  ol: ({ children }) => <ol className="list-decimal pl-6 mb-4 w-full">{children}</ol>,
+  ol: ({ children }) => <ol className="list-decimal pl-6 mb-4">{children}</ol>,
   li: ({ children }) => {
     const childrenArray = React.Children.toArray(children).filter((ch: any) => ch.props?.type === 'checkbox');
     if (childrenArray.length > 0) {
@@ -43,30 +39,22 @@ const defaultComponents = getNextraComponents({
       return (<CheckItem variant={(childrenArray[0] as any)?.props?.checked ? 'do' : 'dont'}>{inner}</CheckItem>)
     }
     return (
-      <li className="mb-1 w-full">{children}</li>
+      <li className="mb-1">{children}</li>
     )
   },
-CheckItem:({ children })=>{
-    const childrenArray = React.Children.toArray(children).filter((ch: any) => ch.props?.type === 'checkbox');
-    if (childrenArray.length > 0) {
-      const inner = React.Children.toArray(children).filter((ch: any) => ch.props?.type !== 'checkbox');
-      return (<CheckItem variant={(childrenArray[0] as any)?.props?.checked ? 'do' : 'dont'}>{inner}</CheckItem>)
-    }
-    return (
-      <li className="mb-1 w-full">{children}</li>
-    )
-},
   code: ({ children }) => (
     <CodeBlock>
       {children}
     </CodeBlock>
   ),
   pre: ({ children }) => (
-    <pre className="bg-secondary\/20 text-sm p-4 rounded-lg overflow-x-auto mb-2 border border-neutral-200 dark:border-neutral-700 w-full">
+    <pre className="bg-secondary/20 text-sm p-4 rounded-lg overflow-x-auto mb-2 border border-neutral-200 dark:border-neutral-700 ">
       {children}
     </pre>
   ),
 
+  // Blockquote
+  blockquote: BlockQuote,
   // Imágenes
   ApiReference,
   img: ({ src, alt, height, ...props }) => (
@@ -81,22 +69,22 @@ CheckItem:({ children })=>{
 
   // Tablas
   table: ({ children }) => (
-    <table className="w-full border border-secondary\/20 text-left rounded-md overflow-hidden mb-6">
+    <table className="w-full border border-secondary/20 text-left rounded-md overflow-hidden mb-6">
       {children}
     </table>
   ),
   thead: ({ children }) => (
-    <thead className="bg-secondary\/10 dark:bg-secondary\/20 text-primary font-semibold">
+    <thead className="bg-secondary/10 dark:bg-secondary/20 text-primary font-semibold">
       {children}
     </thead>
   ),
-  tbody: ({ children }) => <tbody className="divide-y divide-secondary\/10">{children}</tbody>,
-  tr: ({ children }) => <tr className="hover:bg-secondary\/5 transition">{children}</tr>,
+  tbody: ({ children }) => <tbody className="divide-y divide-secondary/10">{children}</tbody>,
+  tr: ({ children }) => <tr className="hover:bg-secondary/5 transition">{children}</tr>,
   th: ({ children }) => (
-    <th className="px-4 py-2 text-sm border-b border-secondary\/20">{children}</th>
+    <th className="px-4 py-2 text-sm border-b border-secondary/20">{children}</th>
   ),
   td: ({ children }) => (
-    <td className="px-4 py-2 text-sm border-b border-secondary\/10">{children}</td>
+    <td className="px-4 py-2 text-sm border-b border-secondary/10">{children}</td>
   ),
 
   // Custom MDX blocks
@@ -125,12 +113,11 @@ CheckItem:({ children })=>{
       {children}
     </AlertBlock>
   ),
-  // Blockquote
-  blockquote: BlockQuote,
+  CheckList,
+  CheckItem,
 })
 
 export const useMDXComponents = (components: any) => ({
   ...defaultComponents,
   ...components
 })
-

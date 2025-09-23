@@ -12,15 +12,15 @@
         "preview": "/api/v1/site-appearance/previews/crystal.png"
     },
     {
-        "name": "lupe",
-        "description": "Modern, clean documentation with Prisma-inspired design and seamless user experience.",
-        "sample": "https://themes-lupe.gitdoc.ai",
-        "preview": "/api/v1/site-appearance/previews/lupe.png"
+        "name": "nova",
+        "description": "Elegant, professional documentation with a Nova-inspired design and streamlined user experience.",
+        "sample": "https://themes-nova.gitdoc.ai",
+        "preview": "/api/v1/site-appearance/previews/nova.png"
     },
     {
         "name": "lume",
-        "description": "Modern, clean documentation with NuxtUI-inspired design and seamless user experience.",
-        "sample": "https://themes-lupe.gitdoc.ai",
-        "preview": "/api/v1/site-appearance/previews/lupe.png"
+        "description": "Modern, clean documentation with lume-inspired design and seamless user experience.",
+        "sample": "https://themes-lume.gitdoc.ai",
+        "preview": "/api/v1/site-appearance/previews/lume.png"
     }
 ]

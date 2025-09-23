@@ -1,0 +1,182 @@
+{
+  "name": "Nova Documentation",
+  "description": "Elegant, professional documentation with a Nova-inspired design and streamlined user experience.",
+  "theme": "nova",
+  "colors": {
+    "light": "#16a34a",
+    "dark": "#22c55e"
+  },
+  "defaultThemeMode": "light",
+  "logo": {
+    "light": "/assets/light.svg",
+    "dark": "/assets/dark.svg"
+  },
+  "favicon": "/assets/favicon.svg",
+  "background": {
+    "colors": {
+      "dark": "#111827",
+      "light": "#fafbfc"
+    }
+  },
+  "banner": {
+    "message": "Welcome to Nova Theme",
+    "colors": {
+      "light": "#16a34a",
+      "dark": "#22c55e"
+    }
+  },
+  "navbar": [
+    {
+      "type": "link",
+      "label": "Support",
+      "reference": "https://nova-docs.com/support"
+    },
+    {
+      "type": "button",
+      "label": "Try Nova",
+      "reference": "https://demo.nova-docs.com"
+    }
+  ],
+  "footer": [
+    {
+      "type": "github",
+      "reference": "https://github.com/nova-docs"
+    }
+  ],
+
+  "navigation": {
+    "versions": [
+      {
+        "version": "v1.0.0",
+        "tabs": [
+          {
+            "tab": "Documentation",
+            "items": [
+              {
+                "type": "group",
+                "title": "Getting Started",
+                "children": [
+                  {
+                    "type": "page",
+                    "title": "Platform Overview",
+                    "page": "/v1.0.0/documentation/getting_started/introduction.mdx"
+                  },
+                  {
+                    "type": "page",
+                    "title": "Installation Guide",
+                    "page": "/v1.0.0/documentation/getting_started/installation.mdx"
+                  },
+                  {
+                    "type": "page",
+                    "title": "Quick Start",
+                    "page": "/v1.0.0/documentation/getting_started/quick_start.mdx"
+                  }
+                ]
+              },
+              {
+                "type": "group",
+                "title": "Core Features",
+                "children": [
+                  {
+                    "type": "page",
+                    "title": "Cloud Services",
+                    "page": "/v1.0.0/documentation/core_features/cloud_services.mdx"
+                  },
+                  {
+                    "type": "page",
+                    "title": "Security Configuration",
+                    "page": "/v1.0.0/documentation/core_features/security_configuration.mdx"
+                  },
+                  {
+                    "type": "page",
+                    "title": "Monitoring & Analytics",
+                    "page": "/v1.0.0/documentation/core_features/monitoring_analytics.mdx"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "tab": "API Reference",
+            "items": [
+              {
+                "type": "group",
+                "title": "Applications",
+                "children": [
+                  {
+                    "type": "openapi",
+                    "title": "Get All Applications",
+                    "method": "GET",
+                    "reference": "/api/applications",
+                    "path": "/v1.0.0/api_reference/openapi.json"
+                  },
+                  {
+                    "type": "openapi",
+                    "title": "Create Application",
+                    "method": "POST",
+                    "reference": "/api/applications",
+                    "path": "/v1.0.0/api_reference/openapi.json"
+                  },
+                  {
+                    "type": "openapi",
+                    "title": "Update Application",
+                    "method": "PUT",
+                    "reference": "/api/applications/{id}",
+                    "path": "/v1.0.0/api_reference/openapi.json"
+                  },
+                  {
+                    "type": "openapi",
+                    "title": "Delete Application",
+                    "method": "DELETE",
+                    "reference": "/api/applications/{id}",
+                    "path": "/v1.0.0/api_reference/openapi.json"
+                  }
+                ]
+              },
+              {
+                "type": "group",
+                "title": "Authentication",
+                "children": [
+                  {
+                    "type": "openapi",
+                    "title": "Generate API Key",
+                    "method": "POST",
+                    "reference": "/api/auth/keys",
+                    "path": "/v1.0.0/api_reference/openapi.json"
+                  },
+                  {
+                    "type": "openapi",
+                    "title": "Validate Token",
+                    "method": "POST",
+                    "reference": "/api/auth/validate",
+                    "path": "/v1.0.0/api_reference/openapi.json"
+                  }
+                ]
+              },
+              {
+                "type": "group",
+                "title": "System",
+                "children": [
+                  {
+                    "type": "openapi",
+                    "title": "Get All Logs",
+                    "method": "GET",
+                    "reference": "/management/logs",
+                    "path": "/v1.0.0/api_reference/openapi.json"
+                  },
+                  {
+                    "type": "openapi",
+                    "title": "Change Log Level",
+                    "method": "PUT",
+                    "reference": "/management/logs",
+                    "path": "/v1.0.0/api_reference/openapi.json"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

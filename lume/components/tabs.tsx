@@ -44,8 +44,8 @@ export const TabList = ({
   }
 
   return (
-    <div className="pt-4 z-30 container sticky top-14 px-4 bg-background/90 backdrop-blur-xs">
-      <div className="text-lg">
+    <div className="pt-2 container sticky top-14 px-4">
+      <div className="text-sm">
         <div className="flex gap-4  overflow-x-auto">
           {visibleTabs.map((tabName) => {
             const isActive = tabName === activeTab
@@ -54,8 +54,8 @@ export const TabList = ({
               <button
                 key={tabName}
                 onClick={() => handleTabClick(tabName)}
-                className={`font-medium transition-all duration-300 border   ${isActive
-                  ? 'border-secondary/20 rounded-xl text-primary bg-secondary/5 px-4 py-1 '
+                className={`font-medium transition-colors pb-2 border-b-2 ${isActive
+                  ? 'tab-active'
                   : 'border-transparent text-secondary tab-hover'
                   }`}
               >
