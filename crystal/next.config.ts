@@ -11,7 +11,14 @@ const withNextra = nextra({
 });
 
 export default async function config() {
-  await init();
+
+  let static_data={}
+  try {
+   static_data = await init();
+
+  } catch (err) {
+    console.warn('Error reading ');
+  }
 
   let siteConfig = {};
   try {
@@ -27,5 +34,3 @@ export default async function config() {
     },
   });
 }
-
-

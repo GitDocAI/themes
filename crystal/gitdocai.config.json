@@ -6,7 +6,7 @@
     "light": "#3b82f6",
     "dark": "#8b5cf6"
   },
-  "defaultThemeMode": "light",
+  "defaultThemeMode": "dark",
   "logo": {
     "light": "/assets/light.svg",
     "dark": "/assets/dark.svg"
