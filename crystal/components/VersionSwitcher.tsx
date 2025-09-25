@@ -64,7 +64,7 @@ const VersionSwitcher = ({ versions }: { versions: Version[] }) => {
         onFocus={handleFocus}
         onBlur={handleBlur}
         onClick={click}
-        className="x:whitespace-nowrap x:transition-colors x:min-w-6 x:overflow-hidden x:text-ellipsis x:focus-visible:nextra-focus x:ring-inset bg-background border-secondary/30 text-secondary border rounded-full px-3 py-1"
+        className="x:whitespace-nowrap x:transition-colors x:min-w-6 x:overflow-hidden x:text-ellipsis x:focus-visible:nextra-focus x:ring-inset bg-background border-secondary/30 text-secondary border rounded-full px-3 py-1 text-sm"
       >
         {selectedVersion}
       </button>
@@ -75,7 +75,7 @@ const VersionSwitcher = ({ versions }: { versions: Version[] }) => {
             <li
               key={version.version}
               onMouseDown={() => handleOptionClick(version.version)}
-              className={`px-4 w-full py-2 hover:bg-background bg-background border border-background/30  cursor-pointer ${version.version === selectedVersion ? 'bg-background/80 !text-primary font-bold' : ''}`}
+              className={`px-4 text-sm w-full py-2 hover:bg-background bg-background border border-background/30  cursor-pointer ${version.version === selectedVersion ? 'bg-background/80 !text-primary font-bold' : ''}`}
             >
               {version.version}
             </li>

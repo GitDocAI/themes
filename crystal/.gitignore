@@ -41,3 +41,4 @@ turbo/
 next.config.mjs.local
 package-lock.json
 static
+*-lock.yaml
