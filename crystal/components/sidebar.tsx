@@ -187,7 +187,7 @@ function dropdownHasActiveChild(dropdown: NavigationItem, pathname: string): boo
       <aside
         className={`
           sidebar
-          fixed sm:sticky top-24 left-0 h-full max-h-[90dvh] w-72 overflow-y-auto py-6 z-50 sm:z-10
+          fixed sm:sticky top-24 left-0  h-[90dvh] w-72 overflow-y-auto py-6 z-50 sm:z-10 pr-1
           transition-all duration-300 min-w-64 ease-in-out sm:bg-transparent
           border-r border-crystal-200/20 backdrop-blur-sm
           ${isOpen ? 'translate-x-0 glass-card ml-4 rounded-2xl shadow-glass' : '-translate-x-full'} sm:translate-x-0 sm:glass-none sm:shadow-none sm:ml-0 sm:rounded-none

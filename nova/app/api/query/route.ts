@@ -1,5 +1,5 @@
-import data from '../../../public/static_data.json';
 import {search} from '../../../shared/file_indexer/query'
+import data from '../../../static/static_data.json';
 
 export async function POST(req:any) {
   try {

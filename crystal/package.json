@@ -9,6 +9,8 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@headlessui/react": "^2.2.9",
+    "clsx": "^2.1.1",
     "ml-matrix": "^6.12.1",
     "natural": "^8.1.0",
     "next": "^15.3.2",
@@ -19,6 +21,7 @@
     "primeicons": "^7.0.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "shiki": "^3.13.0",
     "stopwords": "^0.0.9"
   },
   "devDependencies": {

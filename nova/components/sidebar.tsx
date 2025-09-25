@@ -7,7 +7,6 @@ import { Version, Tab } from '../models/InnerConfiguration'
 import { useEffect, useState } from 'react'
 import { redirect } from 'next/navigation'
 import {splitPageUrl} from '../shared/splitPageUrl'
-import SearchBar from './searchbar'
 export const Sidebar = ({ themeinfo, versions, tabs }: { themeinfo: ThemeInfo, versions: Version[], tabs: Tab[] }) => {
   const pathname = usePathname()
   const [items, setItems] = useState<NavigationItem[]>(themeinfo.navigation.items ?? [])
@@ -172,7 +171,7 @@ function dropdownHasActiveChild(dropdown: NavigationItem, pathname: string): boo
       <aside
         className={`
           sidebar
-          fixed sm:sticky top-0 left-0 h-screen w-72 overflow-hidden py-6 z-50 sm:z-10
+          fixed sm:sticky top-0 left-0 h-full w-72 py-6 z-50 sm:z-10 overflow-y-auto
           transition-all duration-300 min-w-64 ease-in-out sm:bg-transparent
           backdrop-blur-sm border-r border-nova-200 dark:border-nova-700
           ${isOpen ? 'translate-x-0 glass-card ml-4 rounded-xl shadow-nova' : '-translate-x-full'} sm:translate-x-0 sm:glass-none sm:shadow-none sm:ml-0 sm:rounded-none

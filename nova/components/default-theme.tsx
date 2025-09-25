@@ -37,7 +37,7 @@ export const DefaultTheme: FC<{
           colors={themeinfo.colors}
         />
         <div className='flex text-secondary flex-1 flex-col'>
-          <div className="flex flex-col sm:flex-row flex-1 w-full">
+          <div className="flex flex-col sm:flex-row flex-1 w-full h-full">
             <Sidebar themeinfo={themeinfo} versions={versions} tabs={tabs} />
             <div className="flex flex-col gap-1 w-full flex-1 min-h-0">
               <main className="flex-1
