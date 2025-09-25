@@ -35,9 +35,9 @@ export const Security =({security,securitySchemas}:ApiReference)=>{
                   if (sectype === "bearerAuth") {
                     return (
                       <div key={sectype} className="p-3 rounded-md">
-                        <span className=" flex-row items-center text-primary mb-1 flex flex-1 gap-6">
+                        <span className=" flex-wrap items-center text-primary mb-1 flex flex-1 gap-6">
                             <h1 className="font-semibold">Authorization</h1>
-                            <div className="flex gap-2 flex-row items-center justify-center">
+                            <div className="flex gap-2 flex-wrap items-center justify-center">
                               {tags.map(tag => (
                                 <span
                                   key={tag}

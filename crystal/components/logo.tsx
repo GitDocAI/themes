@@ -13,14 +13,14 @@ export const Logo: FC<{ light?: string, dark?: string }> = ({ light, dark }) => 
       <img
         src={light}
         alt="logo"
-        className="h-8"
+        className="h-4 lg:h-8"
         style={{ display: 'var(--logo-light-display)' }}
       />
 
       <img
         src={dark}
         alt="logo"
-        className="h-8"
+        className="h-4 lg:h-8"
         style={{ display: 'var(--logo-dark-display)' }}
       />
     </div>

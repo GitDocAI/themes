@@ -55,7 +55,7 @@ export const TabList = ({
               <button
                 key={tabName}
                 onClick={() => handleTabClick(tabName)}
-                className={`font-semibold transition-all duration-200 px-2 py-3 border-b-3 text-lg ${isActive
+                className={`font-semibold transition-all duration-200 px-2 py-3 border-b-3 text-xs lg:text-lg ${isActive
                   ? 'tab-active'
                   : 'border-transparent text-secondary tab-hover'
                   }`}

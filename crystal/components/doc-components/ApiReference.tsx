@@ -45,7 +45,7 @@ export default function ApiReference({
         lg:grid-rows-[auto_auto]
         lg:[grid-template-areas:'reference_side']
        ">
-      <div id="apiref" className="rounded-2xl p-6 transition [grid-area:reference] w-full">
+      <div id="apiref" className="rounded-2xl md:p-4 lg:p-6 transition [grid-area:reference] w-full">
 
         {tags?.length ? (
           <div className="flex gap-2 mb-2 flex-wrap">
