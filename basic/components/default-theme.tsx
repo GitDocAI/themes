@@ -50,7 +50,7 @@ export const DefaultTheme: FC<{
                   lg:grid-cols-[auto_auto]
                   lg:grid-rows-[auto_auto]
                   lg:[grid-template-areas:'content_toc''nav_toc''footer_toc']
-                  p-4
+                  md:p-4
 
                   gap-4">
                   {children}

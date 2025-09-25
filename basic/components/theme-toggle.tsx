@@ -22,7 +22,7 @@ export default function ThemeToggle({ defaultMode }: { defaultMode: string }) {
     <button
       aria-label="Toggle theme"
       onClick={toggle}
-      className="flex items-center justify-center w-10 h-10 rounded-lg bg-secondary/10 dark:bg-secondary/20 transition-colors duration-300"
+      className="flex items-center justify-center sm:w-10 sm:h-10 rounded-lg bg-secondary/10 dark:bg-secondary/20 transition-colors duration-300"
     >
       {theme === 'dark-theme' ? (
         <i className="pi pi-sun text-yellow-100 text-xl transition-transform transform hover:scale-110" />

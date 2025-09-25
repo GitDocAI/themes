@@ -187,7 +187,7 @@ export default function SearchBar() {
     <>
       <button
         onClick={openModal}
-        className="md:w-full flex items-center space-x-2 rounded-lg md:border md:border-secondary/30 bg-background px-4 py-2 text-sm text-gray-600 md:shadow-sm transition hover:md:shadow-md "
+        className="md:w-full flex items-center sm:space-x-2 rounded-lg md:border md:border-secondary/30 bg-background sm:px-4 py-2 text-sm text-gray-600 md:shadow-sm transition hover:md:shadow-md "
       >
         <i className="w-4 h-4 pi pi-search cursor-pointer" />
         <span className="hidden sm:inline">Search</span>

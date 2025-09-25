@@ -64,7 +64,7 @@ const VersionSwitcher = ({ versions }: { versions: Version[] }) => {
         onFocus={handleFocus}
         onBlur={handleBlur}
         onClick={click}
-        className="x:whitespace-nowrap x:transition-colors x:min-w-6 x:overflow-hidden x:text-ellipsis x:focus-visible:nextra-focus x:ring-inset bg-background border-secondary/30 text-secondary border rounded-full px-3 py-1"
+        className="x:whitespace-nowrap x:transition-colors x:min-w-6 x:overflow-hidden x:text-ellipsis x:focus-visible:nextra-focus x:ring-inset bg-background border-secondary/30 text-secondary border rounded-full text-xs sm:text-md px-3 py-1"
       >
         {selectedVersion}
       </button>

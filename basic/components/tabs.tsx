@@ -44,7 +44,7 @@ export const TabList = ({
   }
 
   return (
-    <div className="pt-2 container sticky top-14 px-4">
+    <div className="pt-2 container bg-background/60 backdrop-blur-xs sticky top-14 px-4">
       <div className="text-sm">
         <div className="flex gap-4  overflow-x-auto">
           {visibleTabs.map((tabName) => {
