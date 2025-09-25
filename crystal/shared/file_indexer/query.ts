@@ -1,6 +1,4 @@
-import fs from "fs";
-import natural from "natural";
-import { tokenize } from "./content_processor"; // tu función con stemmer
+import { tokenize } from "./content_processor";
 
 function cosineSimilarity(vecA: number[], vecB: number[]): number {
   let dot = 0, normA = 0, normB = 0;
@@ -33,8 +31,8 @@ export function search(query: string, docs: any[], index: any, topK = 5) {
   });
 
   return scores
-    .filter(res=>res.score >= 0.002)
     .sort((a, b) => b.score - a.score)
     .slice(0, topK)
+    .filter(res=>res.score >= 0.002)
     ;
 }

@@ -179,7 +179,7 @@ export default function SearchBar() {
       }
     };
 
-    const timerId = setTimeout(handleSearch, 300);
+    const timerId = setTimeout(handleSearch, 100);
     return () => clearTimeout(timerId);
   }, [query]);
 
