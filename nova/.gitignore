@@ -40,4 +40,3 @@ turbo/
 # Optional: local next config override
 next.config.mjs.local
 package-lock.json
-static

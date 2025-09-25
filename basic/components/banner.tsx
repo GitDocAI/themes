@@ -43,7 +43,7 @@ export const Banner: FC<{ content: BannerConfig }> = ({ content }) => {
         }} />
       )}
       <div
-        className={`px-4 py-1 rounded relative flex items-center justify-between gap-4 shadow-sm border ${
+        className={`px-4 py-1 rounded relative text-xs sm:text-md flex items-center justify-between gap-4 shadow-sm border ${
           colors ? 'custom-banner' : 'bg-red-100 border-yellow-300 text-yellow-800'
         }`}
       >
