@@ -32,7 +32,7 @@ export const DefaultTheme: FC<{
     <>
       {themeinfo.banner ? <Banner content={themeinfo.banner} /> : <></>}
       <div className='min-h-screen w-full flex flex-col justify-between relative 2xl:container mx-auto'>
-        <Navbar navitems={themeinfo.navbar} versions={versions}
+        <Navbar navitems={themeinfo.navbar??[]} versions={versions}
           logo={logo}
           defaultTheme={themeinfo.defaultThemeMode ?? ''}
           tablist={tabs}
