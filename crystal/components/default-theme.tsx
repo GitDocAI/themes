@@ -19,6 +19,11 @@ export const DefaultTheme: FC<{
   const versions = calculateVersions(themeinfo)
   const tabs = calculateTabs(themeinfo)
 
+  // Extract colors from theme configuration  
+  const colors = themeinfo.colors ? {
+    light: themeinfo.colors.light,
+    dark: themeinfo.colors.dark
+  } : undefined;
 
   let logo = (<div></div>)
   if (themeinfo.logo) {
@@ -34,11 +39,12 @@ export const DefaultTheme: FC<{
         <Navbar navitems={themeinfo.navbar} versions={versions}
           logo={logo}
           defaultTheme={themeinfo.defaultThemeMode ?? ''}
+          colors={colors}
         />
-        <TabList versions={versions} tablist={tabs} />
+        <TabList versions={versions} tablist={tabs} colors={colors} />
         <div className='flex text-secondary flex-1 flex-col'>
           <div className="px-4 flex flex-col sm:flex-row flex-1 2xl:container mx-auto w-full">
-            <Sidebar themeinfo={themeinfo} versions={versions} tabs={tabs} />
+            <Sidebar themeinfo={themeinfo} versions={versions} tabs={tabs} colors={colors} />
             <div className="flex flex-col gap-1 w-full flex-1 min-h-0">
               <main className="flex-1
                   grid

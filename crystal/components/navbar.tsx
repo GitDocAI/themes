@@ -13,32 +13,49 @@ export const Navbar: FC<{
   navitems: NavBarItem[]
   logo: ReactNode
   defaultTheme: string,
-  versions: Version[]
-}> = ({ navitems, versions, logo, defaultTheme }) => {
+  versions: Version[],
+  colors?: { light?: string; dark?: string }
+}> = ({ navitems, versions, logo, defaultTheme, colors }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const showVersionSwitcher = true
 
+  // Función para convertir hex a RGB
+  const hexToRgb = (hex: string): string => {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result 
+      ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}`
+      : '59, 130, 246'
+  }
+
+  const primaryRgb = colors?.light 
+    ? hexToRgb(colors.light) 
+    : '59, 130, 246'
+  
+  const secondaryRgb = colors?.dark 
+    ? hexToRgb(colors.dark) 
+    : '139, 92, 246'
+
   return (
     <>
-      {/* Estilos dinámicos para botones según color primario */}
+      {/* Estilos dinámicos para botones según colores de configuración */}
       <style
         dangerouslySetInnerHTML={{
           __html: `
             .custom-button {
-              background: var(--gradient-primary);
+              background: linear-gradient(135deg, rgb(${primaryRgb}) 0%, rgb(${secondaryRgb}) 100%);
               color: white;
               padding: 0.75rem 1.5rem;
               border-radius: 12px;
               border: 1px solid rgba(255, 255, 255, 0.1);
               backdrop-filter: blur(8px);
-              box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+              box-shadow: 0 4px 12px rgba(${primaryRgb}, 0.2);
               transition: all 0.3s ease;
               font-weight: 500;
             }
 
             .custom-button:hover {
               transform: translateY(-2px);
-              box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
+              box-shadow: 0 8px 24px rgba(${primaryRgb}, 0.3);
               border-color: rgba(255, 255, 255, 0.2);
             }
 
@@ -50,12 +67,12 @@ export const Navbar: FC<{
             }
 
             .navbar-link:hover {
-              background: rgba(var(--color-accent-blue), 0.1);
+              background: rgba(${primaryRgb}, 0.1);
               transform: translateY(-1px);
             }
 
             .dark-theme .navbar-link:hover {
-              background: rgba(var(--color-accent-blue), 0.15);
+              background: rgba(${primaryRgb}, 0.15);
             }
           `
         }}
@@ -69,7 +86,7 @@ export const Navbar: FC<{
           </div>
 
           <span className="hidden sm:block lg:min-w-sm  max-w-md">
-            <SearchBar />
+            <SearchBar colors={colors} />
           </span>
 
           <div className='hidden md:flex items-center space-x-6'>
@@ -93,7 +110,7 @@ export const Navbar: FC<{
 
           <div className='md:hidden flex items-center space-x-4'>
             <span className="block sm:hidden">
-              <SearchBar />
+              <SearchBar colors={colors} />
             </span>
             <ThemeToggle defaultMode={defaultTheme} />
             <button

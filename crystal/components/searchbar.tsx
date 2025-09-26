@@ -44,7 +44,7 @@ function highlightSearchTerms(text: string, query: string): ReactNode {
         );
 
         return isMatch ? (
-          <span key={index} className="text-accent-blue font-semibold bg-accent-blue/10 px-1.5 py-0.5 rounded-md">
+          <span key={index} className="searchbar-accent font-semibold searchbar-accent-bg px-1.5 py-0.5 rounded-md">
             {part}
           </span>
         ) : (
@@ -120,12 +120,44 @@ function formatHeadingPath(headingPath: string[]): ReactNode {
   return <span className="flex flex-row items-center text-primary"> {displayPath.map((elem,index)=>(<span key={`${index + Date.now()}-${elem}`}>{elem}{index<displayPath.length-1?<i className="mx-1 pi  pi-angle-double-right"></i>:null}</span>))}</span>
 }
 
-export default function SearchBar() {
+export default function SearchBar({ colors }: { colors?: { light?: string; dark?: string } } = {}) {
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isMac, setIsMac] = useState<boolean | null>(null);
   const router = useRouter();
+
+  // Convert hex to RGB
+  const hexToRgb = (hex: string) => {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    return `${r}, ${g}, ${b}`;
+  };
+
+  // Generate dynamic styles
+  const dynamicStyles = colors ? `
+    <style>
+      .searchbar-accent {
+        color: ${colors.light || '#3b82f6'} !important;
+      }
+      .dark .searchbar-accent {
+        color: ${colors.dark || '#8b5cf6'} !important;
+      }
+      .searchbar-accent-hover:hover {
+        color: ${colors.light || '#3b82f6'} !important;
+      }
+      .dark .searchbar-accent-hover:hover {
+        color: ${colors.dark || '#8b5cf6'} !important;
+      }
+      .searchbar-accent-bg {
+        background-color: rgba(${hexToRgb(colors.light || '#3b82f6')}, 0.1) !important;
+      }
+      .dark .searchbar-accent-bg {
+        background-color: rgba(${hexToRgb(colors.dark || '#8b5cf6')}, 0.1) !important;
+      }
+    </style>
+  ` : '';
 
   const openModal = () => setIsOpen(true);
   const closeModal = () => {
@@ -185,9 +217,10 @@ export default function SearchBar() {
 
   return (
     <>
+      {dynamicStyles && <div dangerouslySetInnerHTML={{ __html: dynamicStyles }} />}
       <button
         onClick={openModal}
-        className="md:w-full flex items-center sm:space-x-3 rounded-xl searchbar-solid px-4 py-2.5 text-sm text-crystal-600 dark:text-crystal-300 transition-all duration-200 hover:text-accent-blue hover:shadow-crystal"
+        className="md:w-full flex items-center sm:space-x-3 rounded-xl searchbar-solid px-4 py-2.5 text-sm text-crystal-600 dark:text-crystal-300 transition-all duration-200 searchbar-accent-hover hover:shadow-crystal"
       >
         <i className="w-4 h-4 pi pi-search cursor-pointer" />
         <span className="hidden sm:inline">Search</span>
@@ -244,7 +277,7 @@ export default function SearchBar() {
                       className="block p-4 w-full text-left"
                     >
                       <div className="font-semibold text-crystal-700 dark:text-crystal-200 truncate text-sm mb-2 flex items-center space-x-2">
-                        <i className="pi pi-file-o text-accent-blue text-xs"></i>
+                        <i className="pi pi-file-o searchbar-accent text-xs"></i>
                         <span>{formattedHeadings}</span>
                       </div>
 

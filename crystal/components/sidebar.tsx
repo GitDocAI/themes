@@ -7,12 +7,24 @@ import { Version, Tab } from '../models/InnerConfiguration'
 import { useEffect, useState } from 'react'
 import { redirect } from 'next/navigation'
 import {splitPageUrl} from '../shared/splitPageUrl'
-export const Sidebar = ({ themeinfo, versions, tabs }: { themeinfo: ThemeInfo, versions: Version[], tabs: Tab[] }) => {
+export const Sidebar = ({ themeinfo, versions, tabs, colors }: { themeinfo: ThemeInfo, versions: Version[], tabs: Tab[], colors?: { light?: string; dark?: string } }) => {
   const pathname = usePathname()
   const [items, setItems] = useState<NavigationItem[]>(themeinfo.navigation.items ?? [])
   const [isOpen, setIsOpen] = useState(false)
 
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
+
+  // Función para convertir hex a RGB
+  const hexToRgb = (hex: string): string => {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result 
+      ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}`
+      : '34, 197, 94'
+  }
+
+  const primaryRgb = colors?.light 
+    ? hexToRgb(colors.light) 
+    : '34, 197, 94'
 
   const methodColors: Record<string, string> = {
     GET: "bg-gradient-to-r from-emerald-400 to-emerald-500 text-white shadow-emerald-200 dark:shadow-emerald-800/30",
@@ -79,7 +91,7 @@ function dropdownHasActiveChild(dropdown: NavigationItem, pathname: string): boo
       case 'group':
         return (
           <div key={item.title} className={`mb-8`}>
-            <div className="sidebar-text font-bold text-xs uppercase mb-3 tracking-wider px-2 border-l-2 border-accent-blue/50">
+            <div className="sidebar-text font-bold text-xs uppercase mb-3 tracking-wider px-2 border-l-2 sidebar-group-border">
               {item.title}
             </div>
             <div className="space-y-1 pl-2">
@@ -93,7 +105,7 @@ function dropdownHasActiveChild(dropdown: NavigationItem, pathname: string): boo
           <details key={item.title} className={`group cursor-pointer ${paddingLeft}`}
  open={isOpen}
           >
-            <summary className="sidebar-text flex items-center justify-between py-2 px-3 text-sm font-medium rounded-xl hover:bg-gradient-to-r hover:from-accent-blue/5 hover:to-accent-purple/5 hover:text-accent-blue transition-all duration-200">
+            <summary className="sidebar-text flex items-center justify-between py-2 px-3 text-sm font-medium rounded-xl hover:sidebar-accent-bg sidebar-accent transition-all duration-200">
               <span className="sidebar-text font-semibold text-sm tracking-wide">{item.title}</span>
               <svg className="w-4 h-4 transition-transform duration-200 group-open:rotate-90 text-crystal-600 dark:text-crystal-400" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
@@ -112,18 +124,10 @@ function dropdownHasActiveChild(dropdown: NavigationItem, pathname: string): boo
           <Anchor
             key={item.page + item.title}
             href={item.page || '#'}
-            className={`${isActive ? 'sidebar-active' : 'sidebar-text'} block py-2 px-3 rounded-xl text-sm transition-all duration-200 ease-in-out ${paddingLeft} ${isActive
+            className={`${isActive ? 'sidebar-active-custom sidebar-active-bg' : 'sidebar-text'} block py-2 px-3 rounded-xl text-sm transition-all duration-200 ease-in-out ${paddingLeft} ${isActive
               ? 'font-medium shadow-lg'
               : 'hover:bg-gradient-to-r hover:from-crystal-100/50 hover:to-crystal-200/30 dark:hover:text-crystal-100 hover:transform hover:scale-[1.02]'
               }`}
-            style={isActive
-              ? {
-                  background: 'linear-gradient(to right, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1))',
-                  color: '#1f2937',
-                  boxShadow: '0 4px 12px rgba(59, 130, 246, 0.2)'
-                }
-              : {}
-            }
           >
             {item.title}
           </Anchor>
@@ -138,18 +142,10 @@ function dropdownHasActiveChild(dropdown: NavigationItem, pathname: string): boo
           <Anchor
             key={item.page + item.title}
             href={item.page || '#'}
-            className={`${isActive_ ? 'sidebar-active' : 'sidebar-text'} flex items-center gap-3 py-2 px-3 rounded-xl text-sm transition-all duration-200 ease-in-out ${paddingLeft} ${isActive_
+            className={`${isActive_ ? 'sidebar-active-custom' : 'sidebar-text'} flex items-center gap-3 py-2 px-3 rounded-xl text-sm transition-all duration-200 ease-in-out ${paddingLeft} ${isActive_
               ? 'font-medium shadow-lg'
               : 'hover:bg-gradient-to-r hover:from-crystal-100/50 hover:to-crystal-200/30 dark:hover:text-crystal-100 hover:transform hover:scale-[1.02]'
               }`}
-            style={isActive_
-              ? {
-                  background: 'linear-gradient(to right, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1))',
-                  color: '#1f2937',
-                  boxShadow: '0 4px 12px rgba(59, 130, 246, 0.2)'
-                }
-              : {}
-            }
           >
             <span
               className={`px-2.5 py-1 rounded-lg text-xs font-bold shadow-md flex-shrink-0 ${methodColors[item.method]}`}
@@ -171,6 +167,31 @@ function dropdownHasActiveChild(dropdown: NavigationItem, pathname: string): boo
 
   return (
     <>
+      {/* Estilos dinámicos para sidebar según colores de configuración */}
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
+          .sidebar-group-border {
+            border-color: rgba(${primaryRgb}, 0.5) !important;
+          }
+          .sidebar-dropdown-hover:hover {
+            background: linear-gradient(135deg, rgba(${primaryRgb}, 0.05), rgba(${primaryRgb}, 0.08)) !important;
+            color: rgb(${primaryRgb}) !important;
+          }
+          .sidebar-active-custom {
+            background: linear-gradient(135deg, rgba(${primaryRgb}, 0.15), rgba(${primaryRgb}, 0.1)) !important;
+            color: rgb(${primaryRgb}) !important;
+            border: 1px solid rgba(${primaryRgb}, 0.3) !important;
+            box-shadow: 0 2px 8px rgba(${primaryRgb}, 0.15) !important;
+            font-weight: 600 !important;
+          }
+          .sidebar-page-hover:hover {
+            background: linear-gradient(to right, rgba(${primaryRgb}, 0.05), rgba(${primaryRgb}, 0.03)) !important;
+            color: rgb(${primaryRgb}) !important;
+          }
+          `,
+        }}
+      />
       {/* Mobile launcher button */}
       <div className="sm:hidden   py-2 border-b border-secondary/10  sticky top-0 z-20 flex items-center gap-2">
 
