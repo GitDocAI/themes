@@ -17,9 +17,10 @@ const VersionSwitcher = ({ versions }: { versions: Version[] }) => {
   // Si no hay versiones, mostrar una versión por defecto
   if (!versions || versions.length === 0) {
     return (
-      <div className="w-full flex items-center px-4 py-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 font-medium text-sm shadow-sm">
+
+      <div className="w-full flex items-center px-4 py-3 bg-primary border border-primary rounded-lg text-primary font-medium text-sm shadow-sm">
         <div className="flex items-center space-x-2">
-          <div className="w-1.5 h-1.5 bg-amber-400 rounded-full"></div>
+          <div className="w-1.5 h-1.5 bg-primary rounded-full"></div>
           <span>v1.0.0</span>
         </div>
       </div>
@@ -75,30 +76,30 @@ const VersionSwitcher = ({ versions }: { versions: Version[] }) => {
         ref={inputRef}
         onClick={click}
         onBlur={handleBlur}
-        className="w-full flex items-center justify-between px-4 py-3 bg-amber-50 hover:bg-amber-100 border border-amber-200 hover:border-amber-300 rounded-lg text-amber-800 font-medium text-sm transition-all duration-200 hover:shadow-md group"
+        className="w-full flex items-center justify-between px-4 py-3 bg-primary hover:bg-primary border border-primary hover:border-primary rounded-lg text-primary font-medium text-sm transition-all duration-200 hover:shadow-md group"
       >
         <div className="flex items-center space-x-2">
-          <div className="w-1.5 h-1.5 bg-amber-400 rounded-full"></div>
+          <div className="w-1.5 h-1.5 bg-primary rounded-full"></div>
           <span>{selectedVersion}</span>
         </div>
         {filteredVersions.length > 1 && (
-          <i className={`pi pi-chevron-down text-xs ml-2 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''} text-amber-600 group-hover:text-amber-800`}></i>
+          <i className={`pi pi-chevron-down text-xs ml-2 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''} text-primary group-hover:text-primary`}></i>
         )}
       </button>
 
       {isOpen && filteredVersions.length > 1 && (
-        <ul className="absolute z-50 mt-1 w-full bg-white border border-amber-200 rounded-lg shadow-xl overflow-hidden">
+        <ul className="absolute z-50 mt-1 w-full bg-white border border-primary rounded-lg shadow-xl overflow-hidden">
           {filteredVersions.map(version => (
             <li
               key={version.version}
               onMouseDown={() => handleOptionClick(version.version)}
               className={`px-4 py-3 cursor-pointer transition-all duration-200 flex items-center space-x-2 text-sm ${
                 version.version === selectedVersion
-                  ? 'bg-amber-100 text-amber-800 font-medium border-l-2 border-amber-400'
-                  : 'text-amber-700 hover:bg-amber-50 hover:text-amber-800'
+                  ? 'bg-primary text-primary font-medium border-l-2 border-primary'
+                  : 'text-primary hover:bg-primary hover:text-primary'
               }`}
             >
-              <div className={`w-1.5 h-1.5 rounded-full ${version.version === selectedVersion ? 'bg-amber-400' : 'bg-amber-300'}`}></div>
+              <div className={`w-1.5 h-1.5 rounded-full ${version.version === selectedVersion ? 'bg-primary' : 'bg-primary'}`}></div>
               <span>{version.version}</span>
             </li>
           ))}
