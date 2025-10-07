@@ -18,9 +18,11 @@ export const metadata: Metadata = {
 
 
 
+import { openapi_path_builder } from '../shared/path_builder';
 
-const site = JSON.parse(process.env.SITE_CONFIG!)
+import raw_site from '../gitdocai.config.json'
 
+const site = openapi_path_builder(raw_site as any)
 
 const RootLayout: FC<{ children: ReactNode }> = async ({ children }) => {
   const pageMap = await getPageMap()

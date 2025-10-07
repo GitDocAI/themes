@@ -8,6 +8,7 @@ import { ThemeInfo } from '../models/ThemeInfo'
 import InvalidConfigPage from '@/components/InvalidConfig'
 import { GlobalScript } from '@/components/doc-components/GlobalScript'
 
+import { openapi_path_builder } from '../shared/path_builder';
 
 export const metadata: Metadata = {
   title: {
@@ -18,8 +19,10 @@ export const metadata: Metadata = {
 
 
 
+import raw_site from '../gitdocai.config.json'
 
-const site = JSON.parse(process.env.SITE_CONFIG!)
+const site = openapi_path_builder(raw_site as any)
+
 
 
 const RootLayout: FC<{ children: ReactNode }> = async ({ children }) => {
