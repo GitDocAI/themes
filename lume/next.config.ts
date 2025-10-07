@@ -29,6 +29,8 @@ export default async function config() {
   }
 
   return withNextra({
+     reactDevOverlay: false,
+    devIndicators: false,
     env: {
       SITE_CONFIG: JSON.stringify(siteConfig),
     },

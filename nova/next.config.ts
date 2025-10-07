@@ -11,7 +11,7 @@ const withNextra = nextra({
 });
 
 export default async function config() {
-  
+
   let static_data={}
   try {
    static_data = await init();
@@ -29,6 +29,8 @@ export default async function config() {
   }
 
   return withNextra({
+     reactDevOverlay: false,
+    devIndicators: false,
     env: {
       SITE_CONFIG: JSON.stringify(siteConfig),
     },
