@@ -125,28 +125,8 @@ body {
   font-feature-settings: 'rlig' 1, 'calt' 1;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
   position: relative;
-  width: 100%;
-  max-width: 100vw;
-}
-
-html {
-  width: 100%;
-  max-width: 100vw;
-  overflow-x: hidden;
-  overflow-y: scroll;
-}
-
-/* Ensure main content container doesn't overflow */
-main, article, section {
-  max-width: 100%;
-  min-width: 0;
-}
-
-/* Ensure nextra content wrapper respects width constraints */
-.nextra-content {
-  max-width: 100%;
-  min-width: 0;
 }
 
 body::before {
@@ -346,7 +326,7 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 600;
   line-height: 1.3;
   letter-spacing: -0.02em;
-  scroll-margin-top: 100px;
+  scroll-margin-top: 150px;
 }
 
 h1 {
@@ -439,7 +419,6 @@ pre {
 
 .sidebar::-webkit-scrollbar {
   width: 8px;
-  height: 8px;
 }
 
 .sidebar::-webkit-scrollbar-track {
@@ -458,9 +437,6 @@ pre {
   background: linear-gradient(135deg, rgb(var(--color-accent-purple)), rgb(var(--color-accent-blue)));
 }
 
-.dark-theme .sidebar {
-  scrollbar-color: rgba(148, 163, 184, 0.8) rgba(30, 41, 59, 0.3);
-}
 
 .dark-theme .sidebar::-webkit-scrollbar-track {
   background: rgba(var(--color-crystal-800), 0.3);
