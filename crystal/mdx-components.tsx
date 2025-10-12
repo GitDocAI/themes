@@ -12,7 +12,7 @@ const defaultComponents = getNextraComponents({
     const { children, toc } = some
     return (
       <>
-         <article id="mdx-content" className=" [grid-area:content] sm:p-3 h-full flex-1 min-h-[60dvh] ">
+         <article id="mdx-content" className=" [grid-area:content] sm:p-3 h-full flex-1 min-h-[60dvh]   ">
              {children}
           </article>
           <TOC toc={toc} />

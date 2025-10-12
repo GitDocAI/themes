@@ -569,8 +569,6 @@ div[data-rehype-pretty-code-fragment] pre:hover {
 pre > span.relative.group {
   position: static !important;
   display: block !important;
-  width: 100% !important;
-  height: 100% !important;
 }
 
 /* Enhanced copy button styling */
@@ -749,4 +747,22 @@ pre button[data-copy-target]:hover {
 
 .dark-theme .content-card:hover {
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+}
+
+.sidebar {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(var(--color-crystal-800)) var(--glass-bg); /* Firefox */
+}
+
+.sidebar::-webkit-scrollbar {
+  width: 12px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+  background: rgb(var(--color-crystal-800)); /* track */
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+  background-color: var(--glass-bg); /* thumb */
+  border-radius: 6px;
 }

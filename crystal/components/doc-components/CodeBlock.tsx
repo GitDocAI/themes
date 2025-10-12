@@ -7,7 +7,7 @@ interface CodeBlockProps {
 export const CodeBlock = ({ children }: CodeBlockProps) => {
   const id = `code-`
   return (
-    <span className="relative group inline-block w-full" >
+    <span className="relative group " >
       <code id={id}>
         {children}
       </code>
