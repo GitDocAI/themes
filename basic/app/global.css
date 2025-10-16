@@ -134,89 +134,37 @@ pre:hover button[data-copy-target] {
   opacity: 1 !important;
 }
 
-/* Estilos para contenido editable */
-.editable-content {
+/* Estilos para artículo editable completo */
+.editable-article {
   position: relative;
   transition: all 0.2s ease;
   outline: none !important;
   border: none !important;
-}
-
-.editable-content:hover {
-  background-color: rgb(var(--color-primary) / 0.03);
-  border-radius: 0.25rem;
   cursor: text;
 }
 
-.editable-content:focus,
-.editable-content.editing {
+.editable-article:hover {
+  background-color: rgb(var(--color-primary) / 0.02);
+  border-radius: 0.5rem;
+}
+
+.editable-article:focus,
+.editable-article.editing {
   outline: none !important;
   border: none !important;
   box-shadow: none !important;
-  background-color: transparent !important;
+  background-color: rgb(var(--color-primary) / 0.03) !important;
+  border-radius: 0.5rem;
 }
 
 /* Eliminar cualquier highlight del navegador */
-.editable-content:focus-visible {
+.editable-article:focus-visible {
   outline: none !important;
 }
 
-*[contenteditable="true"]:focus {
+article[contenteditable="true"]:focus {
   outline: none !important;
   box-shadow: none !important;
   border: none !important;
-}
-
-/* Asegurar que todos los estilos se mantengan en modo editable */
-.editable-content strong,
-.editable-content b {
-  font-weight: 600;
-  color: rgb(var(--color-primary));
-}
-
-.editable-content em,
-.editable-content i {
-  font-style: italic;
-  color: rgb(var(--color-secondary));
-}
-
-.editable-content del,
-.editable-content s {
-  text-decoration: line-through;
-  color: rgb(var(--color-secondary) / 0.6);
-}
-
-.editable-content code {
-  background-color: rgb(var(--color-secondary) / 0.1);
-  padding: 0.125rem 0.375rem;
-  border-radius: 0.25rem;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 0.875rem;
-}
-
-.editable-content ul {
-  list-style-type: disc;
-  padding-left: 1.5rem;
-  margin-bottom: 1rem;
-}
-
-.editable-content ol {
-  list-style-type: decimal;
-  padding-left: 1.5rem;
-  margin-bottom: 1rem;
-}
-
-.editable-content li {
-  display: list-item;
-  margin-bottom: 0.25rem;
-}
-
-.editable-content a {
-  color: rgb(59 130 246);
-  text-decoration: underline;
-}
-
-.editable-content a:hover {
-  color: rgb(37 99 235);
 }
 
