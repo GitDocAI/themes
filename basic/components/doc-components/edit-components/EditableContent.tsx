@@ -173,7 +173,7 @@ export function EditableContent({ children, originalMarkdown, webhook_url, authe
     originalMarkdownRef.current = originalMarkdown
   }, [originalMarkdown])
 
-  const sendToWebhook = async (oldContent: string, newContent: string) => {
+  const sendToWebhook = async (newContent: string) => {
     if (!webhook_url) {
       console.warn('No webhook URL configured')
       return
@@ -188,7 +188,6 @@ export function EditableContent({ children, originalMarkdown, webhook_url, authe
         },
         body: JSON.stringify({
           file_path: file_path,
-          old_segment: oldContent,
           new_text: newContent,
         }),
       })
@@ -222,7 +221,7 @@ export function EditableContent({ children, originalMarkdown, webhook_url, authe
 
       // Solo guardar si cambió
       if (newMarkdown !== originalMarkdownRef.current) {
-        sendToWebhook(originalMarkdownRef.current, newMarkdown)
+        sendToWebhook(newMarkdown)
         originalMarkdownRef.current = newMarkdown
       }
 
@@ -298,7 +297,7 @@ export function EditableContent({ children, originalMarkdown, webhook_url, authe
         // Guardar el elemento actual
         const newMarkdown = htmlToMarkdown(childRef.current)
         if (newMarkdown !== originalMarkdownRef.current) {
-          sendToWebhook(originalMarkdownRef.current, newMarkdown)
+          sendToWebhook( newMarkdown)
           originalMarkdownRef.current = newMarkdown
         }
 
