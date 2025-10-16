@@ -2,6 +2,7 @@
 
 import React, { useRef, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
+import DevToolbar from '../../dev-mode/DevToolbar'
 
 interface EditableArticleProps {
   children: React.ReactNode
@@ -246,6 +247,7 @@ export function EditableArticle({ children,is_prod,webhook_url,authentication }:
   const articleRef = useRef<HTMLElement | null>(null)
   const pathname = usePathname()
   const isEditingRef = useRef(false)
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
     if (is_prod || !articleRef.current) return
@@ -259,6 +261,11 @@ export function EditableArticle({ children,is_prod,webhook_url,authentication }:
       }
 
       try {
+        console.log('Sending to webhook:', {
+          file_path: pathname + '.mdx',
+          content_length: markdown.length
+        })
+
         const res = await fetch(webhook_url, {
           method: 'POST',
           headers: {
@@ -267,7 +274,7 @@ export function EditableArticle({ children,is_prod,webhook_url,authentication }:
           },
           body: JSON.stringify({
             file_path: pathname + '.mdx',
-            new_content: markdown,
+            new_text: markdown,
           }),
         })
 
@@ -281,14 +288,39 @@ export function EditableArticle({ children,is_prod,webhook_url,authentication }:
       }
     }
 
-    const handleBlur = () => {
-      if (!isEditingRef.current || !articleRef.current) return
+    const saveContent = () => {
+      if (!articleRef.current) return
 
       // Convertir HTML a Markdown
       const markdown = htmlToMarkdown(articleRef.current)
 
       // Enviar al webhook
       sendToWebhook(markdown)
+    }
+
+    const handleInput = () => {
+      // Cancelar el timeout anterior si existe
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current)
+      }
+
+      // Crear nuevo timeout para guardar después de 3 segundos
+      saveTimeoutRef.current = setTimeout(() => {
+        saveContent()
+      }, 3000)
+    }
+
+    const handleBlur = () => {
+      if (!isEditingRef.current || !articleRef.current) return
+
+      // Cancelar el timeout pendiente si existe
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current)
+        saveTimeoutRef.current = null
+      }
+
+      // Guardar inmediatamente al perder el foco
+      saveContent()
 
       isEditingRef.current = false
       article.classList.remove('editing')
@@ -303,7 +335,15 @@ export function EditableArticle({ children,is_prod,webhook_url,authentication }:
       // Cmd/Ctrl + S para guardar
       if ((e.metaKey || e.ctrlKey) && e.key === 's') {
         e.preventDefault()
-        article.blur()
+
+        // Cancelar el timeout pendiente
+        if (saveTimeoutRef.current) {
+          clearTimeout(saveTimeoutRef.current)
+          saveTimeoutRef.current = null
+        }
+
+        // Guardar inmediatamente
+        saveContent()
       }
 
       // Cmd/Ctrl + B para negrita
@@ -324,13 +364,20 @@ export function EditableArticle({ children,is_prod,webhook_url,authentication }:
     article.classList.add('editable-article')
 
     // Agregar event listeners
+    article.addEventListener('input', handleInput)
     article.addEventListener('blur', handleBlur)
     article.addEventListener('focus', handleFocus)
     article.addEventListener('keydown', handleKeyDown)
 
     return () => {
+      // Limpiar timeout al desmontar
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current)
+      }
+
       article.removeAttribute('contentEditable')
       article.classList.remove('editable-article', 'editing')
+      article.removeEventListener('input', handleInput)
       article.removeEventListener('blur', handleBlur)
       article.removeEventListener('focus', handleFocus)
       article.removeEventListener('keydown', handleKeyDown)
@@ -350,12 +397,15 @@ export function EditableArticle({ children,is_prod,webhook_url,authentication }:
   }
 
   return (
-    <article
-      id="mdx-content"
-      ref={setArticleRef}
-      className="[grid-area:content] sm:p-3 h-full flex-1 min-h-[60dvh]"
-    >
-      {children}
-    </article>
+    <div className="[grid-area:content] flex flex-col">
+      <DevToolbar />
+      <article
+        id="mdx-content"
+        ref={setArticleRef}
+        className="sm:p-3 h-full flex-1 min-h-[60dvh]"
+      >
+        {children}
+      </article>
+    </div>
   )
 }
