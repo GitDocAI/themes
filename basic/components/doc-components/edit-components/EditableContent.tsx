@@ -2,12 +2,14 @@
 
 import React, { useRef, useEffect } from 'react'
 
+import { usePathname } from 'next/navigation'
+
+
 interface EditableContentProps {
   children: React.ReactNode
   originalMarkdown: string
   webhook_url: string
   authentication: string
-  file_path: string
 }
 
 /**
@@ -160,9 +162,12 @@ function htmlToMarkdown(element: HTMLElement): string {
   return markdown.trim()
 }
 
-export function EditableContent({ children, originalMarkdown, webhook_url, authentication, file_path }: EditableContentProps) {
+export function EditableContent({ children, originalMarkdown, webhook_url, authentication}: EditableContentProps) {
   const childRef = useRef<HTMLElement | null>(null)
   const originalMarkdownRef = useRef(originalMarkdown)
+
+  const pathname = usePathname()
+  const file_path: string=   pathname+'.mdx'
 
   useEffect(() => {
     originalMarkdownRef.current = originalMarkdown
@@ -403,3 +408,4 @@ export function EditableContent({ children, originalMarkdown, webhook_url, authe
 
   return clonedChild
 }
+
