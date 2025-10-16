@@ -10,10 +10,6 @@
   },
   "dependencies": {
     "@headlessui/react": "^2.2.9",
-    "@tiptap/markdown": "^3.7.1",
-    "@tiptap/pm": "^3.7.0",
-    "@tiptap/react": "^3.7.0",
-    "@tiptap/starter-kit": "^3.7.0",
     "clsx": "^2.1.1",
     "ml-matrix": "^6.12.1",
     "natural": "^8.1.0",

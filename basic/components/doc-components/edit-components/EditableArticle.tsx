@@ -5,11 +5,12 @@ import { usePathname } from 'next/navigation'
 
 interface EditableArticleProps {
   children: React.ReactNode
+ is_prod :boolean
+ webhook_url :string
+ authentication :string
 }
 
-const is_prod = process.env.NODE_ENV === 'production'
-const webhook_url = process.env.NEXT_PUBLIC_WEBHOOK_URL || process.env.WEBHOOK_URL
-const authentication = process.env.NEXT_PUBLIC_AUTHENTICATION || process.env.AUTHENTICATION
+
 
 /**
  * Convierte el contenido HTML del contentEditable a Markdown
@@ -241,7 +242,7 @@ function htmlToMarkdown(element: HTMLElement): string {
   return markdown.trim()
 }
 
-export function EditableArticle({ children }: EditableArticleProps) {
+export function EditableArticle({ children,is_prod,webhook_url,authentication }: EditableArticleProps) {
   const articleRef = useRef<HTMLElement | null>(null)
   const pathname = usePathname()
   const isEditingRef = useRef(false)

@@ -144,7 +144,6 @@ pre:hover button[data-copy-target] {
 }
 
 .editable-article:hover {
-  background-color: rgb(var(--color-primary) / 0.02);
   border-radius: 0.5rem;
 }
 
@@ -153,7 +152,6 @@ pre:hover button[data-copy-target] {
   outline: none !important;
   border: none !important;
   box-shadow: none !important;
-  background-color: rgb(var(--color-primary) / 0.03) !important;
   border-radius: 0.5rem;
 }
 
