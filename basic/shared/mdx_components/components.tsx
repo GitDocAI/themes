@@ -4,6 +4,7 @@ import { BlockQuote } from '../../components/doc-components/BlockQuote'
 import { CodeBlock } from '../../components/doc-components/CodeBlock'
 import { CheckItem, CheckList } from '../../components/doc-components/CheckList'
 import { EditableWrapper } from '../../components/doc-components/edit-components/EditableWrapper'
+import { ResizableImage } from '../../components/doc-components/ResizableImage'
 import ApiReference from '../../components/doc-components/ApiReference'
 
 export const components = {
@@ -71,15 +72,22 @@ export const components = {
       {children}
     </a>
   ),
-  img: ({ src, alt, height, ...props }) => (
-    <img
-      src={src as string}
-      alt={alt}
-      className="rounded-lg mb-4 max-w-full border border-neutral-200 dark:border-neutral-700"
-      style={{ height: height ? `${height}px` : 'auto' }}
-      {...props}
-    />
-  ),
+  img: ({ src, alt, width, ...props }) => {
+    // En modo desarrollo (editable), usar ResizableImage
+    if (process.env.NODE_ENV !== 'production') {
+      return <ResizableImage src={src as string} alt={alt} initialWidth={width as number} />
+    }
+    // En producción, usar img normal
+    return (
+      <img
+        src={src as string}
+        alt={alt}
+        className="rounded-lg mb-4 max-w-full border border-neutral-200 dark:border-neutral-700"
+        style={{ width: width ? `${width}px` : 'auto', maxWidth: '100%' }}
+        {...props}
+      />
+    )
+  },
 
   // --- Blockquote ---
   blockquote: ({ children }) => <BlockQuote>{children}</BlockQuote>,

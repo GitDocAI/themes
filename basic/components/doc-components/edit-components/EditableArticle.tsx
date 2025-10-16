@@ -90,10 +90,19 @@ function htmlToMarkdown(element: HTMLElement): string {
           const href = el.getAttribute('href') || ''
           return `[${children}](${href})`
 
-        case 'img':
+        case 'img': {
           const src = el.getAttribute('src') || ''
           const alt = el.getAttribute('alt') || ''
+          const imgWidth = el.style.width || el.getAttribute('width')
+
+          // Si tiene ancho especificado, incluirlo en el markdown
+          if (imgWidth) {
+            const widthValue = imgWidth.replace('px', '')
+            return `<img src="${src}" alt="${alt}" width="${widthValue}" />\n\n`
+          }
+
           return `![${alt}](${src})\n\n`
+        }
 
         case 'br':
           return '\n'
@@ -112,8 +121,48 @@ function htmlToMarkdown(element: HTMLElement): string {
           // Las tablas se manejan en el case 'table'
           return children
 
-        // Divs y spans - solo retornar contenido
-        case 'div':
+        // Divs y spans - verificar si son componentes especiales
+        case 'div': {
+          // Detectar AlertBlock (Tip, Note, Warning, Danger, Info)
+          const classes = el.className || ''
+
+          // Detectar tipo de alerta por las clases de color
+          let alertType: string | null = null
+          if (classes.includes('border-green-500')) {
+            alertType = 'Tip'
+          } else if (classes.includes('border-blue-500')) {
+            alertType = 'Note'
+          } else if (classes.includes('border-yellow-500')) {
+            alertType = 'Warning'
+          } else if (classes.includes('border-red-500')) {
+            alertType = 'Danger'
+          } else if (classes.includes('border-sky-500')) {
+            alertType = 'Info'
+          }
+
+          if (alertType) {
+            // Obtener el contenido sin el ícono
+            // El AlertBlock tiene un <i> para el ícono y un <div> con el contenido
+            const contentDiv = el.querySelector('div.text-secondary')
+            if (contentDiv) {
+              const alertContent = Array.from(contentDiv.childNodes).map(processNode).join('')
+              return `<${alertType}>\n${alertContent.trim()}\n</${alertType}>\n\n`
+            }
+            // Fallback si no encuentra el div interno
+            return `<${alertType}>\n${children}\n</${alertType}>\n\n`
+          }
+
+          // Si no es un componente especial, solo retornar el contenido
+          return children
+        }
+
+        case 'i':
+          // Ignorar íconos (como los de AlertBlock)
+          if (el.className.includes('pi pi-')) {
+            return ''
+          }
+          return `*${children}*`
+
         case 'span':
         case 'article':
         case 'section':

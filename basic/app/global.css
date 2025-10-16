@@ -168,3 +168,25 @@ article[contenteditable="true"]:focus {
   border: none !important;
 }
 
+/* Asegurar que las imágenes no causen overflow horizontal */
+.editable-article img,
+article#mdx-content img {
+  max-width: 100% !important;
+  height: auto !important;
+  display: block;
+}
+
+/* Prevenir overflow en el artículo editable */
+.editable-article,
+article#mdx-content {
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
+/* Estilos para el contenedor de imagen redimensionable */
+.resizable-image-container {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+}
+
