@@ -2,7 +2,6 @@
 
 import React, { useRef, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
-import DevToolbar from '../../dev-mode/DevToolbar'
 
 interface EditableArticleProps {
   children: React.ReactNode
@@ -247,12 +246,14 @@ export function EditableArticle({ children,is_prod,webhook_url,authentication }:
   const articleRef = useRef<HTMLElement | null>(null)
   const pathname = usePathname()
   const isEditingRef = useRef(false)
-  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
     if (is_prod || !articleRef.current) return
 
     const article = articleRef.current
+
+    let timeoutId: NodeJS.Timeout | null = null
 
     const sendToWebhook = async (markdown: string) => {
       if (!webhook_url) {
@@ -261,11 +262,6 @@ export function EditableArticle({ children,is_prod,webhook_url,authentication }:
       }
 
       try {
-        console.log('Sending to webhook:', {
-          file_path: pathname + '.mdx',
-          content_length: markdown.length
-        })
-
         const res = await fetch(webhook_url, {
           method: 'POST',
           headers: {
@@ -279,48 +275,24 @@ export function EditableArticle({ children,is_prod,webhook_url,authentication }:
         })
 
         if (!res.ok) {
-          console.error('Failed to save content:', await res.text())
+          console.log('Failed to save content:', await res.text())
         } else {
           console.log('Content saved successfully')
+          // Clear the content of the article after saving
         }
       } catch (error) {
-        console.error('Error saving content:', error)
+        console.log('Error saving content:', error)
       }
     }
 
-    const saveContent = () => {
-      if (!articleRef.current) return
+    const handleBlur = () => {
+      if (!isEditingRef.current || !articleRef.current) return
 
       // Convertir HTML a Markdown
       const markdown = htmlToMarkdown(articleRef.current)
 
       // Enviar al webhook
       sendToWebhook(markdown)
-    }
-
-    const handleInput = () => {
-      // Cancelar el timeout anterior si existe
-      if (saveTimeoutRef.current) {
-        clearTimeout(saveTimeoutRef.current)
-      }
-
-      // Crear nuevo timeout para guardar después de 3 segundos
-      saveTimeoutRef.current = setTimeout(() => {
-        saveContent()
-      }, 3000)
-    }
-
-    const handleBlur = () => {
-      if (!isEditingRef.current || !articleRef.current) return
-
-      // Cancelar el timeout pendiente si existe
-      if (saveTimeoutRef.current) {
-        clearTimeout(saveTimeoutRef.current)
-        saveTimeoutRef.current = null
-      }
-
-      // Guardar inmediatamente al perder el foco
-      saveContent()
 
       isEditingRef.current = false
       article.classList.remove('editing')
@@ -335,15 +307,7 @@ export function EditableArticle({ children,is_prod,webhook_url,authentication }:
       // Cmd/Ctrl + S para guardar
       if ((e.metaKey || e.ctrlKey) && e.key === 's') {
         e.preventDefault()
-
-        // Cancelar el timeout pendiente
-        if (saveTimeoutRef.current) {
-          clearTimeout(saveTimeoutRef.current)
-          saveTimeoutRef.current = null
-        }
-
-        // Guardar inmediatamente
-        saveContent()
+        article.blur()
       }
 
       // Cmd/Ctrl + B para negrita
@@ -359,28 +323,42 @@ export function EditableArticle({ children,is_prod,webhook_url,authentication }:
       }
     }
 
+
+    const handleContentChange = () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current)
+      }
+
+      timeoutRef.current = setTimeout(async () => {
+        if (!isEditingRef.current || !articleRef.current) return
+        const markdown = htmlToMarkdown(articleRef.current)
+        isEditingRef.current = false
+        await sendToWebhook(markdown)
+        isEditingRef.current = true
+      }, 300)
+    }
+
     // Hacer el artículo editable
     article.setAttribute('contentEditable', 'true')
     article.classList.add('editable-article')
 
     // Agregar event listeners
-    article.addEventListener('input', handleInput)
     article.addEventListener('blur', handleBlur)
     article.addEventListener('focus', handleFocus)
     article.addEventListener('keydown', handleKeyDown)
+    article.addEventListener('input', handleContentChange)
 
     return () => {
-      // Limpiar timeout al desmontar
-      if (saveTimeoutRef.current) {
-        clearTimeout(saveTimeoutRef.current)
-      }
-
       article.removeAttribute('contentEditable')
       article.classList.remove('editable-article', 'editing')
-      article.removeEventListener('input', handleInput)
       article.removeEventListener('blur', handleBlur)
       article.removeEventListener('focus', handleFocus)
       article.removeEventListener('keydown', handleKeyDown)
+      article.removeEventListener('input', handleContentChange)
+
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current)
+      }
     }
   }, [pathname])
 
@@ -397,15 +375,13 @@ export function EditableArticle({ children,is_prod,webhook_url,authentication }:
   }
 
   return (
-    <div className="[grid-area:content] flex flex-col">
-      <DevToolbar />
-      <article
-        id="mdx-content"
-        ref={setArticleRef}
-        className="sm:p-3 h-full flex-1 min-h-[60dvh]"
-      >
-        {children}
-      </article>
-    </div>
+    <article
+      id="mdx-content"
+      ref={setArticleRef}
+      className="[grid-area:content] sm:p-3 h-full flex-1 min-h-[60dvh]"
+    >
+      {children}
+    </article>
   )
 }
+
