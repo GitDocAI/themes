@@ -10,6 +10,10 @@
   },
   "dependencies": {
     "@headlessui/react": "^2.2.9",
+    "@tiptap/markdown": "^3.7.1",
+    "@tiptap/pm": "^3.7.0",
+    "@tiptap/react": "^3.7.0",
+    "@tiptap/starter-kit": "^3.7.0",
     "clsx": "^2.1.1",
     "ml-matrix": "^6.12.1",
     "natural": "^8.1.0",
@@ -21,8 +25,12 @@
     "primeicons": "^7.0.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "react-markdown": "^10.1.0",
+    "remark-gfm": "^4.0.1",
     "shiki": "^3.13.0",
-    "stopwords": "^0.0.9"
+    "stopwords": "^0.0.9",
+    "tiptap-markdown": "^0.9.0",
+    "turndown": "^7.2.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.7",
@@ -34,3 +42,4 @@
     "typescript": "^5"
   }
 }
+
