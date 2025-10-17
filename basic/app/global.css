@@ -312,3 +312,187 @@ article#mdx-content {
   position: relative;
 }
 
+/* Link Modal Styles */
+.link-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.link-modal {
+  background-color: rgb(var(--color-bg));
+  border: 1px solid rgb(var(--color-primary) / 0.2);
+  border-radius: 0.75rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  padding: 1.5rem;
+  min-width: 400px;
+  max-width: 90vw;
+}
+
+.link-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.link-modal-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: rgb(var(--color-heading));
+}
+
+.link-modal-close {
+  background: transparent;
+  border: none;
+  color: rgb(var(--color-muted));
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 0.375rem;
+  transition: all 0.2s ease;
+}
+
+.link-modal-close:hover {
+  background-color: rgb(var(--color-primary) / 0.08);
+  color: rgb(var(--color-primary));
+}
+
+.link-modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.link-modal-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.link-modal-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: rgb(var(--color-content));
+}
+
+.link-modal-input {
+  padding: 0.625rem 0.875rem;
+  border: 1px solid rgb(var(--color-primary) / 0.2);
+  border-radius: 0.5rem;
+  background-color: rgb(var(--color-bg));
+  color: rgb(var(--color-content));
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+}
+
+.link-modal-input:focus {
+  outline: none;
+  border-color: rgb(var(--color-primary) / 0.5);
+  box-shadow: 0 0 0 3px rgb(var(--color-primary) / 0.1);
+}
+
+.link-modal-input.error {
+  border-color: #ef4444;
+}
+
+.link-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.link-modal-button {
+  padding: 0.625rem 1.25rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+}
+
+.link-modal-button-cancel {
+  background-color: transparent;
+  color: rgb(var(--color-muted));
+  border-color: rgb(var(--color-primary) / 0.2);
+}
+
+.link-modal-button-cancel:hover {
+  background-color: rgb(var(--color-primary) / 0.08);
+  color: rgb(var(--color-primary));
+}
+
+.link-modal-button-insert {
+  background-color: rgb(var(--color-primary));
+  color: white;
+}
+
+.link-modal-button-insert:hover:not(:disabled) {
+  background-color: rgb(var(--color-primary) / 0.9);
+}
+
+.link-modal-button-insert:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Table Grid Styles */
+.table-grid-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 0.5rem;
+  background-color: rgb(var(--color-bg));
+  border: 1px solid rgb(var(--color-primary) / 0.2);
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 0.75rem;
+  z-index: 50;
+}
+
+.table-grid-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.table-grid-row {
+  display: flex;
+  gap: 2px;
+}
+
+.table-grid-cell {
+  width: 20px;
+  height: 20px;
+  border: 1px solid rgb(var(--color-primary) / 0.3);
+  border-radius: 2px;
+  background-color: transparent;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.table-grid-cell:hover {
+  background-color: rgb(var(--color-primary) / 0.1);
+}
+
+.table-grid-cell-active {
+  background-color: rgb(var(--color-primary) / 0.25);
+  border-color: rgb(var(--color-primary) / 0.6);
+}
+
+.table-grid-label {
+  margin-top: 0.5rem;
+  text-align: center;
+  font-size: 0.75rem;
+  color: rgb(var(--color-muted));
+  font-weight: 500;
+}
+

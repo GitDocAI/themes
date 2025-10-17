@@ -286,9 +286,19 @@ export function EditableArticle({ children,is_prod,webhook_url,authentication }:
   const justSavedRef = useRef(false)
   const cursorTextPositionRef = useRef<number>(0)
 
+  // Detectar si estamos en API Reference
+  const [isApiReference, setIsApiReference] = React.useState(false)
+
+  React.useEffect(() => {
+    // Verificar si hay elemento con id="apiref" o si la URL contiene "api_reference"
+    const hasApiRefElement = !!document.getElementById('apiref')
+    const urlHasApiRef = pathname.toLowerCase().includes('api_reference')
+    setIsApiReference(hasApiRefElement || urlHasApiRef)
+  }, [pathname])
+
   // Capturar el contenido inicial y actualizar cuando children cambia
   useEffect(() => {
-    if (is_prod || !contentContainerRef.current) return
+    if (is_prod || isApiReference || !contentContainerRef.current) return
 
     const container = contentContainerRef.current
     const childrenDiv = container.nextElementSibling
@@ -329,7 +339,7 @@ export function EditableArticle({ children,is_prod,webhook_url,authentication }:
         }
       }
     }
-  }, [is_prod, children])
+  }, [is_prod, isApiReference, children])
 
   // Guardar posición del cursor basada en texto plano
   const saveSimpleCursorPosition = () => {
@@ -518,7 +528,7 @@ export function EditableArticle({ children,is_prod,webhook_url,authentication }:
 
   // Efecto para bloquear re-renders mientras se guarda
   useLayoutEffect(() => {
-    if (is_prod || !contentContainerRef.current) return
+    if (is_prod || isApiReference || !contentContainerRef.current) return
 
     const container = contentContainerRef.current
 
@@ -530,10 +540,10 @@ export function EditableArticle({ children,is_prod,webhook_url,authentication }:
         restoreSimpleCursorPosition()
       })
     }
-  }, [children, is_prod])
+  }, [children, is_prod, isApiReference])
 
   useEffect(() => {
-    if (is_prod || !articleRef.current) return
+    if (is_prod || isApiReference || !articleRef.current) return
 
     const article = articleRef.current
 
@@ -751,7 +761,7 @@ export function EditableArticle({ children,is_prod,webhook_url,authentication }:
         document.removeEventListener('devtoolbar:save', handleForceSave as EventListener)
       }
     }
-  }, [pathname, webhook_url, authentication, is_prod])
+  }, [pathname, webhook_url, authentication, is_prod, isApiReference])
 
   const setArticleRef = (element: HTMLElement | null) => {
     if (element && !articleRef.current) {
@@ -759,7 +769,7 @@ export function EditableArticle({ children,is_prod,webhook_url,authentication }:
     }
   }
 
-  if (is_prod) {
+  if (is_prod || isApiReference) {
     return (
       <article id="mdx-content" className="[grid-area:content] sm:p-3 h-full flex-1 min-h-[60dvh]">
         {children}

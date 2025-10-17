@@ -3,22 +3,34 @@
 import React, { useState, useRef, useEffect } from 'react'
 
 const DevToolbar: React.FC = () => {
+  // Detectar si estamos en API Reference
+  const [isApiReference, setIsApiReference] = useState(false)
   const [isTextStylesOpen, setIsTextStylesOpen] = useState(false)
   const [isListsOpen, setIsListsOpen] = useState(false)
   const [activeFormats, setActiveFormats] = useState<Set<string>>(new Set())
   const [hasSelection, setHasSelection] = useState(false)
+  const [isLinkModalOpen, setIsLinkModalOpen] = useState(false)
+  const [linkText, setLinkText] = useState('')
+  const [linkUrl, setLinkUrl] = useState('')
+  const [isTableGridOpen, setIsTableGridOpen] = useState(false)
+  const [hoveredCell, setHoveredCell] = useState<{row: number, col: number} | null>(null)
+  const [isInsertOpen, setIsInsertOpen] = useState(false)
   const textStylesRef = useRef<HTMLDivElement>(null)
   const listsRef = useRef<HTMLDivElement>(null)
+  const imageInputRef = useRef<HTMLInputElement>(null)
+  const tableGridRef = useRef<HTMLDivElement>(null)
+  const insertRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    // Verificar si hay elemento con id="apiref" o si la URL contiene "api_reference"
+    const hasApiRefElement = !!document.getElementById('apiref')
+    const urlHasApiRef = window.location.pathname.toLowerCase().includes('api_reference')
+    setIsApiReference(hasApiRefElement || urlHasApiRef)
+  }, [])
 
   // Debug: log when activeFormats changes
   useEffect(() => {
   }, [activeFormats])
-
-  // En Next.js, process.env.NODE_ENV se evalúa en build time
-  // En desarrollo siempre será 'development'
-  if (process.env.NODE_ENV === 'production') {
-    return null
-  }
 
   // Detectar formatos activos y si hay selección
   useEffect(() => {
@@ -86,6 +98,35 @@ const DevToolbar: React.FC = () => {
       return () => document.removeEventListener('mousedown', handleClickOutside)
     }
   }, [isListsOpen])
+
+  // Cerrar grid de tabla al hacer click fuera
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (tableGridRef.current && !tableGridRef.current.contains(event.target as Node)) {
+        setIsTableGridOpen(false)
+        setHoveredCell(null)
+      }
+    }
+
+    if (isTableGridOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+      return () => document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [isTableGridOpen])
+
+  // Cerrar dropdown Insert al hacer click fuera
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (insertRef.current && !insertRef.current.contains(event.target as Node)) {
+        setIsInsertOpen(false)
+      }
+    }
+
+    if (isInsertOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+      return () => document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [isInsertOpen])
 
   const applyTextStyle = (tag: string) => {
     const article = document.getElementById('mdx-content')
@@ -280,6 +321,72 @@ const DevToolbar: React.FC = () => {
     }, 0)
   }
 
+  const handleImageClick = () => {
+    imageInputRef.current?.click()
+  }
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      console.log('Image selected:', file.name)
+      // Por ahora solo descartamos el archivo
+    }
+    // Reset input para permitir seleccionar el mismo archivo nuevamente
+    e.target.value = ''
+  }
+
+  const handleLinkClick = () => {
+    const selection = window.getSelection()
+    const selectedText = selection?.toString() || ''
+
+    setLinkText(selectedText)
+    setLinkUrl('')
+    setIsLinkModalOpen(true)
+  }
+
+  const handleLinkInsert = () => {
+    // Validar que ambos campos estén llenos
+    if (!linkText.trim() || !linkUrl.trim()) {
+      return
+    }
+
+    // Validar que la URL sea válida
+    try {
+      new URL(linkUrl)
+    } catch {
+      return
+    }
+
+    console.log('Link to insert:', { text: linkText, url: linkUrl })
+    // Por ahora solo cerramos el modal
+    setIsLinkModalOpen(false)
+    setLinkText('')
+    setLinkUrl('')
+  }
+
+  const handleLinkModalClose = () => {
+    setIsLinkModalOpen(false)
+    setLinkText('')
+    setLinkUrl('')
+  }
+
+  const isValidUrl = (url: string): boolean => {
+    if (!url.trim()) return false
+    try {
+      new URL(url)
+      return true
+    } catch {
+      return false
+    }
+  }
+
+  const handleTableSelect = (rows: number, cols: number) => {
+    console.log(`Table selected: ${rows}x${cols}`)
+    // Por ahora solo cerramos el grid
+    setIsTableGridOpen(false)
+    setHoveredCell(null)
+  }
+
   const applyListStyle = (listType: 'ul' | 'ol') => {
     const article = document.getElementById('mdx-content')
     if (!article) return
@@ -352,6 +459,17 @@ const DevToolbar: React.FC = () => {
       const saveEvent = new CustomEvent('devtoolbar:save')
       document.dispatchEvent(saveEvent)
     }, 0)
+  }
+
+  // En Next.js, process.env.NODE_ENV se evalúa en build time
+  // En desarrollo siempre será 'development'
+  if (process.env.NODE_ENV === 'production') {
+    return null
+  }
+
+  // Si es API Reference, no mostrar el toolbar
+  if (isApiReference) {
+    return null
   }
 
   return (
@@ -517,10 +635,18 @@ const DevToolbar: React.FC = () => {
         <div className="dev-toolbar-divider" />
 
         <div className="dev-toolbar-group">
+          <input
+            ref={imageInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleImageSelect}
+            style={{ display: 'none' }}
+          />
           <button
             className="dev-toolbar-button"
             title="Images"
             aria-label="Images"
+            onClick={handleImageClick}
           >
             <svg className="dev-toolbar-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
               <rect x="2" y="2" width="12" height="12" rx="1" stroke="currentColor" strokeWidth="1" fill="none"/>
@@ -533,39 +659,217 @@ const DevToolbar: React.FC = () => {
             className="dev-toolbar-button"
             title="Links"
             aria-label="Links"
+            onClick={handleLinkClick}
           >
             <svg className="dev-toolbar-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M7.5 10.5L5.5 12.5C4.67157 13.3284 3.32843 13.3284 2.5 12.5C1.67157 11.6716 1.67157 10.3284 2.5 9.5L4.5 7.5M11.5 8.5L13.5 6.5C14.3284 5.67157 14.3284 4.32843 13.5 3.5C12.6716 2.67157 11.3284 2.67157 10.5 3.5L8.5 5.5M6 10L10 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
             </svg>
           </button>
 
-          <button
-            className="dev-toolbar-button"
-            title="Table"
-            aria-label="Table"
-          >
-            <svg className="dev-toolbar-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="2" y="2" width="12" height="12" rx="1" stroke="currentColor" strokeWidth="1" fill="none"/>
-              <path d="M2 6H14M6 6V14" stroke="currentColor" strokeWidth="1"/>
-            </svg>
-          </button>
+          <div className="dev-toolbar-group" ref={tableGridRef}>
+            <button
+              className="dev-toolbar-button"
+              title="Table"
+              aria-label="Table"
+              onClick={() => setIsTableGridOpen(!isTableGridOpen)}
+            >
+              <svg className="dev-toolbar-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="2" y="2" width="12" height="12" rx="1" stroke="currentColor" strokeWidth="1" fill="none"/>
+                <path d="M2 6H14M6 6V14" stroke="currentColor" strokeWidth="1"/>
+              </svg>
+            </button>
+
+            {isTableGridOpen && (
+              <div className="table-grid-dropdown">
+                <div className="table-grid-container">
+                  {Array.from({ length: 8 }, (_, row) => (
+                    <div key={row} className="table-grid-row">
+                      {Array.from({ length: 10 }, (_, col) => (
+                        <div
+                          key={col}
+                          className={`table-grid-cell ${
+                            hoveredCell && row <= hoveredCell.row && col <= hoveredCell.col
+                              ? 'table-grid-cell-active'
+                              : ''
+                          }`}
+                          onMouseEnter={() => setHoveredCell({ row, col })}
+                          onClick={() => handleTableSelect(row + 1, col + 1)}
+                        />
+                      ))}
+                    </div>
+                  ))}
+                </div>
+                <div className="table-grid-label">
+                  {hoveredCell ? `${hoveredCell.row + 1} x ${hoveredCell.col + 1}` : 'Select table size'}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="dev-toolbar-divider" />
 
-        <div className="dev-toolbar-group">
+        <div className="dev-toolbar-group" ref={insertRef}>
           <button
             className="dev-toolbar-button"
             title="Insert Elements"
             aria-label="Insert Elements"
+            onClick={() => setIsInsertOpen(!isInsertOpen)}
           >
             <svg className="dev-toolbar-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M8 3V13M3 8H13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
             </svg>
             <span className="ml-1 text-xs">Insert</span>
+            <svg className="ml-1" width="8" height="8" viewBox="0 0 8 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M1 2L4 5L7 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
           </button>
+
+          {isInsertOpen && (
+            <div className="dev-toolbar-dropdown">
+              <button
+                className="dev-toolbar-dropdown-item"
+                onClick={() => {
+                  console.log('Code Snippet clicked')
+                  setIsInsertOpen(false)
+                }}
+              >
+                <svg className="inline-block mr-2" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M5 4L2 8L5 12M11 4L14 8L11 12M9.5 2L6.5 14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                <span>Code Snippet</span>
+              </button>
+              <button
+                className="dev-toolbar-dropdown-item"
+                onClick={() => {
+                  console.log('Separator clicked')
+                  setIsInsertOpen(false)
+                }}
+              >
+                <svg className="inline-block mr-2" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M2 8H14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                </svg>
+                <span>Separator</span>
+              </button>
+              <button
+                className="dev-toolbar-dropdown-item"
+                onClick={() => {
+                  console.log('Tip clicked')
+                  setIsInsertOpen(false)
+                }}
+              >
+                <svg className="inline-block mr-2" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M8 2C6.67392 2 5.40215 2.52678 4.46447 3.46447C3.52678 4.40215 3 5.67392 3 7C3 8.5 3.5 9.5 4.5 10.5L5 12H7V13C7 13.2652 7.10536 13.5196 7.29289 13.7071C7.48043 13.8946 7.73478 14 8 14C8.26522 14 8.51957 13.8946 8.70711 13.7071C8.89464 13.5196 9 13.2652 9 13V12H11L11.5 10.5C12.5 9.5 13 8.5 13 7C13 5.67392 12.4732 4.40215 11.5355 3.46447C10.5979 2.52678 9.32608 2 8 2Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                <span>Tip</span>
+              </button>
+              <button
+                className="dev-toolbar-dropdown-item"
+                onClick={() => {
+                  console.log('Note clicked')
+                  setIsInsertOpen(false)
+                }}
+              >
+                <svg className="inline-block mr-2" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M3 2H13C13.5523 2 14 2.44772 14 3V13C14 13.5523 13.5523 14 13 14H3C2.44772 14 2 13.5523 2 13V3C2 2.44772 2.44772 2 3 2Z" stroke="currentColor" strokeWidth="1.5"/>
+                  <path d="M5 5H11M5 8H11M5 11H9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                </svg>
+                <span>Note</span>
+              </button>
+              <button
+                className="dev-toolbar-dropdown-item"
+                onClick={() => {
+                  console.log('Warning clicked')
+                  setIsInsertOpen(false)
+                }}
+              >
+                <svg className="inline-block mr-2" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M7.13397 2.5C7.51888 1.83333 8.48113 1.83333 8.86603 2.5L13.9282 11.5C14.3131 12.1667 13.832 13 13.0622 13H2.93782C2.16802 13 1.68688 12.1667 2.07179 11.5L7.13397 2.5Z" stroke="currentColor" strokeWidth="1.5"/>
+                  <path d="M8 6V9M8 11V11.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                </svg>
+                <span>Warning</span>
+              </button>
+              <button
+                className="dev-toolbar-dropdown-item"
+                onClick={() => {
+                  console.log('Danger clicked')
+                  setIsInsertOpen(false)
+                }}
+              >
+                <svg className="inline-block mr-2" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="8" cy="8" r="6" stroke="currentColor" strokeWidth="1.5"/>
+                  <path d="M10 6L6 10M6 6L10 10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                </svg>
+                <span>Danger</span>
+              </button>
+              <button
+                className="dev-toolbar-dropdown-item"
+                onClick={() => {
+                  console.log('Info clicked')
+                  setIsInsertOpen(false)
+                }}
+              >
+                <svg className="inline-block mr-2" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="8" cy="8" r="6" stroke="currentColor" strokeWidth="1.5"/>
+                  <path d="M8 7V11M8 5V5.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                </svg>
+                <span>Info</span>
+              </button>
+            </div>
+          )}
         </div>
       </div>
+
+      {/* Link Modal */}
+      {isLinkModalOpen && (
+        <div className="link-modal-overlay" onClick={handleLinkModalClose}>
+          <div className="link-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="link-modal-header">
+              <h3 className="link-modal-title">Insert Link</h3>
+              <button className="link-modal-close" onClick={handleLinkModalClose}>
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M15 5L5 15M5 5L15 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                </svg>
+              </button>
+            </div>
+            <div className="link-modal-body">
+              <div className="link-modal-field">
+                <label className="link-modal-label">Text</label>
+                <input
+                  type="text"
+                  className="link-modal-input"
+                  value={linkText}
+                  onChange={(e) => setLinkText(e.target.value)}
+                  placeholder="Enter link text"
+                  autoFocus
+                />
+              </div>
+              <div className="link-modal-field">
+                <label className="link-modal-label">URL</label>
+                <input
+                  type="url"
+                  className="link-modal-input"
+                  value={linkUrl}
+                  onChange={(e) => setLinkUrl(e.target.value)}
+                  placeholder="https://example.com"
+                />
+              </div>
+            </div>
+            <div className="link-modal-footer">
+              <button className="link-modal-button link-modal-button-cancel" onClick={handleLinkModalClose}>
+                Cancel
+              </button>
+              <button
+                className="link-modal-button link-modal-button-insert"
+                onClick={handleLinkInsert}
+                disabled={!linkText.trim() || !linkUrl.trim() || !isValidUrl(linkUrl)}
+              >
+                Insert
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
