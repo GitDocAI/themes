@@ -250,9 +250,9 @@ export function EditableArticle({ children,is_prod,webhook_url,authentication }:
   const savedContentRef = useRef<string>('')
   const shouldBlockRenderRef = useRef(false)
   const cursorPositionRef = useRef<number>(0)
-  const isRestoringRef = useRef(false)
   const initialContentRef = useRef<string>('')
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const justSavedRef = useRef(false)
 
   // Capturar el contenido inicial y actualizar cuando children cambia
   useEffect(() => {
@@ -279,6 +279,7 @@ export function EditableArticle({ children,is_prod,webhook_url,authentication }:
       }
       // Actualizaciones posteriores (cambios en el MDX externo)
       else if (newContent !== container.innerHTML) {
+        console.log('External MDX change detected, updating content')
 
         // Guardar posición del cursor actual
         const cursorPos = getAbsoluteCursorPosition()
@@ -289,23 +290,40 @@ export function EditableArticle({ children,is_prod,webhook_url,authentication }:
         container.innerHTML = newContent
         initialContentRef.current = newContent
 
-        // Restaurar cursor de forma inteligente
-        requestAnimationFrame(() => {
-          // Si se eliminó contenido y el cursor estaba más allá del nuevo contenido
-          if (newContentLength < oldContentLength && cursorPos > newContentLength) {
-            // Poner el cursor al final del nuevo contenido
-            setAbsoluteCursorPosition(newContentLength)
-          }
-          // Si se agregó contenido o el cursor está dentro del rango
-          else if (cursorPos > 0 && cursorPos <= newContentLength) {
-            // Mantener la posición del cursor
-            setAbsoluteCursorPosition(cursorPos)
-          }
-          // Si no hay cursor o está fuera de rango, poner al final
-          else if (newContentLength > 0) {
-            setAbsoluteCursorPosition(newContentLength)
-          }
-        })
+        // Si acabamos de guardar, es un cambio esperado (del webhook)
+        if (justSavedRef.current) {
+          console.log('This is an expected change from webhook, rendering new content')
+          justSavedRef.current = false
+
+          // Mantener el cursor en la misma posición si es posible
+          requestAnimationFrame(() => {
+            if (cursorPos > 0 && cursorPos <= newContentLength) {
+              setAbsoluteCursorPosition(cursorPos)
+            } else if (newContentLength > 0) {
+              setAbsoluteCursorPosition(newContentLength)
+            }
+          })
+        }
+        // Cambio externo (editaste el MDX directamente)
+        else {
+          // Restaurar cursor de forma inteligente
+          requestAnimationFrame(() => {
+            // Si se eliminó contenido y el cursor estaba más allá del nuevo contenido
+            if (newContentLength < oldContentLength && cursorPos > newContentLength) {
+              // Poner el cursor al final del nuevo contenido
+              setAbsoluteCursorPosition(newContentLength)
+            }
+            // Si se agregó contenido o el cursor está dentro del rango
+            else if (cursorPos > 0 && cursorPos <= newContentLength) {
+              // Mantener la posición del cursor
+              setAbsoluteCursorPosition(cursorPos)
+            }
+            // Si no hay cursor o está fuera de rango, poner al final
+            else if (newContentLength > 0) {
+              setAbsoluteCursorPosition(newContentLength)
+            }
+          })
+        }
       }
     }
   }, [is_prod, children])
@@ -428,10 +446,30 @@ export function EditableArticle({ children,is_prod,webhook_url,authentication }:
           }),
         })
 
-        await new Promise(resolve => setTimeout(resolve, 2000))
+        if (res.ok) {
+          console.log('Content saved successfully')
 
-        shouldBlockRenderRef.current = false
-        savedContentRef.current = ''
+          // Marcar que acabamos de guardar para que el próximo hot reload sea esperado
+          justSavedRef.current = true
+
+          // Esperar solo 500ms para que el webhook procese el archivo
+          await new Promise(resolve => setTimeout(resolve, 500))
+
+          // Desbloquear para permitir el hot reload
+          shouldBlockRenderRef.current = false
+          savedContentRef.current = ''
+
+          console.log('Unblocked, waiting for hot reload to render changes')
+
+          // Limpiar la flag después de 2 segundos por seguridad
+          setTimeout(() => {
+            justSavedRef.current = false
+          }, 2000)
+        } else {
+          console.log('Failed to save content:', await res.text())
+          shouldBlockRenderRef.current = false
+          savedContentRef.current = ''
+        }
 
       } catch (error) {
         console.log('Error saving content:', error)
