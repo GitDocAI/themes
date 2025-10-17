@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useRef, useEffect } from 'react'
+import React, { useRef, useEffect, useLayoutEffect } from 'react'
 import { usePathname } from 'next/navigation'
 
 interface EditableArticleProps {
@@ -244,16 +244,158 @@ function htmlToMarkdown(element: HTMLElement): string {
 
 export function EditableArticle({ children,is_prod,webhook_url,authentication }: EditableArticleProps) {
   const articleRef = useRef<HTMLElement | null>(null)
+  const contentContainerRef = useRef<HTMLDivElement | null>(null)
   const pathname = usePathname()
   const isEditingRef = useRef(false)
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const savedContentRef = useRef<string>('')
+  const shouldBlockRenderRef = useRef(false)
+  const cursorPositionRef = useRef<number>(0)
+  const isRestoringRef = useRef(false)
+  const initialContentRef = useRef<string>('')
+  const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+  // Capturar el contenido inicial y actualizar cuando children cambia
+  useEffect(() => {
+    if (is_prod || !contentContainerRef.current) return
+
+    const container = contentContainerRef.current
+    const childrenDiv = container.nextElementSibling
+
+    if (!childrenDiv) return
+
+    // Si NO estamos bloqueando renders, actualizar el contenido
+    if (!shouldBlockRenderRef.current && childrenDiv.innerHTML) {
+      const newContent = childrenDiv.innerHTML
+
+      // Primera vez: guardar como inicial
+      if (!initialContentRef.current) {
+        initialContentRef.current = newContent
+        container.innerHTML = newContent
+
+        // Ocultar el div de children
+        ;(childrenDiv as HTMLElement).style.display = 'none'
+        // Mostrar el contenedor editable
+        container.style.display = 'block'
+      }
+      // Actualizaciones posteriores (cambios en el MDX externo)
+      else if (newContent !== container.innerHTML) {
+
+        // Guardar posición del cursor actual
+        const cursorPos = getAbsoluteCursorPosition()
+        const oldContentLength = container.textContent?.length || 0
+        const newContentLength = newContent.replace(/<[^>]*>/g, '').length
+
+        // Actualizar contenido
+        container.innerHTML = newContent
+        initialContentRef.current = newContent
+
+        // Restaurar cursor de forma inteligente
+        requestAnimationFrame(() => {
+          // Si se eliminó contenido y el cursor estaba más allá del nuevo contenido
+          if (newContentLength < oldContentLength && cursorPos > newContentLength) {
+            // Poner el cursor al final del nuevo contenido
+            setAbsoluteCursorPosition(newContentLength)
+          }
+          // Si se agregó contenido o el cursor está dentro del rango
+          else if (cursorPos > 0 && cursorPos <= newContentLength) {
+            // Mantener la posición del cursor
+            setAbsoluteCursorPosition(cursorPos)
+          }
+          // Si no hay cursor o está fuera de rango, poner al final
+          else if (newContentLength > 0) {
+            setAbsoluteCursorPosition(newContentLength)
+          }
+        })
+      }
+    }
+  }, [is_prod, children])
+
+  // Función para obtener la posición absoluta del cursor en el texto
+  const getAbsoluteCursorPosition = (): number => {
+    const selection = window.getSelection()
+    const container = contentContainerRef.current || articleRef.current
+    if (!selection || selection.rangeCount === 0 || !container) return 0
+
+    const range = selection.getRangeAt(0)
+    const preCaretRange = range.cloneRange()
+    preCaretRange.selectNodeContents(container)
+    preCaretRange.setEnd(range.endContainer, range.endOffset)
+
+    return preCaretRange.toString().length
+  }
+
+  // Función para establecer el cursor en una posición absoluta
+  const setAbsoluteCursorPosition = (position: number) => {
+    const container = contentContainerRef.current || articleRef.current
+    if (!container) return
+
+    const selection = window.getSelection()
+    if (!selection) return
+
+    let charCount = 0
+
+    const findPosition = (node: Node): boolean => {
+      if (node.nodeType === Node.TEXT_NODE) {
+        const textLength = node.textContent?.length || 0
+        if (charCount + textLength >= position) {
+          const range = document.createRange()
+          const offset = position - charCount
+          range.setStart(node, Math.min(offset, textLength))
+          range.collapse(true)
+          selection.removeAllRanges()
+          selection.addRange(range)
+          return true
+        }
+        charCount += textLength
+      } else if (node.nodeType === Node.ELEMENT_NODE) {
+        for (const child of Array.from(node.childNodes)) {
+          if (findPosition(child)) return true
+        }
+      }
+      return false
+    }
+
+    findPosition(container)
+  }
+
+  // Función para guardar la posición del cursor
+  const saveCursorPosition = () => {
+    cursorPositionRef.current = getAbsoluteCursorPosition()
+  }
+
+  // Función para restaurar la posición del cursor
+  const restoreCursorPosition = () => {
+    if (!articleRef.current) return
+
+    try {
+      setAbsoluteCursorPosition(cursorPositionRef.current)
+    } catch (error) {
+      console.log('Could not restore cursor position:', error)
+    }
+  }
+
+  // Efecto para bloquear re-renders mientras se guarda
+  // NUEVA ESTRATEGIA: No intentar restaurar, simplemente devolver el contenido guardado
+  useLayoutEffect(() => {
+    if (is_prod || !contentContainerRef.current) return
+
+    const container = contentContainerRef.current
+
+    // Si estamos bloqueando renders Y tenemos contenido guardado, restaurar
+    if (shouldBlockRenderRef.current && savedContentRef.current) {
+      container.innerHTML = savedContentRef.current
+
+      // Restaurar cursor
+      requestAnimationFrame(() => {
+        restoreCursorPosition()
+      })
+    }
+  }, [children, is_prod])
 
   useEffect(() => {
     if (is_prod || !articleRef.current) return
 
     const article = articleRef.current
-
-    let timeoutId: NodeJS.Timeout | null = null
 
     const sendToWebhook = async (markdown: string) => {
       if (!webhook_url) {
@@ -262,6 +404,18 @@ export function EditableArticle({ children,is_prod,webhook_url,authentication }:
       }
 
       try {
+        // Guardar la posición del cursor PRIMERO
+        saveCursorPosition()
+
+        // Guardar el contenido HTML actual antes de enviar
+        const container = contentContainerRef.current
+        if (container) {
+          savedContentRef.current = container.innerHTML
+        }
+
+        // Activar bloqueo de renders INMEDIATAMENTE
+        shouldBlockRenderRef.current = true
+
         const res = await fetch(webhook_url, {
           method: 'POST',
           headers: {
@@ -274,96 +428,126 @@ export function EditableArticle({ children,is_prod,webhook_url,authentication }:
           }),
         })
 
-        if (!res.ok) {
-          console.log('Failed to save content:', await res.text())
-        } else {
-          console.log('Content saved successfully')
-          // Clear the content of the article after saving
-        }
+        await new Promise(resolve => setTimeout(resolve, 2000))
+
+        shouldBlockRenderRef.current = false
+        savedContentRef.current = ''
+
       } catch (error) {
         console.log('Error saving content:', error)
+        shouldBlockRenderRef.current = false
+        savedContentRef.current = ''
       }
     }
 
     const handleBlur = () => {
-      if (!isEditingRef.current || !articleRef.current) return
+      if (!isEditingRef.current) return
+
+      const container = contentContainerRef.current
+      if (!container) return
+
+      // Limpiar cualquier debounce pendiente
+      if (debounceTimeoutRef.current) {
+        clearTimeout(debounceTimeoutRef.current)
+        debounceTimeoutRef.current = null
+      }
 
       // Convertir HTML a Markdown
-      const markdown = htmlToMarkdown(articleRef.current)
+      const markdown = htmlToMarkdown(container)
 
       // Enviar al webhook
       sendToWebhook(markdown)
 
       isEditingRef.current = false
-      article.classList.remove('editing')
+      if (article) {
+        article.classList.remove('editing')
+      }
     }
 
     const handleFocus = () => {
       isEditingRef.current = true
-      article.classList.add('editing')
+      if (article) {
+        article.classList.add('editing')
+      }
     }
 
     const handleKeyDown = (e: KeyboardEvent) => {
       // Cmd/Ctrl + S para guardar
       if ((e.metaKey || e.ctrlKey) && e.key === 's') {
         e.preventDefault()
-        article.blur()
-      }
 
-      // Cmd/Ctrl + B para negrita
-      if ((e.metaKey || e.ctrlKey) && e.key === 'b') {
-        e.preventDefault()
-        document.execCommand('bold', false)
-      }
+        const container = contentContainerRef.current
+        if (!container) return
 
-      // Cmd/Ctrl + I para cursiva
-      if ((e.metaKey || e.ctrlKey) && e.key === 'i') {
-        e.preventDefault()
-        document.execCommand('italic', false)
-      }
-    }
+        // Limpiar debounce si existe
+        if (debounceTimeoutRef.current) {
+          clearTimeout(debounceTimeoutRef.current)
+          debounceTimeoutRef.current = null
+        }
 
+        // Convertir HTML a Markdown
+        const markdown = htmlToMarkdown(container)
 
-    const handleContentChange = () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current)
-      }
+        // Enviar al webhook
+        sendToWebhook(markdown)
 
-      timeoutRef.current = setTimeout(async () => {
-        if (!isEditingRef.current || !articleRef.current) return
-        const markdown = htmlToMarkdown(articleRef.current)
-        isEditingRef.current = false
-        await sendToWebhook(markdown)
-        isEditingRef.current = true
-      }, 300)
-    }
-
-    // Hacer el artículo editable
-    article.setAttribute('contentEditable', 'true')
-    article.classList.add('editable-article')
-
-    // Agregar event listeners
-    article.addEventListener('blur', handleBlur)
-    article.addEventListener('focus', handleFocus)
-    article.addEventListener('keydown', handleKeyDown)
-    article.addEventListener('input', handleContentChange)
-
-    return () => {
-      article.removeAttribute('contentEditable')
-      article.classList.remove('editable-article', 'editing')
-      article.removeEventListener('blur', handleBlur)
-      article.removeEventListener('focus', handleFocus)
-      article.removeEventListener('keydown', handleKeyDown)
-      article.removeEventListener('input', handleContentChange)
-
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current)
       }
     }
-  }, [pathname])
+
+    const handleInput = () => {
+      if (!isEditingRef.current) return
+
+      // Limpiar timeout anterior
+      if (debounceTimeoutRef.current) {
+        clearTimeout(debounceTimeoutRef.current)
+      }
+
+      // Crear nuevo timeout de 3 segundos
+      debounceTimeoutRef.current = setTimeout(() => {
+        const container = contentContainerRef.current
+        if (!container || !isEditingRef.current) return
+
+        // Convertir HTML a Markdown
+        const markdown = htmlToMarkdown(container)
+
+        // Enviar al webhook
+        sendToWebhook(markdown)
+
+      }, 3000)
+    }
+
+    // Hacer el contenedor editable
+    const container = contentContainerRef.current
+    if (container) {
+      container.setAttribute('contentEditable', 'true')
+      container.classList.add('editable-article')
+
+      // Agregar event listeners al contenedor
+      container.addEventListener('blur', handleBlur)
+      container.addEventListener('focus', handleFocus)
+      container.addEventListener('keydown', handleKeyDown)
+      container.addEventListener('input', handleInput)
+
+      return () => {
+        // Limpiar debounce al desmontar
+        if (debounceTimeoutRef.current) {
+          clearTimeout(debounceTimeoutRef.current)
+        }
+
+        container.removeAttribute('contentEditable')
+        container.classList.remove('editable-article', 'editing')
+        container.removeEventListener('blur', handleBlur)
+        container.removeEventListener('focus', handleFocus)
+        container.removeEventListener('keydown', handleKeyDown)
+        container.removeEventListener('input', handleInput)
+      }
+    }
+  }, [pathname, webhook_url, authentication, is_prod])
 
   const setArticleRef = (element: HTMLElement | null) => {
-    articleRef.current = element
+    if (element && !articleRef.current) {
+      articleRef.current = element
+    }
   }
 
   if (is_prod) {
@@ -374,13 +558,23 @@ export function EditableArticle({ children,is_prod,webhook_url,authentication }:
     )
   }
 
+  // Renderizar usando un wrapper que React no toca directamente
   return (
     <article
       id="mdx-content"
       ref={setArticleRef}
       className="[grid-area:content] sm:p-3 h-full flex-1 min-h-[60dvh]"
     >
-      {children}
+      {/* Contenedor editable - React no debe tocar su contenido */}
+      <div
+        ref={contentContainerRef}
+        suppressHydrationWarning
+        style={{ display: 'none' }}
+      />
+      {/* Contenedor de children - se oculta después de copiar */}
+      <div suppressHydrationWarning>
+        {children}
+      </div>
     </article>
   )
 }
