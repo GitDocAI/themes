@@ -45,23 +45,59 @@ function htmlToMarkdown(element: HTMLElement): string {
           return `###### ${children}\n\n`
 
         case 'p':
+          // Si el párrafo está vacío, generar un &nbsp; para preservar la línea vacía
+          if (!children.trim()) {
+            return `&nbsp;\n\n`
+          }
           return `${children}\n\n`
+
+        // Manejar íconos primero (antes de 'i' para italic)
+        case 'i':
+          // Ignorar íconos (como los de AlertBlock)
+          if (el.className.includes('pi pi-')) {
+            return ''
+          }
+          // Si no es ícono, es italic
+          // Ignorar si está vacío o solo contiene <br>
+          if (!children.trim() || children.trim() === '\n') {
+            return ''
+          }
+          return `*${children}*`
 
         case 'strong':
         case 'b':
+          // Ignorar si está vacío o solo contiene <br>
+          if (!children.trim() || children.trim() === '\n') {
+            return ''
+          }
           return `**${children}**`
 
         case 'em':
-        case 'i':
+          // Ignorar si está vacío o solo contiene <br>
+          if (!children.trim() || children.trim() === '\n') {
+            return ''
+          }
           return `*${children}*`
 
         case 'del':
         case 's':
           return `~~${children}~~`
 
+        case 'u':
+          // HTML para subrayado (Markdown no tiene sintaxis nativa)
+          // Ignorar si está vacío o solo contiene <br>
+          if (!children.trim() || children.trim() === '\n') {
+            return ''
+          }
+          return `<u>${children}</u>`
+
         case 'code':
           // Si es código inline (no dentro de pre)
           if (!el.closest('pre')) {
+            // Ignorar si está vacío o solo contiene <br>
+            if (!children.trim() || children.trim() === '\n') {
+              return ''
+            }
             return `\`${children}\``
           }
           return children
@@ -157,13 +193,6 @@ function htmlToMarkdown(element: HTMLElement): string {
           return children
         }
 
-        case 'i':
-          // Ignorar íconos (como los de AlertBlock)
-          if (el.className.includes('pi pi-')) {
-            return ''
-          }
-          return `*${children}*`
-
         case 'span':
         case 'article':
         case 'section':
@@ -223,6 +252,9 @@ function htmlToMarkdown(element: HTMLElement): string {
           case 'i':
             text += `*${child.textContent}*`
             break
+          case 'u':
+            text += `<u>${child.textContent}</u>`
+            break
           case 'code':
             text += `\`${child.textContent}\``
             break
@@ -249,10 +281,10 @@ export function EditableArticle({ children,is_prod,webhook_url,authentication }:
   const isEditingRef = useRef(false)
   const savedContentRef = useRef<string>('')
   const shouldBlockRenderRef = useRef(false)
-  const cursorPositionRef = useRef<number>(0)
   const initialContentRef = useRef<string>('')
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const justSavedRef = useRef(false)
+  const cursorTextPositionRef = useRef<number>(0)
 
   // Capturar el contenido inicial y actualizar cuando children cambia
   useEffect(() => {
@@ -267,8 +299,10 @@ export function EditableArticle({ children,is_prod,webhook_url,authentication }:
     if (!shouldBlockRenderRef.current && childrenDiv.innerHTML) {
       const newContent = childrenDiv.innerHTML
 
+
       // Primera vez: guardar como inicial
       if (!initialContentRef.current) {
+
         initialContentRef.current = newContent
         container.innerHTML = newContent
 
@@ -279,121 +313,210 @@ export function EditableArticle({ children,is_prod,webhook_url,authentication }:
       }
       // Actualizaciones posteriores (cambios en el MDX externo)
       else if (newContent !== container.innerHTML) {
-        console.log('External MDX change detected, updating content')
-
-        // Guardar posición del cursor actual
-        const cursorPos = getAbsoluteCursorPosition()
-        const oldContentLength = container.textContent?.length || 0
-        const newContentLength = newContent.replace(/<[^>]*>/g, '').length
 
         // Actualizar contenido
         container.innerHTML = newContent
         initialContentRef.current = newContent
 
-        // Si acabamos de guardar, es un cambio esperado (del webhook)
+        // Si acabamos de guardar, marcar como procesado y restaurar cursor
         if (justSavedRef.current) {
-          console.log('This is an expected change from webhook, rendering new content')
           justSavedRef.current = false
 
-          // Mantener el cursor en la misma posición si es posible
+          // Restaurar cursor
           requestAnimationFrame(() => {
-            if (cursorPos > 0 && cursorPos <= newContentLength) {
-              setAbsoluteCursorPosition(cursorPos)
-            } else if (newContentLength > 0) {
-              setAbsoluteCursorPosition(newContentLength)
-            }
-          })
-        }
-        // Cambio externo (editaste el MDX directamente)
-        else {
-          // Restaurar cursor de forma inteligente
-          requestAnimationFrame(() => {
-            // Si se eliminó contenido y el cursor estaba más allá del nuevo contenido
-            if (newContentLength < oldContentLength && cursorPos > newContentLength) {
-              // Poner el cursor al final del nuevo contenido
-              setAbsoluteCursorPosition(newContentLength)
-            }
-            // Si se agregó contenido o el cursor está dentro del rango
-            else if (cursorPos > 0 && cursorPos <= newContentLength) {
-              // Mantener la posición del cursor
-              setAbsoluteCursorPosition(cursorPos)
-            }
-            // Si no hay cursor o está fuera de rango, poner al final
-            else if (newContentLength > 0) {
-              setAbsoluteCursorPosition(newContentLength)
-            }
+            restoreSimpleCursorPosition()
           })
         }
       }
     }
   }, [is_prod, children])
 
-  // Función para obtener la posición absoluta del cursor en el texto
-  const getAbsoluteCursorPosition = (): number => {
+  // Guardar posición del cursor basada en texto plano
+  const saveSimpleCursorPosition = () => {
+    const container = contentContainerRef.current
+    if (!container) return
+
     const selection = window.getSelection()
-    const container = contentContainerRef.current || articleRef.current
-    if (!selection || selection.rangeCount === 0 || !container) return 0
+    if (!selection || selection.rangeCount === 0) {
+      cursorTextPositionRef.current = 0
+      return
+    }
 
     const range = selection.getRangeAt(0)
-    const preCaretRange = range.cloneRange()
-    preCaretRange.selectNodeContents(container)
-    preCaretRange.setEnd(range.endContainer, range.endOffset)
+    let position = 0
 
-    return preCaretRange.toString().length
+
+    // Función recursiva para contar caracteres hasta el cursor
+    const countUntilCursor = (node: Node): boolean => {
+      // Si llegamos al nodo del cursor
+      if (node === range.endContainer) {
+        if (node.nodeType === Node.TEXT_NODE) {
+          position += range.endOffset
+        }
+        return true 
+      }
+
+      // Nodo de texto
+      if (node.nodeType === Node.TEXT_NODE) {
+        const text = node.textContent || ''
+        // Ignorar text nodes que solo contienen whitespace/newlines (son artefactos del HTML)
+        if (text.trim() === '') {
+          return false
+        }
+        const len = text.length
+        position += len
+        return false
+      }
+
+      // Elemento
+      if (node.nodeType === Node.ELEMENT_NODE) {
+        const element = node as HTMLElement
+        const tagName = element.tagName?.toLowerCase()
+
+        // Si es un párrafo hijo directo del container
+        if (['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'].includes(tagName) && node.parentNode === container) {
+          // Contar el contenido del párrafo
+          const textContent = element.textContent || ''
+          const hasContent = textContent.trim().length > 0
+
+
+          // Procesar hijos
+          for (const child of Array.from(node.childNodes)) {
+            if (countUntilCursor(child)) return true
+          }
+
+          // Si el párrafo está vacío, contar como 1 carácter (la línea vacía)
+          if (!hasContent) {
+            position += 1
+          }
+
+          // Agregar salto de línea al final de cada párrafo (excepto posiblemente el último)
+          position += 1
+        } else {
+          // Para otros elementos, solo procesar hijos
+          for (const child of Array.from(node.childNodes)) {
+            if (countUntilCursor(child)) return true
+          }
+        }
+      }
+
+      return false
+    }
+
+    countUntilCursor(container)
+    cursorTextPositionRef.current = position
   }
 
-  // Función para establecer el cursor en una posición absoluta
-  const setAbsoluteCursorPosition = (position: number) => {
-    const container = contentContainerRef.current || articleRef.current
+  // Restaurar posición del cursor basada en texto plano
+  const restoreSimpleCursorPosition = () => {
+    const container = contentContainerRef.current
     if (!container) return
+
+    const targetPosition = cursorTextPositionRef.current
+    if (targetPosition === 0) return
 
     const selection = window.getSelection()
     if (!selection) return
 
-    let charCount = 0
-
-    const findPosition = (node: Node): boolean => {
-      if (node.nodeType === Node.TEXT_NODE) {
-        const textLength = node.textContent?.length || 0
-        if (charCount + textLength >= position) {
-          const range = document.createRange()
-          const offset = position - charCount
-          range.setStart(node, Math.min(offset, textLength))
-          range.collapse(true)
-          selection.removeAllRanges()
-          selection.addRange(range)
-          return true
-        }
-        charCount += textLength
-      } else if (node.nodeType === Node.ELEMENT_NODE) {
-        for (const child of Array.from(node.childNodes)) {
-          if (findPosition(child)) return true
-        }
-      }
-      return false
-    }
-
-    findPosition(container)
-  }
-
-  // Función para guardar la posición del cursor
-  const saveCursorPosition = () => {
-    cursorPositionRef.current = getAbsoluteCursorPosition()
-  }
-
-  // Función para restaurar la posición del cursor
-  const restoreCursorPosition = () => {
-    if (!articleRef.current) return
 
     try {
-      setAbsoluteCursorPosition(cursorPositionRef.current)
+      let currentPosition = 0
+      let found = false
+
+      // Función recursiva para buscar la posición
+      const findPosition = (node: Node): boolean => {
+        // Nodo de texto
+        if (node.nodeType === Node.TEXT_NODE) {
+          const text = node.textContent || ''
+          // Ignorar text nodes que solo contienen whitespace/newlines (son artefactos del HTML)
+          if (text.trim() === '') {
+            return false
+          }
+
+          const textLength = text.length
+
+          if (currentPosition + textLength >= targetPosition) {
+            // Encontramos el nodo correcto
+            const offset = targetPosition - currentPosition
+            const range = document.createRange()
+            range.setStart(node, offset)
+            range.collapse(true)
+            selection.removeAllRanges()
+            selection.addRange(range)
+            return true
+          }
+
+          currentPosition += textLength
+          return false
+        }
+
+        // Elemento
+        if (node.nodeType === Node.ELEMENT_NODE) {
+          const element = node as HTMLElement
+          const tagName = element.tagName?.toLowerCase()
+
+          // Si es un párrafo hijo directo del container
+          if (['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'].includes(tagName) && node.parentNode === container) {
+            const textContent = element.textContent || ''
+            const hasContent = textContent.trim().length > 0
+
+            // Si el párrafo está vacío, verificar ANTES de procesar hijos
+            if (!hasContent) {
+              if (currentPosition === targetPosition) {
+                // El cursor está en esta línea vacía
+                const range = document.createRange()
+                range.setStart(element, 0)
+                range.collapse(true)
+                selection.removeAllRanges()
+                selection.addRange(range)
+                return true
+              }
+              currentPosition += 1
+            } else {
+              // Procesar hijos solo si tiene contenido
+              for (const child of Array.from(node.childNodes)) {
+                if (findPosition(child)) return true
+              }
+            }
+
+            // Agregar salto de línea al final de cada párrafo
+            if (currentPosition === targetPosition) {
+              // El cursor está al final de este párrafo
+              const range = document.createRange()
+              range.selectNodeContents(element)
+              range.collapse(false) // Al final
+              selection.removeAllRanges()
+              selection.addRange(range)
+              return true
+            }
+            currentPosition += 1
+          } else {
+            // Para otros elementos, solo procesar hijos
+            for (const child of Array.from(node.childNodes)) {
+              if (findPosition(child)) return true
+            }
+          }
+        }
+
+        return false
+      }
+
+      found = findPosition(container)
+
+      // Si no se encontró, poner al final
+      if (!found) {
+        const range = document.createRange()
+        range.selectNodeContents(container)
+        range.collapse(false)
+        selection.removeAllRanges()
+        selection.addRange(range)
+      }
     } catch (error) {
-      console.log('Could not restore cursor position:', error)
+      console.log('Could not restore cursor:', error)
     }
   }
 
   // Efecto para bloquear re-renders mientras se guarda
-  // NUEVA ESTRATEGIA: No intentar restaurar, simplemente devolver el contenido guardado
   useLayoutEffect(() => {
     if (is_prod || !contentContainerRef.current) return
 
@@ -402,10 +525,9 @@ export function EditableArticle({ children,is_prod,webhook_url,authentication }:
     // Si estamos bloqueando renders Y tenemos contenido guardado, restaurar
     if (shouldBlockRenderRef.current && savedContentRef.current) {
       container.innerHTML = savedContentRef.current
-
-      // Restaurar cursor
+      // Restaurar cursor usando texto plano
       requestAnimationFrame(() => {
-        restoreCursorPosition()
+        restoreSimpleCursorPosition()
       })
     }
   }, [children, is_prod])
@@ -422,8 +544,8 @@ export function EditableArticle({ children,is_prod,webhook_url,authentication }:
       }
 
       try {
-        // Guardar la posición del cursor PRIMERO
-        saveCursorPosition()
+        // Guardar la posición del cursor
+        saveSimpleCursorPosition()
 
         // Guardar el contenido HTML actual antes de enviar
         const container = contentContainerRef.current
@@ -447,7 +569,6 @@ export function EditableArticle({ children,is_prod,webhook_url,authentication }:
         })
 
         if (res.ok) {
-          console.log('Content saved successfully')
 
           // Marcar que acabamos de guardar para que el próximo hot reload sea esperado
           justSavedRef.current = true
@@ -459,20 +580,17 @@ export function EditableArticle({ children,is_prod,webhook_url,authentication }:
           shouldBlockRenderRef.current = false
           savedContentRef.current = ''
 
-          console.log('Unblocked, waiting for hot reload to render changes')
 
           // Limpiar la flag después de 2 segundos por seguridad
           setTimeout(() => {
             justSavedRef.current = false
           }, 2000)
         } else {
-          console.log('Failed to save content:', await res.text())
           shouldBlockRenderRef.current = false
           savedContentRef.current = ''
         }
 
       } catch (error) {
-        console.log('Error saving content:', error)
         shouldBlockRenderRef.current = false
         savedContentRef.current = ''
       }
@@ -530,6 +648,36 @@ export function EditableArticle({ children,is_prod,webhook_url,authentication }:
         sendToWebhook(markdown)
 
       }
+
+      // Enter: Limpiar formatos inline después de crear nueva línea
+      if (e.key === 'Enter') {
+        setTimeout(() => {
+          const selection = window.getSelection()
+          if (!selection || selection.rangeCount === 0) return
+
+          const range = selection.getRangeAt(0)
+          let node = range.startContainer as Node
+
+          // Si estamos dentro de un formato inline (strong, em, u, code), salir de él
+          while (node && node !== contentContainerRef.current) {
+            if (node.nodeType === Node.ELEMENT_NODE) {
+              const element = node as HTMLElement
+              const tag = element.tagName?.toLowerCase()
+
+              if (['strong', 'em', 'u', 'code', 'b', 'i'].includes(tag)) {
+                // Mover el cursor fuera del elemento de formato
+                const newRange = document.createRange()
+                newRange.setStartAfter(element)
+                newRange.collapse(true)
+                selection.removeAllRanges()
+                selection.addRange(newRange)
+                break
+              }
+            }
+            node = node.parentNode!
+          }
+        }, 0)
+      }
     }
 
     const handleInput = () => {
@@ -554,6 +702,25 @@ export function EditableArticle({ children,is_prod,webhook_url,authentication }:
       }, 3000)
     }
 
+    // Listener para guardados forzados desde el DevToolbar
+    const handleForceSave = () => {
+      const container = contentContainerRef.current
+      if (!container) return
+
+      // Limpiar debounce si existe
+      if (debounceTimeoutRef.current) {
+        clearTimeout(debounceTimeoutRef.current)
+        debounceTimeoutRef.current = null
+      }
+
+      // Convertir HTML a Markdown
+      const markdown = htmlToMarkdown(container)
+
+      // Enviar al webhook
+      sendToWebhook(markdown)
+
+    }
+
     // Hacer el contenedor editable
     const container = contentContainerRef.current
     if (container) {
@@ -565,6 +732,9 @@ export function EditableArticle({ children,is_prod,webhook_url,authentication }:
       container.addEventListener('focus', handleFocus)
       container.addEventListener('keydown', handleKeyDown)
       container.addEventListener('input', handleInput)
+
+      // Agregar listener para guardado forzado desde DevToolbar
+      document.addEventListener('devtoolbar:save', handleForceSave as EventListener)
 
       return () => {
         // Limpiar debounce al desmontar
@@ -578,6 +748,7 @@ export function EditableArticle({ children,is_prod,webhook_url,authentication }:
         container.removeEventListener('focus', handleFocus)
         container.removeEventListener('keydown', handleKeyDown)
         container.removeEventListener('input', handleInput)
+        document.removeEventListener('devtoolbar:save', handleForceSave as EventListener)
       }
     }
   }, [pathname, webhook_url, authentication, is_prod])

@@ -239,6 +239,25 @@ article#mdx-content {
   transform: scale(0.98);
 }
 
+.dev-toolbar-button-active {
+  background-color: rgb(var(--color-primary) / 0.15) !important;
+  border-color: rgb(var(--color-primary) / 0.3) !important;
+  color: rgb(var(--color-primary)) !important;
+}
+
+.dev-toolbar-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  background-color: transparent !important;
+  border-color: transparent !important;
+}
+
+.dev-toolbar-button:disabled:hover {
+  background-color: transparent !important;
+  border-color: transparent !important;
+  transform: none;
+}
+
 .dev-toolbar-icon {
   display: flex;
   align-items: center;
