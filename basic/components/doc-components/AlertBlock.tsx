@@ -9,31 +9,36 @@ interface AlertBlockProps {
   children: ReactNode;
 }
 
-const alertConfig: Record<AlertType, { icon: string; colors: string }> = {
+const alertConfig: Record<AlertType, { icon: string; colors: string; iconColor: string }> = {
   tip: {
     icon: 'pi pi-lightbulb',
     colors: 'bg-green-500/10 border-green-500/30 text-green-400',
+    iconColor: 'text-green-400',
   },
   note: {
     icon: 'pi pi-pencil',
     colors: 'bg-blue-500/10 border-blue-500/30 text-blue-400',
+    iconColor: 'text-blue-400',
   },
   warning: {
     icon: 'pi pi-exclamation-triangle',
     colors: 'bg-yellow-500/10 border-yellow-500/30 text-yellow-400',
+    iconColor: 'text-yellow-400',
   },
   danger: {
     icon: 'pi pi-times-circle',
     colors: 'bg-red-500/10 border-red-500/30 text-red-400',
+    iconColor: 'text-red-400',
   },
   info: {
     icon: 'pi pi-info-circle',
     colors: 'bg-sky-500/10 border-sky-500/30 text-sky-400',
+    iconColor: 'text-sky-400',
   },
 };
 
 export const AlertBlock = ({ type = 'note', children }: AlertBlockProps) => {
-  const { icon, colors } = alertConfig[type];
+  const { icon, colors, iconColor } = alertConfig[type];
 
   return (
     <div
@@ -42,7 +47,7 @@ export const AlertBlock = ({ type = 'note', children }: AlertBlockProps) => {
         colors
       )}
     >
-      <i className={clsx(icon, 'mt-0.5 text-xl')} />
+      <i className={clsx(icon, 'mt-0.5 text-xl', iconColor)} />
 
       <div className="text-secondary w-full">
         {children}

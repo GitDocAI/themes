@@ -1,0 +1,1323 @@
+/* Custom styles for MDXEditor */
+
+.mdx-editor-wrapper {
+  width: 100%;
+  height: 100%;
+  min-height: 60vh;
+}
+
+/* Override MDXEditor default styles to match your theme */
+.mdxeditor {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0;
+  padding: 0;
+  min-height: 60vh;
+  color: rgb(var(--color-content, 55 65 81)) !important;
+}
+
+.mdxeditor-toolbar {
+  background: transparent !important;
+  border: none !important;
+  border-bottom: 1px solid rgb(var(--color-muted, 55 65 81) / 0.3) !important;
+  padding: 0.75rem 0;
+  margin: 0 0 1.5rem 0;
+}
+
+/* Dark mode support */
+.dark-theme .mdxeditor {
+  background: transparent !important;
+  color: rgb(var(--color-content, 209 213 219)) !important;
+}
+
+.dark-theme .mdxeditor-toolbar {
+  background: transparent !important;
+  border-bottom: 1px solid rgb(var(--color-muted, 209 213 219) / 0.3) !important;
+}
+
+/* Toolbar buttons and icons */
+.mdxeditor-toolbar button,
+.mdxeditor-toolbar button svg,
+.mdxeditor-toolbar [role="separator"] {
+  color: rgb(var(--color-content, 55 65 81)) !important;
+  fill: rgb(var(--color-content, 55 65 81)) !important;
+  stroke: rgb(var(--color-content, 55 65 81)) !important;
+  transition: all 0.2s;
+  background: transparent !important;
+  border: none !important;
+}
+
+/* Make toolbar icons thinner - more minimalist - override inline styles */
+.mdxeditor-toolbar svg,
+.mdxeditor-toolbar svg *,
+.mdxeditor-toolbar button svg,
+.mdxeditor-toolbar button svg *,
+.mdxeditor-toolbar button svg path,
+.mdxeditor-toolbar button svg line,
+.mdxeditor-toolbar button svg polyline,
+.mdxeditor-toolbar button svg circle,
+.mdxeditor-toolbar button svg rect,
+.mdxeditor-toolbar button svg ellipse,
+.mdxeditor-toolbar button svg polygon {
+  stroke-width: 0.5 !important;
+}
+
+/* BlockTypeSelect dropdown - comprehensive Radix UI support */
+.mdxeditor-toolbar select:not([aria-label*="language"]):not([aria-label*="Language"]),
+.mdxeditor select:not([aria-label*="language"]):not([aria-label*="Language"]):not([class*="language"]),
+select[class*="select"]:not([class*="language"]),
+button[data-radix-collection-item],
+button[role="combobox"],
+[data-radix-select-trigger],
+button[data-radix-select-trigger],
+.mdxeditor-toolbar button[aria-haspopup="listbox"],
+.mdxeditor-toolbar [role="combobox"],
+span[data-radix-select-trigger] {
+  background: transparent !important;
+  color: rgb(var(--color-content, 55 65 81)) !important;
+  border: none !important;
+  padding: 6px 10px !important;
+  border-radius: 4px !important;
+  cursor: pointer !important;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+}
+
+/* BlockTypeSelect dropdown content */
+.mdxeditor-toolbar select:not([aria-label*="language"]) option,
+.mdxeditor select:not([aria-label*="language"]):not([class*="language"]) option,
+select[class*="select"]:not([class*="language"]) option,
+[data-radix-select-content],
+div[data-radix-select-content],
+[data-radix-select-viewport],
+[role="listbox"],
+div[role="listbox"] {
+  background: rgb(var(--color-bg, 255 255 255)) !important;
+  color: rgb(var(--color-content, 55 65 81)) !important;
+  padding: 4px !important;
+  font-weight: 400 !important;
+  border: none !important;
+  border-radius: 6px !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+}
+
+/* Radix Select Items */
+[data-radix-select-item],
+div[data-radix-select-item],
+[role="option"][data-radix-collection-item],
+[role="option"],
+div[role="option"] {
+  background: transparent !important;
+  color: rgb(var(--color-content, 55 65 81)) !important;
+  padding: 8px 12px !important;
+  cursor: pointer !important;
+  border-radius: 4px !important;
+  font-weight: 400 !important;
+}
+
+[data-radix-select-item]:hover,
+div[data-radix-select-item]:hover,
+[role="option"][data-radix-collection-item]:hover,
+[role="option"]:hover,
+div[role="option"]:hover,
+[data-radix-select-item][data-highlighted],
+[role="option"][data-highlighted] {
+  background: rgb(var(--color-primary, 59 130 246) / 0.1) !important;
+  color: rgb(var(--color-primary, 59 130 246)) !important;
+}
+
+.mdxeditor-toolbar button:hover {
+  background: rgb(var(--color-primary, 59 130 246) / 0.15) !important;
+  color: rgb(var(--color-primary, 59 130 246)) !important;
+}
+
+.mdxeditor-toolbar button:hover svg,
+.mdxeditor-toolbar button:hover svg * {
+  stroke: rgb(var(--color-primary, 59 130 246)) !important;
+  fill: rgb(var(--color-primary, 59 130 246)) !important;
+}
+
+.dark-theme .mdxeditor-toolbar button,
+.dark-theme .mdxeditor-toolbar button svg,
+.dark-theme .mdxeditor-toolbar [role="separator"] {
+  color: rgb(var(--color-content, 209 213 219)) !important;
+  fill: rgb(var(--color-content, 209 213 219)) !important;
+  stroke: rgb(var(--color-content, 209 213 219)) !important;
+  border-color: rgb(var(--color-muted, 209 213 219) / 0.3) !important;
+}
+
+.dark-theme .mdxeditor-toolbar select:not([aria-label*="language"]),
+.dark-theme .mdxeditor select:not([aria-label*="language"]):not([class*="language"]),
+.dark-theme select[class*="select"]:not([class*="language"]),
+.dark-theme button[data-radix-collection-item],
+.dark-theme button[role="combobox"],
+.dark-theme [data-radix-select-trigger],
+.dark-theme button[data-radix-select-trigger],
+.dark-theme .mdxeditor-toolbar button[aria-haspopup="listbox"],
+.dark-theme .mdxeditor-toolbar [role="combobox"],
+.dark-theme span[data-radix-select-trigger] {
+  background: rgb(var(--color-bg, 31 41 55)) !important;
+  color: rgb(var(--color-content, 209 213 219)) !important;
+  border-color: rgb(var(--color-muted, 209 213 219) / 0.3) !important;
+}
+
+.dark-theme .mdxeditor-toolbar select:not([aria-label*="language"]) option,
+.dark-theme .mdxeditor select:not([aria-label*="language"]):not([class*="language"]) option,
+.dark-theme select[class*="select"]:not([class*="language"]) option,
+.dark-theme [data-radix-select-content],
+.dark-theme div[data-radix-select-content],
+.dark-theme [data-radix-select-viewport],
+.dark-theme [role="listbox"],
+.dark-theme div[role="listbox"] {
+  background: rgb(var(--color-bg, 31 41 55)) !important;
+  color: rgb(var(--color-content, 209 213 219)) !important;
+  padding: 4px 8px !important;
+  font-weight: 400 !important;
+  border-color: rgb(var(--color-muted, 209 213 219) / 0.3) !important;
+}
+
+.dark-theme [data-radix-select-item],
+.dark-theme div[data-radix-select-item],
+.dark-theme [role="option"][data-radix-collection-item],
+.dark-theme [role="option"],
+.dark-theme div[role="option"] {
+  color: rgb(var(--color-content, 209 213 219)) !important;
+}
+
+.dark-theme [data-radix-select-item]:hover,
+.dark-theme div[data-radix-select-item]:hover,
+.dark-theme [role="option"]:hover,
+.dark-theme div[role="option"]:hover,
+.dark-theme [data-radix-select-item][data-highlighted],
+.dark-theme [role="option"][data-highlighted] {
+  background: rgb(var(--color-primary, 96 165 250) / 0.1) !important;
+  color: rgb(var(--color-primary, 96 165 250)) !important;
+}
+
+/* Backdrop for dialogs - Radix UI overlay - high z-index to stay above sidebar */
+[data-radix-popper-content-wrapper] ~ div[data-radix-dialog-overlay],
+div[data-radix-dialog-overlay],
+[class*="DialogOverlay"],
+.mdxeditor-dialog-backdrop,
+body > div[style*="position: fixed"][style*="inset"] {
+  position: fixed !important;
+  inset: 0 !important;
+  background: rgba(0, 0, 0, 0.6) !important;
+  z-index: 99998 !important;
+  backdrop-filter: blur(2px) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.dark-theme [data-radix-dialog-overlay],
+.dark-theme [class*="DialogOverlay"],
+.dark-theme .mdxeditor-dialog-backdrop {
+  background: rgba(0, 0, 0, 0.8) !important;
+}
+
+.dark-theme .mdxeditor-toolbar button:hover {
+  background: rgb(var(--color-primary, 96 165 250) / 0.15) !important;
+  color: rgb(var(--color-primary, 96 165 250)) !important;
+}
+
+.dark-theme .mdxeditor-toolbar button:hover svg,
+.dark-theme .mdxeditor-toolbar button:hover svg * {
+  stroke: rgb(var(--color-primary, 96 165 250)) !important;
+  fill: rgb(var(--color-primary, 96 165 250)) !important;
+}
+
+/* Toolbar active states */
+.mdxeditor-toolbar button[aria-pressed="true"],
+.mdxeditor-toolbar button[data-state="active"] {
+  background: rgb(var(--color-primary, 59 130 246) / 0.2) !important;
+  color: rgb(var(--color-primary, 59 130 246)) !important;
+}
+
+.mdxeditor-toolbar button[aria-pressed="true"] svg,
+.mdxeditor-toolbar button[data-state="active"] svg,
+.mdxeditor-toolbar button[aria-pressed="true"] svg *,
+.mdxeditor-toolbar button[data-state="active"] svg * {
+  stroke: rgb(var(--color-primary, 59 130 246)) !important;
+  fill: rgb(var(--color-primary, 59 130 246)) !important;
+}
+
+.dark-theme .mdxeditor-toolbar button[aria-pressed="true"],
+.dark-theme .mdxeditor-toolbar button[data-state="active"] {
+  background: rgb(var(--color-primary, 96 165 250) / 0.2) !important;
+  color: rgb(var(--color-primary, 96 165 250)) !important;
+}
+
+.dark-theme .mdxeditor-toolbar button[aria-pressed="true"] svg,
+.dark-theme .mdxeditor-toolbar button[data-state="active"] svg,
+.dark-theme .mdxeditor-toolbar button[aria-pressed="true"] svg *,
+.dark-theme .mdxeditor-toolbar button[data-state="active"] svg * {
+  stroke: rgb(var(--color-primary, 96 165 250)) !important;
+  fill: rgb(var(--color-primary, 96 165 250)) !important;
+}
+
+/* Editor content area */
+.mdxeditor-root-contenteditable {
+  padding: 0;
+  min-height: 50vh;
+  color: rgb(var(--color-content, 55 65 81)) !important;
+}
+
+.dark-theme .mdxeditor-root-contenteditable {
+  color: rgb(var(--color-content, 209 213 219)) !important;
+}
+
+/* Headings - matching production styles */
+.mdxeditor-root-contenteditable h1 {
+  font-size: 2.25rem !important; /* text-4xl */
+  font-weight: 700 !important; /* font-bold */
+  margin-bottom: 1.5rem !important; /* mb-6 */
+  margin-top: 2.5rem !important; /* mt-10 */
+  color: inherit !important;
+}
+
+.mdxeditor-root-contenteditable h2 {
+  font-size: 1.875rem !important; /* text-3xl */
+  font-weight: 600 !important; /* font-semibold */
+  margin-bottom: 1.25rem !important; /* mb-5 */
+  margin-top: 2.5rem !important; /* mt-10 */
+  color: inherit !important;
+}
+
+.mdxeditor-root-contenteditable h3 {
+  font-size: 1.5rem !important; /* text-2xl */
+  font-weight: 500 !important; /* font-medium */
+  margin-bottom: 1rem !important; /* mb-4 */
+  margin-top: 2rem !important; /* mt-8 */
+  color: inherit !important;
+}
+
+.mdxeditor-root-contenteditable h4 {
+  font-size: 1.25rem !important; /* text-xl */
+  font-weight: 500 !important; /* font-medium */
+  margin-bottom: 0.75rem !important; /* mb-3 */
+  margin-top: 1.5rem !important; /* mt-6 */
+  color: inherit !important;
+}
+
+.mdxeditor-root-contenteditable h5 {
+  font-size: 1.125rem !important; /* text-lg */
+  font-weight: 600 !important; /* font-semibold */
+  margin-bottom: 0.5rem !important; /* mb-2 */
+  margin-top: 1.25rem !important; /* mt-5 */
+  color: inherit !important;
+}
+
+.mdxeditor-root-contenteditable h6 {
+  font-size: 1rem !important; /* text-base */
+  font-weight: 600 !important; /* font-semibold */
+  margin-bottom: 0.25rem !important; /* mb-1 */
+  margin-top: 1rem !important; /* mt-4 */
+  color: rgb(var(--color-content, 55 65 81)) !important; /* text-secondary */
+}
+
+.dark-theme .mdxeditor-root-contenteditable h6 {
+  color: rgb(var(--color-content, 209 213 219)) !important;
+}
+
+/* Paragraphs */
+.mdxeditor-root-contenteditable p {
+  margin-bottom: 1rem !important; /* mb-4 */
+  line-height: 1.75 !important; /* leading-7 */
+  font-size: 1rem !important; /* text-base */
+  color: rgb(var(--color-content, 55 65 81)) !important;
+}
+
+.dark-theme .mdxeditor-root-contenteditable p {
+  color: rgb(var(--color-content, 209 213 219)) !important;
+}
+
+/* Text formatting - matching production */
+.mdxeditor-root-contenteditable strong {
+  font-weight: 600 !important; /* font-semibold */
+  color: rgb(var(--color-primary, 59 130 246)) !important; /* text-primary */
+}
+
+.dark-theme .mdxeditor-root-contenteditable strong {
+  color: rgb(var(--color-primary, 96 165 250)) !important;
+}
+
+.mdxeditor-root-contenteditable em {
+  font-style: italic !important;
+  color: rgb(var(--color-content, 55 65 81)) !important; /* text-secondary */
+}
+
+.dark-theme .mdxeditor-root-contenteditable em {
+  color: rgb(var(--color-content, 209 213 219)) !important;
+}
+
+.mdxeditor-root-contenteditable del {
+  text-decoration: line-through !important;
+  color: rgb(var(--color-content, 55 65 81) / 0.6) !important; /* text-secondary/60 */
+}
+
+.dark-theme .mdxeditor-root-contenteditable del {
+  color: rgb(var(--color-content, 209 213 219) / 0.6) !important;
+}
+
+/* Inline code - matching CodeBlock component style with gray background */
+.mdxeditor-root-contenteditable code:not(pre code),
+.mdxeditor code:not(pre code),
+.mdxeditor span[data-lexical-text] code {
+  background: rgb(55 65 81 / 0.15) !important; /* gray-700/15 for light mode */
+  font-size: 0.875rem !important; /* text-sm */
+  padding: 0.125rem 0.375rem !important; /* px-1.5 py-0.5 */
+  border-radius: 0.25rem !important; /* rounded */
+  font-family: 'Courier New', monospace !important; /* font-mono */
+  color: rgb(59 130 246) !important; /* blue-600 */
+  border: 1px solid rgb(55 65 81 / 0.1) !important;
+}
+
+.dark-theme .mdxeditor-root-contenteditable code:not(pre code),
+.dark-theme .mdxeditor code:not(pre code),
+.dark-theme .mdxeditor span[data-lexical-text] code {
+  background: rgb(75 85 99 / 0.3) !important; /* gray-600/30 for dark mode */
+  color: rgb(96 165 250) !important; /* blue-400 */
+  border: 1px solid rgb(75 85 99 / 0.2) !important;
+}
+
+/* Lists */
+.mdxeditor-root-contenteditable ul {
+  list-style-type: disc !important;
+  padding-left: 1.5rem !important; /* pl-6 */
+  margin-bottom: 1rem !important; /* mb-4 */
+}
+
+.mdxeditor-root-contenteditable ol {
+  list-style-type: decimal !important;
+  padding-left: 1.5rem !important; /* pl-6 */
+  margin-bottom: 1rem !important; /* mb-4 */
+}
+
+.mdxeditor-root-contenteditable li {
+  margin-bottom: 0.25rem !important; /* mb-1 */
+  color: inherit !important;
+}
+
+/* Links */
+.mdxeditor-root-contenteditable a {
+  color: rgb(59 130 246) !important; /* text-blue-600 */
+  text-decoration: underline !important;
+  transition: color 0.2s !important;
+}
+
+.mdxeditor-root-contenteditable a:hover {
+  color: rgb(29 78 216) !important; /* hover:text-blue-800 */
+}
+
+.dark-theme .mdxeditor-root-contenteditable a {
+  color: rgb(96 165 250) !important; /* dark:text-blue-400 */
+}
+
+/* Horizontal rule */
+.mdxeditor-root-contenteditable hr {
+  margin: 2rem 0 !important; /* my-8 */
+  border-top: 1px solid rgb(var(--color-muted, 55 65 81) / 0.2) !important; /* border-secondary/20 */
+}
+
+.dark-theme .mdxeditor-root-contenteditable hr {
+  border-top-color: rgb(var(--color-muted, 209 213 219) / 0.2) !important;
+}
+
+/* All text elements in editor */
+.mdxeditor-root-contenteditable span,
+.mdxeditor-root-contenteditable div {
+  color: inherit !important;
+}
+
+/* Placeholder text */
+.mdxeditor-root-contenteditable [data-lexical-decorator] {
+  color: rgb(var(--color-muted, 55 65 81)) !important;
+}
+
+.dark-theme .mdxeditor-root-contenteditable [data-lexical-decorator] {
+  color: rgb(var(--color-muted, 209 213 219)) !important;
+}
+
+/* Tables in editor */
+.mdxeditor table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1rem 0;
+}
+
+.mdxeditor table td,
+.mdxeditor table th {
+  border: 1px solid rgb(var(--color-muted, 55 65 81) / 0.2);
+  padding: 0.5rem;
+}
+
+.dark-theme .mdxeditor table td,
+.dark-theme .mdxeditor table th {
+  border-color: rgb(var(--color-muted, 209 213 219) / 0.2);
+}
+
+/* Code blocks */
+.mdxeditor pre {
+  background: rgb(var(--color-muted, 55 65 81) / 0.1);
+  border-radius: 0.375rem;
+  padding: 1rem;
+  overflow-x: auto;
+}
+
+.dark-theme .mdxeditor pre {
+  background: rgb(var(--color-muted, 209 213 219) / 0.05);
+}
+
+/* Blockquotes */
+.mdxeditor blockquote {
+  border-left: 4px solid rgb(var(--color-primary, 59 130 246));
+  padding-left: 1rem;
+  margin: 1rem 0;
+  color: rgb(var(--color-content, 55 65 81) / 0.8) !important;
+}
+
+.dark-theme .mdxeditor blockquote {
+  border-left-color: rgb(var(--color-primary, 96 165 250));
+  color: rgb(var(--color-content, 209 213 219) / 0.8) !important;
+}
+
+/* Dropdowns and Dialogs - Base styles */
+.mdxeditor [role="menu"],
+.mdxeditor [role="listbox"],
+.mdxeditor [data-radix-popper-content-wrapper] {
+  background: rgb(var(--color-bg, 255 255 255)) !important;
+  border: 1px solid rgb(var(--color-muted, 55 65 81) / 0.3) !important;
+  border-radius: 6px !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+  color: rgb(var(--color-content, 55 65 81)) !important;
+  z-index: 9999 !important;
+  padding: 4px !important;
+}
+
+/* Dialog specific styles - comprehensive selectors for modal content */
+.mdxeditor [role="dialog"],
+.mdxeditor dialog,
+.mdxeditor [data-dialog],
+div[class*="Dialog"]:not([class*="DialogOverlay"]),
+div[class*="dialog"]:not([class*="overlay"]),
+[data-radix-dialog-content],
+div[data-radix-dialog-content] {
+  background: rgb(var(--color-bg, 255 255 255)) !important;
+  border: none !important;
+  border-radius: 8px !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+  color: rgb(var(--color-content, 55 65 81)) !important;
+  z-index: 99999 !important;
+  padding: 1.5rem !important;
+  max-width: 500px !important;
+  min-width: 400px !important;
+}
+
+.dark-theme .mdxeditor [role="menu"],
+.dark-theme .mdxeditor [role="listbox"],
+.dark-theme .mdxeditor [data-radix-popper-content-wrapper] {
+  background: rgb(var(--color-bg, 31 41 55)) !important;
+  border-color: rgb(var(--color-muted, 209 213 219) / 0.3) !important;
+  color: rgb(var(--color-content, 209 213 219)) !important;
+}
+
+.dark-theme .mdxeditor [role="dialog"],
+.dark-theme .mdxeditor dialog,
+.dark-theme .mdxeditor [data-dialog],
+.dark-theme div[class*="Dialog"]:not([class*="DialogOverlay"]),
+.dark-theme div[class*="dialog"]:not([class*="overlay"]),
+.dark-theme [data-radix-dialog-content],
+.dark-theme div[data-radix-dialog-content] {
+  background: rgb(var(--color-bg, 31 41 55)) !important;
+  color: rgb(var(--color-content, 209 213 219)) !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* Dropdown items */
+.mdxeditor [role="menuitem"],
+.mdxeditor [role="option"] {
+  color: rgb(var(--color-content, 55 65 81)) !important;
+  padding: 8px 12px !important;
+  border-radius: 4px !important;
+  cursor: pointer !important;
+  transition: all 0.2s !important;
+}
+
+.mdxeditor [role="menuitem"]:hover,
+.mdxeditor [role="option"]:hover {
+  background: rgb(var(--color-primary, 59 130 246) / 0.1) !important;
+  color: rgb(var(--color-primary, 59 130 246)) !important;
+}
+
+.dark-theme .mdxeditor [role="menuitem"],
+.dark-theme .mdxeditor [role="option"] {
+  color: rgb(var(--color-content, 209 213 219)) !important;
+}
+
+.dark-theme .mdxeditor [role="menuitem"]:hover,
+.dark-theme .mdxeditor [role="option"]:hover {
+  background: rgb(var(--color-primary, 96 165 250) / 0.1) !important;
+  color: rgb(var(--color-primary, 96 165 250)) !important;
+}
+
+/* Input fields in dialogs - comprehensive selectors */
+.mdxeditor input[type="text"],
+.mdxeditor input[type="url"],
+.mdxeditor input[type="email"],
+.mdxeditor input:not([type="checkbox"]):not([type="radio"]),
+.mdxeditor textarea,
+div[class*="Dialog"] input,
+div[class*="dialog"] input,
+div[role="dialog"] input,
+div[role="dialog"] textarea,
+[data-radix-portal] input,
+[data-radix-portal] textarea,
+form input[type="text"],
+form input[type="url"],
+form textarea {
+  background: rgb(var(--color-bg, 255 255 255)) !important;
+  border: 1px solid rgb(var(--color-muted, 55 65 81) / 0.3) !important;
+  border-radius: 4px !important;
+  padding: 8px 12px !important;
+  color: rgb(var(--color-content, 55 65 81)) !important;
+  transition: border-color 0.2s !important;
+  font-size: 14px !important;
+  width: 100% !important;
+}
+
+.mdxeditor input[type="text"]:focus,
+.mdxeditor input[type="url"]:focus,
+.mdxeditor input:focus,
+.mdxeditor textarea:focus,
+div[class*="Dialog"] input:focus,
+div[role="dialog"] input:focus,
+div[role="dialog"] textarea:focus,
+[data-radix-portal] input:focus,
+[data-radix-portal] textarea:focus,
+form input:focus,
+form textarea:focus {
+  outline: none !important;
+  border-color: rgb(var(--color-primary, 59 130 246)) !important;
+  box-shadow: 0 0 0 3px rgb(var(--color-primary, 59 130 246) / 0.1) !important;
+}
+
+.dark-theme .mdxeditor input[type="text"],
+.dark-theme .mdxeditor input[type="url"],
+.dark-theme .mdxeditor input[type="email"],
+.dark-theme .mdxeditor input:not([type="checkbox"]):not([type="radio"]),
+.dark-theme .mdxeditor textarea,
+.dark-theme div[class*="Dialog"] input,
+.dark-theme div[class*="dialog"] input,
+.dark-theme div[role="dialog"] input,
+.dark-theme div[role="dialog"] textarea,
+.dark-theme [data-radix-portal] input,
+.dark-theme [data-radix-portal] textarea,
+.dark-theme form input[type="text"],
+.dark-theme form input[type="url"],
+.dark-theme form textarea {
+  background: rgb(var(--color-bg, 31 41 55)) !important;
+  border-color: rgb(var(--color-muted, 209 213 219) / 0.3) !important;
+  color: rgb(var(--color-content, 209 213 219)) !important;
+}
+
+.dark-theme .mdxeditor input[type="text"]:focus,
+.dark-theme .mdxeditor input[type="url"]:focus,
+.dark-theme .mdxeditor input:focus,
+.dark-theme .mdxeditor textarea:focus,
+.dark-theme div[class*="Dialog"] input:focus,
+.dark-theme div[role="dialog"] input:focus,
+.dark-theme div[role="dialog"] textarea:focus,
+.dark-theme [data-radix-portal] input:focus,
+.dark-theme [data-radix-portal] textarea:focus,
+.dark-theme form input:focus,
+.dark-theme form textarea:focus {
+  border-color: rgb(var(--color-primary, 96 165 250)) !important;
+  box-shadow: 0 0 0 3px rgb(var(--color-primary, 96 165 250) / 0.1) !important;
+}
+
+/* Dialog buttons */
+.mdxeditor [role="dialog"] button {
+  padding: 8px 16px !important;
+  border-radius: 4px !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+  transition: all 0.2s !important;
+  border: 1px solid transparent !important;
+}
+
+.mdxeditor [role="dialog"] button[type="submit"],
+.mdxeditor [role="dialog"] button[data-primary="true"] {
+  background: rgb(var(--color-primary, 59 130 246)) !important;
+  color: white !important;
+}
+
+.mdxeditor [role="dialog"] button[type="submit"]:hover,
+.mdxeditor [role="dialog"] button[data-primary="true"]:hover {
+  background: rgb(var(--color-primary, 59 130 246) / 0.9) !important;
+}
+
+.mdxeditor [role="dialog"] button[type="button"] {
+  background: transparent !important;
+  color: rgb(var(--color-content, 55 65 81)) !important;
+  border-color: rgb(var(--color-muted, 55 65 81) / 0.3) !important;
+}
+
+.mdxeditor [role="dialog"] button[type="button"]:hover {
+  background: rgb(var(--color-muted, 55 65 81) / 0.1) !important;
+}
+
+.dark-theme .mdxeditor [role="dialog"] button[type="submit"],
+.dark-theme .mdxeditor [role="dialog"] button[data-primary="true"] {
+  background: rgb(var(--color-primary, 96 165 250)) !important;
+}
+
+.dark-theme .mdxeditor [role="dialog"] button[type="button"] {
+  color: rgb(var(--color-content, 209 213 219)) !important;
+  border-color: rgb(var(--color-muted, 209 213 219) / 0.3) !important;
+}
+
+.dark-theme .mdxeditor [role="dialog"] button[type="button"]:hover {
+  background: rgb(var(--color-muted, 209 213 219) / 0.1) !important;
+}
+
+/* Custom component dropdown */
+.mdx-toolbar-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 8px;
+  border: none;
+  background: transparent;
+  color: rgb(var(--color-content, 55 65 81));
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.mdx-toolbar-button:hover {
+  background: rgb(var(--color-primary, 59 130 246) / 0.15);
+  color: rgb(var(--color-primary, 59 130 246));
+}
+
+.mdx-toolbar-button svg {
+  stroke: currentColor;
+}
+
+.dark-theme .mdx-toolbar-button {
+  color: rgb(var(--color-content, 209 213 219));
+}
+
+.dark-theme .mdx-toolbar-button:hover {
+  background: rgb(var(--color-primary, 96 165 250) / 0.15);
+  color: rgb(var(--color-primary, 96 165 250));
+}
+
+/* Component dropdown menu */
+.component-dropdown-menu {
+  position: fixed;
+  background: rgb(var(--color-bg, 255 255 255));
+  border: 1px solid rgb(var(--color-muted, 55 65 81) / 0.3);
+  border-radius: 6px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  z-index: 9999;
+  min-width: 160px;
+}
+
+.dark-theme .component-dropdown-menu {
+  background: rgb(var(--color-bg, 31 41 55));
+  border-color: rgb(var(--color-muted, 209 213 219) / 0.3);
+}
+
+.component-dropdown-item {
+  width: 100%;
+  padding: 8px 12px;
+  text-align: left;
+  background: transparent;
+  border: none;
+  color: rgb(var(--color-content, 55 65 81));
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.component-dropdown-item:first-child {
+  border-radius: 6px 6px 0 0;
+}
+
+.component-dropdown-item:last-child {
+  border-radius: 0 0 6px 6px;
+}
+
+.component-dropdown-item:hover {
+  background: rgb(var(--color-primary, 59 130 246) / 0.1);
+  color: rgb(var(--color-primary, 59 130 246));
+}
+
+.component-dropdown-item svg {
+  stroke: currentColor;
+  flex-shrink: 0;
+}
+
+.dark-theme .component-dropdown-item {
+  color: rgb(var(--color-content, 209 213 219));
+}
+
+.dark-theme .component-dropdown-item:hover {
+  background: rgb(var(--color-primary, 96 165 250) / 0.1);
+  color: rgb(var(--color-primary, 96 165 250));
+}
+
+/* Nested editor styles for JSX components (Info, Tip, Warning, etc.) */
+.mdxeditor .nested-editor,
+.mdxeditor [data-lexical-editor="true"] {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  outline: none !important;
+}
+
+/* Remove white background from nested contenteditable */
+.mdxeditor [contenteditable="true"][data-lexical-editor="true"] {
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+  min-height: 1.5rem !important;
+}
+
+/* Ensure nested editor text inherits color from parent */
+.mdxeditor [data-lexical-editor="true"] p,
+.mdxeditor [data-lexical-editor="true"] span,
+.mdxeditor [data-lexical-editor="true"] div {
+  color: inherit !important;
+}
+
+/* CodeMirror Code Block Styles - single unified gray block */
+/* Target actual MDXEditor CSS Module classes */
+.mdxeditor div[class*="codeBlockWrapper"],
+.mdxeditor div[class*="codeMirrorWrapper"],
+.mdxeditor div[class*="_codeMirrorWrapper_"],
+.mdxeditor div:has(> .cm-editor) {
+  background: rgb(55 65 81 / 0.15) !important; /* Same gray as inline code */
+  border-radius: 0.5rem !important;
+  padding: 0 !important;
+  border: none !important; /* Remove border to unify colors */
+  position: relative !important;
+  margin: 0 0 1rem 0 !important;
+  overflow: visible !important; /* Allow select to overflow */
+}
+
+/* Toolbar container - position it outside/above the code block */
+.mdxeditor div[class*="codeMirrorToolbar"],
+.mdxeditor div[class*="_codeMirrorToolbar_"] {
+  position: absolute !important;
+  top: -2rem !important;
+  left: 0 !important;
+  right: 0 !important;
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  z-index: 10 !important;
+  width: 100% !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+}
+
+.dark-theme .mdxeditor div[class*="codeBlockWrapper"],
+.dark-theme .mdxeditor div[class*="codeMirrorWrapper"],
+.dark-theme .mdxeditor div:has(> .cm-editor) {
+  background: rgb(75 85 99 / 0.25) !important;
+  border: none !important;
+}
+
+/* CodeMirror editor - same background to unify */
+.mdxeditor .cm-editor {
+  background: rgb(55 65 81 / 0.15) !important; /* Same as wrapper */
+  position: relative !important;
+  padding: 1rem !important;
+  border: none !important;
+  outline: none !important;
+  border-radius: 0 0 0.5rem 0.5rem !important; /* Match wrapper */
+}
+
+.dark-theme .mdxeditor .cm-editor {
+  background: rgb(75 85 99 / 0.25) !important;
+}
+
+/* Container wrapper to hold both select and code block together */
+.mdxeditor div[class*="codeBlockWrapper"],
+.mdxeditor div[class*="codeMirrorWrapper"],
+.mdxeditor div:has(> .cm-editor) {
+  margin-top: 2rem !important; /* Space for select above */
+}
+
+.mdxeditor .cm-scroller,
+.mdxeditor .cm-content {
+  background: transparent !important;
+  border: none !important;
+}
+
+.mdxeditor .cm-editor.cm-focused {
+  outline: none !important;
+  border: none !important;
+}
+
+/* CodeMirror content */
+.mdxeditor .cm-scroller {
+  overflow-x: auto !important;
+  padding: 0 !important;
+}
+
+.mdxeditor .cm-content {
+  padding: 0 !important;
+  color: rgb(var(--color-content, 55 65 81)) !important;
+  caret-color: rgb(var(--color-content, 55 65 81)) !important; /* Cursor same as text color */
+}
+
+.dark-theme .mdxeditor .cm-content {
+  color: rgb(var(--color-content, 209 213 219)) !important;
+  caret-color: rgb(var(--color-content, 209 213 219)) !important; /* Cursor same as text color */
+}
+
+/* CodeMirror cursor - make it visible */
+.mdxeditor .cm-cursor,
+.mdxeditor .cm-cursor-primary {
+  border-left-color: rgb(var(--color-content, 55 65 81)) !important;
+  border-left-width: 2px !important;
+}
+
+.dark-theme .mdxeditor .cm-cursor,
+.dark-theme .mdxeditor .cm-cursor-primary {
+  border-left-color: rgb(var(--color-content, 209 213 219)) !important;
+}
+
+/* Language selector - positioned ABOVE the code block with nice styling */
+.mdxeditor select[class*="language"],
+.mdxeditor select[aria-label*="language"],
+.mdxeditor select[aria-label*="Language"],
+.mdxeditor div[class*="codeBlockWrapper"] select,
+.mdxeditor div[class*="codeMirrorToolbar"] select,
+.mdxeditor .cm-editor ~ select,
+.mdxeditor div:has(> .cm-editor) > select {
+  position: absolute !important;
+  top: -2rem !important; /* Position above the code block */
+  left: 0 !important;
+  background: rgb(59 130 246) !important; /* Solid blue background - no CSS vars to avoid white */
+  border: none !important;
+  border-radius: 0.375rem 0.375rem 0 0 !important; /* Rounded top corners only */
+  padding: 0.375rem 0.75rem !important;
+  font-size: 0.75rem !important;
+  font-weight: 600 !important;
+  color: #ffffff !important; /* Solid white text */
+  cursor: pointer !important;
+  z-index: 10 !important;
+  box-shadow: none !important;
+  font-family: 'Courier New', Consolas, Monaco, monospace !important;
+  letter-spacing: 0.025em !important;
+  text-transform: uppercase !important;
+  transition: background-color 0.2s ease !important;
+  min-width: 120px !important;
+  display: block !important; /* Force display */
+}
+
+.mdxeditor select[class*="language"]:hover,
+.mdxeditor select[aria-label*="language"]:hover,
+.mdxeditor select[aria-label*="Language"]:hover,
+.mdxeditor div[class*="codeBlockWrapper"] select:hover,
+.mdxeditor div[class*="codeMirrorToolbar"] select:hover,
+.mdxeditor .cm-editor ~ select:hover,
+.mdxeditor div:has(> .cm-editor) > select:hover {
+  background: rgb(37 99 235) !important; /* Darker blue on hover */
+}
+
+.dark-theme .mdxeditor select[class*="language"],
+.dark-theme .mdxeditor select[aria-label*="language"],
+.dark-theme .mdxeditor select[aria-label*="Language"],
+.dark-theme .mdxeditor div[class*="codeBlockWrapper"] select,
+.dark-theme .mdxeditor div[class*="codeMirrorToolbar"] select,
+.dark-theme .mdxeditor .cm-editor ~ select,
+.dark-theme .mdxeditor div:has(> .cm-editor) > select {
+  background: rgb(96 165 250) !important; /* Lighter blue for dark mode */
+  color: #1f2937 !important; /* Dark text for better contrast in dark mode */
+}
+
+.dark-theme .mdxeditor select[class*="language"]:hover,
+.dark-theme .mdxeditor select[aria-label*="language"]:hover,
+.dark-theme .mdxeditor select[aria-label*="Language"]:hover {
+  background: rgb(59 130 246) !important; /* Slightly darker on hover */
+}
+
+/* Style the select dropdown arrow */
+.mdxeditor select[class*="language"],
+.mdxeditor select[aria-label*="language"],
+.mdxeditor select[aria-label*="Language"] {
+  appearance: none !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 0.5rem center !important;
+  background-size: 1rem !important;
+  padding-right: 2rem !important;
+}
+
+.dark-theme .mdxeditor select[class*="language"],
+.dark-theme .mdxeditor select[aria-label*="language"],
+.dark-theme .mdxeditor select[aria-label*="Language"] {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='rgb(31 41 55)' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
+}
+
+/* Style select options */
+.mdxeditor select[class*="language"] option,
+.mdxeditor select[aria-label*="language"] option,
+.mdxeditor select[aria-label*="Language"] option {
+  background: #ffffff !important; /* Solid white background */
+  color: #1f2937 !important; /* Dark text */
+  padding: 0.5rem !important;
+  font-weight: 400 !important;
+  text-transform: none !important;
+}
+
+.dark-theme .mdxeditor select[class*="language"] option,
+.dark-theme .mdxeditor select[aria-label*="language"] option,
+.dark-theme .mdxeditor select[aria-label*="Language"] option {
+  background: #1f2937 !important; /* Dark background */
+  color: #f9fafb !important; /* Light text */
+}
+
+/* Hide the delete button in toolbar by default, show on hover */
+.mdxeditor div[class*="codeMirrorToolbar"] button,
+.mdxeditor div[class*="_codeMirrorToolbar_"] button {
+  opacity: 0 !important;
+  transition: opacity 0.2s ease !important;
+  background: transparent !important;
+  border: none !important;
+  padding: 0.25rem !important;
+  cursor: pointer !important;
+  position: relative !important; /* Changed from absolute */
+  margin-left: auto !important; /* Push to the right */
+}
+
+.mdxeditor div[class*="codeMirrorWrapper"]:hover div[class*="codeMirrorToolbar"] button,
+.mdxeditor div[class*="_codeMirrorWrapper_"]:hover div[class*="_codeMirrorToolbar_"] button {
+  opacity: 0.7 !important;
+}
+
+.mdxeditor div[class*="codeMirrorToolbar"] button:hover,
+.mdxeditor div[class*="_codeMirrorToolbar_"] button:hover {
+  opacity: 1 !important;
+  background: rgb(var(--color-primary, 59 130 246) / 0.1) !important;
+  border-radius: 0.375rem !important;
+}
+
+/* Style the delete button icon */
+.mdxeditor div[class*="codeMirrorToolbar"] button svg,
+.mdxeditor div[class*="_codeMirrorToolbar_"] button svg {
+  stroke: rgb(var(--color-content, 55 65 81)) !important;
+  width: 1rem !important;
+  height: 1rem !important;
+}
+
+.dark-theme .mdxeditor div[class*="codeMirrorToolbar"] button svg,
+.dark-theme .mdxeditor div[class*="_codeMirrorToolbar_"] button svg {
+  stroke: rgb(var(--color-content, 209 213 219)) !important;
+}
+
+/* CodeMirror syntax highlighting - using your theme colors */
+/* Override basicLight theme and target all possible highlighting classes */
+/* Keywords */
+.cm-editor .cm-keyword,
+.mdxeditor .cm-keyword,
+.mdxeditor .ͼ1,
+.mdxeditor .tok-keyword,
+.cm-content .cm-keyword {
+  color: rgb(168 85 247) !important; /* purple-500 */
+  font-weight: 500 !important;
+}
+
+/* Strings */
+.cm-editor .cm-string,
+.mdxeditor .cm-string,
+.mdxeditor .tok-string,
+.cm-content .cm-string {
+  color: rgb(34 197 94) !important; /* green-500 */
+}
+
+/* Comments */
+.cm-editor .cm-comment,
+.mdxeditor .cm-comment,
+.mdxeditor .tok-comment,
+.cm-line-comment,
+.cm-block-comment {
+  color: rgb(156 163 175) !important; /* gray-400 */
+  font-style: italic !important;
+}
+
+/* Numbers and booleans */
+.cm-editor .cm-number,
+.cm-editor .cm-bool,
+.mdxeditor .cm-number,
+.mdxeditor .cm-bool,
+.mdxeditor .tok-number,
+.mdxeditor .tok-bool {
+  color: rgb(249 115 22) !important; /* orange-500 */
+}
+
+/* Variables and functions */
+.cm-editor .cm-variableName,
+.cm-editor .cm-name,
+.mdxeditor .cm-variableName,
+.mdxeditor .cm-name,
+.mdxeditor .tok-variableName,
+.mdxeditor .tok-name {
+  color: rgb(59 130 246) !important; /* blue-600 */
+}
+
+/* Operators and punctuation */
+.cm-editor .cm-operator,
+.cm-editor .cm-punctuation,
+.mdxeditor .cm-operator,
+.mdxeditor .cm-punctuation,
+.mdxeditor .tok-operator,
+.mdxeditor .tok-punctuation {
+  color: rgb(var(--color-content, 55 65 81)) !important;
+}
+
+/* Properties */
+.cm-editor .cm-property,
+.cm-editor .cm-propertyName,
+.mdxeditor .cm-property,
+.mdxeditor .cm-propertyName,
+.mdxeditor .tok-propertyName {
+  color: rgb(236 72 153) !important; /* pink-500 */
+}
+
+/* Types and classes */
+.cm-editor .cm-type,
+.cm-editor .cm-typeName,
+.cm-editor .cm-className,
+.mdxeditor .cm-type,
+.mdxeditor .cm-typeName,
+.mdxeditor .cm-className,
+.mdxeditor .tok-typeName,
+.mdxeditor .tok-className {
+  color: rgb(251 146 60) !important; /* orange-400 */
+}
+
+/* HTML/JSX Tags */
+.cm-editor .cm-tag,
+.mdxeditor .cm-tag,
+.mdxeditor .tok-tagName {
+  color: rgb(239 68 68) !important; /* red-500 */
+}
+
+/* Attributes */
+.cm-editor .cm-attributeName,
+.mdxeditor .cm-attributeName,
+.mdxeditor .tok-attributeName {
+  color: rgb(59 130 246) !important; /* blue-600 */
+}
+
+.cm-editor .cm-attributeValue,
+.mdxeditor .cm-attributeValue,
+.mdxeditor .tok-attributeValue {
+  color: rgb(34 197 94) !important; /* green-500 */
+}
+
+/* Dark theme syntax highlighting */
+.dark-theme .mdxeditor .cm-keyword {
+  color: rgb(192 132 252) !important; /* purple-400 */
+}
+
+.dark-theme .mdxeditor .cm-string {
+  color: rgb(74 222 128) !important; /* green-400 */
+}
+
+.dark-theme .mdxeditor .cm-comment {
+  color: rgb(var(--color-muted, 209 213 219)) !important;
+}
+
+.dark-theme .mdxeditor .cm-number,
+.dark-theme .mdxeditor .cm-bool {
+  color: rgb(251 146 60) !important; /* orange-400 */
+}
+
+.dark-theme .mdxeditor .cm-function,
+.dark-theme .mdxeditor .cm-variableName {
+  color: rgb(96 165 250) !important; /* blue-400 */
+}
+
+.dark-theme .mdxeditor .cm-operator,
+.dark-theme .mdxeditor .cm-punctuation {
+  color: rgb(var(--color-content, 209 213 219)) !important;
+}
+
+.dark-theme .mdxeditor .cm-property {
+  color: rgb(244 114 182) !important; /* pink-400 */
+}
+
+.dark-theme .mdxeditor .cm-type,
+.dark-theme .mdxeditor .cm-className {
+  color: rgb(253 186 116) !important; /* orange-300 */
+}
+
+/* CodeMirror line numbers - optional, can be hidden */
+.mdxeditor .cm-lineNumbers {
+  display: none !important; /* Hide line numbers for cleaner look */
+}
+
+/* CodeMirror active line - remove highlight so it matches the block */
+.mdxeditor .cm-activeLine {
+  background: transparent !important;
+}
+
+.dark-theme .mdxeditor .cm-activeLine {
+  background: transparent !important;
+}
+
+/* CodeMirror selection */
+.mdxeditor .cm-selectionBackground,
+.mdxeditor .cm-content ::selection {
+  background: rgb(var(--color-primary, 59 130 246) / 0.2) !important;
+}
+
+.dark-theme .mdxeditor .cm-selectionBackground,
+.dark-theme .mdxeditor .cm-content ::selection {
+  background: rgb(var(--color-primary, 96 165 250) / 0.2) !important;
+}
+
+/* Matching brackets/parens - remove white background */
+.mdxeditor .cm-matchingBracket,
+.mdxeditor .cm-nonmatchingBracket {
+  background: transparent !important;
+  outline: 1px solid rgb(var(--color-primary, 59 130 246)) !important;
+  border-radius: 2px !important;
+}
+
+.dark-theme .mdxeditor .cm-matchingBracket,
+.dark-theme .mdxeditor .cm-nonmatchingBracket {
+  outline-color: rgb(var(--color-primary, 96 165 250)) !important;
+}
+
+/* Remove default CodeMirror border/outline */
+.mdxeditor .cm-editor .cm-scroller {
+  outline: none !important;
+}
+
+/* CodeMirror gutters - transparent to match single block */
+.mdxeditor .cm-gutters {
+  background: transparent !important;
+  border: none !important;
+}
+
+/* Remove any extra borders or backgrounds from CodeMirror elements */
+.mdxeditor .cm-activeLineGutter {
+  background: transparent !important;
+}
+
+.mdxeditor .cm-foldGutter {
+  display: none !important;
+}
+
+/* Copy button for code blocks */
+.code-copy-button {
+  position: absolute !important;
+  top: 0.5rem !important;
+  right: 0.5rem !important;
+  background: transparent !important;
+  border: none !important;
+  padding: 0.375rem !important;
+  cursor: pointer !important;
+  opacity: 0 !important;
+  transition: all 0.2s ease !important;
+  border-radius: 0.375rem !important;
+  color: rgb(var(--color-content, 55 65 81)) !important;
+  z-index: 20 !important;
+}
+
+.mdxeditor div[class*="codeMirrorWrapper"]:hover .code-copy-button,
+.mdxeditor div[class*="_codeMirrorWrapper_"]:hover .code-copy-button {
+  opacity: 0.7 !important;
+}
+
+.code-copy-button:hover {
+  opacity: 1 !important;
+  background: rgb(var(--color-primary, 59 130 246) / 0.1) !important;
+}
+
+.dark-theme .code-copy-button {
+  color: rgb(var(--color-content, 209 213 219)) !important;
+}
+
+/* FINAL OVERRIDE: Code block language selector - MUST be visible with blue background */
+/* These rules are at the end to override any previous conflicting styles */
+/* Using actual MDXEditor CSS Module classes */
+.mdxeditor div[class*="codeMirrorToolbar"] select,
+.mdxeditor div[class*="_codeMirrorToolbar_"] select,
+.mdxeditor select[aria-label*="language"],
+.mdxeditor select[aria-label*="Language"],
+.mdxeditor select[class*="language"],
+.mdxeditor div:has(> .cm-editor) > select,
+.mdxeditor .cm-editor ~ select {
+  position: absolute !important;
+  top: -2rem !important;
+  left: 0 !important;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  background: rgb(59 130 246) !important;
+  background-color: rgb(59 130 246) !important;
+  color: #ffffff !important;
+  border: none !important;
+  border-radius: 0.375rem 0.375rem 0 0 !important;
+  padding: 0.375rem 0.75rem !important;
+  padding-right: 2rem !important;
+  font-size: 0.75rem !important;
+  font-weight: 600 !important;
+  font-family: 'Courier New', Consolas, Monaco, monospace !important;
+  letter-spacing: 0.025em !important;
+  text-transform: uppercase !important;
+  cursor: pointer !important;
+  z-index: 10 !important;
+  min-width: 120px !important;
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 0.5rem center !important;
+  background-size: 1rem !important;
+}
+
+.mdxeditor select[aria-label*="language"] option,
+.mdxeditor select[aria-label*="Language"] option,
+.mdxeditor select[class*="language"] option {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  color: #1f2937 !important;
+  padding: 0.5rem !important;
+  font-weight: 400 !important;
+  text-transform: none !important;
+}
+
+.dark-theme .mdxeditor select[aria-label*="language"],
+.dark-theme .mdxeditor select[aria-label*="Language"],
+.dark-theme .mdxeditor select[class*="language"],
+.dark-theme .mdxeditor div:has(> .cm-editor) > select,
+.dark-theme .mdxeditor .cm-editor ~ select {
+  background: rgb(96 165 250) !important;
+  background-color: rgb(96 165 250) !important;
+  color: #1f2937 !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='rgb(31 41 55)' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
+}
+
+.dark-theme .mdxeditor select[aria-label*="language"] option,
+.dark-theme .mdxeditor select[aria-label*="Language"] option,
+.dark-theme .mdxeditor select[class*="language"] option {
+  background: #1f2937 !important;
+  background-color: #1f2937 !important;
+  color: #f9fafb !important;
+}

@@ -9,7 +9,16 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@codemirror/lang-css": "^6.3.1",
+    "@codemirror/lang-html": "^6.4.11",
+    "@codemirror/lang-javascript": "^6.2.4",
+    "@codemirror/lang-json": "^6.0.2",
+    "@codemirror/lang-markdown": "^6.4.0",
+    "@codemirror/lang-python": "^6.2.1",
+    "@codemirror/lang-sql": "^6.10.0",
+    "@codemirror/lang-yaml": "^6.1.2",
     "@headlessui/react": "^2.2.9",
+    "@mdxeditor/editor": "^3.47.0",
     "clsx": "^2.1.1",
     "ml-matrix": "^6.12.1",
     "natural": "^8.1.0",
@@ -38,4 +47,3 @@
     "typescript": "^5"
   }
 }
-
