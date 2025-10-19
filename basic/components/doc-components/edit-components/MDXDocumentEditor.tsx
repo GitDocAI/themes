@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react'
+import React, { useRef, useEffect, useState, createContext, useContext } from 'react'
 import {
   MDXEditor,
   headingsPlugin,
@@ -31,7 +31,115 @@ import '../../../styles/mdx-editor-custom.css'
 import { InsertComponentDropdown } from './CustomToolbarButtons'
 import { AlertBlock } from '../AlertBlock'
 import { Collapse } from '../Collapse'
+import { Card } from '../Card'
+import { CardModal } from './CardModal'
 import { allExtensions } from './customCodeMirrorTheme'
+
+// Context to share editor ref and save function
+interface EditorContextType {
+  editorRef: React.RefObject<MDXEditorMethods | null>
+  saveToWebhook: (content: string) => Promise<void>
+}
+const EditorContext = createContext<EditorContextType | null>(null)
+
+// Editable Card wrapper component
+const EditableCard = ({ mdastNode }: { mdastNode: any }) => {
+  const [showEditModal, setShowEditModal] = useState(false)
+  const context = useContext(EditorContext)
+  const editorRef = context?.editorRef
+  const saveToWebhook = context?.saveToWebhook
+
+  const titleAttr = (mdastNode.attributes as any[])?.find((attr) => attr.name === 'title')
+  const iconAttr = (mdastNode.attributes as any[])?.find((attr) => attr.name === 'icon')
+  const hrefAttr = (mdastNode.attributes as any[])?.find((attr) => attr.name === 'href')
+  const imgAttr = (mdastNode.attributes as any[])?.find((attr) => attr.name === 'img')
+  const textAttr = (mdastNode.attributes as any[])?.find((attr) => attr.name === 'text')
+
+  const title = titleAttr?.value || 'Card title'
+  const icon = iconAttr?.value
+  const href = hrefAttr?.value
+  const img = imgAttr?.value
+  const text = textAttr?.value
+
+  // Get content from children
+  const getContentText = (node: any): string => {
+    if (!node.children || node.children.length === 0) return 'Card content goes here'
+    const firstChild = node.children[0]
+    if (firstChild.type === 'text') return firstChild.value
+    if (firstChild.type === 'paragraph' && firstChild.children) {
+      const textChild = firstChild.children.find((c: any) => c.type === 'text')
+      return textChild?.value || 'Card content goes here'
+    }
+    return 'Card content goes here'
+  }
+
+  const handleUpdate = async (cardMarkdown: string) => {
+    if (!editorRef?.current || !saveToWebhook) return
+
+    // Get current markdown
+    const currentMarkdown = editorRef.current.getMarkdown()
+
+    // Build the old card markdown to find and replace
+    let oldCardMarkdown = '<Card'
+    if (title) oldCardMarkdown += ` title="${title}"`
+    if (icon) oldCardMarkdown += ` icon="${icon}"`
+    if (img) oldCardMarkdown += ` img="${img}"`
+    if (href) oldCardMarkdown += ` href="${href}"`
+    if (text) oldCardMarkdown += ` text="${text}"`
+    oldCardMarkdown += `>\n  ${getContentText(mdastNode)}\n</Card>`
+
+    // Replace in markdown
+    const newMarkdown = currentMarkdown.replace(oldCardMarkdown, cardMarkdown)
+    editorRef.current.setMarkdown(newMarkdown)
+
+    // Save to webhook
+    await saveToWebhook(newMarkdown)
+  }
+
+  return (
+    <div contentEditable={false} style={{ margin: '16px 0', position: 'relative' }}>
+      <button
+        onClick={() => setShowEditModal(true)}
+        style={{
+          position: 'absolute',
+          top: '8px',
+          right: '8px',
+          zIndex: 1,
+          padding: '6px 12px',
+          fontSize: '12px',
+          backgroundColor: '#3b82f6',
+          color: 'white',
+          border: 'none',
+          borderRadius: '4px',
+          cursor: 'pointer',
+          fontWeight: '500',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+        }}
+      >
+        Edit
+      </button>
+      <Card title={title} icon={icon} href={href} img={img} text={text}>
+        <NestedLexicalEditor<MdxJsxTextElement>
+          getContent={(node) => node.children}
+          getUpdatedMdastNode={(node, children) => ({ ...node, children: children as any })}
+        />
+      </Card>
+      <CardModal
+        isOpen={showEditModal}
+        onClose={() => setShowEditModal(false)}
+        onInsert={handleUpdate}
+        initialData={{
+          title,
+          icon,
+          href,
+          img,
+          text,
+          content: getContentText(mdastNode),
+        }}
+      />
+    </div>
+  )
+}
 
 interface MDXDocumentEditorProps {
   markdown: string
@@ -148,13 +256,14 @@ export function MDXDocumentEditor({
   }, [])
 
   return (
-    <div className="mdx-editor-wrapper">
-      <MDXEditor
-        ref={editorRef}
-        markdown={markdown}
-        onChange={handleChange}
-        readOnly={readOnly}
-        plugins={[
+    <EditorContext.Provider value={{ editorRef, saveToWebhook }}>
+      <div className="mdx-editor-wrapper">
+        <MDXEditor
+          ref={editorRef}
+          markdown={markdown}
+          onChange={handleChange}
+          readOnly={readOnly}
+          plugins={[
           // Core markdown plugins
           headingsPlugin(),
           listsPlugin(),
@@ -204,7 +313,7 @@ export function MDXDocumentEditor({
                     <AlertBlock type="info">
                       <NestedLexicalEditor<MdxJsxTextElement>
                         getContent={(node) => node.children}
-                        getUpdatedMdastNode={(node, children) => ({ ...node, children })}
+                        getUpdatedMdastNode={(node, children) => ({ ...node, children: children as any })}
                       />
                     </AlertBlock>
                   )
@@ -220,7 +329,7 @@ export function MDXDocumentEditor({
                     <AlertBlock type="tip">
                       <NestedLexicalEditor<MdxJsxTextElement>
                         getContent={(node) => node.children}
-                        getUpdatedMdastNode={(node, children) => ({ ...node, children })}
+                        getUpdatedMdastNode={(node, children) => ({ ...node, children: children as any })}
                       />
                     </AlertBlock>
                   )
@@ -236,7 +345,7 @@ export function MDXDocumentEditor({
                     <AlertBlock type="note">
                       <NestedLexicalEditor<MdxJsxTextElement>
                         getContent={(node) => node.children}
-                        getUpdatedMdastNode={(node, children) => ({ ...node, children })}
+                        getUpdatedMdastNode={(node, children) => ({ ...node, children: children as any })}
                       />
                     </AlertBlock>
                   )
@@ -252,7 +361,7 @@ export function MDXDocumentEditor({
                     <AlertBlock type="warning">
                       <NestedLexicalEditor<MdxJsxTextElement>
                         getContent={(node) => node.children}
-                        getUpdatedMdastNode={(node, children) => ({ ...node, children })}
+                        getUpdatedMdastNode={(node, children) => ({ ...node, children: children as any })}
                       />
                     </AlertBlock>
                   )
@@ -268,7 +377,7 @@ export function MDXDocumentEditor({
                     <AlertBlock type="danger">
                       <NestedLexicalEditor<MdxJsxTextElement>
                         getContent={(node) => node.children}
-                        getUpdatedMdastNode={(node, children) => ({ ...node, children })}
+                        getUpdatedMdastNode={(node, children) => ({ ...node, children: children as any })}
                       />
                     </AlertBlock>
                   )
@@ -293,12 +402,25 @@ export function MDXDocumentEditor({
                       <Collapse title={title} defaultOpen={true}>
                         <NestedLexicalEditor<MdxJsxTextElement>
                           getContent={(node) => node.children}
-                          getUpdatedMdastNode={(node, children) => ({ ...node, children })}
+                          getUpdatedMdastNode={(node, children) => ({ ...node, children: children as any })}
                         />
                       </Collapse>
                     </div>
                   )
                 },
+              },
+              {
+                name: 'Card',
+                kind: 'flow',
+                props: [
+                  { name: 'title', type: 'string' },
+                  { name: 'icon', type: 'string' },
+                  { name: 'href', type: 'string' },
+                  { name: 'img', type: 'string' },
+                  { name: 'text', type: 'string' },
+                ],
+                hasChildren: true,
+                Editor: ({ mdastNode }) => <EditableCard mdastNode={mdastNode} />,
               },
             ],
           }),
@@ -328,6 +450,7 @@ export function MDXDocumentEditor({
           }),
         ]}
       />
-    </div>
+      </div>
+    </EditorContext.Provider>
   )
 }

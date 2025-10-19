@@ -10,6 +10,7 @@ import { Note } from './components/doc-components/Note'
 import { Warning } from './components/doc-components/Warning'
 import { Danger } from './components/doc-components/Danger'
 import { Collapse } from './components/doc-components/Collapse'
+import { Card } from './components/doc-components/Card'
 
 const defaultComponents = getNextraComponents({
   wrapper(content: any) {
@@ -35,6 +36,7 @@ const defaultComponents = getNextraComponents({
   Warning,
   Danger,
   Collapse,
+  Card,
 })
 
 export const useMDXComponents = (components: any) => ({

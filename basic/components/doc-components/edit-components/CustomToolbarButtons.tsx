@@ -5,8 +5,9 @@ import {
   usePublisher,
   insertMarkdown$,
 } from '@mdxeditor/editor'
+import { CardModal } from './CardModal'
 
-type ComponentType = 'tip' | 'note' | 'warning' | 'danger' | 'info' | 'codeblock'
+type ComponentType = 'tip' | 'note' | 'warning' | 'danger' | 'info' | 'card' | 'codeblock'
 
 interface ComponentOption {
   type: ComponentType
@@ -69,6 +70,16 @@ const componentOptions: ComponentOption[] = [
     )
   },
   {
+    type: 'card',
+    label: 'Card',
+    icon: (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+        <line x1="3" y1="9" x2="21" y2="9"/>
+      </svg>
+    )
+  },
+  {
     type: 'codeblock',
     label: 'Code Block',
     icon: (
@@ -83,6 +94,7 @@ const componentOptions: ComponentOption[] = [
 export const InsertComponentDropdown = () => {
   const [isOpen, setIsOpen] = useState(false)
   const [dropdownStyle, setDropdownStyle] = useState<React.CSSProperties>({})
+  const [showCardModal, setShowCardModal] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const buttonRef = useRef<HTMLButtonElement>(null)
   const insertMarkdown = usePublisher(insertMarkdown$)
@@ -120,13 +132,22 @@ export const InsertComponentDropdown = () => {
       // Insert code block as markdown - the codeBlockPlugin will parse and render it
       const codeBlockMarkdown = '```js\n\n```\n\n'
       insertMarkdown(codeBlockMarkdown)
+      setIsOpen(false)
+    } else if (type === 'card') {
+      // Show Card modal
+      setShowCardModal(true)
+      setIsOpen(false)
     } else {
       // Insert JSX component as markdown (Info, Tip, Warning, Danger, Note)
       const componentName = type.charAt(0).toUpperCase() + type.slice(1)
       const jsxMarkdown = '<' + componentName + '>\n\n</' + componentName + '>\n\n'
       insertMarkdown(jsxMarkdown)
+      setIsOpen(false)
     }
-    setIsOpen(false)
+  }
+
+  const handleCardInsert = (cardMarkdown: string) => {
+    insertMarkdown(cardMarkdown + '\n\n')
   }
 
   return (
@@ -169,6 +190,12 @@ export const InsertComponentDropdown = () => {
           ))}
         </div>
       )}
+
+      <CardModal
+        isOpen={showCardModal}
+        onClose={() => setShowCardModal(false)}
+        onInsert={handleCardInsert}
+      />
     </div>
   )
 }

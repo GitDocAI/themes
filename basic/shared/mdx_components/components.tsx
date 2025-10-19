@@ -5,6 +5,7 @@ import { CodeBlock } from '../../components/doc-components/CodeBlock'
 import { CheckItem, CheckList } from '../../components/doc-components/CheckList'
 import { ResizableImage } from '../../components/doc-components/ResizableImage'
 import { Collapse } from '../../components/doc-components/Collapse'
+import { Card } from '../../components/doc-components/Card'
 import ApiReference from '../../components/doc-components/ApiReference'
 
 export const components = {
@@ -113,6 +114,7 @@ export const components = {
   Danger: ({ children }: any) => <AlertBlock type="danger">{children}</AlertBlock>,
   Info: ({ children }: any) => <AlertBlock type="info">{children}</AlertBlock>,
   Collapse: ({ children, title, defaultOpen }: any) => <Collapse title={title} defaultOpen={defaultOpen}>{children}</Collapse>,
+  Card: ({ children, title, icon, href, img, text }: any) => <Card title={title} icon={icon} href={href} img={img} text={text}>{children}</Card>,
 
   // --- Special Markdown features ---
   inlineCode: ({ children }: any) => (
