@@ -20,10 +20,12 @@ import {
   linkPlugin,
   linkDialogPlugin,
   CreateLink,
-  imagePlugin,
   jsxPlugin,
   NestedLexicalEditor,
   type MDXEditorMethods,
+  diffSourcePlugin,
+  DiffSourceToggleWrapper,
+  directivesPlugin,
 } from '@mdxeditor/editor'
 import type { MdxJsxTextElement } from 'mdast-util-mdx'
 import '@mdxeditor/editor/style.css'
@@ -271,9 +273,8 @@ export function MDXDocumentEditor({
           thematicBreakPlugin(),
           linkPlugin(),
           linkDialogPlugin(),
-          imagePlugin({
-            imageAutocompleteSuggestions: [],
-          }),
+          // imagePlugin disabled - images are handled as JSX components to preserve HTML format
+          directivesPlugin(),
           tablePlugin(),
           codeBlockPlugin({
             defaultCodeBlockLanguage: 'js',
@@ -422,29 +423,71 @@ export function MDXDocumentEditor({
                 hasChildren: true,
                 Editor: ({ mdastNode }) => <EditableCard mdastNode={mdastNode} />,
               },
+              {
+                name: 'img',
+                kind: 'text',
+                props: [
+                  { name: 'src', type: 'string' },
+                  { name: 'alt', type: 'string' },
+                  { name: 'width', type: 'string' },
+                  { name: 'height', type: 'string' },
+                ],
+                hasChildren: false,
+                Editor: ({ mdastNode }) => {
+                  const srcAttr = (mdastNode.attributes as any[])?.find((attr) => attr.name === 'src')
+                  const altAttr = (mdastNode.attributes as any[])?.find((attr) => attr.name === 'alt')
+                  const widthAttr = (mdastNode.attributes as any[])?.find((attr) => attr.name === 'width')
+                  const heightAttr = (mdastNode.attributes as any[])?.find((attr) => attr.name === 'height')
+
+                  const src = srcAttr?.value || ''
+                  const alt = altAttr?.value || ''
+                  const width = widthAttr?.value
+                  const height = heightAttr?.value
+
+                  return (
+                    <div contentEditable={false} style={{ margin: '16px 0' }}>
+                      <img
+                        src={src}
+                        alt={alt}
+                        width={width}
+                        height={height}
+                        className="rounded-lg border border-neutral-200 dark:border-neutral-700"
+                        style={{ maxWidth: '100%', height: 'auto' }}
+                      />
+                    </div>
+                  )
+                },
+              },
             ],
           }),
 
           // Markdown shortcuts (##, -, **, etc.)
           markdownShortcutPlugin(),
 
+          // Diff/Source plugin for mode switching
+          diffSourcePlugin({
+            viewMode: 'rich-text',
+          }),
+
           // Toolbar
           toolbarPlugin({
             toolbarContents: () => (
               <>
-                <BoldItalicUnderlineToggles />
-                <CodeToggle />
-                <Separator />
-                <BlockTypeSelect />
-                <Separator />
-                <ListsToggle />
-                <Separator />
-                <CreateLink />
-                <Separator />
-                <InsertTable />
-                <InsertThematicBreak />
-                <Separator />
-                <InsertComponentDropdown />
+                <DiffSourceToggleWrapper options={['rich-text', 'source']}>
+                  <BoldItalicUnderlineToggles />
+                  <CodeToggle />
+                  <Separator />
+                  <BlockTypeSelect />
+                  <Separator />
+                  <ListsToggle />
+                  <Separator />
+                  <CreateLink />
+                  <Separator />
+                  <InsertTable />
+                  <InsertThematicBreak />
+                  <Separator />
+                  <InsertComponentDropdown />
+                </DiffSourceToggleWrapper>
               </>
             ),
           }),

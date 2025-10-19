@@ -69,9 +69,9 @@ export const Card = ({ title, children, icon, href, img, text }: CardProps) => {
 
   const CardContent = () => (
     <>
-      {/* Image at top if provided */}
+      {/* Image at top if provided - full width, touching top and sides */}
       {img && (
-        <div className="w-full h-32 overflow-hidden rounded-md mb-3 -ml-4">
+        <div className="w-full h-48 overflow-hidden rounded-t-lg -m-px mb-0">
           <img
             src={img}
             alt={title}
@@ -80,7 +80,7 @@ export const Card = ({ title, children, icon, href, img, text }: CardProps) => {
         </div>
       )}
 
-      <div className="flex flex-col flex-1">
+      <div className={`flex flex-col flex-1 ${img ? 'p-4' : ''}`}>
         {/* Icon above title */}
         {icon && (
           <div className="flex-shrink-0 mb-2" style={{ color: primaryColor }}>
@@ -143,7 +143,7 @@ export const Card = ({ title, children, icon, href, img, text }: CardProps) => {
   if (isWholeCardClickable) {
     return (
       <LinkComponent
-        className="group relative flex flex-col h-full rounded-lg border-l-[3px] p-4 border border-gray-300 dark:border-gray-700 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 no-underline hover:border-current"
+        className={`group relative flex flex-col h-full rounded-lg border-l-[3px] ${img ? 'p-0' : 'p-4'} border border-gray-300 dark:border-gray-700 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 no-underline hover:border-current overflow-hidden`}
         style={{
           borderLeftColor: primaryColor,
           '--hover-border-color': primaryColor,
@@ -165,7 +165,7 @@ export const Card = ({ title, children, icon, href, img, text }: CardProps) => {
   // Otherwise, just the card container
   return (
     <div
-      className="group relative flex flex-col h-full rounded-lg border-l-[3px] p-4 border border-gray-300 dark:border-gray-700 transition-all duration-200 hover:shadow-md"
+      className={`group relative flex flex-col h-full rounded-lg border-l-[3px] ${img ? 'p-0' : 'p-4'} border border-gray-300 dark:border-gray-700 transition-all duration-200 hover:shadow-md overflow-hidden`}
       style={{ borderLeftColor: primaryColor }}
       onMouseEnter={(e) => {
         e.currentTarget.style.borderColor = primaryColor

@@ -3,7 +3,7 @@ import { AlertBlock } from '../../components/doc-components/AlertBlock'
 import { BlockQuote } from '../../components/doc-components/BlockQuote'
 import { CodeBlock } from '../../components/doc-components/CodeBlock'
 import { CheckItem, CheckList } from '../../components/doc-components/CheckList'
-import { ResizableImage } from '../../components/doc-components/ResizableImage'
+// ResizableImage removed - images are now handled by JSX descriptor in editor
 import { Collapse } from '../../components/doc-components/Collapse'
 import { Card } from '../../components/doc-components/Card'
 import ApiReference from '../../components/doc-components/ApiReference'
@@ -74,11 +74,6 @@ export const components = {
     </a>
   ),
   img: ({ src, alt, width, ...props }: any) => {
-    // En modo desarrollo (editable), usar ResizableImage
-    if (process.env.NODE_ENV !== 'production') {
-      return <ResizableImage src={src as string} alt={alt} initialWidth={width as number} />
-    }
-    // En producción, usar img normal
     return (
       <img
         src={src as string}

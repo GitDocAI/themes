@@ -14,6 +14,8 @@
   padding: 0;
   min-height: 60vh;
   color: rgb(var(--color-content, 55 65 81)) !important;
+  width: 100% !important;
+  max-width: 100% !important;
 }
 
 .mdxeditor-toolbar {
@@ -1320,4 +1322,140 @@ form textarea:focus {
   background: #1f2937 !important;
   background-color: #1f2937 !important;
   color: #f9fafb !important;
+}
+
+/* View Mode Switch Buttons - Diff/Source Toggle */
+/* Critical: Lock the wrapper to prevent width changes */
+.mdx-editor-wrapper {
+  width: 100% !important;
+  position: relative !important;
+}
+
+/* Lock all internal containers to 100% width */
+.mdxeditor,
+.mdxeditor-toolbar,
+.mdxeditor-diff-source-wrapper,
+.mdxeditor-rich-text-editor,
+.mdxeditor [class*="sourceEditor"],
+.mdxeditor .cm-editor {
+  width: 100% !important;
+}
+
+/* Toggle wrapper styling - push to the right side */
+.mdxeditor-toolbar [class*="diffSourceToggleWrapper"] {
+  margin-left: auto !important;
+}
+
+/* The toggle group container - apply single border here ONLY */
+.mdxeditor-toolbar div[class*="diffSourceToggle"] {
+  border: 1px solid rgb(var(--color-muted, 55 65 81) / 0.3) !important;
+  border-radius: 6px !important;
+  padding: 2px !important;
+  background: transparent !important;
+  display: inline-flex !important;
+  gap: 0 !important;
+}
+
+/* Remove ALL borders/backgrounds from nested elements - this fixes triple border */
+.mdxeditor-toolbar div[class*="diffSourceToggle"] *,
+.mdxeditor-toolbar div[class*="diffSourceToggle"] *::before,
+.mdxeditor-toolbar div[class*="diffSourceToggle"] *::after {
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+/* Re-apply border-radius only to buttons for visual consistency */
+.mdxeditor-toolbar div[class*="diffSourceToggle"] button {
+  border-radius: 4px !important;
+}
+
+/* Individual toggle buttons - compact like other toolbar buttons */
+.mdxeditor-toolbar div[class*="diffSourceToggle"] button,
+.mdxeditor-toolbar div[class*="diffSourceToggle"] [class*="toolbarToggleItem"] {
+  border: none !important;
+  border-radius: 4px !important;
+  padding: 4px 8px !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  background: transparent !important;
+  color: rgb(var(--color-content, 55 65 81)) !important;
+  transition: all 0.2s ease !important;
+  margin: 0 !important;
+  min-width: auto !important;
+  width: auto !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+/* Remove any extra borders from nested elements */
+.mdxeditor-toolbar div[class*="diffSourceToggle"] button > *,
+.mdxeditor-toolbar div[class*="diffSourceToggle"] [class*="toolbarToggleItem"] > *,
+.mdxeditor-toolbar div[class*="diffSourceToggle"] button > span,
+.mdxeditor-toolbar div[class*="diffSourceToggle"] [class*="toolbarToggleItem"] > span {
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+  padding: 0 !important;
+}
+
+.mdxeditor-toolbar div[class*="diffSourceToggle"] button:hover,
+.mdxeditor-toolbar div[class*="diffSourceToggle"] [class*="toolbarToggleItem"]:hover {
+  background: rgb(var(--color-primary, 59 130 246) / 0.1) !important;
+  color: rgb(var(--color-primary, 59 130 246)) !important;
+}
+
+/* Active state for the selected mode */
+.mdxeditor-toolbar div[class*="diffSourceToggle"] button[data-state="on"],
+.mdxeditor-toolbar div[class*="diffSourceToggle"] button[aria-pressed="true"],
+.mdxeditor-toolbar div[class*="diffSourceToggle"] [class*="toolbarToggleItem"][data-state="on"],
+.mdxeditor-toolbar div[class*="diffSourceToggle"] [class*="toolbarToggleItem"][aria-pressed="true"] {
+  background: rgb(var(--color-primary, 59 130 246)) !important;
+  color: white !important;
+  font-weight: 600 !important;
+}
+
+.mdxeditor-toolbar div[class*="diffSourceToggle"] button[data-state="on"]:hover,
+.mdxeditor-toolbar div[class*="diffSourceToggle"] button[aria-pressed="true"]:hover,
+.mdxeditor-toolbar div[class*="diffSourceToggle"] [class*="toolbarToggleItem"][data-state="on"]:hover,
+.mdxeditor-toolbar div[class*="diffSourceToggle"] [class*="toolbarToggleItem"][aria-pressed="true"]:hover {
+  background: rgb(var(--color-primary, 59 130 246) / 0.9) !important;
+  color: white !important;
+}
+
+/* Dark mode for view mode switches */
+.dark-theme .mdxeditor-toolbar [class*="diffSourceToggleWrapper"],
+.dark-theme .mdxeditor-toolbar div[class*="diffSourceToggle"] {
+  border-color: rgb(var(--color-muted, 209 213 219) / 0.3) !important;
+  background: rgb(var(--color-bg, 31 41 55) / 0.5) !important;
+}
+
+.dark-theme .mdxeditor-toolbar div[class*="diffSourceToggle"] button,
+.dark-theme .mdxeditor-toolbar div[class*="diffSourceToggle"] [class*="toolbarToggleItem"] {
+  color: rgb(var(--color-content, 209 213 219)) !important;
+}
+
+.dark-theme .mdxeditor-toolbar div[class*="diffSourceToggle"] button:hover,
+.dark-theme .mdxeditor-toolbar div[class*="diffSourceToggle"] [class*="toolbarToggleItem"]:hover {
+  background: rgb(var(--color-primary, 96 165 250) / 0.1) !important;
+  color: rgb(var(--color-primary, 96 165 250)) !important;
+}
+
+.dark-theme .mdxeditor-toolbar div[class*="diffSourceToggle"] button[data-state="on"],
+.dark-theme .mdxeditor-toolbar div[class*="diffSourceToggle"] button[aria-pressed="true"],
+.dark-theme .mdxeditor-toolbar div[class*="diffSourceToggle"] [class*="toolbarToggleItem"][data-state="on"],
+.dark-theme .mdxeditor-toolbar div[class*="diffSourceToggle"] [class*="toolbarToggleItem"][aria-pressed="true"] {
+  background: rgb(var(--color-primary, 96 165 250)) !important;
+  color: rgb(31 41 55) !important;
+}
+
+.dark-theme .mdxeditor-toolbar div[class*="diffSourceToggle"] button[data-state="on"]:hover,
+.dark-theme .mdxeditor-toolbar div[class*="diffSourceToggle"] button[aria-pressed="true"]:hover,
+.dark-theme .mdxeditor-toolbar div[class*="diffSourceToggle"] [class*="toolbarToggleItem"][data-state="on"]:hover,
+.dark-theme .mdxeditor-toolbar div[class*="diffSourceToggle"] [class*="toolbarToggleItem"][aria-pressed="true"]:hover {
+  background: rgb(var(--color-primary, 96 165 250) / 0.9) !important;
+  color: rgb(31 41 55) !important;
 }
