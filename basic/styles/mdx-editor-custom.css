@@ -50,18 +50,25 @@
 }
 
 /* Make toolbar icons thinner - more minimalist - override inline styles */
-.mdxeditor-toolbar svg,
-.mdxeditor-toolbar svg *,
-.mdxeditor-toolbar button svg,
-.mdxeditor-toolbar button svg *,
-.mdxeditor-toolbar button svg path,
-.mdxeditor-toolbar button svg line,
-.mdxeditor-toolbar button svg polyline,
-.mdxeditor-toolbar button svg circle,
-.mdxeditor-toolbar button svg rect,
-.mdxeditor-toolbar button svg ellipse,
-.mdxeditor-toolbar button svg polygon {
+/* Exception: custom buttons maintain their own strokeWidth */
+.mdxeditor-toolbar svg:not(.mdx-toolbar-button svg),
+.mdxeditor-toolbar svg *:not(.mdx-toolbar-button svg *),
+.mdxeditor-toolbar button:not(.mdx-toolbar-button) svg,
+.mdxeditor-toolbar button:not(.mdx-toolbar-button) svg *,
+.mdxeditor-toolbar button:not(.mdx-toolbar-button) svg path,
+.mdxeditor-toolbar button:not(.mdx-toolbar-button) svg line,
+.mdxeditor-toolbar button:not(.mdx-toolbar-button) svg polyline,
+.mdxeditor-toolbar button:not(.mdx-toolbar-button) svg circle,
+.mdxeditor-toolbar button:not(.mdx-toolbar-button) svg rect,
+.mdxeditor-toolbar button:not(.mdx-toolbar-button) svg ellipse,
+.mdxeditor-toolbar button:not(.mdx-toolbar-button) svg polygon {
   stroke-width: 0.5 !important;
+}
+
+/* Custom toolbar button icons maintain their strokeWidth */
+.mdx-toolbar-button svg,
+.mdx-toolbar-button svg * {
+  stroke-width: 2 !important;
 }
 
 /* BlockTypeSelect dropdown - comprehensive Radix UI support */
@@ -704,6 +711,40 @@ form textarea:focus {
 
 .mdx-toolbar-button svg {
   stroke: currentColor;
+}
+
+/* Tooltip for custom toolbar buttons */
+.mdx-toolbar-button {
+  position: relative;
+}
+
+.mdx-toolbar-button[data-tooltip]:hover::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 6px 10px;
+  background: rgb(17 24 39);
+  color: white;
+  font-size: 12px;
+  white-space: nowrap;
+  border-radius: 6px;
+  pointer-events: none;
+  z-index: 99999;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.mdx-toolbar-button[data-tooltip]:hover::before {
+  content: '';
+  position: absolute;
+  bottom: calc(100% + 3px);
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: rgb(17 24 39);
+  pointer-events: none;
+  z-index: 99999;
 }
 
 .dark-theme .mdx-toolbar-button {

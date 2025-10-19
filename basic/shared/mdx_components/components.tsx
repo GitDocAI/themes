@@ -75,13 +75,20 @@ export const components = {
   ),
   img: ({ src, alt, width, ...props }: any) => {
     return (
-      <img
-        src={src as string}
-        alt={alt}
-        className="rounded-lg mb-4 max-w-full border border-neutral-200 dark:border-neutral-700"
-        style={{ width: width ? `${width}px` : 'auto', maxWidth: '100%' }}
-        {...props}
-      />
+      <figure className="my-6">
+        <img
+          src={src as string}
+          alt={alt}
+          className="rounded-lg max-w-full border border-neutral-200 dark:border-neutral-700"
+          style={{ width: width ? `${width}px` : 'auto', maxWidth: '100%', display: 'block' }}
+          {...props}
+        />
+        {alt && (
+          <figcaption className="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center italic">
+            {alt}
+          </figcaption>
+        )}
+      </figure>
     )
   },
 
