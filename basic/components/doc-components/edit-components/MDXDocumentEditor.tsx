@@ -38,6 +38,7 @@ import { CardModal } from './CardModal'
 import { ImageEditModal } from './ImageEditModal'
 import { allExtensions } from './customCodeMirrorTheme'
 import { usePathname } from 'next/navigation'
+import { createDescriptorsFromComponents,remarkCalloutPlugin } from './customEditComponents'
 
 // Context to share editor ref, save function, and webhook info
 interface EditorContextType {
@@ -47,6 +48,8 @@ interface EditorContextType {
   authentication: string
 }
 const EditorContext = createContext<EditorContextType | null>(null)
+
+const descriptors = createDescriptorsFromComponents()
 
 // Editable Image wrapper component
 const EditableImage = ({ mdastNode }: { mdastNode: any }) => {
@@ -401,7 +404,6 @@ export function MDXDocumentEditor({
           linkDialogPlugin(),
           // imagePlugin disabled - images are handled as JSX components to preserve HTML format
           directivesPlugin(),
-          tablePlugin(),
           codeBlockPlugin({
             defaultCodeBlockLanguage: 'js',
           }),
@@ -426,90 +428,11 @@ export function MDXDocumentEditor({
             },
             codeMirrorExtensions: [allExtensions],
           }),
-
+          remarkCalloutPlugin(),
           // JSX support - NO source field to avoid auto-imports
           jsxPlugin({
             jsxComponentDescriptors: [
-              {
-                name: 'Info',
-                kind: 'flow',
-                props: [],
-                hasChildren: true,
-                Editor: () => {
-                  return (
-                    <AlertBlock type="info">
-                      <NestedLexicalEditor<MdxJsxTextElement>
-                        getContent={(node) => node.children}
-                        getUpdatedMdastNode={(node, children) => ({ ...node, children: children as any })}
-                      />
-                    </AlertBlock>
-                  )
-                },
-              },
-              {
-                name: 'Tip',
-                kind: 'flow',
-                props: [],
-                hasChildren: true,
-                Editor: () => {
-                  return (
-                    <AlertBlock type="tip">
-                      <NestedLexicalEditor<MdxJsxTextElement>
-                        getContent={(node) => node.children}
-                        getUpdatedMdastNode={(node, children) => ({ ...node, children: children as any })}
-                      />
-                    </AlertBlock>
-                  )
-                },
-              },
-              {
-                name: 'Note',
-                kind: 'flow',
-                props: [],
-                hasChildren: true,
-                Editor: () => {
-                  return (
-                    <AlertBlock type="note">
-                      <NestedLexicalEditor<MdxJsxTextElement>
-                        getContent={(node) => node.children}
-                        getUpdatedMdastNode={(node, children) => ({ ...node, children: children as any })}
-                      />
-                    </AlertBlock>
-                  )
-                },
-              },
-              {
-                name: 'Warning',
-                kind: 'flow',
-                props: [],
-                hasChildren: true,
-                Editor: () => {
-                  return (
-                    <AlertBlock type="warning">
-                      <NestedLexicalEditor<MdxJsxTextElement>
-                        getContent={(node) => node.children}
-                        getUpdatedMdastNode={(node, children) => ({ ...node, children: children as any })}
-                      />
-                    </AlertBlock>
-                  )
-                },
-              },
-              {
-                name: 'Danger',
-                kind: 'flow',
-                props: [],
-                hasChildren: true,
-                Editor: () => {
-                  return (
-                    <AlertBlock type="danger">
-                      <NestedLexicalEditor<MdxJsxTextElement>
-                        getContent={(node) => node.children}
-                        getUpdatedMdastNode={(node, children) => ({ ...node, children: children as any })}
-                      />
-                    </AlertBlock>
-                  )
-                },
-              },
+                ...descriptors,
               {
                 name: 'Collapse',
                 kind: 'flow',
@@ -571,7 +494,6 @@ export function MDXDocumentEditor({
           diffSourcePlugin({
             viewMode: 'rich-text',
           }),
-
           // Toolbar
           toolbarPlugin({
             toolbarContents: () => (
