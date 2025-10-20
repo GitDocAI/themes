@@ -18,6 +18,7 @@ import {
   InsertThematicBreak,
   Separator,
   linkPlugin,
+  imagePlugin,
   linkDialogPlugin,
   CreateLink,
   jsxPlugin,
@@ -38,7 +39,7 @@ import { CardModal } from './CardModal'
 import { ImageEditModal } from './ImageEditModal'
 import { allExtensions } from './customCodeMirrorTheme'
 import { usePathname } from 'next/navigation'
-import { createDescriptorsFromComponents,remarkCalloutPlugin } from './customEditComponents'
+import { createDescriptorsFromComponents } from './customEditComponents'
 
 // Context to share editor ref, save function, and webhook info
 interface EditorContextType {
@@ -398,10 +399,12 @@ export function MDXDocumentEditor({
           // Core markdown plugins
           headingsPlugin(),
           listsPlugin(),
+          tablePlugin(),
           quotePlugin(),
           thematicBreakPlugin(),
           linkPlugin(),
           linkDialogPlugin(),
+          imagePlugin(),
           // imagePlugin disabled - images are handled as JSX components to preserve HTML format
           directivesPlugin(),
           codeBlockPlugin({
@@ -428,12 +431,22 @@ export function MDXDocumentEditor({
             },
             codeMirrorExtensions: [allExtensions],
           }),
-          remarkCalloutPlugin(),
           // JSX support - NO source field to avoid auto-imports
           jsxPlugin({
             jsxComponentDescriptors: [
                 ...descriptors,
-              {
+                  {
+          name: 'table',
+          kind: 'flow',
+          hasChildren: true,
+          Editor: ({ mdastNode }) => {
+            return (
+              <div contentEditable={false}>
+                        asasasasass
+              </div>
+            )
+          },
+        },{
                 name: 'Collapse',
                 kind: 'flow',
                 props: [

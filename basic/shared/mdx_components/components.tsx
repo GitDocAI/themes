@@ -100,6 +100,7 @@ export const components = {
   // --- Tables ---
   table:({children}:any)=><BasicCustomTable> {children} </BasicCustomTable>,
 
+  DataTable:({children,...props}:any)=><BasicCustomTable {...props}> {children} </BasicCustomTable>,
   // --- Misc / MDX custom blocks ---
   Tip: ({ children }: any) => <AlertBlock type="tip">{children}</AlertBlock>,
   Note: ({ children }: any) => <AlertBlock type="note">{children}</AlertBlock>,

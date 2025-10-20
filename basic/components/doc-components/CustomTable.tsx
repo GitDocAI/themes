@@ -2,7 +2,10 @@ import React from 'react'
 import { DataTable } from 'primereact/datatable'
 import { Column } from 'primereact/column'
 
-export const BasicCustomTable = ({ children }: any) => {
+export const BasicCustomTable = ({ children,...props }: any):any => {
+
+
+
     const thead = React.Children.toArray(children).find(
       (child: any) => child.type === 'thead'
     )
@@ -10,7 +13,10 @@ export const BasicCustomTable = ({ children }: any) => {
       (child: any) => child.type === 'tbody'
     )
 
-    if (!thead || !tbody) return
+    if (!thead || !tbody) {
+       const inner_table = React.Children.map(children,(table)=>table.props?.children)
+       return BasicCustomTable({children:inner_table,...props})
+  }
 
     const headerCells = React.Children.map(
       (thead as any).props.children.props.children,
@@ -30,11 +36,11 @@ export const BasicCustomTable = ({ children }: any) => {
     )
 
 
-  if (headerCells.length === 0) return null
+  if (headerCells.length === 0) return
 
   return (
     <div className="my-6">
-      <DataTable value={rowData} stripedRows responsiveLayout="scroll">
+      <DataTable value={rowData} stripedRows {...props} >
         {headerCells.map((h:any) => (
           <Column key={h} field={h} header={h} />
         ))}

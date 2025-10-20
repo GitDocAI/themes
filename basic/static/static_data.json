@@ -611,39 +611,39 @@
         "headingPath": [
           "Introduction to Acme Platform"
         ],
-        "startLine": 5
+        "startLine": 6
       }
     },
     {
       "path": "v1.0.0/documentation/getting_started/introduction.mdx",
       "chunk": {
-        "text": "Introduction to Acme Platform Welcome to Acme Platform, the comprehensive solution that empowers modern teams to build, deploy, and scale applications with ease. Property Description Name Full name of user Age Reported age Joined Whether the user joined the community TIP Acme Platform provides everything you need to go from idea to production in minutes, not days.",
+        "text": "Introduction to Acme Platform Welcome to Acme Platform, the comprehensive solution that empowers modern teams to build, deploy, and scale applications with ease. Property Description Name Full name of user Age Reported age Joined Whether the user joined the community Joined Whether the user joined the community Joined Whether the user joined the community Joined Whether the user joined the community TIP Acme Platform provides everything you need to go from idea to production in minutes, not days.",
         "headingPath": [
           "Introduction to Acme Platform"
         ],
-        "startLine": 11
+        "startLine": 12
       }
     },
     {
       "path": "v1.0.0/documentation/getting_started/introduction.mdx",
       "chunk": {
-        "text": "name of user Age Reported age Joined Whether the user joined the community TIP Acme Platform provides everything you need to go from idea to production in minutes, not days. What is Acme Platform?",
+        "text": "Whether the user joined the community Joined Whether the user joined the community TIP Acme Platform provides everything you need to go from idea to production in minutes, not days. What is Acme Platform?",
         "headingPath": [
           "Introduction to Acme Platform",
           "What is Acme Platform?"
         ],
-        "startLine": 17
+        "startLine": 19
       }
     },
     {
       "path": "v1.0.0/documentation/getting_started/introduction.mdx",
       "chunk": {
-        "text": "Reported age Joined Whether the user joined the community TIP Acme Platform provides everything you need to go from idea to production in minutes, not days. What is Acme Platform? Acme Platform is an innovative cloudnative platform that combines the power of modern infrastructure with developerfriendly tools.",
+        "text": "the community Joined Whether the user joined the community TIP Acme Platform provides everything you need to go from idea to production in minutes, not days. What is Acme Platform? Acme Platform is an innovative cloudnative platform that combines the power of modern infrastructure with developerfriendly tools.",
         "headingPath": [
           "Introduction to Acme Platform",
-          "Key Benefits"
+          "What is Acme Platform?"
         ],
-        "startLine": 23
+        "startLine": 25
       }
     },
     {
@@ -654,7 +654,7 @@
           "Introduction to Acme Platform",
           "Key Benefits"
         ],
-        "startLine": 29
+        "startLine": 31
       }
     },
     {
@@ -665,7 +665,7 @@
           "Introduction to Acme Platform",
           "Key Benefits"
         ],
-        "startLine": 35
+        "startLine": 38
       }
     },
     {
@@ -674,9 +674,9 @@
         "text": "analytics Supports all major programming languages and frameworks How It Works Acme Platform follows a simple threestep process: 1. Connect Your Code Link your Git repository to Acme Platform 2. Automated Build Our system automatically builds and tests your application 3.",
         "headingPath": [
           "Introduction to Acme Platform",
-          "How It Works"
+          "Key Benefits"
         ],
-        "startLine": 41
+        "startLine": 44
       }
     },
     {
@@ -687,7 +687,7 @@
           "Introduction to Acme Platform",
           "How It Works"
         ],
-        "startLine": 47
+        "startLine": 50
       }
     },
     {
@@ -698,7 +698,7 @@
           "Introduction to Acme Platform",
           "Getting Started"
         ],
-        "startLine": 53
+        "startLine": 57
       }
     },
     {
@@ -709,7 +709,7 @@
           "Introduction to Acme Platform",
           "Getting Started"
         ],
-        "startLine": 59
+        "startLine": 63
       }
     },
     {
@@ -720,7 +720,7 @@
           "Introduction to Acme Platform",
           ""
         ],
-        "startLine": 65
+        "startLine": 70
       }
     },
     {
@@ -1567,7 +1567,7 @@
     2.725510083686854,
     3.211017899468555,
     4.5973122605884456,
-    3.211017899468555,
+    3.344549292093078,
     2.51787071890861,
     3.211017899468555,
     3.681021528714291,
@@ -1994,7 +1994,7 @@
     4.5973122605884456,
     5.290459441148391,
     4.5973122605884456,
-    3.498699971920336,
+    3.9041650800285006,
     4.191847152480282,
     4.5973122605884456,
     5.290459441148391,
@@ -2143,7 +2143,7 @@
     5.290459441148391,
     4.5973122605884456,
     4.191847152480282,
-    3.681021528714291,
+    4.191847152480282,
     3.681021528714291,
     4.5973122605884456,
     3.681021528714291,
@@ -7994,7 +7994,7 @@
       2.725510083686854,
       3.211017899468555,
       4.5973122605884456,
-      41.743232693091215,
+      43.479140797210015,
       5.03574143781722,
       9.633053698405666,
       11.043064586142872,
@@ -9422,7 +9422,7 @@
       5.451020167373708,
       0,
       0,
-      16.055089497342777,
+      16.72274646046539,
       0,
       6.42203579893711,
       0,
@@ -10136,7 +10136,7 @@
       0,
       0,
       0,
-      3.211017899468555,
+      3.344549292093078,
       0,
       0,
       0,
@@ -10850,7 +10850,7 @@
       5.451020167373708,
       0,
       0,
-      41.743232693091215,
+      43.479140797210015,
       0,
       0,
       3.681021528714291,
@@ -23415,7 +23415,7 @@
       4.5973122605884456,
       0,
       4.5973122605884456,
-      3.498699971920336,
+      3.9041650800285006,
       4.191847152480282,
       4.5973122605884456,
       0,
@@ -34412,7 +34412,7 @@
       5.451020167373708,
       0,
       0,
-      6.42203579893711,
+      6.689098584186156,
       0,
       0,
       0,
@@ -34839,7 +34839,7 @@
       0,
       0,
       0,
-      3.498699971920336,
+      3.9041650800285006,
       0,
       0,
       0,
@@ -34988,7 +34988,7 @@
       0,
       4.5973122605884456,
       4.191847152480282,
-      7.362043057428582,
+      8.383694304960564,
       7.362043057428582,
       4.5973122605884456,
       11.043064586142872,
@@ -41549,10 +41549,10 @@
       5.292296749596689,
       2.6514021115331325,
       0,
-      5.451020167373708,
+      13.627550418434272,
       0,
       0,
-      6.42203579893711,
+      6.689098584186156,
       0,
       0,
       0,
@@ -41695,7 +41695,7 @@
       0,
       0,
       0,
-      3.498699971920336,
+      13.994799887681344,
       0,
       0,
       0,
@@ -41979,7 +41979,7 @@
       0,
       0,
       0,
-      3.498699971920336,
+      3.9041650800285006,
       0,
       0,
       0,
@@ -42044,7 +42044,7 @@
       0,
       0,
       0,
-      3.344549292093078,
+      13.378197168372312,
       0,
       0,
       0,
@@ -42128,8 +42128,8 @@
       0,
       0,
       4.191847152480282,
-      7.362043057428582,
-      7.362043057428582,
+      8.383694304960564,
+      29.448172229714327,
       0,
       0,
       0,
@@ -42266,7 +42266,7 @@
       5.451020167373708,
       0,
       0,
-      3.211017899468555,
+      0,
       0,
       0,
       0,
@@ -42409,7 +42409,7 @@
       0,
       0,
       0,
-      3.498699971920336,
+      6.997399943840672,
       0,
       0,
       0,
@@ -42693,7 +42693,7 @@
       0,
       0,
       0,
-      3.498699971920336,
+      0,
       0,
       0,
       0,
@@ -42758,7 +42758,7 @@
       0,
       0,
       0,
-      3.344549292093078,
+      6.689098584186156,
       0,
       0,
       0,
@@ -42842,8 +42842,8 @@
       0,
       0,
       0,
-      7.362043057428582,
-      7.362043057428582,
+      0,
+      11.043064586142872,
       0,
       0,
       0,
@@ -43407,7 +43407,7 @@
       0,
       0,
       0,
-      3.498699971920336,
+      0,
       0,
       0,
       0,
@@ -43472,7 +43472,7 @@
       0,
       0,
       0,
-      3.344549292093078,
+      6.689098584186156,
       0,
       0,
       0,
@@ -43556,7 +43556,7 @@
       0,
       0,
       0,
-      3.681021528714291,
+      0,
       7.362043057428582,
       0,
       0,
