@@ -7,6 +7,7 @@ import './global.css'
 import { ThemeInfo } from '../models/ThemeInfo'
 import InvalidConfigPage from '@/components/InvalidConfig'
 import { GlobalScript } from '@/components/doc-components/GlobalScript'
+import { PrimeReactProvider } from "primereact/api";
 
 import { openapi_path_builder } from '../shared/path_builder';
 
@@ -43,7 +44,9 @@ const RootLayout: FC<{ children: ReactNode }> = async ({ children }) => {
         <link rel="icon" href={site.favicon} />
       </Head>
       <body style={{ margin: 0 }} >
-        <DefaultTheme themeinfo={site as any} pageMap={pageMap} >{children}</DefaultTheme>
+         <PrimeReactProvider value={{ unstyled: true }}>
+          <DefaultTheme themeinfo={site as any} pageMap={pageMap} >{children}</DefaultTheme>
+         </PrimeReactProvider>
         <GlobalScript />
       </body>
     </html>
