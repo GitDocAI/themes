@@ -3,6 +3,8 @@ import { AlertBlock } from '../../components/doc-components/AlertBlock'
 import { BlockQuote } from '../../components/doc-components/BlockQuote'
 import { CodeBlock } from '../../components/doc-components/CodeBlock'
 import { CheckItem, CheckList } from '../../components/doc-components/CheckList'
+import { BasicCustomTable } from '@/components/doc-components/CustomTable'
+
 // ResizableImage removed - images are now handled by JSX descriptor in editor
 import { Collapse } from '../../components/doc-components/Collapse'
 import { Card } from '../../components/doc-components/Card'
@@ -96,18 +98,7 @@ export const components = {
   blockquote: ({ children }: any) => <BlockQuote>{children}</BlockQuote>,
 
   // --- Tables ---
-  table: ({ children }: any) => (
-    <table className="w-full border border-secondary/20 text-left rounded-md overflow-hidden mb-6">
-      {children}
-    </table>
-  ),
-  thead: ({ children }: any) => (
-    <thead className="bg-secondary/10 dark:bg-secondary/20 text-primary font-semibold">{children}</thead>
-  ),
-  tbody: ({ children }: any) => <tbody className="divide-y divide-secondary/10">{children}</tbody>,
-  tr: ({ children }: any) => <tr className="hover:bg-secondary/5 transition">{children}</tr>,
-  th: ({ children }: any) => <th className="px-4 py-2 text-sm border-b border-secondary/20">{children}</th>,
-  td: ({ children }: any) => <td className="px-4 py-2 text-sm border-b border-secondary/10">{children}</td>,
+  table:({children}:any)=><BasicCustomTable> {children} </BasicCustomTable>,
 
   // --- Misc / MDX custom blocks ---
   Tip: ({ children }: any) => <AlertBlock type="tip">{children}</AlertBlock>,

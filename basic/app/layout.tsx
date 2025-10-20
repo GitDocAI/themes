@@ -4,6 +4,9 @@ import { getPageMap } from 'nextra/page-map'
 import type { FC, ReactNode } from 'react'
 import { DefaultTheme } from '../components/default-theme'
 import './global.css'
+import 'primereact/resources/themes/lara-light-blue/theme.css';
+import 'primereact/resources/primereact.min.css'
+import 'primeicons/primeicons.css'
 import { ThemeInfo } from '../models/ThemeInfo'
 import InvalidConfigPage from '@/components/InvalidConfig'
 import { GlobalScript } from '@/components/doc-components/GlobalScript'
@@ -44,7 +47,7 @@ const RootLayout: FC<{ children: ReactNode }> = async ({ children }) => {
         <link rel="icon" href={site.favicon} />
       </Head>
       <body style={{ margin: 0 }} >
-         <PrimeReactProvider value={{ unstyled: true }}>
+         <PrimeReactProvider value={createPrimeReactTheme()} >
           <DefaultTheme themeinfo={site as any} pageMap={pageMap} >{children}</DefaultTheme>
          </PrimeReactProvider>
         <GlobalScript />
@@ -157,3 +160,36 @@ export function hexToRgb(hex: string): [number, number, number] | null {
 
   return [r, g, b]
 }
+
+
+const createPrimeReactTheme = () => {
+  return {
+    ripple: true,
+    pt: {
+      button: {
+        root: {
+          className: {
+            default: `bg-primary text-white border-none hover:opacity-90`
+          }
+        }
+      },
+      datatable: {
+              root: {
+                className: `!bg-background !text-secondary`
+              },
+              headerRow: {
+                className: '!bg-background !text-secondary !font-bold'
+              },
+              bodyRow: {
+                className: '!bg-background/80 !text-secondary'
+              },
+              cell: {
+                className: '!py-2 !px-3 !bg-background !text-secondary'
+              }
+      }
+    }
+  }
+}
+
+
+
