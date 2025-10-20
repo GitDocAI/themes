@@ -496,3 +496,96 @@ article#mdx-content {
   font-weight: 500;
 }
 
+/* PrimeReact DataTable Custom Styles */
+.p-datatable {
+  border-radius: 0.5rem !important;
+  overflow: hidden !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+  border: 1px solid rgb(var(--color-muted) / 0.15) !important;
+}
+
+.p-datatable .p-datatable-thead > tr > th {
+  background-color: rgb(var(--color-primary) / 0.08) !important;
+  color: rgb(var(--color-primary)) !important;
+  font-weight: 700 !important;
+  border-bottom: 2px solid rgb(var(--color-primary) / 0.3) !important;
+  border-right: 1px solid rgb(var(--color-primary) / 0.2) !important;
+  padding: 0.75rem 1rem !important;
+}
+
+.p-datatable .p-datatable-thead > tr > th:last-child {
+  border-right: none !important;
+}
+
+.p-datatable .p-datatable-tbody > tr {
+  background-color: rgb(var(--color-bg)) !important;
+  border-bottom: 1px solid rgb(var(--color-primary) / 0.15) !important;
+  transition: background-color 0.2s ease !important;
+}
+
+.p-datatable .p-datatable-tbody > tr:hover {
+  background-color: rgb(var(--color-primary) / 0.05) !important;
+}
+
+.p-datatable .p-datatable-tbody > tr > td {
+  padding: 0.75rem 1rem !important;
+  border-right: 1px solid rgb(var(--color-primary) / 0.18) !important;
+  color: rgb(var(--color-muted)) !important;
+}
+
+.p-datatable .p-datatable-tbody > tr > td:last-child {
+  border-right: none !important;
+}
+
+/* Striped rows styling */
+.p-datatable .p-datatable-tbody > tr.p-row-odd {
+  background-color: rgb(var(--color-bg)) !important;
+}
+
+.p-datatable .p-datatable-tbody > tr.p-row-even {
+  background-color: rgb(var(--color-primary) / 0.02) !important;
+}
+
+.p-datatable .p-datatable-tbody > tr.p-row-odd:hover,
+.p-datatable .p-datatable-tbody > tr.p-row-even:hover {
+  background-color: rgb(var(--color-primary) / 0.08) !important;
+}
+
+/* Dark theme adjustments */
+.dark-theme .p-datatable {
+  box-shadow: 0 1px 3px rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(100, 100, 100, 0.25) !important;
+}
+
+.dark-theme .p-datatable .p-datatable-thead > tr > th {
+  background-color: rgb(var(--color-primary) / 0.12) !important;
+  border-bottom: 2px solid rgba(100, 100, 100, 0.3) !important;
+  border-right: 1px solid rgba(100, 100, 100, 0.2) !important;
+}
+
+.dark-theme .p-datatable .p-datatable-tbody > tr {
+  background-color: rgb(var(--color-bg)) !important;
+  border-bottom: 1px solid rgba(80, 80, 80, 0.4) !important;
+  border-color: rgba(80, 80, 80, 0.4) !important;
+}
+
+.dark-theme .p-datatable .p-datatable-tbody > tr.p-row-odd,
+.dark-theme .p-datatable .p-datatable-tbody > tr.p-row-even {
+  border-bottom: 1px solid rgba(80, 80, 80, 0.4) !important;
+  border-bottom-color: rgba(80, 80, 80, 0.4) !important;
+}
+
+.dark-theme .p-datatable .p-datatable-tbody > tr > td {
+  border-right: 1px solid rgba(80, 80, 80, 0.4) !important;
+  border-color: rgba(80, 80, 80, 0.4) !important;
+}
+
+.dark-theme .p-datatable-tbody tr,
+.dark-theme table.p-datatable-table tbody tr {
+  border-bottom: 1px solid rgba(80, 80, 80, 0.4) !important;
+}
+
+.dark-theme .p-datatable .p-datatable-tbody > tr:hover {
+  background-color: rgb(var(--color-primary) / 0.1) !important;
+}
+

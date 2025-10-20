@@ -3,10 +3,10 @@ import { Head } from 'nextra/components'
 import { getPageMap } from 'nextra/page-map'
 import type { FC, ReactNode } from 'react'
 import { DefaultTheme } from '../components/default-theme'
-import './global.css'
 import 'primereact/resources/themes/lara-light-blue/theme.css';
 import 'primereact/resources/primereact.min.css'
 import 'primeicons/primeicons.css'
+import './global.css'
 import { ThemeInfo } from '../models/ThemeInfo'
 import InvalidConfigPage from '@/components/InvalidConfig'
 import { GlobalScript } from '@/components/doc-components/GlobalScript'
@@ -175,16 +175,28 @@ const createPrimeReactTheme = () => {
       },
       datatable: {
               root: {
-                className: `!bg-background !text-secondary`
+                className: `!rounded-lg !overflow-hidden !border !border-secondary/15`
+              },
+              table: {
+                className: '!w-full'
+              },
+              thead: {
+                className: '!bg-primary/10'
               },
               headerRow: {
-                className: '!bg-background !text-secondary !font-bold'
+                className: '!border-b-2 !border-primary/30'
+              },
+              headerCell: {
+                className: '!py-3 !px-4 !text-left !font-bold !text-primary !bg-primary/5 !border-r !border-primary/20 last:!border-r-0'
+              },
+              tbody: {
+                className: '!bg-background'
               },
               bodyRow: {
-                className: '!bg-background/80 !text-secondary'
+                className: '!border-b !border-primary/15 hover:!bg-primary/5 !transition-colors'
               },
               cell: {
-                className: '!py-2 !px-3 !bg-background !text-secondary'
+                className: '!py-3 !px-4 !border-r !border-primary/18 last:!border-r-0'
               }
       }
     }
