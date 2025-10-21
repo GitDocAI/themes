@@ -1569,3 +1569,486 @@ article#mdx-content {
   background-color: rgba(100, 100, 100, 0.2) !important;
 }
 
+/* Code Block Styles with Shiki */
+.code-block-wrapper {
+  margin: 1.5rem 0 !important;
+  border-radius: 0.75rem !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  background-color: #0d1117 !important;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3) !important;
+}
+
+.code-block-header {
+  background-color: #161b22 !important;
+  padding: 0.875rem 1.25rem !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+}
+
+.code-block-filename {
+  color: #8b949e !important;
+  font-size: 0.8125rem !important;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace !important;
+  font-weight: 400 !important;
+}
+
+.code-block-container {
+  position: relative !important;
+  background-color: #0d1117 !important;
+}
+
+.code-block-content {
+  overflow-x: auto !important;
+  background-color: #0d1117 !important;
+}
+
+.code-block-content pre {
+  margin: 0 !important;
+  padding: 1.25rem !important;
+  background-color: #0d1117 !important;
+  font-size: 0.875rem !important;
+  line-height: 1.7 !important;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace !important;
+}
+
+.code-block-copy-btn {
+  position: absolute !important;
+  top: 0.75rem !important;
+  right: 0.75rem !important;
+  padding: 0.5rem 0.625rem !important;
+  background-color: #21262d !important;
+  border: 1px solid #30363d !important;
+  border-radius: 0.375rem !important;
+  color: #c9d1d9 !important;
+  cursor: pointer !important;
+  opacity: 0 !important;
+  transition: opacity 0.2s ease, background-color 0.2s ease !important;
+  font-size: 0.8125rem !important;
+}
+
+.code-block-wrapper:hover .code-block-copy-btn {
+  opacity: 1 !important;
+}
+
+.code-block-copy-btn:hover {
+  background-color: #30363d !important;
+  border-color: #484f58 !important;
+}
+
+.code-block-copy-btn i {
+  font-size: 0.875rem !important;
+  display: block !important;
+}
+
+/* Code Group Styles */
+.code-group {
+  margin: 1.5rem 0 !important;
+  border-radius: 1rem !important;
+  overflow: hidden !important;
+  border: 1px solid #d0d7de !important;
+  background-color: #f6f8fa !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+}
+
+.dark-theme .code-group {
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  background-color: #0d1117 !important;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Tabs mode header */
+.code-group-header-tabs {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  background-color: #eaeef2 !important;
+  border-bottom: 1px solid #d0d7de !important;
+  padding: 0.5rem 1rem !important;
+  gap: 0.5rem !important;
+}
+
+.dark-theme .code-group-header-tabs {
+  background-color: #161b22 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.code-group-tabs {
+  display: flex !important;
+  gap: 0.25rem !important;
+  flex: 1 !important;
+  overflow-x: auto !important;
+  scrollbar-width: none !important;
+}
+
+.code-group-tabs::-webkit-scrollbar {
+  display: none !important;
+}
+
+.code-group-tab {
+  padding: 0.5rem 1rem !important;
+  background-color: transparent !important;
+  border: none !important;
+  border-radius: 0.5rem !important;
+  color: #57606a !important;
+  cursor: pointer !important;
+  font-size: 0.8125rem !important;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace !important;
+  font-weight: 500 !important;
+  transition: all 0.15s ease !important;
+  white-space: nowrap !important;
+}
+
+.dark-theme .code-group-tab {
+  color: #8b949e !important;
+}
+
+.code-group-tab:hover {
+  color: #24292f !important;
+  background-color: rgba(0, 0, 0, 0.05) !important;
+}
+
+.dark-theme .code-group-tab:hover {
+  color: #c9d1d9 !important;
+  background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+.code-group-tab.active {
+  color: rgb(var(--color-primary)) !important;
+  background-color: rgb(var(--color-primary) / 0.1) !important;
+  font-weight: 600 !important;
+}
+
+/* Dropdown mode header */
+.code-group-header-dropdown {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  background-color: #eaeef2 !important;
+  border-bottom: 1px solid #d0d7de !important;
+  padding: 0.75rem 1rem !important;
+  gap: 0.75rem !important;
+}
+
+.dark-theme .code-group-header-dropdown {
+  background-color: #161b22 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.code-group-header-dropdown .code-block-filename {
+  color: #57606a !important;
+  font-size: 0.8125rem !important;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace !important;
+  font-weight: 400 !important;
+  flex: 1 !important;
+}
+
+.dark-theme .code-group-header-dropdown .code-block-filename {
+  color: #8b949e !important;
+}
+
+.code-group-header-dropdown .code-group-controls {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+}
+
+.code-group-dropdown {
+  padding: 0.375rem 0.625rem !important;
+  background-color: #ffffff !important;
+  border: 1px solid #d0d7de !important;
+  border-radius: 0.5rem !important;
+  color: #24292f !important;
+  font-size: 0.75rem !important;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+  outline: none !important;
+  transition: all 0.15s ease !important;
+}
+
+.dark-theme .code-group-dropdown {
+  background-color: #21262d !important;
+  border: 1px solid #30363d !important;
+  color: #c9d1d9 !important;
+}
+
+.code-group-dropdown:hover {
+  background-color: #f6f8fa !important;
+  border-color: #afb8c1 !important;
+}
+
+.dark-theme .code-group-dropdown:hover {
+  background-color: #30363d !important;
+  border-color: #484f58 !important;
+}
+
+.code-group-dropdown:focus {
+  border-color: rgb(var(--color-primary)) !important;
+  box-shadow: 0 0 0 2px rgb(var(--color-primary) / 0.15) !important;
+}
+
+.code-group-dropdown option {
+  background-color: #ffffff !important;
+  color: #24292f !important;
+  padding: 0.5rem !important;
+}
+
+.dark-theme .code-group-dropdown option {
+  background-color: #161b22 !important;
+  color: #c9d1d9 !important;
+}
+
+/* Copy button for code group */
+.code-group-copy-btn {
+  padding: 0.375rem 0.625rem !important;
+  background-color: #ffffff !important;
+  border: 1px solid #d0d7de !important;
+  border-radius: 0.5rem !important;
+  color: #24292f !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+  font-size: 0.75rem !important;
+  flex-shrink: 0 !important;
+}
+
+.dark-theme .code-group-copy-btn {
+  background-color: #21262d !important;
+  border: 1px solid #30363d !important;
+  color: #c9d1d9 !important;
+}
+
+.code-group-copy-btn:hover {
+  background-color: #f6f8fa !important;
+  border-color: #afb8c1 !important;
+}
+
+.dark-theme .code-group-copy-btn:hover {
+  background-color: #30363d !important;
+  border-color: #484f58 !important;
+}
+
+.code-group-copy-btn i {
+  font-size: 0.875rem !important;
+  display: block !important;
+}
+
+/* Code content for code group */
+.code-group-content {
+  overflow-x: auto !important;
+  background-color: #f6f8fa !important;
+}
+
+.dark-theme .code-group-content {
+  background-color: #0d1117 !important;
+}
+
+.code-group-content pre {
+  margin: 0 !important;
+  padding: 1.25rem !important;
+  background-color: #f6f8fa !important;
+  font-size: 0.875rem !important;
+  line-height: 1.7 !important;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace !important;
+}
+
+.dark-theme .code-group-content pre {
+  background-color: #0d1117 !important;
+}
+
+/* Shiki code styling overrides */
+.code-block-content pre code,
+.code-group-content pre code {
+  background-color: transparent !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+}
+
+/* Force our background colors over Shiki's inline styles */
+.code-group-content .shiki,
+.code-group-content .shiki span {
+  background-color: transparent !important;
+}
+
+.code-group-content pre.shiki {
+  background-color: #f6f8fa !important;
+  color: #24292f !important;
+}
+
+.dark-theme .code-group-content pre.shiki {
+  background-color: #0d1117 !important;
+  color: #e6edf3 !important;
+}
+
+/* Override Shiki's inline text colors for better contrast */
+.code-group-content .shiki span {
+  color: inherit;
+}
+
+/* Let Shiki handle syntax colors but ensure minimum contrast */
+.code-group-content .shiki .line {
+  color: #24292f !important;
+}
+
+.dark-theme .code-group-content .shiki .line {
+  color: #e6edf3 !important;
+}
+
+/* Code Tabs Styles - matching code-block visual style */
+.code-tabs-wrapper {
+  margin: 1.5rem 0 !important;
+  border-radius: 0.75rem !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  background-color: #0d1117 !important;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Header - thin bar at top like code-block-header */
+.code-tabs-header {
+  background-color: #161b22 !important;
+  padding: 0.5rem 1rem !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+}
+
+/* Tabs list - inline buttons */
+.code-tabs-list {
+  display: flex !important;
+  gap: 0.375rem !important;
+  flex: 1 !important;
+  overflow-x: auto !important;
+  scrollbar-width: none !important;
+}
+
+.code-tabs-list::-webkit-scrollbar {
+  display: none !important;
+}
+
+.code-tab {
+  padding: 0.25rem 0.75rem !important;
+  background-color: transparent !important;
+  border: none !important;
+  border-radius: 0.25rem !important;
+  color: #8b949e !important;
+  cursor: pointer !important;
+  font-size: 0.75rem !important;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace !important;
+  font-weight: 500 !important;
+  transition: all 0.15s ease !important;
+  white-space: nowrap !important;
+  line-height: 1.2 !important;
+}
+
+.code-tab:hover {
+  color: #c9d1d9 !important;
+  background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+.code-tab.active {
+  color: #58a6ff !important;
+  background-color: rgba(88, 166, 255, 0.1) !important;
+}
+
+/* Dropdown - compact inline select */
+.code-tabs-dropdown {
+  padding: 0.25rem 0.5rem !important;
+  background-color: transparent !important;
+  border: 1px solid #30363d !important;
+  border-radius: 0.25rem !important;
+  color: #8b949e !important;
+  font-size: 0.75rem !important;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+  outline: none !important;
+  transition: all 0.15s ease !important;
+  line-height: 1.2 !important;
+}
+
+.code-tabs-dropdown:hover {
+  background-color: rgba(255, 255, 255, 0.03) !important;
+  border-color: #484f58 !important;
+  color: #c9d1d9 !important;
+}
+
+.code-tabs-dropdown:focus {
+  border-color: #58a6ff !important;
+  box-shadow: 0 0 0 2px rgba(88, 166, 255, 0.15) !important;
+}
+
+.code-tabs-dropdown option {
+  background-color: #161b22 !important;
+  color: #c9d1d9 !important;
+  padding: 0.5rem !important;
+}
+
+/* Copy button for code tabs - MATCHING CODE-BLOCK STYLE */
+.code-tabs-container {
+  position: relative !important;
+  background-color: #0d1117 !important;
+}
+
+.code-tabs-copy-btn {
+  position: absolute !important;
+  top: 0.75rem !important;
+  right: 0.75rem !important;
+  padding: 0.5rem 0.625rem !important;
+  background-color: #21262d !important;
+  border: 1px solid #30363d !important;
+  border-radius: 0.375rem !important;
+  color: #c9d1d9 !important;
+  cursor: pointer !important;
+  opacity: 0 !important;
+  transition: opacity 0.2s ease, background-color 0.2s ease !important;
+  font-size: 0.8125rem !important;
+  z-index: 10 !important;
+}
+
+.code-tabs-wrapper:hover .code-tabs-copy-btn {
+  opacity: 1 !important;
+}
+
+.code-tabs-copy-btn:hover {
+  background-color: #30363d !important;
+  border-color: #484f58 !important;
+}
+
+.code-tabs-copy-btn i {
+  font-size: 0.875rem !important;
+  display: block !important;
+}
+
+/* Code content for code tabs */
+.code-tabs-content {
+  overflow-x: auto !important;
+  background-color: #0d1117 !important;
+}
+
+.code-tabs-content pre {
+  margin: 0 !important;
+  padding: 1.25rem !important;
+  background-color: #0d1117 !important;
+  font-size: 0.875rem !important;
+  line-height: 1.7 !important;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace !important;
+}
+
+/* Fix for shiki highlighting in code tabs */
+.code-tabs-content pre code {
+  background-color: transparent !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+}
+
+/* Dark theme adjustments for code blocks */
+.dark-theme .code-block-wrapper,
+.dark-theme .code-group,
+.dark-theme .code-tabs-wrapper {
+  border-color: rgba(100, 100, 100, 0.3) !important;
+}
+

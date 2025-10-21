@@ -11,6 +11,8 @@ import { BasicScrollPanel } from '@/components/doc-components/ScrollPanel'
 import { BasicPrimeCard } from '@/components/doc-components/Card'
 import { BasicAccordion, BasicAccordionTab } from '@/components/doc-components/Accordion'
 import { BasicTimeline } from '@/components/doc-components/Timeline'
+import { CodeGroup, File } from '@/components/doc-components/CodeGroup'
+import { CodeTabs, Tab } from '@/components/doc-components/CodeTabs'
 
 // ResizableImage removed - images are now handled by JSX descriptor in editor
 import { Collapse } from '../../components/doc-components/Collapse'
@@ -134,6 +136,14 @@ export const components = {
 
   // --- Timeline ---
   Timeline: BasicTimeline,
+
+  // --- CodeGroup ---
+  CodeGroup: CodeGroup,
+  File: File,
+
+  // --- CodeTabs ---
+  CodeTabs: CodeTabs,
+  Tab: Tab,
 
   // --- Misc / MDX custom blocks ---
   Tip: ({ children }: any) => <AlertBlock type="tip">{children}</AlertBlock>,
