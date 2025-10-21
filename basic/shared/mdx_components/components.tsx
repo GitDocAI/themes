@@ -9,6 +9,7 @@ import { BasicTabView, BasicTabPanel } from '@/components/doc-components/TabView
 import { BasicStepper, BasicStepperPanel } from '@/components/doc-components/Stepper'
 import { BasicScrollPanel } from '@/components/doc-components/ScrollPanel'
 import { BasicPrimeCard } from '@/components/doc-components/Card'
+import { BasicAccordion, BasicAccordionTab } from '@/components/doc-components/Accordion'
 
 // ResizableImage removed - images are now handled by JSX descriptor in editor
 import { Collapse } from '../../components/doc-components/Collapse'
@@ -125,6 +126,10 @@ export const components = {
 
   // --- Card ---
   Card: BasicPrimeCard,
+
+  // --- Accordion ---
+  Accordion: BasicAccordion,
+  AccordionTab: BasicAccordionTab,
 
   // --- Misc / MDX custom blocks ---
   Tip: ({ children }: any) => <AlertBlock type="tip">{children}</AlertBlock>,

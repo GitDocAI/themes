@@ -1266,3 +1266,104 @@ article#mdx-content {
   border-color: rgb(var(--color-primary)) !important;
 }
 
+/* PrimeReact Accordion Custom Styles */
+.p-accordion {
+  background-color: transparent !important;
+}
+
+.p-accordion .p-accordion-tab {
+  margin-bottom: 0.5rem !important;
+}
+
+.p-accordion .p-accordion-header {
+  background-color: transparent !important;
+}
+
+.p-accordion .p-accordion-header-link {
+  background-color: rgb(var(--color-bg)) !important;
+  border: 1px solid rgb(var(--color-primary) / 0.2) !important;
+  border-radius: 0.5rem !important;
+  padding: 1rem 1.25rem !important;
+  color: rgb(var(--color-heading)) !important;
+  font-weight: 600 !important;
+  transition: all 0.2s ease !important;
+}
+
+.p-accordion .p-accordion-header-link:hover {
+  background-color: rgb(var(--color-primary) / 0.05) !important;
+  border-color: rgb(var(--color-primary) / 0.3) !important;
+}
+
+.p-accordion .p-accordion-header-link:focus {
+  outline: none !important;
+  box-shadow: 0 0 0 2px rgb(var(--color-primary) / 0.2) !important;
+}
+
+.p-accordion .p-accordion-header-link .p-accordion-toggle-icon {
+  color: rgb(var(--color-primary)) !important;
+  margin-left: auto !important;
+}
+
+.p-accordion .p-accordion-content {
+  background-color: rgb(var(--color-bg)) !important;
+  border: 1px solid rgb(var(--color-primary) / 0.2) !important;
+  border-top: none !important;
+  border-bottom-left-radius: 0.5rem !important;
+  border-bottom-right-radius: 0.5rem !important;
+  padding: 1.25rem !important;
+  color: rgb(var(--color-content)) !important;
+  margin-top: -0.5rem !important;
+}
+
+.p-accordion .p-accordion-tab-active .p-accordion-header-link {
+  background-color: rgb(var(--color-primary) / 0.08) !important;
+  border-color: rgb(var(--color-primary) / 0.4) !important;
+  border-bottom-left-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+}
+
+/* Accordion tab content styling */
+.accordion-tab-content {
+  color: rgb(var(--color-content)) !important;
+  line-height: 1.6 !important;
+}
+
+.accordion-tab-content h1,
+.accordion-tab-content h2,
+.accordion-tab-content h3,
+.accordion-tab-content h4,
+.accordion-tab-content h5,
+.accordion-tab-content h6 {
+  color: rgb(var(--color-heading)) !important;
+}
+
+.accordion-tab-content p {
+  margin-bottom: 0.75rem !important;
+}
+
+.accordion-tab-content p:last-child {
+  margin-bottom: 0 !important;
+}
+
+/* Dark theme adjustments for Accordion */
+.dark-theme .p-accordion .p-accordion-header-link {
+  background-color: rgb(var(--color-bg)) !important;
+  border: 1px solid rgba(100, 100, 100, 0.3) !important;
+}
+
+.dark-theme .p-accordion .p-accordion-header-link:hover {
+  background-color: rgb(var(--color-primary) / 0.1) !important;
+  border-color: rgba(100, 100, 100, 0.5) !important;
+}
+
+.dark-theme .p-accordion .p-accordion-content {
+  background-color: rgb(var(--color-bg)) !important;
+  border: 1px solid rgba(100, 100, 100, 0.3) !important;
+  border-top: none !important;
+}
+
+.dark-theme .p-accordion .p-accordion-tab-active .p-accordion-header-link {
+  background-color: rgb(var(--color-primary) / 0.12) !important;
+  border-color: rgba(100, 100, 100, 0.5) !important;
+}
+
