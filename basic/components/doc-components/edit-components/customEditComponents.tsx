@@ -1,15 +1,13 @@
 
-import { jsxPlugin, NestedLexicalEditor } from '@mdxeditor/editor'
+import { NestedLexicalEditor } from '@mdxeditor/editor'
 import { components } from '@/shared/mdx_components/components'
 
 export const createDescriptorsFromComponents=() => {
   return Object.entries(components).map(([name, Comp]) => ({
     name,
-    kind: 'flow', // la mayoría de los tuyos son bloques, no inline
+    kind: 'flow',
     hasChildren: true,
-    // Editor es cómo el editor lo renderiza
     Editor: ({ mdastNode }: any) => {
-      // Render estático (no editable) para la mayoría
       return (
         <div contentEditable={false}>
           <Comp {...extractProps(mdastNode)}>
@@ -27,11 +25,17 @@ export const createDescriptorsFromComponents=() => {
   })) as any
 }
 
-// Helper para extraer los atributos del nodo MDX
 function extractProps(mdastNode: any) {
   const props: Record<string, any> = {}
-  for (const attr of mdastNode.attributes || []) {
-    props[attr.name] = attr.value
+  if (mdastNode.attributes && Array.isArray(mdastNode.attributes)) {
+    if (mdastNode.attributes && Array.isArray(mdastNode.attributes)) {
+      for (const attr of mdastNode.attributes) {
+        if(attr.value?.type=="mdxJsxAttributeValueExpression"){
+            console.log(attr.value.value)
+            props[attr.name] = JSON.parse(attr.value?.value)
+            continue
+          }
+          props[attr.name] = attr.value
   }
   return props
 }

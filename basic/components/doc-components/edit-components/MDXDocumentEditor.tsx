@@ -404,7 +404,6 @@ export function MDXDocumentEditor({
           quotePlugin(),
           thematicBreakPlugin(),
           tablePlugin(),
-          customTablePlugin(),
           linkPlugin(),
           linkDialogPlugin(),
           imagePlugin(),

@@ -117,8 +117,7 @@ export const components = {
     return <BasicCustomChart {...props}>{children}</BasicCustomChart>
   },
   //---request--response
-  ResponseExample:({responses}:any)=><ResponseTabs responses={responses} ></ResponseTabs>,
-
+  ResponseExample: ResponseTabs,
   // --- Tabs ---
   TabView: BasicTabView,
   TabPanel: BasicTabPanel,
