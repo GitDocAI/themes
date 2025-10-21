@@ -1032,3 +1032,67 @@ article#mdx-content {
   border-color: rgb(var(--color-primary) / 0.6) !important;
 }
 
+/* PrimeReact ScrollPanel Custom Styles */
+.p-scrollpanel {
+  border-radius: 0.5rem !important;
+  border: 1px solid rgb(var(--color-primary) / 0.2) !important;
+  background-color: transparent !important;
+}
+
+.p-scrollpanel .p-scrollpanel-wrapper {
+  border-radius: 0.5rem !important;
+}
+
+.p-scrollpanel .p-scrollpanel-content {
+  padding: 1rem !important;
+  color: rgb(var(--color-content)) !important;
+}
+
+.p-scrollpanel .p-scrollpanel-bar {
+  background-color: rgb(var(--color-primary) / 0.1) !important;
+  border-radius: 4px !important;
+  opacity: 1 !important;
+}
+
+.p-scrollpanel .p-scrollpanel-bar:hover {
+  background-color: rgb(var(--color-primary) / 0.2) !important;
+}
+
+.p-scrollpanel .p-scrollpanel-bar-y {
+  width: 8px !important;
+  right: 4px !important;
+}
+
+.p-scrollpanel .p-scrollpanel-bar-x {
+  height: 8px !important;
+  bottom: 4px !important;
+}
+
+/* ScrollPanel content styling */
+.scroll-panel-content {
+  color: rgb(var(--color-content)) !important;
+}
+
+.scroll-panel-content h1,
+.scroll-panel-content h2,
+.scroll-panel-content h3,
+.scroll-panel-content h4,
+.scroll-panel-content h5,
+.scroll-panel-content h6 {
+  color: rgb(var(--color-heading)) !important;
+}
+
+/* Dark theme adjustments for ScrollPanel */
+.dark-theme .p-scrollpanel {
+  border: 1px solid rgba(100, 100, 100, 0.3) !important;
+  background-color: transparent !important;
+}
+
+.dark-theme .p-scrollpanel .p-scrollpanel-bar {
+  background-color: rgb(var(--color-primary) / 0.2) !important;
+}
+
+.dark-theme .p-scrollpanel .p-scrollpanel-bar:hover {
+  background-color: rgb(var(--color-primary) / 0.3) !important;
+}
+
