@@ -34,7 +34,7 @@ import '../../../styles/mdx-editor-custom.css'
 import { InsertComponentDropdown, ImageUploadButton } from './CustomToolbarButtons'
 import { AlertBlock } from '../AlertBlock'
 import { Collapse } from '../Collapse'
-import { Card } from '../Card'
+import { BasicPrimeCard } from '../Card'
 import { CardModal } from './CardModal'
 import { ImageEditModal } from './ImageEditModal'
 import { allExtensions } from './customCodeMirrorTheme'
@@ -182,16 +182,16 @@ const EditableCard = ({ mdastNode }: { mdastNode: any }) => {
   const saveToWebhook = context?.saveToWebhook
 
   const titleAttr = (mdastNode.attributes as any[])?.find((attr) => attr.name === 'title')
+  const subtitleAttr = (mdastNode.attributes as any[])?.find((attr) => attr.name === 'subtitle')
   const iconAttr = (mdastNode.attributes as any[])?.find((attr) => attr.name === 'icon')
   const hrefAttr = (mdastNode.attributes as any[])?.find((attr) => attr.name === 'href')
-  const imgAttr = (mdastNode.attributes as any[])?.find((attr) => attr.name === 'img')
-  const textAttr = (mdastNode.attributes as any[])?.find((attr) => attr.name === 'text')
+  const imageAttr = (mdastNode.attributes as any[])?.find((attr) => attr.name === 'image')
 
   const title = titleAttr?.value || 'Card title'
+  const subtitle = subtitleAttr?.value
   const icon = iconAttr?.value
   const href = hrefAttr?.value
-  const img = imgAttr?.value
-  const text = textAttr?.value
+  const image = imageAttr?.value
 
   // Get content from children
   const getContentText = (node: any): string => {
@@ -214,10 +214,10 @@ const EditableCard = ({ mdastNode }: { mdastNode: any }) => {
     // Build the old card markdown to find and replace
     let oldCardMarkdown = '<Card'
     if (title) oldCardMarkdown += ` title="${title}"`
+    if (subtitle) oldCardMarkdown += ` subtitle="${subtitle}"`
     if (icon) oldCardMarkdown += ` icon="${icon}"`
-    if (img) oldCardMarkdown += ` img="${img}"`
+    if (image) oldCardMarkdown += ` image="${image}"`
     if (href) oldCardMarkdown += ` href="${href}"`
-    if (text) oldCardMarkdown += ` text="${text}"`
     oldCardMarkdown += `>\n  ${getContentText(mdastNode)}\n</Card>`
 
     // Replace in markdown
@@ -250,22 +250,22 @@ const EditableCard = ({ mdastNode }: { mdastNode: any }) => {
       >
         Edit
       </button>
-      <Card title={title} icon={icon} href={href} img={img} text={text}>
+      <BasicPrimeCard title={title} subtitle={subtitle} icon={icon} href={href} image={image}>
         <NestedLexicalEditor<MdxJsxTextElement>
           getContent={(node) => node.children}
           getUpdatedMdastNode={(node, children) => ({ ...node, children: children as any })}
         />
-      </Card>
+      </BasicPrimeCard>
       <CardModal
         isOpen={showEditModal}
         onClose={() => setShowEditModal(false)}
         onInsert={handleUpdate}
         initialData={{
           title,
+          subtitle,
           icon,
           href,
-          img,
-          text,
+          image,
           content: getContentText(mdastNode),
         }}
       />

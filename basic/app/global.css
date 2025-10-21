@@ -850,6 +850,20 @@ article#mdx-content {
   background-color: transparent !important;
 }
 
+/* Force all stepper content areas to be transparent */
+.p-stepper [class*="stepper"] {
+  background-color: transparent !important;
+}
+
+/* But keep specific elements with their designed backgrounds */
+.p-stepper .p-stepper-number {
+  background-color: rgb(var(--color-muted) / 0.2) !important;
+}
+
+.p-stepper .p-stepper-header.p-highlight .p-stepper-number {
+  background-color: rgb(var(--color-primary)) !important;
+}
+
 .p-stepper .p-stepper-nav {
   display: flex !important;
   justify-content: space-between !important;
@@ -940,7 +954,15 @@ article#mdx-content {
   background-color: transparent !important;
 }
 
+.p-stepper .p-stepper-panel.p-stepper-panel-active {
+  background-color: transparent !important;
+}
+
 .p-stepper .p-stepper-content {
+  background-color: transparent !important;
+}
+
+.p-stepper .p-stepper-panel .p-stepper-content {
   background-color: transparent !important;
 }
 
@@ -1019,7 +1041,23 @@ article#mdx-content {
   background-color: transparent !important;
 }
 
+.dark-theme .p-stepper .p-stepper-panel {
+  background-color: transparent !important;
+}
+
+.dark-theme .p-stepper .p-stepper-panel.p-stepper-panel-active {
+  background-color: transparent !important;
+}
+
 .dark-theme .p-stepper .p-stepper-content {
+  background-color: transparent !important;
+}
+
+.dark-theme .p-stepper .p-stepper-panel .p-stepper-content {
+  background-color: transparent !important;
+}
+
+.dark-theme .p-stepper .p-stepper-panel-content {
   background-color: transparent !important;
 }
 
@@ -1041,6 +1079,10 @@ article#mdx-content {
 
 .p-scrollpanel .p-scrollpanel-wrapper {
   border-radius: 0.5rem !important;
+}
+
+.p-stepper .p-stepper-panel-content {
+  background-color: transparent !important;
 }
 
 .p-scrollpanel .p-scrollpanel-content {
@@ -1094,5 +1136,133 @@ article#mdx-content {
 
 .dark-theme .p-scrollpanel .p-scrollpanel-bar:hover {
   background-color: rgb(var(--color-primary) / 0.3) !important;
+}
+
+/* PrimeReact Card Custom Styles */
+.p-card {
+  background-color: rgb(var(--color-bg)) !important;
+  border: 1px solid rgb(var(--color-primary) / 0.2) !important;
+  border-radius: 0.5rem !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+}
+
+.p-card .p-card-header {
+  border-top-left-radius: 0.5rem !important;
+  border-top-right-radius: 0.5rem !important;
+  overflow: hidden !important;
+}
+
+.p-card .p-card-header img {
+  width: 100% !important;
+  height: auto !important;
+  max-height: 300px !important;
+  object-fit: cover !important;
+  display: block !important;
+}
+
+.prime-card-icon-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 2rem 1.5rem !important;
+  background: linear-gradient(135deg, rgb(var(--color-primary) / 0.1), rgb(var(--color-primary) / 0.05)) !important;
+}
+
+.prime-card-icon-header i {
+  font-size: 3rem !important;
+  color: rgb(var(--color-primary)) !important;
+}
+
+.dark-theme .prime-card-icon-header {
+  background: linear-gradient(135deg, rgb(var(--color-primary) / 0.15), rgb(var(--color-primary) / 0.08)) !important;
+}
+
+.p-card .p-card-body {
+  padding: 1.5rem !important;
+  color: rgb(var(--color-content)) !important;
+}
+
+.p-card .p-card-title {
+  color: rgb(var(--color-heading)) !important;
+  font-size: 1.25rem !important;
+  font-weight: 600 !important;
+  margin-bottom: 0.5rem !important;
+}
+
+.p-card .p-card-subtitle {
+  color: rgb(var(--color-muted)) !important;
+  font-size: 0.875rem !important;
+  margin-bottom: 1rem !important;
+}
+
+.p-card .p-card-content {
+  color: rgb(var(--color-content)) !important;
+  line-height: 1.6 !important;
+}
+
+.p-card .p-card-footer {
+  padding: 1rem 1.5rem !important;
+  border-top: 1px solid rgb(var(--color-primary) / 0.1) !important;
+  background-color: rgb(var(--color-primary) / 0.02) !important;
+}
+
+/* Card content styling */
+.prime-card-content {
+  color: rgb(var(--color-content)) !important;
+}
+
+.prime-card-content h1,
+.prime-card-content h2,
+.prime-card-content h3,
+.prime-card-content h4,
+.prime-card-content h5,
+.prime-card-content h6 {
+  color: rgb(var(--color-heading)) !important;
+}
+
+.prime-card-content p {
+  margin-bottom: 0.75rem !important;
+}
+
+.prime-card-content p:last-child {
+  margin-bottom: 0 !important;
+}
+
+/* Dark theme adjustments for Card */
+.dark-theme .p-card {
+  background-color: rgb(var(--color-bg)) !important;
+  border: 1px solid rgba(100, 100, 100, 0.3) !important;
+  box-shadow: 0 1px 3px rgba(255, 255, 255, 0.05) !important;
+}
+
+.dark-theme .p-card .p-card-footer {
+  border-top: 1px solid rgba(100, 100, 100, 0.2) !important;
+  background-color: rgb(var(--color-primary) / 0.05) !important;
+}
+
+/* Clickable Card Link Styles */
+.prime-card-link {
+  text-decoration: none !important;
+  color: inherit !important;
+  display: block !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+.prime-card-link:hover {
+  transform: translateY(-4px) !important;
+}
+
+.prime-card-link:hover .p-card {
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15) !important;
+  border-color: rgb(var(--color-primary)) !important;
+}
+
+.prime-card-link:active {
+  transform: translateY(-2px) !important;
+}
+
+.dark-theme .prime-card-link:hover .p-card {
+  box-shadow: 0 8px 16px rgba(255, 255, 255, 0.1) !important;
+  border-color: rgb(var(--color-primary)) !important;
 }
 

@@ -8,10 +8,10 @@ import { BasicCustomChart } from '@/components/doc-components/CustomChart'
 import { BasicTabView, BasicTabPanel } from '@/components/doc-components/TabView'
 import { BasicStepper, BasicStepperPanel } from '@/components/doc-components/Stepper'
 import { BasicScrollPanel } from '@/components/doc-components/ScrollPanel'
+import { BasicPrimeCard } from '@/components/doc-components/Card'
 
 // ResizableImage removed - images are now handled by JSX descriptor in editor
 import { Collapse } from '../../components/doc-components/Collapse'
-import { Card } from '../../components/doc-components/Card'
 import ApiReference from '../../components/doc-components/ApiReference'
 
 export const components = {
@@ -123,6 +123,9 @@ export const components = {
   // --- ScrollPanel ---
   ScrollPanel: BasicScrollPanel,
 
+  // --- Card ---
+  Card: BasicPrimeCard,
+
   // --- Misc / MDX custom blocks ---
   Tip: ({ children }: any) => <AlertBlock type="tip">{children}</AlertBlock>,
   Note: ({ children }: any) => <AlertBlock type="note">{children}</AlertBlock>,
@@ -130,7 +133,6 @@ export const components = {
   Danger: ({ children }: any) => <AlertBlock type="danger">{children}</AlertBlock>,
   Info: ({ children }: any) => <AlertBlock type="info">{children}</AlertBlock>,
   Collapse: ({ children, title, defaultOpen }: any) => <Collapse title={title} defaultOpen={defaultOpen}>{children}</Collapse>,
-  Card: ({ children, title, icon, href, img, text }: any) => <Card title={title} icon={icon} href={href} img={img} text={text}>{children}</Card>,
 
   // --- Special Markdown features ---
   inlineCode: ({ children }: any) => (

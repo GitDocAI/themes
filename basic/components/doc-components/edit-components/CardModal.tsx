@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import { Card } from '../Card'
+import { BasicPrimeCard } from '../Card'
 
 interface CardModalProps {
   isOpen: boolean
@@ -9,26 +9,26 @@ interface CardModalProps {
   onInsert: (cardMarkdown: string) => void
   initialData?: {
     title?: string
+    subtitle?: string
     icon?: string
     href?: string
-    img?: string
-    text?: string
+    image?: string
     content?: string
   }
 }
 
 const COMMON_ICONS = [
-  'info', 'book', 'file', 'folder', 'link', 'star', 'heart', 'bell',
-  'check', 'times', 'cog', 'user', 'envelope', 'calendar', 'clock',
-  'chart-bar', 'database', 'code', 'terminal', 'globe', 'shield'
+  'pi-bolt', 'pi-book', 'pi-file', 'pi-folder', 'pi-link', 'pi-star', 'pi-heart', 'pi-bell',
+  'pi-check', 'pi-times', 'pi-cog', 'pi-user', 'pi-envelope', 'pi-calendar', 'pi-clock',
+  'pi-chart-line', 'pi-database', 'pi-code', 'pi-desktop', 'pi-globe', 'pi-shield'
 ]
 
 export const CardModal: React.FC<CardModalProps> = ({ isOpen, onClose, onInsert, initialData }) => {
   const [title, setTitle] = useState(initialData?.title || 'Card title')
+  const [subtitle, setSubtitle] = useState(initialData?.subtitle || '')
   const [icon, setIcon] = useState(initialData?.icon || '')
   const [href, setHref] = useState(initialData?.href || '')
-  const [img, setImg] = useState(initialData?.img || '')
-  const [text, setText] = useState(initialData?.text || '')
+  const [image, setImage] = useState(initialData?.image || '')
   const [content, setContent] = useState(initialData?.content || 'Card content goes here')
 
   if (!isOpen) return null
@@ -40,10 +40,10 @@ export const CardModal: React.FC<CardModalProps> = ({ isOpen, onClose, onInsert,
     cardMarkdown += ` title="${title}"`
 
     // Add optional props if they have values
+    if (subtitle) cardMarkdown += ` subtitle="${subtitle}"`
     if (icon) cardMarkdown += ` icon="${icon}"`
-    if (img) cardMarkdown += ` img="${img}"`
+    if (image) cardMarkdown += ` image="${image}"`
     if (href) cardMarkdown += ` href="${href}"`
-    if (text) cardMarkdown += ` text="${text}"`
 
     cardMarkdown += `>\n  ${content}\n</Card>`
 
@@ -91,6 +91,20 @@ export const CardModal: React.FC<CardModalProps> = ({ isOpen, onClose, onInsert,
               />
             </div>
 
+            {/* Subtitle */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-1.5 text-gray-700 dark:text-gray-300">
+                Subtitle (optional)
+              </label>
+              <input
+                type="text"
+                value={subtitle}
+                onChange={(e) => setSubtitle(e.target.value)}
+                placeholder="Enter card subtitle"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm outline-none bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
+              />
+            </div>
+
             {/* Content */}
             <div className="mb-4">
               <label className="block text-sm font-medium mb-1.5 text-gray-700 dark:text-gray-300">
@@ -118,18 +132,18 @@ export const CardModal: React.FC<CardModalProps> = ({ isOpen, onClose, onInsert,
                 <option value="">No icon</option>
                 {COMMON_ICONS.map((iconName) => (
                   <option key={iconName} value={iconName}>
-                    pi-{iconName}
+                    {iconName}
                   </option>
                 ))}
               </select>
               <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                Or enter custom: URL, path, or PrimeIcon name
+                Or enter custom PrimeIcon class
               </div>
               <input
                 type="text"
                 value={icon}
                 onChange={(e) => setIcon(e.target.value)}
-                placeholder="e.g., pi-star or /icon.png"
+                placeholder="e.g., pi pi-star"
                 className="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md text-[13px] outline-none mt-1.5 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
               />
             </div>
@@ -141,8 +155,8 @@ export const CardModal: React.FC<CardModalProps> = ({ isOpen, onClose, onInsert,
               </label>
               <input
                 type="text"
-                value={img}
-                onChange={(e) => setImg(e.target.value)}
+                value={image}
+                onChange={(e) => setImage(e.target.value)}
                 placeholder="https://example.com/image.png or /images/card.png"
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm outline-none bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
               />
@@ -160,22 +174,8 @@ export const CardModal: React.FC<CardModalProps> = ({ isOpen, onClose, onInsert,
                 placeholder="/path or https://example.com"
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm outline-none bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
               />
-            </div>
-
-            {/* Button Text (optional) */}
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-1.5 text-gray-700 dark:text-gray-300">
-                Button Text (optional)
-              </label>
-              <input
-                type="text"
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                placeholder="e.g., Learn more, Read docs"
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm outline-none bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
-              />
               <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                If link URL is set but button text is empty, the whole card will be clickeable
+                If link URL is set, the whole card will be clickable
               </div>
             </div>
           </div>
@@ -185,15 +185,15 @@ export const CardModal: React.FC<CardModalProps> = ({ isOpen, onClose, onInsert,
             <div className="text-sm font-medium mb-3 text-gray-700 dark:text-gray-300">
               Preview
             </div>
-            <Card
+            <BasicPrimeCard
               title={title}
+              subtitle={subtitle || undefined}
               icon={icon || undefined}
-              img={img || undefined}
+              image={image || undefined}
               href={href || undefined}
-              text={text || undefined}
             >
               {content}
-            </Card>
+            </BasicPrimeCard>
           </div>
         </div>
 
