@@ -4,6 +4,7 @@ import { BlockQuote } from '../../components/doc-components/BlockQuote'
 import { CodeBlock } from '../../components/doc-components/CodeBlock'
 import { CheckItem, CheckList } from '../../components/doc-components/CheckList'
 import { BasicCustomTable } from '@/components/doc-components/CustomTable'
+import { BasicCustomChart } from '@/components/doc-components/CustomChart'
 
 // ResizableImage removed - images are now handled by JSX descriptor in editor
 import { Collapse } from '../../components/doc-components/Collapse'
@@ -101,6 +102,13 @@ export const components = {
   table:({children}:any)=><BasicCustomTable> {children} </BasicCustomTable>,
 
   DataTable:({children,...props}:any)=><BasicCustomTable {...props}> {children} </BasicCustomTable>,
+
+  // --- Charts ---
+  Chart:({children,...props}:any)=>{
+    // Wrap table children in BasicCustomChart
+    return <BasicCustomChart {...props}>{children}</BasicCustomChart>
+  },
+
   // --- Misc / MDX custom blocks ---
   Tip: ({ children }: any) => <AlertBlock type="tip">{children}</AlertBlock>,
   Note: ({ children }: any) => <AlertBlock type="note">{children}</AlertBlock>,

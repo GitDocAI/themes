@@ -20,6 +20,7 @@
     "@codemirror/lang-yaml": "^6.1.2",
     "@headlessui/react": "^2.2.9",
     "@mdxeditor/editor": "^3.47.0",
+    "chart.js": "^4.4.8",
     "clsx": "^2.1.1",
     "ml-matrix": "^6.12.1",
     "natural": "^8.1.0",

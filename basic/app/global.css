@@ -7,8 +7,7 @@
 :root {
 --color-muted: 55 65 81;
   --logo-light-display:block;
-  --logo-dark-display:none
-
+  --logo-dark-display:none;
 }
 
 .dark-theme {
