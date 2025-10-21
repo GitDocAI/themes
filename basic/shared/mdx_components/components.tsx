@@ -13,6 +13,9 @@ import { BasicAccordion, BasicAccordionTab } from '@/components/doc-components/A
 import { BasicTimeline } from '@/components/doc-components/Timeline'
 import { CodeGroup, File } from '@/components/doc-components/CodeGroup'
 import { CodeTabs, Tab } from '@/components/doc-components/CodeTabs'
+import { Columns } from '@/components/doc-components/Columns'
+import { Frame } from '@/components/doc-components/Frame'
+import { BasicCarousel } from '@/components/doc-components/Carousel'
 
 // ResizableImage removed - images are now handled by JSX descriptor in editor
 import { Collapse } from '../../components/doc-components/Collapse'
@@ -144,6 +147,15 @@ export const components = {
   // --- CodeTabs ---
   CodeTabs: CodeTabs,
   Tab: Tab,
+
+  // --- Columns ---
+  Columns: Columns,
+
+  // --- Frame ---
+  Frame: Frame,
+
+  // --- Carousel ---
+  Carousel: BasicCarousel,
 
   // --- Misc / MDX custom blocks ---
   Tip: ({ children }: any) => <AlertBlock type="tip">{children}</AlertBlock>,

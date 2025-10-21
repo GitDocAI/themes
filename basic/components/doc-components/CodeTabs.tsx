@@ -58,12 +58,10 @@ export const CodeTabs: React.FC<CodeTabsProps> = ({ children }) => {
 
         if (code) {
           parsedTabs.push({ title, filename, code, language })
-          console.log(`✅ Added tab: ${title} (${language})`)
         }
       }
     })
 
-    console.log('🎯 Final parsed tabs:', parsedTabs)
     setTabs(parsedTabs)
   }, [children])
 
