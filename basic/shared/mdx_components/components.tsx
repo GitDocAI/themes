@@ -17,6 +17,7 @@ import { CodeTabs, Tab } from '@/components/doc-components/CodeTabs'
 // ResizableImage removed - images are now handled by JSX descriptor in editor
 import { Collapse } from '../../components/doc-components/Collapse'
 import ApiReference from '../../components/doc-components/ApiReference'
+import { ResponseTabs } from '@/components/doc-components/api-ref-components/ResponseTabs'
 
 export const components = {
   // --- Headings ---
@@ -115,6 +116,8 @@ export const components = {
     // Wrap table children in BasicCustomChart
     return <BasicCustomChart {...props}>{children}</BasicCustomChart>
   },
+  //---request--response
+  ResponseExample:({responses}:any)=><ResponseTabs responses={responses} ></ResponseTabs>,
 
   // --- Tabs ---
   TabView: BasicTabView,
