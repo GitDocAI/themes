@@ -10,6 +10,7 @@ import { BasicStepper, BasicStepperPanel } from '@/components/doc-components/Ste
 import { BasicScrollPanel } from '@/components/doc-components/ScrollPanel'
 import { BasicPrimeCard } from '@/components/doc-components/Card'
 import { BasicAccordion, BasicAccordionTab } from '@/components/doc-components/Accordion'
+import { BasicTimeline } from '@/components/doc-components/Timeline'
 
 // ResizableImage removed - images are now handled by JSX descriptor in editor
 import { Collapse } from '../../components/doc-components/Collapse'
@@ -130,6 +131,9 @@ export const components = {
   // --- Accordion ---
   Accordion: BasicAccordion,
   AccordionTab: BasicAccordionTab,
+
+  // --- Timeline ---
+  Timeline: BasicTimeline,
 
   // --- Misc / MDX custom blocks ---
   Tip: ({ children }: any) => <AlertBlock type="tip">{children}</AlertBlock>,
