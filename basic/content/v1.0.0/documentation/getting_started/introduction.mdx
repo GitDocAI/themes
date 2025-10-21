@@ -67,3 +67,156 @@ Let's move on to the [Installation Guide](/v1.0.0/documentation/getting_started/
 
 > [!NOTE]
 > Acme Platform is designed to work with teams of all sizes, from solo developers to enterprise organizations.
+
+## Quick Start Guide
+
+Follow these steps to get your first app deployed:
+
+<Stepper>
+  <StepperPanel header="Create Account">
+    ### Step 1: Sign Up
+
+    Create your Acme Platform account in seconds:
+
+    1. Go to the signup page
+    2. Enter your email and password
+    3. Verify your email address
+
+    > [!TIP]
+    > Use your work email to get team collaboration features automatically.
+  </StepperPanel>
+
+  <StepperPanel header="Connect Repository">
+    ### Step 2: Link Your Git Repository
+
+    Connect your code repository to Acme Platform:
+
+    ```bash
+    # Install the Acme CLI
+    npm install -g acme-cli
+
+    # Login to your account
+    acme login
+
+    # Link your repository
+    acme init
+    ```
+
+    We support GitHub, GitLab, Bitbucket, and any Git repository.
+  </StepperPanel>
+
+  <StepperPanel header="Deploy">
+    ### Step 3: Deploy Your App
+
+    Deploy with a single command:
+
+    ```bash
+    acme deploy --env production
+    ```
+
+    **Congratulations!** Your app is now live and scaling automatically.
+  </StepperPanel>
+</Stepper>
+
+## Advanced Configuration (Vertical Guide)
+
+For advanced users who need more control:
+
+<Stepper orientation="vertical" linear>
+  <StepperPanel header="Environment Setup">
+    ### Configure Your Environment
+
+    Set up your development environment with all required tools:
+
+    - **Node.js**: Version 18 or higher
+    - **Docker**: For containerization
+    - **Git**: Version control
+    - **Cloud CLI**: AWS, Azure, or GCP CLI tools
+
+    > [!WARNING]
+    > Make sure all tools are properly installed before proceeding to the next step.
+  </StepperPanel>
+
+  <StepperPanel header="Project Configuration">
+    ### Create Configuration File
+
+    Create an `acme.yml` file in your project root:
+
+    ```yaml
+    version: 1.0
+    name: my-awesome-app
+    runtime: node18
+
+    build:
+      command: npm run build
+      output: dist
+
+    env:
+      NODE_ENV: production
+      API_URL: https://api.example.com
+
+    scaling:
+      min: 2
+      max: 10
+      target_cpu: 70
+    ```
+
+    <Tip>
+    Use environment-specific configuration files for different deployment environments.
+    </Tip>
+  </StepperPanel>
+
+  <StepperPanel header="Database Setup">
+    ### Connect Your Database
+
+    Configure your database connection:
+
+    <DataTable>
+    | Database | Support | Auto-scaling |
+    |----------|---------|--------------|
+    | PostgreSQL | Yes   | Yes          |
+    | MySQL    | Yes     | Yes          |
+    | MongoDB  | Yes     | Yes          |
+    | Redis    | Yes     | No           |
+    </DataTable>
+
+    Connection string format:
+    ```
+    postgresql://user:password@host:port/database
+    ```
+  </StepperPanel>
+
+  <StepperPanel header="Deploy & Monitor">
+    ### Final Deployment
+
+    Deploy your fully configured application:
+
+    ```bash
+    # Run pre-deployment checks
+    acme validate
+
+    # Deploy to production
+    acme deploy --env production --region us-east-1
+
+    # Monitor deployment
+    acme logs --follow
+    ```
+
+    <CheckList>
+      <CheckItem variant="do">
+        Monitor the deployment logs for any errors
+      </CheckItem>
+      <CheckItem variant="do">
+        Set up alerts for critical metrics
+      </CheckItem>
+      <CheckItem variant="do">
+        Configure backup schedules
+      </CheckItem>
+      <CheckItem variant="dont">
+        Skip the validation step
+      </CheckItem>
+    </CheckList>
+
+    **Success!** Your application is now running with advanced configuration.
+  </StepperPanel>
+</Stepper>

@@ -843,3 +843,192 @@ article#mdx-content {
   color: rgb(var(--color-heading)) !important;
 }
 
+/* PrimeReact Stepper Custom Styles */
+.p-stepper {
+  border-radius: 0.5rem !important;
+  overflow: hidden !important;
+  background-color: transparent !important;
+}
+
+.p-stepper .p-stepper-nav {
+  display: flex !important;
+  justify-content: space-between !important;
+  padding: 1rem !important;
+  background-color: transparent !important;
+  border-bottom: 2px solid rgb(var(--color-primary) / 0.2) !important;
+}
+
+.p-stepper.p-stepper-vertical .p-stepper-nav {
+  flex-direction: column !important;
+  border-bottom: none !important;
+  border-right: 2px solid rgb(var(--color-primary) / 0.2) !important;
+}
+
+.p-stepper .p-stepper-header {
+  flex: 1 !important;
+  padding: 0.5rem !important;
+}
+
+.p-stepper .p-stepper-header .p-stepper-action {
+  border: none !important;
+  background: transparent !important;
+  padding: 0.75rem !important;
+  transition: all 0.2s ease !important;
+  border-radius: 0.375rem !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.75rem !important;
+}
+
+.p-stepper .p-stepper-header .p-stepper-action:not(.p-disabled):hover {
+  background-color: rgb(var(--color-primary) / 0.05) !important;
+}
+
+.p-stepper .p-stepper-header .p-stepper-number {
+  background-color: rgb(var(--color-muted) / 0.2) !important;
+  color: rgb(var(--color-muted)) !important;
+  border: 2px solid rgb(var(--color-muted) / 0.3) !important;
+  width: 2.5rem !important;
+  height: 2.5rem !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-weight: 600 !important;
+  transition: all 0.2s ease !important;
+}
+
+.p-stepper .p-stepper-header.p-highlight .p-stepper-number {
+  background-color: rgb(var(--color-primary)) !important;
+  color: white !important;
+  border-color: rgb(var(--color-primary)) !important;
+}
+
+.p-stepper .p-stepper-header .p-stepper-title {
+  color: rgb(var(--color-muted)) !important;
+  font-weight: 500 !important;
+  transition: all 0.2s ease !important;
+}
+
+.p-stepper .p-stepper-header.p-highlight .p-stepper-title {
+  color: rgb(var(--color-primary)) !important;
+  font-weight: 600 !important;
+}
+
+.p-stepper .p-stepper-separator {
+  background-color: rgb(var(--color-primary) / 0.2) !important;
+  flex: 1 !important;
+  height: 2px !important;
+  margin: 0 0.5rem !important;
+  transition: all 0.2s ease !important;
+}
+
+.p-stepper.p-stepper-vertical .p-stepper-separator {
+  width: 2px !important;
+  height: auto !important;
+  min-height: 2rem !important;
+  margin: 0.5rem 0 !important;
+  margin-left: 1.25rem !important;
+}
+
+.p-stepper .p-stepper-panels {
+  background-color: transparent !important;
+  padding: 1.5rem !important;
+}
+
+.p-stepper .p-stepper-panel {
+  background-color: transparent !important;
+}
+
+.p-stepper .p-stepper-content {
+  background-color: transparent !important;
+}
+
+/* Stepper navigation buttons */
+.stepper-navigation {
+  display: flex !important;
+  gap: 0.5rem !important;
+}
+
+.stepper-navigation .p-button {
+  border-radius: 0.375rem !important;
+  font-weight: 500 !important;
+  transition: all 0.2s ease !important;
+}
+
+.stepper-navigation .p-button-secondary {
+  background-color: transparent !important;
+  color: rgb(var(--color-muted)) !important;
+  border: 1px solid rgb(var(--color-primary) / 0.3) !important;
+}
+
+.stepper-navigation .p-button-secondary:hover {
+  background-color: rgb(var(--color-primary) / 0.08) !important;
+  color: rgb(var(--color-primary)) !important;
+  border-color: rgb(var(--color-primary) / 0.5) !important;
+}
+
+.stepper-navigation .p-button:not(.p-button-secondary) {
+  background-color: rgb(var(--color-primary)) !important;
+  border: 1px solid rgb(var(--color-primary)) !important;
+  color: white !important;
+}
+
+.stepper-navigation .p-button:not(.p-button-secondary):hover {
+  background-color: rgb(var(--color-primary) / 0.9) !important;
+}
+
+/* Stepper content styling */
+.stepper-panel-content {
+  color: rgb(var(--color-content)) !important;
+  margin-bottom: 1rem !important;
+}
+
+.stepper-panel-content h1,
+.stepper-panel-content h2,
+.stepper-panel-content h3,
+.stepper-panel-content h4,
+.stepper-panel-content h5,
+.stepper-panel-content h6 {
+  color: rgb(var(--color-heading)) !important;
+}
+
+/* Dark theme adjustments for Stepper */
+.dark-theme .p-stepper {
+  background-color: transparent !important;
+}
+
+.dark-theme .p-stepper .p-stepper-nav {
+  background-color: transparent !important;
+  border-bottom: 2px solid rgba(100, 100, 100, 0.3) !important;
+}
+
+.dark-theme .p-stepper.p-stepper-vertical .p-stepper-nav {
+  border-right: 2px solid rgba(100, 100, 100, 0.3) !important;
+}
+
+.dark-theme .p-stepper .p-stepper-header .p-stepper-action:not(.p-disabled):hover {
+  background-color: rgb(var(--color-primary) / 0.1) !important;
+}
+
+.dark-theme .p-stepper .p-stepper-separator {
+  background-color: rgba(100, 100, 100, 0.3) !important;
+}
+
+.dark-theme .p-stepper .p-stepper-panels {
+  background-color: transparent !important;
+}
+
+.dark-theme .p-stepper .p-stepper-content {
+  background-color: transparent !important;
+}
+
+.dark-theme .stepper-navigation .p-button-secondary {
+  border-color: rgba(100, 100, 100, 0.4) !important;
+}
+
+.dark-theme .stepper-navigation .p-button-secondary:hover {
+  background-color: rgb(var(--color-primary) / 0.15) !important;
+  border-color: rgb(var(--color-primary) / 0.6) !important;
+}
+

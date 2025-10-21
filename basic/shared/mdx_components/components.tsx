@@ -6,6 +6,7 @@ import { CheckItem, CheckList } from '../../components/doc-components/CheckList'
 import { BasicCustomTable } from '@/components/doc-components/CustomTable'
 import { BasicCustomChart } from '@/components/doc-components/CustomChart'
 import { BasicTabView, BasicTabPanel } from '@/components/doc-components/TabView'
+import { BasicStepper, BasicStepperPanel } from '@/components/doc-components/Stepper'
 
 // ResizableImage removed - images are now handled by JSX descriptor in editor
 import { Collapse } from '../../components/doc-components/Collapse'
@@ -113,6 +114,10 @@ export const components = {
   // --- Tabs ---
   TabView: BasicTabView,
   TabPanel: BasicTabPanel,
+
+  // --- Stepper ---
+  Stepper: BasicStepper,
+  StepperPanel: BasicStepperPanel,
 
   // --- Misc / MDX custom blocks ---
   Tip: ({ children }: any) => <AlertBlock type="tip">{children}</AlertBlock>,
