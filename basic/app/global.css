@@ -757,3 +757,89 @@ article#mdx-content {
   background-color: rgb(var(--color-primary) / 0.6) !important;
 }
 
+/* PrimeReact TabView Custom Styles */
+.p-tabview {
+  border-radius: 0.5rem !important;
+  overflow: hidden !important;
+}
+
+.p-tabview .p-tabview-nav {
+  background-color: rgb(var(--color-bg)) !important;
+  border-bottom: 2px solid rgb(var(--color-primary) / 0.2) !important;
+  padding: 0 !important;
+  display: flex !important;
+}
+
+.p-tabview .p-tabview-nav li {
+  margin-right: 0.25rem !important;
+}
+
+.p-tabview .p-tabview-nav li .p-tabview-nav-link {
+  background-color: transparent !important;
+  border: none !important;
+  border-bottom: 2px solid transparent !important;
+  color: rgb(var(--color-muted)) !important;
+  padding: 1rem 1.5rem !important;
+  font-weight: 500 !important;
+  transition: all 0.2s ease !important;
+  border-radius: 0 !important;
+}
+
+.p-tabview .p-tabview-nav li .p-tabview-nav-link:not(.p-disabled):focus {
+  box-shadow: none !important;
+}
+
+.p-tabview .p-tabview-nav li:not(.p-highlight):not(.p-disabled):hover .p-tabview-nav-link {
+  background-color: rgb(var(--color-primary) / 0.05) !important;
+  color: rgb(var(--color-primary)) !important;
+  border-bottom-color: rgb(var(--color-primary) / 0.3) !important;
+}
+
+.p-tabview .p-tabview-nav li.p-highlight .p-tabview-nav-link {
+  background-color: transparent !important;
+  color: rgb(var(--color-primary)) !important;
+  border-bottom-color: rgb(var(--color-primary)) !important;
+  font-weight: 600 !important;
+}
+
+.p-tabview .p-tabview-panels {
+  background-color: rgb(var(--color-bg)) !important;
+  padding: 1.5rem !important;
+  border: none !important;
+  color: rgb(var(--color-content)) !important;
+}
+
+.p-tabview .p-tabview-nav li .p-tabview-nav-link .p-tabview-left-icon,
+.p-tabview .p-tabview-nav li .p-tabview-nav-link .p-tabview-right-icon {
+  color: inherit !important;
+}
+
+/* Dark theme adjustments for TabView */
+.dark-theme .p-tabview .p-tabview-nav {
+  background-color: rgb(var(--color-bg)) !important;
+  border-bottom: 2px solid rgba(100, 100, 100, 0.3) !important;
+}
+
+.dark-theme .p-tabview .p-tabview-nav li:not(.p-highlight):not(.p-disabled):hover .p-tabview-nav-link {
+  background-color: rgb(var(--color-primary) / 0.1) !important;
+  border-bottom-color: rgb(var(--color-primary) / 0.4) !important;
+}
+
+.dark-theme .p-tabview .p-tabview-panels {
+  background-color: rgb(var(--color-bg)) !important;
+}
+
+/* Tab content styling */
+.tab-content {
+  color: rgb(var(--color-content)) !important;
+}
+
+.tab-content h1,
+.tab-content h2,
+.tab-content h3,
+.tab-content h4,
+.tab-content h5,
+.tab-content h6 {
+  color: rgb(var(--color-heading)) !important;
+}
+

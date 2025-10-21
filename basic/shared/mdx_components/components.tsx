@@ -5,6 +5,7 @@ import { CodeBlock } from '../../components/doc-components/CodeBlock'
 import { CheckItem, CheckList } from '../../components/doc-components/CheckList'
 import { BasicCustomTable } from '@/components/doc-components/CustomTable'
 import { BasicCustomChart } from '@/components/doc-components/CustomChart'
+import { BasicTabView, BasicTabPanel } from '@/components/doc-components/TabView'
 
 // ResizableImage removed - images are now handled by JSX descriptor in editor
 import { Collapse } from '../../components/doc-components/Collapse'
@@ -108,6 +109,10 @@ export const components = {
     // Wrap table children in BasicCustomChart
     return <BasicCustomChart {...props}>{children}</BasicCustomChart>
   },
+
+  // --- Tabs ---
+  TabView: BasicTabView,
+  TabPanel: BasicTabPanel,
 
   // --- Misc / MDX custom blocks ---
   Tip: ({ children }: any) => <AlertBlock type="tip">{children}</AlertBlock>,
