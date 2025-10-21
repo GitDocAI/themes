@@ -18,6 +18,7 @@ import { CodeTabs, Tab } from '@/components/doc-components/CodeTabs'
 import { Collapse } from '../../components/doc-components/Collapse'
 import ApiReference from '../../components/doc-components/ApiReference'
 import { ResponseTabs } from '@/components/doc-components/api-ref-components/ResponseTabs'
+import Transport from '@/components/doc-components/Transport'
 
 export const components = {
   // --- Headings ---
@@ -146,6 +147,8 @@ export const components = {
   // --- CodeTabs ---
   CodeTabs: CodeTabs,
   Tab: Tab,
+  //-- transport
+  RightPanel:({children}:any)=><Transport>{children}</Transport>,
 
   // --- Misc / MDX custom blocks ---
   Tip: ({ children }: any) => <AlertBlock type="tip">{children}</AlertBlock>,
