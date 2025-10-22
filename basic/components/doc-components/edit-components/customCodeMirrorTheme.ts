@@ -90,7 +90,7 @@ export const customTheme: Extension = [
 ]
 
 // All extensions including language support
-export const allExtensions: Extension = [
+export const allExtensions: Extension[] = [
   ...Object.values(languageSupport),
   customTheme,
 ]

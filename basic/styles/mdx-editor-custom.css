@@ -19,11 +19,14 @@
 }
 
 .mdxeditor-toolbar {
-  background: transparent !important;
+  background: rgb(var(--color-bg, 255 255 255)) !important;
   border: none !important;
   border-bottom: 1px solid rgb(var(--color-muted, 55 65 81) / 0.3) !important;
   padding: 0.75rem 0;
   margin: 0 0 1.5rem 0;
+  position: sticky !important;
+  top: 64px !important;
+  z-index: 100 !important;
 }
 
 /* Dark mode support */
@@ -33,7 +36,7 @@
 }
 
 .dark-theme .mdxeditor-toolbar {
-  background: transparent !important;
+  background: rgb(var(--color-bg, 31 41 55)) !important;
   border-bottom: 1px solid rgb(var(--color-muted, 209 213 219) / 0.3) !important;
 }
 
@@ -720,10 +723,10 @@ form textarea:focus {
 
 .mdx-toolbar-button[data-tooltip]:hover::after {
   content: attr(data-tooltip);
-  position: absolute;
-  bottom: calc(100% + 8px);
-  left: 50%;
-  transform: translateX(-50%);
+  position: absolute !important;
+  bottom: calc(100% + 8px) !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
   padding: 6px 10px;
   background: rgb(17 24 39);
   color: white;
@@ -731,20 +734,20 @@ form textarea:focus {
   white-space: nowrap;
   border-radius: 6px;
   pointer-events: none;
-  z-index: 99999;
+  z-index: 9999999 !important;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
 }
 
 .mdx-toolbar-button[data-tooltip]:hover::before {
   content: '';
-  position: absolute;
-  bottom: calc(100% + 3px);
-  left: 50%;
+  position: absolute !important;
+  bottom: calc(100% + 3px) !important;
+  left: 50% !important;
   transform: translateX(-50%);
   border: 5px solid transparent;
   border-top-color: rgb(17 24 39);
   pointer-events: none;
-  z-index: 99999;
+  z-index: 9999999 !important;
 }
 
 .dark-theme .mdx-toolbar-button {
@@ -758,13 +761,13 @@ form textarea:focus {
 
 /* Component dropdown menu */
 .component-dropdown-menu {
-  position: fixed;
-  background: rgb(var(--color-bg, 255 255 255));
-  border: 1px solid rgb(var(--color-muted, 55 65 81) / 0.3);
-  border-radius: 6px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  z-index: 9999;
-  min-width: 160px;
+  position: fixed !important;
+  background: rgb(var(--color-bg, 255 255 255)) !important;
+  border: 1px solid rgb(var(--color-muted, 55 65 81) / 0.3) !important;
+  border-radius: 6px !important;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2) !important;
+  z-index: 999999 !important;
+  min-width: 160px !important;
 }
 
 .dark-theme .component-dropdown-menu {
@@ -845,30 +848,56 @@ form textarea:focus {
 .mdxeditor div[class*="_codeMirrorWrapper_"],
 .mdxeditor div:has(> .cm-editor) {
   background: rgb(55 65 81 / 0.15) !important; /* Same gray as inline code */
-  border-radius: 0.5rem !important;
+  border-radius: 0 0 0.5rem 0.5rem !important; /* Only bottom corners rounded */
   padding: 0 !important;
   border: none !important; /* Remove border to unify colors */
   position: relative !important;
-  margin: 0 0 1rem 0 !important;
+  margin: 2.5rem 0 1rem 0 !important; /* Space for header */
   overflow: visible !important; /* Allow select to overflow */
 }
 
-/* Toolbar container - position it outside/above the code block */
+/* Create a border frame that includes the header using ::before */
+.mdxeditor div[class*="codeBlockWrapper"]::before,
+.mdxeditor div[class*="codeMirrorWrapper"]::before,
+.mdxeditor div[class*="_codeMirrorWrapper_"]::before,
+.mdxeditor div:has(> .cm-editor)::before {
+  content: '' !important;
+  position: absolute !important;
+  top: -2.5rem !important; /* Start at header */
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  border: 1px solid rgb(var(--color-primary) / 0.3) !important;
+  border-radius: 0.5rem !important;
+  pointer-events: none !important; /* Don't block interactions */
+  z-index: 0 !important;
+}
+
+/* Toolbar container - create header area */
 .mdxeditor div[class*="codeMirrorToolbar"],
 .mdxeditor div[class*="_codeMirrorToolbar_"] {
   position: absolute !important;
-  top: -2rem !important;
+  top: -2.5rem !important;
   left: 0 !important;
   right: 0 !important;
-  background: transparent !important;
+  background: rgb(55 65 81 / 0.08) !important; /* Lighter background for header */
   border: none !important;
-  padding: 0 !important;
+  border-bottom: 1px solid rgb(var(--color-primary) / 0.2) !important; /* Separator line */
+  border-radius: 0.5rem 0.5rem 0 0 !important; /* Top corners rounded */
+  padding: 0.5rem !important;
   margin: 0 !important;
-  z-index: 10 !important;
+  z-index: 1 !important; /* Above ::before border */
   width: 100% !important;
+  height: 2.5rem !important;
+  box-sizing: border-box !important;
   display: flex !important;
   justify-content: space-between !important;
   align-items: center !important;
+}
+
+.dark-theme .mdxeditor div[class*="codeMirrorToolbar"],
+.dark-theme .mdxeditor div[class*="_codeMirrorToolbar_"] {
+  background: rgb(75 85 99 / 0.15) !important; /* Lighter background for header in dark mode */
 }
 
 .dark-theme .mdxeditor div[class*="codeBlockWrapper"],
@@ -1031,10 +1060,10 @@ form textarea:focus {
   color: #f9fafb !important; /* Light text */
 }
 
-/* Hide the delete button in toolbar by default, show on hover */
+/* Delete button in toolbar - always visible */
 .mdxeditor div[class*="codeMirrorToolbar"] button,
 .mdxeditor div[class*="_codeMirrorToolbar_"] button {
-  opacity: 0 !important;
+  opacity: 1 !important; /* Always visible */
   transition: opacity 0.2s ease !important;
   background: transparent !important;
   border: none !important;
@@ -1044,14 +1073,9 @@ form textarea:focus {
   margin-left: auto !important; /* Push to the right */
 }
 
-.mdxeditor div[class*="codeMirrorWrapper"]:hover div[class*="codeMirrorToolbar"] button,
-.mdxeditor div[class*="_codeMirrorWrapper_"]:hover div[class*="_codeMirrorToolbar_"] button {
-  opacity: 0.7 !important;
-}
-
 .mdxeditor div[class*="codeMirrorToolbar"] button:hover,
 .mdxeditor div[class*="_codeMirrorToolbar_"] button:hover {
-  opacity: 1 !important;
+  opacity: 0.8 !important;
   background: rgb(var(--color-primary, 59 130 246) / 0.1) !important;
   border-radius: 0.375rem !important;
 }
@@ -1454,8 +1478,8 @@ form textarea:focus {
 .mdxeditor-toolbar div[class*="diffSourceToggle"] button[aria-pressed="true"],
 .mdxeditor-toolbar div[class*="diffSourceToggle"] [class*="toolbarToggleItem"][data-state="on"],
 .mdxeditor-toolbar div[class*="diffSourceToggle"] [class*="toolbarToggleItem"][aria-pressed="true"] {
-  background: rgb(var(--color-primary, 59 130 246)) !important;
-  color: white !important;
+  background: rgb(var(--color-primary, 59 130 246) / 0.25) !important;
+  color: rgb(var(--color-primary, 59 130 246)) !important;
   font-weight: 600 !important;
 }
 
@@ -1463,8 +1487,8 @@ form textarea:focus {
 .mdxeditor-toolbar div[class*="diffSourceToggle"] button[aria-pressed="true"]:hover,
 .mdxeditor-toolbar div[class*="diffSourceToggle"] [class*="toolbarToggleItem"][data-state="on"]:hover,
 .mdxeditor-toolbar div[class*="diffSourceToggle"] [class*="toolbarToggleItem"][aria-pressed="true"]:hover {
-  background: rgb(var(--color-primary, 59 130 246) / 0.9) !important;
-  color: white !important;
+  background: rgb(var(--color-primary, 59 130 246) / 0.35) !important;
+  color: rgb(var(--color-primary, 59 130 246)) !important;
 }
 
 /* Dark mode for view mode switches */
@@ -1489,14 +1513,14 @@ form textarea:focus {
 .dark-theme .mdxeditor-toolbar div[class*="diffSourceToggle"] button[aria-pressed="true"],
 .dark-theme .mdxeditor-toolbar div[class*="diffSourceToggle"] [class*="toolbarToggleItem"][data-state="on"],
 .dark-theme .mdxeditor-toolbar div[class*="diffSourceToggle"] [class*="toolbarToggleItem"][aria-pressed="true"] {
-  background: rgb(var(--color-primary, 96 165 250)) !important;
-  color: rgb(31 41 55) !important;
+  background: rgb(var(--color-primary, 96 165 250) / 0.25) !important;
+  color: rgb(var(--color-primary, 96 165 250)) !important;
 }
 
 .dark-theme .mdxeditor-toolbar div[class*="diffSourceToggle"] button[data-state="on"]:hover,
 .dark-theme .mdxeditor-toolbar div[class*="diffSourceToggle"] button[aria-pressed="true"]:hover,
 .dark-theme .mdxeditor-toolbar div[class*="diffSourceToggle"] [class*="toolbarToggleItem"][data-state="on"]:hover,
 .dark-theme .mdxeditor-toolbar div[class*="diffSourceToggle"] [class*="toolbarToggleItem"][aria-pressed="true"]:hover {
-  background: rgb(var(--color-primary, 96 165 250) / 0.9) !important;
-  color: rgb(31 41 55) !important;
+  background: rgb(var(--color-primary, 96 165 250) / 0.35) !important;
+  color: rgb(var(--color-primary, 96 165 250)) !important;
 }

@@ -6,8 +6,9 @@ import {
   insertMarkdown$,
 } from '@mdxeditor/editor'
 import { CardModal } from './CardModal'
+import { DataTableModal } from './DataTableModal'
 
-type ComponentType = 'tip' | 'note' | 'warning' | 'danger' | 'info' | 'card' | 'codeblock'
+type ComponentType = 'tip' | 'note' | 'warning' | 'danger' | 'info' | 'card' | 'codeblock' | 'datatable'
 
 interface ComponentOption {
   type: ComponentType
@@ -20,73 +21,56 @@ const componentOptions: ComponentOption[] = [
     type: 'tip',
     label: 'Tip',
     icon: (
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <path d="M9 18h6M10 22h4M15 2a4 4 0 0 1 0 8H9a4 4 0 0 1 0-8h6z"/>
-        <path d="M9 10v6a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2v-6"/>
-      </svg>
+      <i className="pi pi-lightbulb" style={{ fontSize: '1rem' }}></i>
     )
   },
   {
     type: 'note',
     label: 'Note',
     icon: (
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-      </svg>
+      <i className="pi pi-pencil" style={{ fontSize: '1rem' }}></i>
     )
   },
   {
     type: 'warning',
     label: 'Warning',
     icon: (
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-        <line x1="12" y1="9" x2="12" y2="13"/>
-        <line x1="12" y1="17" x2="12.01" y2="17"/>
-      </svg>
+      <i className="pi pi-exclamation-triangle" style={{ fontSize: '1rem' }}></i>
     )
   },
   {
     type: 'danger',
     label: 'Danger',
     icon: (
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <circle cx="12" cy="12" r="10"/>
-        <line x1="15" y1="9" x2="9" y2="15"/>
-        <line x1="9" y1="9" x2="15" y2="15"/>
-      </svg>
+      <i className="pi pi-times-circle" style={{ fontSize: '1rem' }}></i>
     )
   },
   {
     type: 'info',
     label: 'Info',
     icon: (
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <circle cx="12" cy="12" r="10"/>
-        <line x1="12" y1="16" x2="12" y2="12"/>
-        <line x1="12" y1="8" x2="12.01" y2="8"/>
-      </svg>
+      <i className="pi pi-info-circle" style={{ fontSize: '1rem' }}></i>
     )
   },
   {
     type: 'card',
     label: 'Card',
     icon: (
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-        <line x1="3" y1="9" x2="21" y2="9"/>
-      </svg>
+      <i className="pi pi-credit-card" style={{ fontSize: '1rem' }}></i>
     )
   },
   {
     type: 'codeblock',
     label: 'Code Block',
     icon: (
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <polyline points="16 18 22 12 16 6"/>
-        <polyline points="8 6 2 12 8 18"/>
-      </svg>
+      <i className="pi pi-code" style={{ fontSize: '1rem' }}></i>
+    )
+  },
+  {
+    type: 'datatable',
+    label: 'Data Table',
+    icon: (
+      <i className="pi pi-table" style={{ fontSize: '1rem' }}></i>
     )
   },
 ]
@@ -95,6 +79,7 @@ export const InsertComponentDropdown = () => {
   const [isOpen, setIsOpen] = useState(false)
   const [dropdownStyle, setDropdownStyle] = useState<React.CSSProperties>({})
   const [showCardModal, setShowCardModal] = useState(false)
+  const [showDataTableModal, setShowDataTableModal] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const buttonRef = useRef<HTMLButtonElement>(null)
   const insertMarkdown = usePublisher(insertMarkdown$)
@@ -137,6 +122,10 @@ export const InsertComponentDropdown = () => {
       // Show Card modal
       setShowCardModal(true)
       setIsOpen(false)
+    } else if (type === 'datatable') {
+      // Show DataTable modal
+      setShowDataTableModal(true)
+      setIsOpen(false)
     } else {
       // Insert JSX component as markdown (Info, Tip, Warning, Danger, Note)
       const componentName = type.charAt(0).toUpperCase() + type.slice(1)
@@ -150,6 +139,10 @@ export const InsertComponentDropdown = () => {
     insertMarkdown(cardMarkdown + '\n\n')
   }
 
+  const handleDataTableInsert = (tableMarkdown: string) => {
+    insertMarkdown(tableMarkdown + '\n\n')
+  }
+
   return (
     <div ref={dropdownRef} className="relative inline-block">
       <button
@@ -157,14 +150,15 @@ export const InsertComponentDropdown = () => {
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         className="mdx-toolbar-button"
-        data-tooltip="Insert Component"
         aria-label="Insert Component"
+        style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '4px 10px' }}
       >
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ strokeWidth: '2px !important' }}>
-          <path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z"/>
-          <path d="M7 7h.01"/>
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ strokeWidth: '2px !important' }}>
+          <line x1="12" y1="5" x2="12" y2="19"/>
+          <line x1="5" y1="12" x2="19" y2="12"/>
         </svg>
-        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: '2px', strokeWidth: '2px !important' }}>
+        <span style={{ fontSize: '14px', fontWeight: '500' }}>Insert</span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ strokeWidth: '2px !important' }}>
           <path d="m6 9 6 6 6-6"/>
         </svg>
       </button>
@@ -194,6 +188,12 @@ export const InsertComponentDropdown = () => {
         isOpen={showCardModal}
         onClose={() => setShowCardModal(false)}
         onInsert={handleCardInsert}
+      />
+
+      <DataTableModal
+        isOpen={showDataTableModal}
+        onClose={() => setShowDataTableModal(false)}
+        onInsert={handleDataTableInsert}
       />
     </div>
   )
@@ -325,11 +325,7 @@ export const ImageUploadButton: React.FC<ImageUploadButtonProps> = ({ webhookUrl
             <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
           </svg>
         ) : (
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ strokeWidth: '2px !important' }}>
-            <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/>
-            <circle cx="9" cy="9" r="2"/>
-            <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
-          </svg>
+          <i className="pi pi-image" style={{ fontSize: '1.2rem' }}></i>
         )}
       </button>
     </>

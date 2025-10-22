@@ -12,6 +12,9 @@ export const TOC: FC<{ toc: Heading[] }> = ({ toc }) => {
     const el = document.getElementById('aside-root')
     if (!el) return;
 
+    // Check initial state
+    setActiveToc(el.innerHTML === '');
+
     const observer = new MutationObserver(() => {
       if (el.innerHTML !== '') {
         setActiveToc(false);

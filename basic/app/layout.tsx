@@ -198,6 +198,82 @@ const createPrimeReactTheme = () => {
               cell: {
                 className: '!py-3 !px-4 !border-r !border-primary/18 last:!border-r-0'
               }
+      },
+      column: {
+        filterOverlay: {
+          className: '!bg-[rgb(var(--color-bg))] !border !border-secondary/20 !rounded-md !shadow-xl !p-4'
+        },
+        filterInput: {
+          className: '!w-full !px-3 !py-2 !border !border-secondary/20 !rounded-md !bg-[rgb(var(--color-bg))] !text-secondary'
+        },
+        filterMenuButton: {
+          className: '!text-primary hover:!bg-primary/10'
+        },
+        columnFilter: {
+          className: '!bg-[rgb(var(--color-bg))]'
+        },
+        filterOperator: {
+          className: '!bg-[rgb(var(--color-bg))] !mb-3'
+        },
+        filterConstraints: {
+          className: '!space-y-2'
+        },
+        filterConstraint: {
+          className: '!border-b !border-secondary/15 last:!border-b-0 !pb-2 !mb-2'
+        },
+        filterMatchModeDropdown: {
+          root: {
+            className: '!bg-[rgb(var(--color-bg))] !border !border-secondary/20 !text-secondary !rounded-md'
+          }
+        },
+        filterOperatorDropdown: {
+          root: {
+            className: '!bg-[rgb(var(--color-bg))] !border !border-secondary/20 !text-secondary !rounded-md'
+          }
+        },
+        filterAddRule: {
+          className: '!text-primary hover:!bg-primary/10 !mt-2'
+        },
+        filterRemoveButton: {
+          root: {
+            className: '!text-red-600 hover:!bg-red-50 dark:hover:!bg-red-900/20'
+          }
+        },
+        filterButtonbar: {
+          className: '!flex !justify-end !gap-2 !pt-4 !mt-4 !border-t !border-secondary/15'
+        },
+        filterClearButton: {
+          root: {
+            className: '!bg-secondary/10 !text-secondary hover:!bg-secondary/20 !border-none'
+          }
+        },
+        filterApplyButton: {
+          root: {
+            className: '!bg-primary !text-white hover:!bg-primary/90 !border-none'
+          }
+        }
+      },
+      inputtext: {
+        root: {
+          className: '!px-3 !py-2 !border !border-secondary/20 !rounded-md !bg-[rgb(var(--color-bg))] !text-secondary placeholder:!text-secondary/60 focus:!ring-2 focus:!ring-primary focus:!border-transparent'
+        }
+      },
+      dropdown: {
+        root: {
+          className: '!bg-[rgb(var(--color-bg))] !border !border-secondary/20 !text-secondary !rounded-md'
+        },
+        input: {
+          className: '!bg-transparent !text-secondary'
+        },
+        trigger: {
+          className: '!text-secondary/70'
+        },
+        panel: {
+          className: '!bg-[rgb(var(--color-bg))] !border !border-secondary/20 !shadow-lg !rounded-md'
+        },
+        item: {
+          className: '!text-secondary hover:!bg-primary/10 !px-3 !py-2'
+        }
       }
     }
   }

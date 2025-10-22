@@ -2,9 +2,9 @@ import { DecoratorNode } from 'lexical'
 import * as React from 'react'
 import { TableEditorComponent } from './EditableTable'
 
-export class CustomTableNode extends DecoratorNode<JSX.Element> {
+export class CustomTableNode extends DecoratorNode<React.ReactElement> {
   __headers: string[]
-  __rows: string[][]
+  __rows: Array<Record<string, string>>
 
   static getType(): string {
     return 'custom-table'
@@ -13,11 +13,11 @@ export class CustomTableNode extends DecoratorNode<JSX.Element> {
   static clone(node: CustomTableNode) {
     return new CustomTableNode({
       headers: [...node.__headers],
-      rows: node.__rows.map(r => [...r]),
+      rows: node.__rows.map(r => ({ ...r })),
     })
   }
 
-  constructor({ headers, rows }: { headers: string[]; rows: string[][] }) {
+  constructor({ headers, rows }: { headers: string[]; rows: Array<Record<string, string>> }) {
     super()
     this.__headers = headers
     this.__rows = rows
@@ -33,8 +33,15 @@ export class CustomTableNode extends DecoratorNode<JSX.Element> {
     return false
   }
 
-  decorate(): JSX.Element {
-    return <TableEditorComponent headers={this.__headers} rows={this.__rows} />
+  decorate(): React.ReactElement {
+    return (
+      <TableEditorComponent
+        initialData={{ headers: this.__headers, rows: this.__rows }}
+        onChange={() => {
+          // TODO: Handle table changes
+        }}
+      />
+    )
   }
 }
 

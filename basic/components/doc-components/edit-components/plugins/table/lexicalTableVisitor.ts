@@ -23,10 +23,20 @@ export function tableDataToMarkdown({ headers, rows }: { headers: string[]; rows
 
 export const CustomTableExportVisitor = {
   testLexicalNode: (node: any) => $isCustomTableNode(node),
-  visitLexicalNode: (node: any, mdastBuilder: any) => {
-    const data = node.getData()
-    const value = tableDataToMarkdown(data)
-    mdastBuilder.addMarkdown(value)
+  visitLexicalNode: ({ lexicalNode, actions }: any) => {
+    const node = lexicalNode as any
+    const headers = node.__headers
+    const rows = node.__rows
+    const value = tableDataToMarkdown({ headers, rows })
+    actions.addAndStepInto('paragraph')
+    // Add the markdown table as raw text
+    const lines = value.split('\n')
+    lines.forEach((line: string) => {
+      actions.appendToParent({
+        type: 'text',
+        value: line + '\n'
+      })
+    })
   }
 }
 
