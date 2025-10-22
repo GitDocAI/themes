@@ -1,7 +1,8 @@
 # Introduction to Acme Platform
 
 Welcome to Acme Platform, the comprehensive solution that empowers modern teams to build, deploy, and scale applications with ease.
-<DataTable  paginator rows={1}>
+
+
     | Property | Description                           |
     | -------- | ------------------------------------- |
     | Name     | Full name of user                     |
@@ -10,8 +11,11 @@ Welcome to Acme Platform, the comprehensive solution that empowers modern teams 
     | Joined   | Whether the user joined the community |
     | Joined   | Whether the user joined the community |
     | Joined   | Whether the user joined the community |
-</DataTable>
-
+<RightPanel>
+  <ResponseExample
+    responses={{"200":{"description":"Token is valid","content":{"application/json":{"schema":{"type":"object","properties":{"expiresAt":{"type":"string","format":"date-time","description":"Token expiration time"},"scopes":{"type":"array","description":"Token permissions","items":{"type":"string"}},"user":{"type":"object","properties":{"email":{"type":"string","format":"email"},"id":{"type":"string","format":"uuid"},"name":{"type":"string"},"role":{"type":"string","enum":["admin","developer","viewer"]}},"required_fields":["id","name","email","role"]},"valid":{"type":"boolean","description":"Whether the token is valid"}},"required_fields":["valid"]}}}},"400":{"description":"Bad request - invalid input parameters","content":{"application/json":{"schema":{"type":"object","properties":{"code":{"type":"string","description":"Error code"},"details":{"type":"object","description":"Additional error details"},"message":{"type":"string","description":"Error message"},"timestamp":{"type":"string","format":"date-time","description":"Error timestamp"}},"required_fields":["code","message","timestamp"]}}}},"401":{"description":"Unauthorized - authentication required","content":{"application/json":{"schema":{"type":"object","properties":{"code":{"type":"string","description":"Error code"},"details":{"type":"object","description":"Additional error details"},"message":{"type":"string","description":"Error message"},"timestamp":{"type":"string","format":"date-time","description":"Error timestamp"}},"required_fields":["code","message","timestamp"]}}}},"500":{"description":"Internal server error","content":{"application/json":{"schema":{"type":"object","properties":{"code":{"type":"string","description":"Error code"},"details":{"type":"object","description":"Additional error details"},"message":{"type":"string","description":"Error message"},"timestamp":{"type":"string","format":"date-time","description":"Error timestamp"}},"required_fields":["code","message","timestamp"]}}}}}}
+  />
+</RightPanel>
 
 > [!TIP]
 > Acme Platform provides everything you need to go from idea to production in minutes, not days.

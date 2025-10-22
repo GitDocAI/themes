@@ -20,6 +20,8 @@ import { BasicCarousel } from '@/components/doc-components/Carousel'
 // ResizableImage removed - images are now handled by JSX descriptor in editor
 import { Collapse } from '../../components/doc-components/Collapse'
 import ApiReference from '../../components/doc-components/ApiReference'
+import { ResponseTabs } from '@/components/doc-components/api-ref-components/ResponseTabs'
+import Transport from '@/components/doc-components/Transport'
 
 export const components = {
   // --- Headings ---
@@ -118,7 +120,8 @@ export const components = {
     // Wrap table children in BasicCustomChart
     return <BasicCustomChart {...props}>{children}</BasicCustomChart>
   },
-
+  //---request--response
+  ResponseExample: ResponseTabs,
   // --- Tabs ---
   TabView: BasicTabView,
   TabPanel: BasicTabPanel,
@@ -147,6 +150,8 @@ export const components = {
   // --- CodeTabs ---
   CodeTabs: CodeTabs,
   Tab: Tab,
+  //-- transport
+  RightPanel:({children}:any)=><Transport>{children}</Transport>,
 
   // --- Columns ---
   Columns: Columns,

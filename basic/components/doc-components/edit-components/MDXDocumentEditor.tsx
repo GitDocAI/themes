@@ -40,6 +40,8 @@ import { ImageEditModal } from './ImageEditModal'
 import { allExtensions } from './customCodeMirrorTheme'
 import { usePathname } from 'next/navigation'
 import { createDescriptorsFromComponents } from './customEditComponents'
+import { customTablePlugin } from './plugins/table/customTablePlugins'
+
 
 // Context to share editor ref, save function, and webhook info
 interface EditorContextType {
@@ -399,9 +401,9 @@ export function MDXDocumentEditor({
           // Core markdown plugins
           headingsPlugin(),
           listsPlugin(),
-          tablePlugin(),
           quotePlugin(),
           thematicBreakPlugin(),
+          tablePlugin(),
           linkPlugin(),
           linkDialogPlugin(),
           imagePlugin(),

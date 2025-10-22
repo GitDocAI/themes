@@ -50,8 +50,6 @@ const parseHeaderMetadata = (headerText: string): { name: string; props: Record<
 
 export const BasicCustomTable = ({ children,...props }: any):any => {
 
-
-
     const thead = React.Children.toArray(children).find(
       (child: any) => child.type === 'thead'
     )
@@ -61,7 +59,7 @@ export const BasicCustomTable = ({ children,...props }: any):any => {
 
     if (!thead || !tbody) {
        const inner_table = React.Children.map(children,(table)=>table.props?.children)
-       return BasicCustomTable({children:inner_table,...props})
+       return inner_table && inner_table.length>0 && BasicCustomTable({children:inner_table,...props})
   }
 
     // Extract raw header text from table headers

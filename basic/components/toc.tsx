@@ -8,15 +8,26 @@ export const TOC: FC<{ toc: Heading[] }> = ({ toc }) => {
   const activeRef = useRef<HTMLLIElement | null>(null)
   const [activeToc, setActiveToc] = useState<boolean>(false)
 
-
   useEffect(() => {
-    const el = document.getElementById('apiref')
-    if(el){
-       setActiveToc(false)
-    }else{
-       setActiveToc(true)
-    }
-  },[])
+    const el = document.getElementById('aside-root')
+    if (!el) return;
+
+    const observer = new MutationObserver(() => {
+      if (el.innerHTML !== '') {
+        setActiveToc(false);
+      } else {
+        setActiveToc(true);
+      }
+    });
+
+    observer.observe(el, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+    });
+
+    return () => observer.disconnect();
+  }, []);
 
 
   useEffect(() => {
