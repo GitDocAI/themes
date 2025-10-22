@@ -12,12 +12,11 @@ const withNextra = nextra({
 
 export default async function config() {
 
-  let static_data={}
   try {
-   static_data = await init();
+   await init();
 
   } catch (err) {
-    console.warn('Error reading ');
+    console.warn('Error initializing search engine');
   }
 
   let siteConfig = {};
@@ -29,8 +28,6 @@ export default async function config() {
   }
 
   return withNextra({
-     reactDevOverlay: false,
-    devIndicators: false,
     env: {
       SITE_CONFIG: JSON.stringify(siteConfig),
     },

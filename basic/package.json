@@ -3,10 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next --turbopack",
-    "build": "next build",
-    "start": "next start",
-    "preview": "next build && next start",
+    "dev": "node -r ./.suppress.js ./node_modules/next/dist/bin/next dev --turbopack",
+    "build": "node -r ./.suppress.js ./node_modules/next/dist/bin/next build",
+    "start": "node -r ./.suppress.js ./node_modules/next/dist/bin/next start",
+    "preview": "node -r ./.suppress.js ./node_modules/next/dist/bin/next build && node -r ./.suppress.js ./node_modules/next/dist/bin/next start",
     "lint": "next lint"
   },
   "dependencies": {
