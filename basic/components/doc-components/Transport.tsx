@@ -1,16 +1,24 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
+'use client'
+
+import React, { useEffect, useState } from 'react'
+import ReactDOM from 'react-dom'
 
 interface TransportProps {
-  children: React.ReactNode;
+  children: React.ReactNode
 }
 
 const Transport: React.FC<TransportProps> = ({ children }) => {
-  return ReactDOM.createPortal(
-    children,
-    document.getElementById('aside-root') as HTMLElement
-  );
-};
+  const [target, setTarget] = useState<HTMLElement | null>(null)
 
-export default Transport;
+  useEffect(() => {
+    const el = document.getElementById('aside-root')
+    if (el) setTarget(el)
+  }, [])
+
+  if (!target) return null
+
+  return ReactDOM.createPortal(children, target)
+}
+
+export default Transport
 
