@@ -43,7 +43,6 @@ export function ResponseTabs({ responses, className = "" }: ResponseTabsProps) {
 
   if(responseEntries.length===0 || responseEntries.every((e:[string,any])=>!e[1] || e[1].description=="No Content"))return null;
 
-console.log(responseEntries)
 
   const jsonContent = getJsonContent(responseEntries.find(([code])=>code==activeTab)![1]);
 

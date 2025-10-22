@@ -5,8 +5,8 @@ import {
   usePublisher,
   insertMarkdown$,
 } from '@mdxeditor/editor'
-import { CardModal } from './CardModal'
-import { DataTableModal } from './DataTableModal'
+import { CardModal } from './plugins/card/CardModal'
+import { DataTableModal } from './plugins/table/DataTableModal'
 
 type ComponentType = 'tip' | 'note' | 'warning' | 'danger' | 'info' | 'card' | 'codeblock' | 'datatable'
 

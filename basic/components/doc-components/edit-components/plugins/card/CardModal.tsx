@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import { BasicPrimeCard } from '../Card'
+import { BasicPrimeCard } from '../../../Card'
 
 interface CardModalProps {
   isOpen: boolean

@@ -12,7 +12,7 @@ const defaultComponents = getNextraComponents({
           {children}
         </EditableWrapper>
         <TOC toc={toc} />
-        <div id="aside-root" className="[grid-area:toc]" />
+        <div id="aside-root" className="[grid-area:toc] top-20 overflow-x-clip overflow-y-auto min-w-64 sticky max-h-screen " />
       </>
     )
   },

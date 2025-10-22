@@ -1,0 +1,95 @@
+import { unified } from 'unified'
+import remarkParse from 'remark-parse'
+import remarkGfm from 'remark-gfm'
+import remarkMdx from 'remark-mdx'
+import remarkStringify from 'remark-stringify'
+import { visit } from 'unist-util-visit'
+
+function wrapTablesAndAdmonitionsPlugin() {
+  return (tree: any) => {
+    // 1️⃣ Envolver tablas en <DataTable>
+    visit(tree, 'table', (node, index, parent) => {
+      if (!parent || typeof index !== 'number') return
+
+      const prevNode = parent.children[index - 1]
+      if (prevNode?.type === 'mdxJsxFlowElement' || parent.type === 'mdxJsxFlowElement') {
+        return
+      }
+
+      const dataTableNode = {
+        type: 'mdxJsxFlowElement',
+        name: 'DataTable',
+        attributes: [],
+        children: [node],
+      }
+
+      parent.children[index] = dataTableNode
+    })
+
+    // 2️⃣ Detectar admonitions tipo [!TIP], [!NOTE], [!WARNING], [!INFO]
+    visit(tree, 'paragraph', (node, index, parent) => {
+      if (!parent || typeof index !== 'number') return
+      if (!node.children?.length) return
+
+      const firstChild = node.children[0]
+      if (firstChild.type !== 'text') return
+
+      const match = firstChild.value.match(/^\[!(TIP|NOTE|WARNING|INFO)\]/i)
+      if (!match) return
+
+      const level = match[1].toUpperCase()
+      const componentName = level.charAt(0).toUpperCase() + level.slice(1).toLowerCase()
+
+      // 🔹 Extraer el texto dentro del bloque
+      // Todo lo que viene después del párrafo de [!TIP] hasta el siguiente salto doble
+      const followingNodes = []
+      let i = index + 1
+      while (i < parent.children.length) {
+        const next = parent.children[i]
+        if (next.type === 'paragraph' && /^\[!/.test(next.children?.[0]?.value || '')) break
+        followingNodes.push(next)
+        i++
+      }
+
+      // 🔹 Crear el nodo JSX de admonition
+      const admonitionNode = {
+        type: 'mdxJsxFlowElement',
+        name: componentName, // Ej: Tip, Warning, Info, Note
+        attributes: [],
+        children: [
+          // Clon del texto del párrafo original sin el marcador
+          {
+            type: 'paragraph',
+            children: [
+              {
+                type: 'text',
+                value: firstChild.value.replace(/^\[!(TIP|NOTE|WARNING|INFO)\]\s*/i, ''),
+              },
+              ...node.children.slice(1),
+            ],
+          },
+          ...followingNodes,
+        ],
+      }
+
+      // 🔹 Reemplazamos el bloque completo
+      parent.children.splice(index, 1 + followingNodes.length, admonitionNode)
+    })
+  }
+}
+
+export async function wrapCustomElements(markdown: string): Promise<string> {
+  const file = await unified()
+    .use(remarkParse)
+    .use(remarkGfm)
+    .use(remarkMdx)
+    .use(wrapTablesAndAdmonitionsPlugin)
+    .use(remarkStringify, {
+      fences: true,
+      bullet: '-',
+    })
+    .process(markdown)
+
+  return String(file)
+}
+
