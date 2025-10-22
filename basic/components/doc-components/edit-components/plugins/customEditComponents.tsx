@@ -4,10 +4,14 @@ import { TableEditPlugin } from './table/TableEditPlugin'
 import { CardEditPlugin } from './card/CardEditPlugin'
 import { ImageEditPlugin } from './image/ImageEditPlugin'
 import { CollapseEditPlugin } from './collapse/CollapseEditPlugin'
+import { alertBlockDirectives } from './alertblock/AlertBlockPlugin'
+
 
 export const createDescriptorsFromComponents=(EditorContext:React.Context<any>) => {
-  return Object.entries(components).map(([name, Comp]) =>{
+  const directives = Object.entries(components).map(([name, Comp]) =>{
    switch(name){
+      case 'DataTable':
+       return TableEditPlugin(EditorContext)
       case 'DataTable':
        return TableEditPlugin(EditorContext)
       case 'Card':
@@ -40,6 +44,8 @@ export const createDescriptorsFromComponents=(EditorContext:React.Context<any>) 
 
     }
   })
+
+  return [...directives,...alertBlockDirectives]
 }
 
 function extractProps(mdastNode: any) {

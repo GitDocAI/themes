@@ -5,7 +5,7 @@ import {
   directivesPlugin,
   type DirectiveDescriptor,
 } from '@mdxeditor/editor'
-import { AlertBlock, type AlertType } from '../AlertBlock'
+import { AlertBlock, type AlertType } from '../../../AlertBlock'
 
 // Descriptor para cada tipo de AlertBlock
 const createAlertDirective = (type: AlertType): DirectiveDescriptor => ({
