@@ -111,7 +111,7 @@ export const CarouselEditPlugin = (EditorContext: React.Context<any>) => {
     return (
       <div contentEditable={false} style={{ margin: '16px 0', position: 'relative' }}>
         <div style={{ position: 'relative' }}>
-          <BasicCarousel {...props} />
+          <BasicCarousel images={images} numVisible={numVisible} circular={circular} />
           <div style={{
             position: 'absolute',
             top: '20px',

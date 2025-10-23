@@ -61,6 +61,15 @@ const extractChartDataFromTable = (children: any): { labels: string[], datasets:
     return null
   }
 
+  // If children is BasicCustomTable component, we need to render it first
+  // Check if it's a function component
+  if (typeof children.type === 'function') {
+    const renderedTable = children.type(children.props)
+    if (renderedTable && renderedTable.props) {
+      children = renderedTable
+    }
+  }
+
   // Get the inner DataTable component
   const dataTableWrapper = children.props?.children
   if (!dataTableWrapper || typeof dataTableWrapper !== 'object' || !('props' in dataTableWrapper)) {

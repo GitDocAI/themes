@@ -10,8 +10,9 @@ import { DataTableModal } from './plugins/table/DataTableModal'
 import { ImageInsertModal } from './plugins/image/ImageInsertModal'
 import { FrameInsertModal } from './plugins/frame/FrameInsertModal'
 import { CarouselInsertModal } from './plugins/carousel/CarouselInsertModal'
+import { ChartInsertModal } from './plugins/chart/ChartInsertModal'
 
-type ComponentType = 'tip' | 'note' | 'warning' | 'danger' | 'info' | 'card' | 'codeblock' | 'datatable' | 'image' | 'frame' | 'carousel'
+type ComponentType = 'tip' | 'note' | 'warning' | 'danger' | 'info' | 'card' | 'codeblock' | 'datatable' | 'image' | 'frame' | 'carousel' | 'chart'
 
 interface ComponentOption {
   type: ComponentType
@@ -97,6 +98,13 @@ const componentOptions: ComponentOption[] = [
       <i className="pi pi-images" style={{ fontSize: '1rem' }}></i>
     )
   },
+  {
+    type: 'chart',
+    label: 'Chart',
+    icon: (
+      <i className="pi pi-chart-bar" style={{ fontSize: '1rem' }}></i>
+    )
+  },
 ]
 
 interface InsertComponentDropdownProps {
@@ -112,6 +120,7 @@ export const InsertComponentDropdown: React.FC<InsertComponentDropdownProps> = (
   const [showImageModal, setShowImageModal] = useState(false)
   const [showFrameModal, setShowFrameModal] = useState(false)
   const [showCarouselModal, setShowCarouselModal] = useState(false)
+  const [showChartModal, setShowChartModal] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const buttonRef = useRef<HTMLButtonElement>(null)
   const insertMarkdown = usePublisher(insertMarkdown$)
@@ -206,6 +215,10 @@ export const InsertComponentDropdown: React.FC<InsertComponentDropdownProps> = (
       // Show Carousel modal
       setShowCarouselModal(true)
       setIsOpen(false)
+    } else if (type === 'chart') {
+      // Show Chart modal
+      setShowChartModal(true)
+      setIsOpen(false)
     } else {
       // Insert JSX component as markdown (Info, Tip, Warning, Danger, Note)
       const componentName = type.charAt(0).toUpperCase() + type.slice(1)
@@ -260,6 +273,10 @@ export const InsertComponentDropdown: React.FC<InsertComponentDropdownProps> = (
     carouselMarkdown += '/>\n\n'
 
     insertMarkdown(carouselMarkdown)
+  }
+
+  const handleChartInsert = (chartMarkdown: string) => {
+    insertMarkdown(chartMarkdown)
   }
 
   return (
@@ -334,6 +351,12 @@ export const InsertComponentDropdown: React.FC<InsertComponentDropdownProps> = (
         onClose={() => setShowCarouselModal(false)}
         onInsert={handleCarouselInsert}
         onUpload={handleImageUpload}
+      />
+
+      <ChartInsertModal
+        isOpen={showChartModal}
+        onClose={() => setShowChartModal(false)}
+        onInsert={handleChartInsert}
       />
     </div>
   )
