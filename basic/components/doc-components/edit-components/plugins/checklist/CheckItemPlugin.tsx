@@ -51,7 +51,7 @@ export const CheckItemEditPlugin = (EditorContext: React.Context<any>) => {
         return (
           <div
             className={clsx(
-              'flex items-start gap-3 transition-all py-1 rounded',
+              'flex items-start flex-row gap-3 transition-all py-1 rounded',
               variant === 'do' ? 'text-primary' : 'text-secondary'
             )}
             onMouseEnter={() => setIsHovering(true)}
@@ -61,7 +61,7 @@ export const CheckItemEditPlugin = (EditorContext: React.Context<any>) => {
             <button
               onClick={toggleVariant}
               className={clsx(
-                'mt-1 text-lg transition-opacity',
+                ' text-lg transition-opacity',
                 variant === 'do' ? 'text-primary' : 'text-secondary/70',
                 isHovering && 'opacity-80'
               )}
