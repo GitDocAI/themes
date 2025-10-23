@@ -2311,6 +2311,25 @@ article img:not(.frame-image):not(.carousel-image):not(.wrapped-image):hover {
   border-radius: 0.5rem;
 }
 
+/* Hide any text content in indicators - only show the visual buttons */
+.carousel-wrapper .p-carousel-indicator button {
+  text-indent: -9999px;
+  overflow: hidden;
+  font-size: 0 !important;
+  line-height: 0 !important;
+}
+
+/* Ensure carousel doesn't show ellipsis or overflow text */
+.carousel-wrapper .p-carousel-indicator {
+  overflow: visible;
+}
+
+.carousel-wrapper .p-carousel-indicators {
+  overflow: visible;
+  font-size: 0;
+  line-height: 0;
+}
+
 /* Code Tabs Styles - matching code-block visual style */
 .code-tabs-wrapper {
   margin: 1.5rem 0 !important;

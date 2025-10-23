@@ -5,6 +5,7 @@ import { CardEditPlugin } from './card/CardEditPlugin'
 import { ImageEditPlugin } from './image/ImageEditPlugin'
 import { CollapseEditPlugin } from './collapse/CollapseEditPlugin'
 import { FrameEditPlugin } from './frame/FrameEditPlugin'
+import { CarouselEditPlugin } from './carousel/CarouselEditPlugin'
 
 export const createDescriptorsFromComponents=(EditorContext:React.Context<any>) => {
   return Object.entries(components).map(([name, Comp]) =>{
@@ -17,6 +18,8 @@ export const createDescriptorsFromComponents=(EditorContext:React.Context<any>) 
        return ImageEditPlugin(EditorContext)
       case 'Frame':
        return FrameEditPlugin(EditorContext)
+      case 'Carousel':
+       return CarouselEditPlugin(EditorContext)
       case 'Collapse':
        return CollapseEditPlugin()
       default:

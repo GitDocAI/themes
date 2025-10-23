@@ -9,8 +9,9 @@ import { CardModal } from './plugins/card/CardModal'
 import { DataTableModal } from './plugins/table/DataTableModal'
 import { ImageInsertModal } from './plugins/image/ImageInsertModal'
 import { FrameInsertModal } from './plugins/frame/FrameInsertModal'
+import { CarouselInsertModal } from './plugins/carousel/CarouselInsertModal'
 
-type ComponentType = 'tip' | 'note' | 'warning' | 'danger' | 'info' | 'card' | 'codeblock' | 'datatable' | 'image' | 'frame'
+type ComponentType = 'tip' | 'note' | 'warning' | 'danger' | 'info' | 'card' | 'codeblock' | 'datatable' | 'image' | 'frame' | 'carousel'
 
 interface ComponentOption {
   type: ComponentType
@@ -89,6 +90,13 @@ const componentOptions: ComponentOption[] = [
       <i className="pi pi-table" style={{ fontSize: '1rem' }}></i>
     )
   },
+  {
+    type: 'carousel',
+    label: 'Carousel',
+    icon: (
+      <i className="pi pi-images" style={{ fontSize: '1rem' }}></i>
+    )
+  },
 ]
 
 interface InsertComponentDropdownProps {
@@ -103,6 +111,7 @@ export const InsertComponentDropdown: React.FC<InsertComponentDropdownProps> = (
   const [showDataTableModal, setShowDataTableModal] = useState(false)
   const [showImageModal, setShowImageModal] = useState(false)
   const [showFrameModal, setShowFrameModal] = useState(false)
+  const [showCarouselModal, setShowCarouselModal] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const buttonRef = useRef<HTMLButtonElement>(null)
   const insertMarkdown = usePublisher(insertMarkdown$)
@@ -193,6 +202,10 @@ export const InsertComponentDropdown: React.FC<InsertComponentDropdownProps> = (
       // Show DataTable modal
       setShowDataTableModal(true)
       setIsOpen(false)
+    } else if (type === 'carousel') {
+      // Show Carousel modal
+      setShowCarouselModal(true)
+      setIsOpen(false)
     } else {
       // Insert JSX component as markdown (Info, Tip, Warning, Danger, Note)
       const componentName = type.charAt(0).toUpperCase() + type.slice(1)
@@ -223,6 +236,30 @@ export const InsertComponentDropdown: React.FC<InsertComponentDropdownProps> = (
     frameMarkdown += '\n/>\n\n'
     // Insert immediately, modal will close itself after calling this
     insertMarkdown(frameMarkdown)
+  }
+
+  const handleCarouselInsert = (images: any[], numVisible: number, circular: boolean) => {
+    // Build images array as valid JSON for Carousel component
+    const imagesArray = images.map(img => {
+      const imageObj: any = {
+        src: img.src,
+        alt: img.alt
+      }
+      if (img.title) imageObj.title = img.title
+      if (img.href) imageObj.href = img.href
+      return imageObj
+    })
+
+    // Convert to JSON string for the attribute
+    const imagesJson = JSON.stringify(imagesArray)
+
+    let carouselMarkdown = '<Carousel\n'
+    carouselMarkdown += `  images={${imagesJson}}\n`
+    carouselMarkdown += `  numVisible={${numVisible}}\n`
+    carouselMarkdown += `  circular={${circular}}\n`
+    carouselMarkdown += '/>\n\n'
+
+    insertMarkdown(carouselMarkdown)
   }
 
   return (
@@ -289,6 +326,13 @@ export const InsertComponentDropdown: React.FC<InsertComponentDropdownProps> = (
         isOpen={showFrameModal}
         onClose={() => setShowFrameModal(false)}
         onInsert={handleFrameInsert}
+        onUpload={handleImageUpload}
+      />
+
+      <CarouselInsertModal
+        isOpen={showCarouselModal}
+        onClose={() => setShowCarouselModal(false)}
+        onInsert={handleCarouselInsert}
         onUpload={handleImageUpload}
       />
     </div>
