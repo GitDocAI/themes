@@ -12,7 +12,7 @@ import { FrameInsertModal } from './plugins/frame/FrameInsertModal'
 import { CarouselInsertModal } from './plugins/carousel/CarouselInsertModal'
 import { ChartInsertModal } from './plugins/chart/ChartInsertModal'
 
-type ComponentType = 'tip' | 'note' | 'warning' | 'danger' | 'info' | 'card' | 'codeblock' | 'datatable' | 'image' | 'frame' | 'carousel' | 'chart'
+type ComponentType = 'tip' | 'note' | 'warning' | 'danger' | 'info' | 'card' | 'codeblock' | 'datatable' | 'image' | 'frame' | 'carousel' | 'chart' | 'scrollpanel'
 
 interface ComponentOption {
   type: ComponentType
@@ -103,6 +103,13 @@ const componentOptions: ComponentOption[] = [
     label: 'Chart',
     icon: (
       <i className="pi pi-chart-bar" style={{ fontSize: '1rem' }}></i>
+    )
+  },
+  {
+    type: 'scrollpanel',
+    label: 'Scroll Panel',
+    icon: (
+      <i className="pi pi-align-justify" style={{ fontSize: '1rem' }}></i>
     )
   },
 ]
@@ -218,6 +225,11 @@ export const InsertComponentDropdown: React.FC<InsertComponentDropdownProps> = (
     } else if (type === 'chart') {
       // Show Chart modal
       setShowChartModal(true)
+      setIsOpen(false)
+    } else if (type === 'scrollpanel') {
+      // Insert ScrollPanel as markdown
+      const scrollPanelMarkdown = '<ScrollPanel>\n\n</ScrollPanel>\n\n'
+      insertMarkdown(scrollPanelMarkdown)
       setIsOpen(false)
     } else {
       // Insert JSX component as markdown (Info, Tip, Warning, Danger, Note)

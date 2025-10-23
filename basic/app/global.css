@@ -2088,6 +2088,57 @@ article img:not(.frame-image):not(.carousel-image):not(.wrapped-image):hover {
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
 }
 
+/* Inline code styling - Confluence-style gray background */
+/* Target all possible inline code selectors including Nextra CSS modules */
+code:not(pre code),
+article code:not(pre code),
+.nx-prose code:not(pre code),
+p code,
+li code,
+td code,
+th code,
+h1 code,
+h2 code,
+h3 code,
+h4 code,
+h5 code,
+h6 code,
+span[class*="_code_"],
+code[class*="_code_"],
+article span[class*="_code_"],
+.nx-prose span[class*="_code_"] {
+  background: rgb(55 65 81 / 0.15) !important; /* gray-700/15 for light mode */
+  font-size: 0.875rem !important; /* text-sm */
+  padding: 0.125rem 0.375rem !important; /* px-1.5 py-0.5 */
+  border-radius: 0.25rem !important; /* rounded */
+  font-family: 'Courier New', Consolas, Monaco, monospace !important; /* font-mono */
+  color: rgb(59 130 246) !important; /* blue-600 */
+  border: 1px solid rgb(55 65 81 / 0.1) !important;
+  font-weight: 400 !important;
+}
+
+.dark-theme code:not(pre code),
+.dark-theme article code:not(pre code),
+.dark-theme .nx-prose code:not(pre code),
+.dark-theme p code,
+.dark-theme li code,
+.dark-theme td code,
+.dark-theme th code,
+.dark-theme h1 code,
+.dark-theme h2 code,
+.dark-theme h3 code,
+.dark-theme h4 code,
+.dark-theme h5 code,
+.dark-theme h6 code,
+.dark-theme span[class*="_code_"],
+.dark-theme code[class*="_code_"],
+.dark-theme article span[class*="_code_"],
+.dark-theme .nx-prose span[class*="_code_"] {
+  background: rgb(75 85 99 / 0.3) !important; /* gray-600/30 for dark mode */
+  color: rgb(96 165 250) !important; /* blue-400 */
+  border: 1px solid rgb(75 85 99 / 0.2) !important;
+}
+
 /* Dark theme styles for auto-wrapper and images */
 .dark-theme .auto-frame-wrapper {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);

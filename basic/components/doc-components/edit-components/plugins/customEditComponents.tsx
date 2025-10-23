@@ -7,6 +7,7 @@ import { CollapseEditPlugin } from './collapse/CollapseEditPlugin'
 import { FrameEditPlugin } from './frame/FrameEditPlugin'
 import { CarouselEditPlugin } from './carousel/CarouselEditPlugin'
 import { ChartEditPlugin } from './chart/ChartEditPlugin'
+import { ScrollPanelEditPlugin } from './scrollpanel/ScrollPanelEditPlugin'
 
 export const createDescriptorsFromComponents=(EditorContext:React.Context<any>) => {
   return Object.entries(components).map(([name, Comp]) =>{
@@ -23,6 +24,8 @@ export const createDescriptorsFromComponents=(EditorContext:React.Context<any>) 
        return CarouselEditPlugin(EditorContext)
       case 'Chart':
        return ChartEditPlugin(EditorContext)
+      case 'ScrollPanel':
+       return ScrollPanelEditPlugin(EditorContext)
       case 'Collapse':
        return CollapseEditPlugin()
       default:
