@@ -53,7 +53,7 @@ export const CardModal: React.FC<CardModalProps> = ({ isOpen, onClose, onInsert,
 
   return (
     <div
-      className="fixed inset-0 backdrop-blur-sm bg-black/10 dark:bg-black/30 flex items-center justify-center z-[10000]"
+      className="sidebar fixed inset-0 backdrop-blur-sm bg-black/10 dark:bg-black/30 flex items-center justify-center z-[10000]"
       onClick={onClose}
     >
       <div

@@ -12,7 +12,7 @@ import { FrameInsertModal } from './plugins/frame/FrameInsertModal'
 import { CarouselInsertModal } from './plugins/carousel/CarouselInsertModal'
 import { ChartInsertModal } from './plugins/chart/ChartInsertModal'
 
-type ComponentType = 'tip' | 'note' | 'warning' | 'danger' | 'info' | 'card' | 'codeblock' | 'datatable' | 'image' | 'frame' | 'carousel' | 'chart' | 'scrollpanel'
+type ComponentType = 'tip' | 'note' | 'warning' | 'danger' | 'info' | 'card' | 'codeblock' | 'datatable' | 'image' | 'frame' | 'carousel' | 'chart' | 'timeline' |'checklist' | 'scrollpanel'
 
 interface ComponentOption {
   type: ComponentType
@@ -112,6 +112,21 @@ const componentOptions: ComponentOption[] = [
       <i className="pi pi-align-justify" style={{ fontSize: '1rem' }}></i>
     )
   },
+    {
+      type: 'timeline',
+      label: 'Timeline',
+      icon: (
+        <i className="pi pi-clock" style={{ fontSize: '1rem' }}></i>
+      )
+    },
+    {
+      type: 'checklist',
+      label: 'Check List',
+      icon: (
+        <i className="pi pi-bullet" style={{ fontSize: '1rem' }}></i>
+      )
+    }
+,
 ]
 
 interface InsertComponentDropdownProps {
@@ -231,7 +246,25 @@ export const InsertComponentDropdown: React.FC<InsertComponentDropdownProps> = (
       const scrollPanelMarkdown = '<ScrollPanel>\n\n</ScrollPanel>\n\n'
       insertMarkdown(scrollPanelMarkdown)
       setIsOpen(false)
-    } else {
+    }
+     else if (type === 'timeline') {
+      // Insert Timeline component as markdown
+      const timelineMarkdown = `<Timeline\n  events={[\n    {\n      title: \'Event 1\',
+      date: \'2023-01-01\',
+      content: \'Description of event 1'\n    },\n    {\n      title: \'Event 2\',
+      date: \'2023-01-02\',
+      content: \'Description of event 2'\n    }\n  ]}\n/>\n\n`;
+      insertMarkdown(timelineMarkdown)
+      setIsOpen(false)
+    }else if (type === 'checklist') {
+      const timelineMarkdown = `<CheckList>
+                <CheckItem variant='on'> New Element </CheckItem>
+             </CheckList>`;
+      insertMarkdown(timelineMarkdown)
+      setIsOpen(false)
+    }
+
+    else {
       // Insert JSX component as markdown (Info, Tip, Warning, Danger, Note)
       const componentName = type.charAt(0).toUpperCase() + type.slice(1)
       const jsxMarkdown = '<' + componentName + '>\n\n</' + componentName + '>\n\n'
