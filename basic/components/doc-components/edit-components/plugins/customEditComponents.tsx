@@ -6,7 +6,7 @@ import { ImageEditPlugin } from './image/ImageEditPlugin'
 import { CollapseEditPlugin } from './collapse/CollapseEditPlugin'
 import { FrameEditPlugin } from './frame/FrameEditPlugin'
 import { CarouselEditPlugin } from './carousel/CarouselEditPlugin'
-import { ChartEditPlugin } from './chart/ChartEditPlugin'
+import { TimelineEditPlugin } from './timeline/TimelineEditPlugin'
 
 export const createDescriptorsFromComponents=(EditorContext:React.Context<any>) => {
   const directives = Object.entries(components).map(([name, Comp]) =>{
@@ -17,6 +17,8 @@ export const createDescriptorsFromComponents=(EditorContext:React.Context<any>) 
        return TableEditPlugin(EditorContext)
       case 'Card':
        return CardEditPlugin(EditorContext)
+      case 'Timeline':
+       return TimelineEditPlugin(EditorContext)
       case 'img':
        return ImageEditPlugin(EditorContext)
       case 'Frame':
