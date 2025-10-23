@@ -78,14 +78,18 @@ export const TimelineEditPlugin = (EditorContext: React.Context<any>) => {
             const before = currentMarkdown.slice(0, start.offset)
             const after = currentMarkdown.slice(end.offset)
 
-            const propsString = Object.entries(localProps)
+            const propsString = Object.entries(localProps.layout??{})
               .map(([k, v]) => ` ${k}={${JSON.stringify(v)}}`)
               .join('')
             const eventsString = JSON.stringify(localEvents, null, 2)
             const newComponentMarkdown = deleting
               ? ''
               : `<Timeline ${propsString} events={${eventsString}} />`
+
+
             const updated = [...before, newComponentMarkdown, ...after].join('')
+
+
             setLastSavedChange(updated)
             editorRef.current.setMarkdown(updated)
             if (saveToWebhook) await saveToWebhook(updated)

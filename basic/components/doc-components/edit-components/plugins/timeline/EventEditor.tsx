@@ -1,7 +1,8 @@
 
 import React from 'react'
 import type { TimelineEvent } from '@/components/doc-components/Timeline'
-import { Dropdown } from 'primereact/dropdown';
+import { Listbox, Transition } from '@headlessui/react'
+import { Fragment } from 'react'
 
 
 interface EventEditorProps {
@@ -39,7 +40,7 @@ export const EventEditor: React.FC<EventEditorProps> = ({ events, onChange }) =>
   return (
     <div className="space-y-4">
       {events.map((ev, idx) => (
-        <div key={idx} className="p-2 border rounded-lg background">
+        <div key={idx} className="p-2 border border-secondary rounded-lg bg-background">
           <div className="flex justify-between items-center mb-2">
             <span className="font-semibold">Event {idx + 1}</span>
             <button
@@ -53,7 +54,7 @@ export const EventEditor: React.FC<EventEditorProps> = ({ events, onChange }) =>
             <label className="flex flex-col">
               Title
               <input
-                className="border p-1 rounded"
+                className="border border-secondary p-1 rounded"
                 type="text"
                 value={ev.title || ''}
                 onChange={(e) => updateEvent(idx, 'title', e.target.value)}
@@ -62,30 +63,56 @@ export const EventEditor: React.FC<EventEditorProps> = ({ events, onChange }) =>
             <label className="flex flex-col">
               Date
               <input
-                className="border p-1 rounded"
+                className="border border-secondary p-1 rounded"
                 type="text"
                 value={ev.date || ''}
                 onChange={(e) => updateEvent(idx, 'date', e.target.value)}
               />
             </label>
-            <label className="flex flex-col">
-              Icon
-              <Dropdown
-                value={ev.icon || ''}
-                onChange={(e) => updateEvent(idx, 'icon', e)}
+             <label className="flex flex-col gap-1">
+                  <span>Icon</span>
 
-                valueTemplate={(opt)=>(<i className={`pi ${opt}`}></i>)}
-                itemTemplate={(opt)=>(<i className={`pi ${opt}`}></i>)}
-                              className="w-full md:w-14rem"
-                options={primeIcons}
-              />
+                  <Listbox value={ev.icon || ''} onChange={(icon) => updateEvent(idx, 'icon', icon)}>
+                    <div className="relative">
+                      {/* Botón principal */}
+                      <Listbox.Button className="relative border  w-full cursor-pointer rounded-md  bg-background py-0.5 pl-3 pr-10 text-left shadow-sm focus:outline-none">
+                        {ev.icon ? (
+                          <i className={`${ev.icon} text-sm`}></i>
+                        ) : (
+                          <span className="text-gray-400">Selecciona un ícono</span>
+                        )}
+                      </Listbox.Button>
 
-
-            </label>
-            <label className="flex flex-col">
+                      {/* Opciones del dropdown */}
+                      <Transition
+                        as={Fragment}
+                        leave="transition ease-in duration-100"
+                        leaveFrom="opacity-100"
+                        leaveTo="opacity-0"
+                      >
+                        <Listbox.Options className="absolute sidebar z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-background py-2 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none grid grid-cols-5 gap-2 p-2">
+                          {primeIcons.map((icon, i) => (
+                            <Listbox.Option
+                              key={i}
+                              value={icon}
+                              className={({ active, selected }) =>
+                                `flex justify-center items-center p-2 rounded-md cursor-pointer transition-all
+                                 ${active ? 'bg-secondary' : ''}
+                                 ${selected ? 'bg-primary' : ''}`
+                              }
+                            >
+                              <i className={`${icon} text-lg `}></i>
+                            </Listbox.Option>
+                          ))}
+                        </Listbox.Options>
+                      </Transition>
+                    </div>
+                  </Listbox>
+                </label>
+          <label className="flex flex-col">
               Color
               <input
-                className="border p-1 rounded"
+                className="border-1 border-secondary p-1 py-auto h-full rounded"
                 type="color"
                 value={ev.color || '#000000'}
                 onChange={(e) => updateEvent(idx, 'color', e.target.value)}
@@ -95,7 +122,7 @@ export const EventEditor: React.FC<EventEditorProps> = ({ events, onChange }) =>
           <label className="flex flex-col mt-2">
             Content
             <textarea
-              className="border p-1 rounded w-full"
+              className="border border-secondary p-1 rounded w-full"
               rows={2}
               value={ev.content as string}
               onChange={(e) => updateEvent(idx, 'content', e.target.value)}
