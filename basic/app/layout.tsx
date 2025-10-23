@@ -63,7 +63,7 @@ export default RootLayout
 
 const getPageRecords = (site: ThemeInfo) => {
   const colorRecord: StyleRecord = {
-    key: 'primary',
+    key: 'main',
     light: site.colors?.light ?? '#000000',
     dark: site.colors?.dark ?? '#ffffff',
     type: 'color'

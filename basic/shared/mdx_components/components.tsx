@@ -10,7 +10,7 @@ import { BasicStepper, BasicStepperPanel } from '@/components/doc-components/Ste
 import { BasicScrollPanel } from '@/components/doc-components/ScrollPanel'
 import { BasicPrimeCard } from '@/components/doc-components/Card'
 import { BasicAccordion, BasicAccordionTab } from '@/components/doc-components/Accordion'
-import { BasicTimeline } from '@/components/doc-components/Timeline'
+import { BasicTimeline, TimelineItem } from '@/components/doc-components/Timeline'
 import { CodeGroup, File } from '@/components/doc-components/CodeGroup'
 import { CodeTabs, Tab } from '@/components/doc-components/CodeTabs'
 import { Columns } from '@/components/doc-components/Columns'
@@ -134,6 +134,7 @@ export const components = {
 
   // --- Timeline ---
   Timeline: BasicTimeline,
+  TimelineItem,
 
   // --- CodeGroup ---
   CodeGroup: CodeGroup,

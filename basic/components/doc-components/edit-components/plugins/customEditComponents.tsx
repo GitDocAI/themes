@@ -8,6 +8,7 @@ import { FrameEditPlugin } from './frame/FrameEditPlugin'
 import { CarouselEditPlugin } from './carousel/CarouselEditPlugin'
 import { TimelineEditPlugin } from './timeline/TimelineEditPlugin'
 import { AccordionEditPlugin } from './accordion/AccordionEditPlugin'
+import { ChartEditPlugin } from './chart/ChartEditPlugin'
 
 export const createDescriptorsFromComponents=(EditorContext:React.Context<any>) => {
   const directives = Object.entries(components).map(([name, Comp]) =>{
@@ -55,7 +56,7 @@ export const createDescriptorsFromComponents=(EditorContext:React.Context<any>) 
     }
   })
 
-  return [...directives,...alertBlockDirectives]
+  return [...directives]
 }
 
 function extractProps(mdastNode: any) {

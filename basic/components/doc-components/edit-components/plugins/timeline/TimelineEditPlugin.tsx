@@ -1,5 +1,10 @@
-import React, { useContext, useState } from "react"
-import { components } from "@/shared/mdx_components/components"
+'use client'
+
+import React, { useContext, useState, Fragment } from 'react'
+import { Dialog, Transition } from '@headlessui/react'
+import { components } from '@/shared/mdx_components/components'
+import type { TimelineEvent, TimelineProps } from '@/components/doc-components/Timeline'
+import { EventEditor } from './EventEditor'
 
 export const TimelineEditPlugin = (EditorContext: React.Context<any>) => {
   return {
@@ -8,20 +13,20 @@ export const TimelineEditPlugin = (EditorContext: React.Context<any>) => {
     props: [
       { name: 'layout', type: 'string' },
       { name: 'align', type: 'string' },
-      { name: 'opposite', type: 'string' },
+      { name: 'opposite', type: 'boolean' },
+      { name: 'events', type: 'expression' },
     ],
-    hasChildren: true,
+    hasChildren: false,
     Editor: ({ mdastNode }: any) => {
-      // Extract props from mdastNode attributes
-      const extractProps = (node: any) => {
+      const extractProps = (node: any): Partial<TimelineProps> => {
         const props: Record<string, any> = {}
         if (node.attributes && Array.isArray(node.attributes)) {
           for (const attr of node.attributes) {
-            if (attr.value?.type === "mdxJsxAttributeValueExpression") {
+            if (attr.value?.type === 'mdxJsxAttributeValueExpression') {
               try {
-                props[attr.name] = JSON.parse(attr.value?.value)
+                props[attr.name] = JSON.parse(attr.value.value)
               } catch {
-                props[attr.name] = attr.value?.value
+                props[attr.name] = attr.value.value
               }
             } else {
               props[attr.name] = attr.value === null ? true : attr.value
@@ -31,141 +36,57 @@ export const TimelineEditPlugin = (EditorContext: React.Context<any>) => {
         return props
       }
 
-      // Extract timeline events from children
-      const extractEvents = (node: any) => {
-        const events: any[] = []
-
-        if (!node.children) return events
-
-        node.children.forEach((child: any) => {
-          if (child.type === 'mdxJsxFlowElement' && child.name === 'TimelineItem') {
-            const event: any = {}
-
-            if (child.attributes && Array.isArray(child.attributes)) {
-              for (const attr of child.attributes) {
-                if (attr.value?.type === "mdxJsxAttributeValueExpression") {
-                  try {
-                    event[attr.name] = JSON.parse(attr.value?.value)
-                  } catch {
-                    event[attr.name] = attr.value?.value
-                  }
-                } else {
-                  event[attr.name] = attr.value
-                }
-              }
-            }
-
-            const content = extractContent(child)
-            event.content = content
-
-            events.push(event)
-          }
-        })
-
-        return events
-      }
-
-      const extractContent = (itemNode: any): string => {
-        if (!itemNode.children) return ''
-
-        const textParts: string[] = []
-
-        const traverse = (node: any) => {
-          if (node.type === 'text') {
-            textParts.push(node.value)
-          } else if (node.type === 'paragraph' && node.children) {
-            node.children.forEach((child: any) => traverse(child))
-          } else if (node.children) {
-            node.children.forEach((child: any) => traverse(child))
+      const extractEvents = (node: any): TimelineEvent[] => {
+        const attr = node.attributes?.find((a: any) => a.name === 'events')
+        if (!attr) return []
+        if (attr.value?.type === 'mdxJsxAttributeValueExpression') {
+          try {
+            return JSON.parse(attr.value.value)
+          } catch {
+            return []
           }
         }
-
-        itemNode.children.forEach((child: any) => traverse(child))
-        return textParts.join(' ').trim()
+        return []
       }
 
-      const TimelineWrapper = () => {
-        const [isEditing, setIsEditing] = useState(false)
-        const [isHovering, setIsHovering] = useState(false)
-        const [editData, setEditData] = useState({
-          layout: extractProps(mdastNode).layout || 'vertical',
-          align: extractProps(mdastNode).align || 'left',
-          opposite: extractProps(mdastNode).opposite || false,
-          events: extractEvents(mdastNode)
-        })
+      const Wrapper = () => {
+        const initialProps = extractProps(mdastNode)
+        const initialEvents = extractEvents(mdastNode)
 
         const context = useContext(EditorContext)
         const editorRef = context?.editorRef
+        const saveToWebhook = context?.saveToWebhook
+
+        const [localProps, setLocalProps] = useState<Partial<TimelineProps>>(initialProps)
+        const [localEvents, setLocalEvents] = useState<TimelineEvent[]>(initialEvents)
+        const [editMode, setEditMode] = useState<boolean>(false)
+        const [isHovering, setIsHovering] = useState<boolean>(false)
+        const [lastsavedCHange, setLastSavedChange] = useState<string>('')
 
         const handleDelete = () => {
-          if (!editorRef?.current) return
-          const currentMarkdown = editorRef.current.getMarkdown()
-
-          const lines = currentMarkdown.split('\n')
-          let inTimeline = false
-          let filteredLines: string[] = []
-
-          for (let i = 0; i < lines.length; i++) {
-            if (lines[i].trim().startsWith('<BasicTimeline')) {
-              inTimeline = true
-              continue
-            }
-            if (inTimeline && lines[i].trim() === '</BasicTimeline>') {
-              inTimeline = false
-              continue
-            }
-            if (!inTimeline) {
-              filteredLines.push(lines[i])
-            }
-          }
-
-          editorRef.current.setMarkdown(filteredLines.join('\n'))
+          updateMarkdown(true)
         }
 
-        const handleSave = () => {
+        const updateMarkdown = async (deleting: boolean = false) => {
           if (!editorRef?.current) return
           const currentMarkdown = editorRef.current.getMarkdown()
 
-          // Generate new markdown
-          const props: string[] = []
-          if (editData.layout !== 'vertical') props.push(`layout="${editData.layout}"`)
-          if (editData.align !== 'left') props.push(`align="${editData.align}"`)
-          if (editData.opposite) props.push('opposite')
-
-          const propsStr = props.length > 0 ? ' ' + props.join(' ') : ''
-
-          const items = editData.events.map((event: any) => {
-            const itemProps: string[] = []
-
-            if (event.icon) itemProps.push(`icon="${event.icon}"`)
-            if (event.color) itemProps.push(`color="${event.color}"`)
-            if (event.date) itemProps.push(`date="${event.date}"`)
-            if (event.title) itemProps.push(`title="${event.title}"`)
-            if (event.image) itemProps.push(`image="${event.image}"`)
-
-            const itemPropsStr = itemProps.length > 0 ? ' ' + itemProps.join(' ') : ''
-
-            return `  <TimelineItem${itemPropsStr}>
-    ${event.content || ''}
-  </TimelineItem>`
-          }).join('\n')
-
-          const newMarkdown = `<BasicTimeline${propsStr}>
-${items}
-</BasicTimeline>`
-
-          // Replace old with new
+          if (currentMarkdown == lastsavedCHange) return
           const lines = currentMarkdown.split('\n')
           let inTimeline = false
           let startIndex = -1
           let endIndex = -1
 
           for (let i = 0; i < lines.length; i++) {
-            if (lines[i].trim().startsWith('<BasicTimeline')) {
+            if (lines[i].trim().startsWith('<Timeline')) {
               inTimeline = true
               startIndex = i
             }
-            if (inTimeline && lines[i].trim() === '</BasicTimeline>') {
+            if (inTimeline && lines[i].trim().endsWith('/>')) {
+              endIndex = i
+              break
+            }
+            if (inTimeline && lines[i].trim() === '</Timeline>') {
               endIndex = i
               break
             }
@@ -174,287 +95,39 @@ ${items}
           if (startIndex !== -1 && endIndex !== -1) {
             const before = lines.slice(0, startIndex)
             const after = lines.slice(endIndex + 1)
-            const updated = [...before, newMarkdown, ...after].join('\n')
-            editorRef.current.setMarkdown(updated)
-          }
+            const propsString = Object.entries(localProps)
+              .map(([k, v]) => ` ${k}={${JSON.stringify(v)}}`)
+              .join('')
+            const eventsString = JSON.stringify(localEvents, null, 2)
+            const newComponentMarkdown = deleting
+              ? ''
+              : `<Timeline${propsString} events={${eventsString}} />`
 
-          setIsEditing(false)
+            const updated = [...before, newComponentMarkdown, ...after].join('\n')
+            setLastSavedChange(updated)
+            editorRef.current.setMarkdown(updated)
+            if (saveToWebhook) await saveToWebhook(updated)
+          }
+        }
+
+        const handleSave = () => {
+          updateMarkdown()
+          setEditMode(false)
         }
 
         const handleCancel = () => {
-          setEditData({
-            layout: extractProps(mdastNode).layout || 'vertical',
-            align: extractProps(mdastNode).align || 'left',
-            opposite: extractProps(mdastNode).opposite || false,
-            events: extractEvents(mdastNode)
-          })
-          setIsEditing(false)
+          setLocalProps(initialProps)
+          setLocalEvents(initialEvents)
+          setEditMode(false)
         }
-
-        const addEvent = () => {
-          setEditData({
-            ...editData,
-            events: [...editData.events, { content: '', title: '', date: '', icon: '', color: '', image: '' }]
-          })
-        }
-
-        const removeEvent = (index: number) => {
-          if (editData.events.length > 1) {
-            setEditData({
-              ...editData,
-              events: editData.events.filter((_: any, i: number) => i !== index)
-            })
-          }
-        }
-
-        const updateEvent = (index: number, field: string, value: string) => {
-          const newEvents = [...editData.events]
-          newEvents[index] = { ...newEvents[index], [field]: value }
-          setEditData({ ...editData, events: newEvents })
-        }
-
-        if (isEditing) {
-          return (
-            <div
-              contentEditable={false}
-              suppressContentEditableWarning={true}
-              style={{
-                margin: '16px 0',
-                userSelect: 'none',
-                border: '2px solid rgb(var(--color-primary))',
-                borderRadius: '8px',
-                padding: '16px',
-                backgroundColor: '#f8f9fa'
-              }}
-            >
-              {/* Edit Mode Header */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 600 }}>Editing Timeline</h4>
-                <div style={{ display: 'flex', gap: '8px' }}>
-                  <button
-                    onClick={handleCancel}
-                    style={{
-                      backgroundColor: '#6c757d',
-                      color: '#ffffff',
-                      padding: '6px 12px',
-                      borderRadius: '4px',
-                      fontSize: '0.875rem',
-                      border: 'none',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleSave}
-                    style={{
-                      backgroundColor: 'rgb(var(--color-primary))',
-                      color: '#ffffff',
-                      padding: '6px 12px',
-                      borderRadius: '4px',
-                      fontSize: '0.875rem',
-                      border: 'none',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    Save
-                  </button>
-                </div>
-              </div>
-
-              {/* Timeline Settings */}
-              <div style={{ marginBottom: '16px', padding: '12px', backgroundColor: 'white', borderRadius: '4px' }}>
-                <h5 style={{ margin: '0 0 12px 0', fontSize: '0.875rem' }}>Settings</h5>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
-                  <div>
-                    <label style={{ display: 'block', fontSize: '0.75rem', marginBottom: '4px', fontWeight: 500 }}>Layout</label>
-                    <select
-                      value={editData.layout}
-                      onChange={(e) => setEditData({ ...editData, layout: e.target.value })}
-                      style={{ width: '100%', padding: '6px', borderRadius: '4px', border: '1px solid #ced4da' }}
-                    >
-                      <option value="vertical">Vertical</option>
-                      <option value="horizontal">Horizontal</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label style={{ display: 'block', fontSize: '0.75rem', marginBottom: '4px', fontWeight: 500 }}>Align</label>
-                    <select
-                      value={editData.align}
-                      onChange={(e) => setEditData({ ...editData, align: e.target.value })}
-                      style={{ width: '100%', padding: '6px', borderRadius: '4px', border: '1px solid #ced4da' }}
-                    >
-                      <option value="left">Left</option>
-                      <option value="right">Right</option>
-                      <option value="alternate">Alternate</option>
-                      <option value="top">Top</option>
-                      <option value="bottom">Bottom</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label style={{ display: 'block', fontSize: '0.75rem', marginBottom: '4px', fontWeight: 500 }}>Show Opposite</label>
-                    <div style={{ display: 'flex', alignItems: 'center', height: '34px' }}>
-                      <input
-                        type="checkbox"
-                        checked={editData.opposite}
-                        onChange={(e) => setEditData({ ...editData, opposite: e.target.checked })}
-                        style={{ marginRight: '8px' }}
-                      />
-                      <span style={{ fontSize: '0.875rem' }}>Enable</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Events */}
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                  <h5 style={{ margin: 0, fontSize: '0.875rem' }}>Events</h5>
-                  <button
-                    onClick={addEvent}
-                    style={{
-                      backgroundColor: 'rgb(var(--color-primary))',
-                      color: '#ffffff',
-                      padding: '4px 8px',
-                      borderRadius: '4px',
-                      fontSize: '0.75rem',
-                      border: 'none',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '4px'
-                    }}
-                  >
-                    <i className="pi pi-plus" style={{ fontSize: '0.75rem' }}></i>
-                    Add Event
-                  </button>
-                </div>
-
-                {editData.events.map((event: any, index: number) => (
-                  <div
-                    key={index}
-                    style={{
-                      marginBottom: '12px',
-                      padding: '12px',
-                      backgroundColor: 'white',
-                      borderRadius: '4px',
-                      border: '1px solid #dee2e6'
-                    }}
-                  >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                      <strong style={{ fontSize: '0.875rem' }}>Event {index + 1}</strong>
-                      {editData.events.length > 1 && (
-                        <button
-                          onClick={() => removeEvent(index)}
-                          style={{
-                            backgroundColor: 'transparent',
-                            color: '#dc3545',
-                            padding: '4px 8px',
-                            borderRadius: '4px',
-                            fontSize: '0.75rem',
-                            border: 'none',
-                            cursor: 'pointer'
-                          }}
-                        >
-                          <i className="pi pi-trash"></i>
-                        </button>
-                      )}
-                    </div>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '8px' }}>
-                      <div>
-                        <label style={{ display: 'block', fontSize: '0.75rem', marginBottom: '4px' }}>Title</label>
-                        <input
-                          type="text"
-                          value={event.title || ''}
-                          onChange={(e) => updateEvent(index, 'title', e.target.value)}
-                          placeholder="Event title"
-                          style={{ width: '100%', padding: '6px', borderRadius: '4px', border: '1px solid #ced4da', fontSize: '0.875rem' }}
-                        />
-                      </div>
-                      <div>
-                        <label style={{ display: 'block', fontSize: '0.75rem', marginBottom: '4px' }}>Date</label>
-                        <input
-                          type="text"
-                          value={event.date || ''}
-                          onChange={(e) => updateEvent(index, 'date', e.target.value)}
-                          placeholder="Event date"
-                          style={{ width: '100%', padding: '6px', borderRadius: '4px', border: '1px solid #ced4da', fontSize: '0.875rem' }}
-                        />
-                      </div>
-                    </div>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', marginBottom: '8px' }}>
-                      <div>
-                        <label style={{ display: 'block', fontSize: '0.75rem', marginBottom: '4px' }}>Icon</label>
-                        <input
-                          type="text"
-                          value={event.icon || ''}
-                          onChange={(e) => updateEvent(index, 'icon', e.target.value)}
-                          placeholder="pi pi-check"
-                          style={{ width: '100%', padding: '6px', borderRadius: '4px', border: '1px solid #ced4da', fontSize: '0.875rem' }}
-                        />
-                      </div>
-                      <div>
-                        <label style={{ display: 'block', fontSize: '0.75rem', marginBottom: '4px' }}>Color</label>
-                        <input
-                          type="text"
-                          value={event.color || ''}
-                          onChange={(e) => updateEvent(index, 'color', e.target.value)}
-                          placeholder="#6366f1"
-                          style={{ width: '100%', padding: '6px', borderRadius: '4px', border: '1px solid #ced4da', fontSize: '0.875rem' }}
-                        />
-                      </div>
-                      <div>
-                        <label style={{ display: 'block', fontSize: '0.75rem', marginBottom: '4px' }}>Image URL</label>
-                        <input
-                          type="text"
-                          value={event.image || ''}
-                          onChange={(e) => updateEvent(index, 'image', e.target.value)}
-                          placeholder="https://..."
-                          style={{ width: '100%', padding: '6px', borderRadius: '4px', border: '1px solid #ced4da', fontSize: '0.875rem' }}
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <label style={{ display: 'block', fontSize: '0.75rem', marginBottom: '4px' }}>Content *</label>
-                      <textarea
-                        value={event.content || ''}
-                        onChange={(e) => updateEvent(index, 'content', e.target.value)}
-                        placeholder="Event content"
-                        rows={3}
-                        style={{
-                          width: '100%',
-                          padding: '6px',
-                          borderRadius: '4px',
-                          border: '1px solid #ced4da',
-                          fontSize: '0.875rem',
-                          fontFamily: 'inherit',
-                          resize: 'vertical'
-                        }}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )
-        }
-
-        // View mode
-        const events = extractEvents(mdastNode)
-        const timelineProps = extractProps(mdastNode)
 
         return (
           <div
-            contentEditable={false}
-            suppressContentEditableWarning={true}
-            style={{ margin: '16px 0', userSelect: 'none', position: 'relative' }}
+            className="mt-6 relative"
             onMouseEnter={() => setIsHovering(true)}
             onMouseLeave={() => setIsHovering(false)}
           >
-            {/* Action buttons */}
+            {/* Hover Buttons */}
             <div
               style={{
                 position: 'absolute',
@@ -465,61 +138,145 @@ ${items}
                 gap: '8px',
                 opacity: isHovering ? 1 : 0,
                 pointerEvents: isHovering ? 'auto' : 'none',
-                transition: 'opacity 0.2s'
+                transition: 'opacity 0.2s',
               }}
             >
               <button
-                onClick={() => setIsEditing(true)}
-                style={{
-                  backgroundColor: 'rgb(var(--color-primary))',
-                  color: '#ffffff',
-                  padding: '6px 12px',
-                  borderRadius: '4px',
-                  fontSize: '0.875rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  border: 'none',
-                  cursor: 'pointer',
-                  transition: 'opacity 0.2s'
-                }}
-                onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.85')}
-                onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
+                onClick={() => setEditMode(true)}
+                className="bg-primary text-background px-3 py-1 rounded text-sm flex items-center gap-1 hover:opacity-90 transition-opacity"
                 title="Edit Timeline"
               >
-                <i className="pi pi-pencil" style={{ fontSize: '0.875rem' }}></i>
+                <i className="pi pi-pencil" />
                 Edit
               </button>
               <button
                 onClick={handleDelete}
-                style={{
-                  backgroundColor: 'rgb(220, 38, 38)',
-                  color: '#ffffff',
-                  padding: '6px 12px',
-                  borderRadius: '4px',
-                  fontSize: '0.875rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  border: 'none',
-                  cursor: 'pointer',
-                  transition: 'opacity 0.2s'
-                }}
-                onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.85')}
-                onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
-                title="Delete Timeline"
+                className="bg-red-600 text-background px-3 py-1 rounded text-sm flex items-center gap-1 hover:opacity-90 transition-opacity"
+                title="Remove Timeline"
               >
-                <i className="pi pi-trash" style={{ fontSize: '0.875rem' }}></i>
-                Delete
+                <i className="pi pi-trash" />
+                Remove
               </button>
             </div>
 
-            <components.Timeline events={events} {...timelineProps} />
+            {/* Rendered Timeline */}
+            <components.Timeline {...localProps} events={localEvents} />
+
+            {/* Modal for Editing */}
+            <Transition appear show={editMode} as={Fragment}>
+              <Dialog as="div" className="relative z-50" onClose={handleCancel}>
+                <Transition.Child
+                  as={Fragment}
+                  enter="ease-out duration-300"
+                  enterFrom="opacity-0"
+                  enterTo="opacity-100"
+                  leave="ease-in duration-200"
+                  leaveFrom="opacity-100"
+                  leaveTo="opacity-0"
+                >
+                  <div className="fixed inset-0 bg-black/40" />
+                </Transition.Child>
+
+                <div className="fixed inset-0 overflow-y-auto">
+                  <div className="flex min-h-full items-center justify-center p-4 text-center">
+                    <Transition.Child
+                      as={Fragment}
+                      enter="ease-out duration-300"
+                      enterFrom="opacity-0 scale-95"
+                      enterTo="opacity-100 scale-100"
+                      leave="ease-in duration-200"
+                      leaveFrom="opacity-100 scale-100"
+                      leaveTo="opacity-0 scale-95"
+                    >
+                      <Dialog.Panel className="w-full max-w-3xl transform overflow-hidden rounded-2xl bg-background border border-primary/20 p-6 text-left align-middle shadow-xl transition-all">
+                        <Dialog.Title
+                          as="h3"
+                          className="text-lg font-medium text-primary mb-4"
+                        >
+                          Editar Timeline
+                        </Dialog.Title>
+
+                        {/* Editable Form */}
+                        <div className="space-y-6 text-secondary">
+                          <div>
+                            <h4 className="font-semibold mb-2 text-primary">Timeline Props</h4>
+                            <div className="grid grid-cols-2 gap-4">
+                              <label className="flex flex-col">
+                                Layout
+                                <select
+                                  className="border border-primary/40 p-1 rounded bg-background text-secondary"
+                                  value={(localProps.layout as string) || 'vertical'}
+                                  onChange={(e) =>
+                                    setLocalProps({ ...localProps, layout: e.target.value as any })
+                                  }
+                                >
+                                  <option value="vertical">vertical</option>
+                                  <option value="horizontal">horizontal</option>
+                                </select>
+                              </label>
+                              <label className="flex flex-col">
+                                Align
+                                <select
+                                  className="border border-primary/40 p-1 rounded bg-background text-secondary"
+                                  value={(localProps.align as string) || 'left'}
+                                  onChange={(e) =>
+                                    setLocalProps({ ...localProps, align: e.target.value as any })
+                                  }
+                                >
+                                  <option value="left">left</option>
+                                  <option value="right">right</option>
+                                  <option value="alternate">alternate</option>
+                                  <option value="top">top</option>
+                                  <option value="bottom">bottom</option>
+                                </select>
+                              </label>
+                              <label className="flex flex-col col-span-2">
+                                Opposite
+                                <input
+                                  type="checkbox"
+                                  checked={!!localProps.opposite}
+                                  onChange={(e) =>
+                                    setLocalProps({ ...localProps, opposite: e.target.checked })
+                                  }
+                                  className="mt-1 accent-primary"
+                                />
+                              </label>
+                            </div>
+                          </div>
+
+                          <div>
+                            <h4 className="font-semibold mb-2 text-primary">Eventos</h4>
+                            <EventEditor events={localEvents} onChange={setLocalEvents} />
+                          </div>
+                        </div>
+
+                        {/* Footer Buttons */}
+                        <div className="mt-6 flex justify-end gap-3">
+                          <button
+                            onClick={handleCancel}
+                            className="px-4 py-2 text-sm font-medium text-secondary border border-primary/30 rounded hover:bg-primary/10 transition-colors"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            onClick={handleSave}
+                            className="px-4 py-2 text-sm font-medium text-background bg-primary rounded hover:opacity-90 transition-opacity"
+                          >
+                            Save
+                          </button>
+                        </div>
+                      </Dialog.Panel>
+                    </Transition.Child>
+                  </div>
+                </div>
+              </Dialog>
+            </Transition>
           </div>
         )
       }
 
-      return <TimelineWrapper />
+      return <Wrapper />
     },
   }
 }
+
