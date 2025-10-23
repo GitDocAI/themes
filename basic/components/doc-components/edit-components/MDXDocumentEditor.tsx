@@ -11,13 +11,11 @@ import {
   markdownShortcutPlugin,
   toolbarPlugin,
   BoldItalicUnderlineToggles,
-  CodeToggle,
   ListsToggle,
   BlockTypeSelect,
   InsertThematicBreak,
   Separator,
   linkPlugin,
-  imagePlugin,
   linkDialogPlugin,
   CreateLink,
   jsxPlugin,
@@ -116,6 +114,66 @@ export function MDXDocumentEditor({
     }
   }
 
+  // Add aria-label to InsertThematicBreak button for tooltip
+  useEffect(() => {
+    const addAriaLabelToSeparator = () => {
+      const buttons = document.querySelectorAll('.mdxeditor-toolbar button')
+      buttons.forEach((button) => {
+        const ariaLabel = button.getAttribute('aria-label')
+
+        // InsertThematicBreak button contains a horizontal line path in SVG
+        const hasHorizontalLinePath = button.querySelector('svg path[d*="M4.5 12.75V11.25H19.5"]')
+        if (hasHorizontalLinePath && !ariaLabel) {
+          button.setAttribute('aria-label', 'Insert separator')
+        }
+      })
+    }
+
+    setTimeout(addAriaLabelToSeparator, 1000)
+    const observer = new MutationObserver(addAriaLabelToSeparator)
+    const toolbar = document.querySelector('.mdxeditor-toolbar')
+    if (toolbar) {
+      observer.observe(toolbar, { childList: true, subtree: true })
+    }
+
+    return () => observer.disconnect()
+  }, [])
+
+  // Wrap regular images in frame-like containers
+  useEffect(() => {
+    const wrapImages = () => {
+      const images = document.querySelectorAll('.mdxeditor img:not(.frame-image):not(.carousel-image):not(.wrapped-image)')
+
+      images.forEach((img) => {
+        // Skip if already wrapped
+        if (img.parentElement?.classList.contains('auto-frame-wrapper')) return
+
+        // Skip if it's inside an editable plugin container (has edit/delete buttons)
+        if (img.closest('[contenteditable="false"]')) return
+
+        // Mark as wrapped
+        img.classList.add('wrapped-image')
+
+        // Create wrapper
+        const wrapper = document.createElement('div')
+        wrapper.className = 'auto-frame-wrapper'
+
+        // Insert wrapper before image and move image inside
+        img.parentNode?.insertBefore(wrapper, img)
+        wrapper.appendChild(img)
+      })
+    }
+
+    const observer = new MutationObserver(wrapImages)
+    const editorContent = document.querySelector('.mdxeditor')
+    if (editorContent) {
+      wrapImages()
+      observer.observe(editorContent, { childList: true, subtree: true })
+    }
+
+    return () => observer.disconnect()
+  }, [])
+
   // Add copy buttons to code blocks
   useEffect(() => {
     const addCopyButtons = () => {
@@ -164,7 +222,9 @@ export function MDXDocumentEditor({
     if (!editorRef?.current || !saveToWebhook) return
     const currentMarkdown = editorRef.current.getMarkdown()
     wrapCustomElements(currentMarkdown).then(mdx=>{
-        editorRef!.current!.setMarkdown( mdx )
+        if (editorRef?.current) {
+          editorRef.current.setMarkdown( mdx )
+        }
     })
     return ()=>{
     }
@@ -189,7 +249,6 @@ export function MDXDocumentEditor({
           linkPlugin(),
           tablePlugin(),
           linkDialogPlugin(),
-          imagePlugin(),
           // imagePlugin disabled - images are handled as JSX components to preserve HTML format
           directivesPlugin(),
           codeBlockPlugin({
@@ -236,7 +295,6 @@ export function MDXDocumentEditor({
               <>
                 <DiffSourceToggleWrapper options={['rich-text', 'source']}>
                   <BoldItalicUnderlineToggles />
-                  <CodeToggle />
                   <Separator />
                   <BlockTypeSelect />
                   <Separator />
@@ -246,7 +304,7 @@ export function MDXDocumentEditor({
                   <Separator />
                   <InsertThematicBreak />
                   <Separator />
-                  <InsertComponentDropdown />
+                  <InsertComponentDropdown webhookUrl={webhookUrl} authentication={authentication} />
                 </DiffSourceToggleWrapper>
               </>
             ),

@@ -1927,6 +1927,7 @@ article#mdx-content {
   background-color: rgb(var(--color-bg));
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   transition: all 0.3s ease;
+  padding: 0.75rem;
 }
 
 .frame-container:hover {
@@ -1938,6 +1939,7 @@ article#mdx-content {
   position: relative;
   overflow: hidden;
   background-color: rgb(var(--color-bg));
+  border-radius: 0.5rem;
 }
 
 .frame-image {
@@ -1945,10 +1947,67 @@ article#mdx-content {
   width: 100%;
   height: auto;
   transition: transform 0.3s ease;
+  border-radius: 0.5rem;
 }
 
 .frame-image-wrapper:hover .frame-image {
   transform: scale(1.02);
+}
+
+/* Auto-wrapper for images to achieve Frame-like style */
+.auto-frame-wrapper {
+  margin: 2rem 0;
+  border-radius: 1.5rem;
+  overflow: hidden;
+  border: 1px solid rgb(var(--color-primary) / 0.15);
+  background-color: rgb(var(--color-bg));
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  padding: 0.75rem;
+  display: block;
+}
+
+.auto-frame-wrapper:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  border-color: rgb(var(--color-primary));
+}
+
+.auto-frame-wrapper img {
+  display: block !important;
+  width: 100% !important;
+  height: auto !important;
+  border-radius: 1rem !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  transition: transform 0.3s ease !important;
+}
+
+.auto-frame-wrapper:hover img {
+  transform: scale(1.02) !important;
+}
+
+/* Fallback for images without wrapper */
+.nx-prose img:not(.frame-image):not(.carousel-image):not(.wrapped-image),
+article img:not(.frame-image):not(.carousel-image):not(.wrapped-image) {
+  display: block !important;
+  width: 100% !important;
+  height: auto !important;
+  margin: 2rem 0 !important;
+  border-radius: 1.5rem !important;
+  border: 1px solid rgb(var(--color-primary) / 0.15) !important;
+  background-color: rgb(var(--color-bg)) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+  transition: all 0.3s ease !important;
+  padding: 0.75rem !important;
+  box-sizing: border-box !important;
+}
+
+.nx-prose img:not(.frame-image):not(.carousel-image):not(.wrapped-image):hover,
+article img:not(.frame-image):not(.carousel-image):not(.wrapped-image):hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12) !important;
+  border-color: rgb(var(--color-primary)) !important;
+  transform: scale(1.02) !important;
 }
 
 .frame-zoom-button {
@@ -2026,6 +2085,25 @@ article#mdx-content {
 }
 
 .dark-theme .frame-container:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+}
+
+/* Dark theme styles for auto-wrapper and images */
+.dark-theme .auto-frame-wrapper {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.dark-theme .auto-frame-wrapper:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+}
+
+.dark-theme .nx-prose img:not(.frame-image):not(.carousel-image):not(.wrapped-image),
+.dark-theme article img:not(.frame-image):not(.carousel-image):not(.wrapped-image) {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.dark-theme .nx-prose img:not(.frame-image):not(.carousel-image):not(.wrapped-image):hover,
+.dark-theme article img:not(.frame-image):not(.carousel-image):not(.wrapped-image):hover {
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
 }
 
@@ -2231,6 +2309,25 @@ article#mdx-content {
   background-color: rgb(var(--color-primary));
   width: 2rem;
   border-radius: 0.5rem;
+}
+
+/* Hide any text content in indicators - only show the visual buttons */
+.carousel-wrapper .p-carousel-indicator button {
+  text-indent: -9999px;
+  overflow: hidden;
+  font-size: 0 !important;
+  line-height: 0 !important;
+}
+
+/* Ensure carousel doesn't show ellipsis or overflow text */
+.carousel-wrapper .p-carousel-indicator {
+  overflow: visible;
+}
+
+.carousel-wrapper .p-carousel-indicators {
+  overflow: visible;
+  font-size: 0;
+  line-height: 0;
 }
 
 /* Code Tabs Styles - matching code-block visual style */

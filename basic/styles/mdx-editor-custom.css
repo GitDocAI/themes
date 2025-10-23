@@ -27,6 +27,7 @@
   position: sticky !important;
   top: 64px !important;
   z-index: 100 !important;
+  overflow: visible !important;
 }
 
 /* Dark mode support */
@@ -716,38 +717,68 @@ form textarea:focus {
   stroke: currentColor;
 }
 
-/* Tooltip for custom toolbar buttons */
-.mdx-toolbar-button {
+/* Make toolbar buttons relative so tooltips position correctly */
+.mdxeditor-toolbar button,
+.mdxeditor-toolbar button > span {
   position: relative;
 }
 
-.mdx-toolbar-button[data-tooltip]:hover::after {
-  content: attr(data-tooltip);
-  position: absolute !important;
-  bottom: calc(100% + 8px) !important;
-  left: 50% !important;
-  transform: translateX(-50%) !important;
-  padding: 6px 10px;
-  background: rgb(17 24 39);
-  color: white;
-  font-size: 12px;
-  white-space: nowrap;
-  border-radius: 6px;
-  pointer-events: none;
-  z-index: 9999999 !important;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+/* Hide Radix UI tooltip content from MDXEditor (but keep triggers visible) */
+.mdxeditor-toolbar [class*="_tooltipContent_"],
+[class*="_tooltipContent_"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
 }
 
-.mdx-toolbar-button[data-tooltip]:hover::before {
-  content: '';
-  position: absolute !important;
-  bottom: calc(100% + 3px) !important;
-  left: 50% !important;
+/* Override ALL pseudo-elements on toolbar buttons and spans first */
+.mdxeditor-toolbar button::after,
+.mdxeditor-toolbar button::before,
+.mdxeditor-toolbar button span::after,
+.mdxeditor-toolbar button span::before,
+.mdxeditor-toolbar [class*="_selectTrigger_"]::after,
+.mdxeditor-toolbar [class*="_selectTrigger_"]::before,
+.mdxeditor-toolbar [class*="_selectTrigger_"] span::after,
+.mdxeditor-toolbar [class*="_selectTrigger_"] span::before {
+  content: none !important;
+  display: none !important;
+}
+
+/* Then add our custom tooltips with higher specificity - dark background for contrast */
+.mdxeditor-toolbar button[aria-label]:hover::after,
+.mdxeditor-toolbar [class*="_selectTrigger_"][aria-label]:hover::after {
+  content: attr(aria-label) !important;
+  display: block !important;
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(17, 24, 39, 0.95);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  white-space: nowrap;
+  z-index: 10000;
+  pointer-events: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Tooltip arrow */
+.mdxeditor-toolbar button[aria-label]:hover::before,
+.mdxeditor-toolbar [class*="_selectTrigger_"][aria-label]:hover::before {
+  content: '' !important;
+  display: block !important;
+  position: absolute;
+  bottom: calc(100% + 3px);
+  left: 50%;
   transform: translateX(-50%);
   border: 5px solid transparent;
-  border-top-color: rgb(17 24 39);
+  border-top-color: rgba(17, 24, 39, 0.95);
+  z-index: 10000;
   pointer-events: none;
-  z-index: 9999999 !important;
 }
 
 .dark-theme .mdx-toolbar-button {
@@ -852,7 +883,7 @@ form textarea:focus {
   padding: 0 !important;
   border: none !important; /* Remove border to unify colors */
   position: relative !important;
-  margin: 2.5rem 0 1rem 0 !important; /* Space for header */
+  margin: 3.5rem 0 1.5rem 0 !important; /* Extra top margin for separation from content above */
   overflow: visible !important; /* Allow select to overflow */
 }
 

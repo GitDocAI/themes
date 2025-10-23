@@ -38,6 +38,14 @@ console.error = function (...args) {
     // Suppress this specific error
     return;
   }
+  if (errorString.includes('nextra') && errorString.includes('Cannot find module')) {
+    // Suppress nextra module not found errors
+    return;
+  }
+  if (errorString.includes('private-next-content-dir/undefined')) {
+    // Suppress nextra content directory errors
+    return;
+  }
   originalConsoleError.apply(console, args);
 };
 

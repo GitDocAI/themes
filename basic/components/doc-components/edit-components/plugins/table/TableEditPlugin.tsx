@@ -32,7 +32,6 @@ export const TableEditPlugin = (EditorContext:React.Context<any>)=>{
                           }
                         }
                       }
-                      console.log('DataTable extractProps:', props)
                       return props
                     }
 
@@ -85,8 +84,9 @@ export const TableEditPlugin = (EditorContext:React.Context<any>)=>{
                       const [isHovering, setIsHovering] = useState(false)
                       const context = useContext(EditorContext)
                       const editorRef = context?.editorRef
+                      const saveToWebhook = context?.saveToWebhook
 
-                      const handleDelete = () => {
+                      const handleDelete = async () => {
                         if (!editorRef?.current) return
                         const currentMarkdown = editorRef.current.getMarkdown()
                         // Find and remove this DataTable from markdown
@@ -109,14 +109,20 @@ export const TableEditPlugin = (EditorContext:React.Context<any>)=>{
                           }
                         }
 
-                        editorRef.current.setMarkdown(filteredLines.join('\n'))
+                        const newMarkdown = filteredLines.join('\n')
+                        editorRef.current.setMarkdown(newMarkdown)
+
+                        // Save to webhook
+                        if (saveToWebhook) {
+                          await saveToWebhook(newMarkdown)
+                        }
                       }
 
                       const handleEdit = () => {
                         setShowModal(true)
                       }
 
-                      const handleUpdate = (newTableMarkdown: string) => {
+                      const handleUpdate = async (newTableMarkdown: string) => {
                         if (!editorRef?.current) return
                         const currentMarkdown = editorRef.current.getMarkdown()
                         // Replace the old DataTable with the new one
@@ -141,6 +147,11 @@ export const TableEditPlugin = (EditorContext:React.Context<any>)=>{
                           const after = lines.slice(endIndex + 1)
                           const updated = [...before, newTableMarkdown, ...after].join('\n')
                           editorRef.current.setMarkdown(updated)
+
+                          // Save to webhook
+                          if (saveToWebhook) {
+                            await saveToWebhook(updated)
+                          }
                         }
 
                         setShowModal(false)

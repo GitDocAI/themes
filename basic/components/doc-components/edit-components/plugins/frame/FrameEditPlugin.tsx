@@ -1,10 +1,11 @@
 'use client'
 import { useContext, useState } from "react"
-import { ImageInsertModal } from "./ImageInsertModal"
+import { FrameInsertModal } from "./FrameInsertModal"
 import { usePathname } from "next/navigation"
+import { Frame } from "@/components/doc-components/Frame"
 
-export const ImageEditPlugin = (EditorContext:React.Context<any>)=>{
-      const EditableImage = ({ mdastNode }: { mdastNode: any }) => {
+export const FrameEditPlugin = (EditorContext:React.Context<any>)=>{
+      const EditableFrame = ({ mdastNode }: { mdastNode: any }) => {
         const [showEditModal, setShowEditModal] = useState(false)
         const context = useContext(EditorContext)
         const editorRef = context?.editorRef
@@ -15,11 +16,13 @@ export const ImageEditPlugin = (EditorContext:React.Context<any>)=>{
 
         const srcAttr = (mdastNode.attributes as any[])?.find((attr) => attr.name === 'src')
         const altAttr = (mdastNode.attributes as any[])?.find((attr) => attr.name === 'alt')
+        const captionAttr = (mdastNode.attributes as any[])?.find((attr) => attr.name === 'caption')
         const widthAttr = (mdastNode.attributes as any[])?.find((attr) => attr.name === 'width')
         const heightAttr = (mdastNode.attributes as any[])?.find((attr) => attr.name === 'height')
 
         const src = srcAttr?.value || ''
         const alt = altAttr?.value || ''
+        const caption = captionAttr?.value || ''
         const width = widthAttr?.value
         const height = heightAttr?.value
 
@@ -49,28 +52,41 @@ export const ImageEditPlugin = (EditorContext:React.Context<any>)=>{
           return `../../../assets/${filename}`
         }
 
-        const handleUpdate = async (imageMarkdown: string) => {
+        const handleUpdate = async (newAlt: string, newCaption: string, newImagePath: string) => {
           if (!editorRef?.current || !saveToWebhook) return
 
           const currentMarkdown = editorRef.current.getMarkdown()
 
-          // Build regex to match old img with any whitespace/newline variations
+          // Build old frame markdown - try to match any format (with or without newlines)
           const escapedSrc = src.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
           const escapedAlt = alt.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+          const escapedCaption = caption.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 
+          // Create a regex that matches the Frame with any whitespace/newline variations
           let regex = new RegExp(
-            `<img[\\s\\n]+` +
+            `<Frame[\\s\\n]+` +
             `src="${escapedSrc}"[\\s\\n]*` +
             `alt="${escapedAlt}"` +
+            (caption ? `[\\s\\n]*caption="${escapedCaption}"` : '') +
             (width ? `[\\s\\n]*width="${width}"` : '') +
             (height ? `[\\s\\n]*height="${height}"` : '') +
-            `[\\s\\n]*/?>`,
+            `[\\s\\n]*/>`,
             'g'
           )
 
-          const newMarkdown = currentMarkdown.replace(regex, imageMarkdown)
+          // Build new frame markdown (single line format for consistency)
+          let newFrameMarkdown = `<Frame src="${newImagePath}" alt="${newAlt}"`
+          if (newCaption) newFrameMarkdown += ` caption="${newCaption}"`
+          if (width) newFrameMarkdown += ` width="${width}"`
+          if (height) newFrameMarkdown += ` height="${height}"`
+          newFrameMarkdown += ' />'
+
+          // Replace in markdown
+          const newMarkdown = currentMarkdown.replace(regex, newFrameMarkdown)
+
           editorRef.current.setMarkdown(newMarkdown)
 
+          // Save to webhook
           await saveToWebhook(newMarkdown)
           setShowEditModal(false)
         }
@@ -80,22 +96,23 @@ export const ImageEditPlugin = (EditorContext:React.Context<any>)=>{
 
           const currentMarkdown = editorRef.current.getMarkdown()
 
-          // Build regex to match img with any whitespace/newline variations
+          // Build regex to match Frame with any whitespace/newline variations
           const escapedSrc = src.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
           const escapedAlt = alt.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+          const escapedCaption = caption.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 
-          // Build regex pattern - handle both self-closing formats: /> and />
           let regex = new RegExp(
-            `<img[\\s\\n]+` +
+            `<Frame[\\s\\n]+` +
             `src="${escapedSrc}"[\\s\\n]*` +
             `alt="${escapedAlt}"` +
+            (caption ? `[\\s\\n]*caption="${escapedCaption}"` : '') +
             (width ? `[\\s\\n]*width="${width}"` : '') +
             (height ? `[\\s\\n]*height="${height}"` : '') +
-            `[\\s\\n]*/?>`,
+            `[\\s\\n]*/>`,
             'g'
           )
 
-          // Remove image from markdown
+          // Remove frame from markdown
           const newMarkdown = currentMarkdown.replace(regex, '')
 
           editorRef.current.setMarkdown(newMarkdown)
@@ -105,23 +122,22 @@ export const ImageEditPlugin = (EditorContext:React.Context<any>)=>{
         }
 
         return (
-          <div contentEditable={false} style={{ margin: '16px 0' }}>
-            <div className="auto-frame-wrapper" style={{ position: 'relative' }}>
-              <img
+          <div contentEditable={false} style={{ margin: '16px 0', position: 'relative' }}>
+            <div style={{ position: 'relative', display: 'inline-block', width: '100%' }}>
+              <Frame
                 src={src}
                 alt={alt}
+                caption={caption}
                 width={width}
                 height={height}
-                className="wrapped-image"
-                style={{ maxWidth: '100%', height: 'auto', display: 'block' }}
               />
               <div style={{
                 position: 'absolute',
-                top: '32px',
-                right: '32px',
+                top: '20px',
+                right: '20px',
                 display: 'flex',
                 gap: '8px',
-                zIndex: 1,
+                zIndex: 10,
               }}>
                 <button
                   onClick={() => setShowEditModal(true)}
@@ -163,32 +179,33 @@ export const ImageEditPlugin = (EditorContext:React.Context<any>)=>{
                 </button>
               </div>
             </div>
-            <ImageInsertModal
+            <FrameInsertModal
               isOpen={showEditModal}
               onClose={() => setShowEditModal(false)}
               onInsert={handleUpdate}
               onUpload={handleUpload}
               initialUrl={src}
               initialAlt={alt}
+              initialCaption={caption}
             />
           </div>
         )
       }
 
       return{
-                name: 'img',
+                name: 'Frame',
                 kind: 'text',
                 props: [
                   { name: 'src', type: 'string' },
                   { name: 'alt', type: 'string' },
+                  { name: 'caption', type: 'string' },
                   { name: 'width', type: 'string' },
                   { name: 'height', type: 'string' },
                 ],
                 hasChildren: false,
-                Editor: ({ mdastNode }:any) => <EditableImage mdastNode={mdastNode} />,
+                Editor: ({ mdastNode }:any) => <EditableFrame mdastNode={mdastNode} />,
               }
 
 
 }
-
 
