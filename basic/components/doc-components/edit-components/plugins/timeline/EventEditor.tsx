@@ -1,11 +1,24 @@
 
 import React from 'react'
 import type { TimelineEvent } from '@/components/doc-components/Timeline'
+import { Dropdown } from 'primereact/dropdown';
+
 
 interface EventEditorProps {
   events: TimelineEvent[]
   onChange: (events: TimelineEvent[]) => void
 }
+
+const primeIcons = [
+    'pi pi-check', 'pi pi-times', 'pi pi-plus', 'pi pi-minus', 'pi pi-search', 'pi pi-pencil',
+    'pi pi-trash', 'pi pi-user', 'pi pi-cog', 'pi pi-calendar', 'pi pi-clock', 'pi pi-envelope',
+    'pi pi-heart', 'pi pi-star', 'pi pi-tag', 'pi pi-comment', 'pi pi-upload', 'pi pi-download',
+    'pi pi-info-circle', 'pi pi-exclamation-triangle', 'pi pi-arrow-right', 'pi pi-arrow-left',
+    'pi pi-arrow-up', 'pi pi-arrow-down', 'pi pi-globe', 'pi pi-home', 'pi pi-image',
+    'pi pi-lock', 'pi pi-unlock', 'pi pi-map', 'pi pi-bell', 'pi pi-video', 'pi pi-power-off',
+    'pi pi-shopping-cart', 'pi pi-thumbs-up', 'pi pi-thumbs-down', 'pi pi-wifi', 'pi pi-github',
+    'pi pi-discord', 'pi pi-youtube', 'pi pi-twitter', 'pi pi-linkedin', 'pi pi-whatsapp',
+  ]
 
 export const EventEditor: React.FC<EventEditorProps> = ({ events, onChange }) => {
   const addEvent = () => {
@@ -57,12 +70,17 @@ export const EventEditor: React.FC<EventEditorProps> = ({ events, onChange }) =>
             </label>
             <label className="flex flex-col">
               Icon
-              <input
-                className="border p-1 rounded"
-                type="text"
+              <Dropdown
                 value={ev.icon || ''}
-                onChange={(e) => updateEvent(idx, 'icon', e.target.value)}
+                onChange={(e) => updateEvent(idx, 'icon', e)}
+
+                valueTemplate={(opt)=>(<i className={`pi ${opt}`}></i>)}
+                itemTemplate={(opt)=>(<i className={`pi ${opt}`}></i>)}
+                              className="w-full md:w-14rem"
+                options={primeIcons}
               />
+
+
             </label>
             <label className="flex flex-col">
               Color

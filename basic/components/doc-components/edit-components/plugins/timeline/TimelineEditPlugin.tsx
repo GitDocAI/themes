@@ -72,42 +72,23 @@ export const TimelineEditPlugin = (EditorContext: React.Context<any>) => {
           const currentMarkdown = editorRef.current.getMarkdown()
 
           if (currentMarkdown == lastsavedCHange) return
-          const lines = currentMarkdown.split('\n')
-          let inTimeline = false
-          let startIndex = -1
-          let endIndex = -1
 
-          for (let i = 0; i < lines.length; i++) {
-            if (lines[i].trim().startsWith('<Timeline')) {
-              inTimeline = true
-              startIndex = i
-            }
-            if (inTimeline && lines[i].trim().endsWith('/>')) {
-              endIndex = i
-              break
-            }
-            if (inTimeline && lines[i].trim() === '</Timeline>') {
-              endIndex = i
-              break
-            }
-          }
+           const { start, end } = mdastNode.position
 
-          if (startIndex !== -1 && endIndex !== -1) {
-            const before = lines.slice(0, startIndex)
-            const after = lines.slice(endIndex + 1)
+            const before = currentMarkdown.slice(0, start.offset)
+            const after = currentMarkdown.slice(end.offset)
+
             const propsString = Object.entries(localProps)
               .map(([k, v]) => ` ${k}={${JSON.stringify(v)}}`)
               .join('')
             const eventsString = JSON.stringify(localEvents, null, 2)
             const newComponentMarkdown = deleting
               ? ''
-              : `<Timeline${propsString} events={${eventsString}} />`
-
-            const updated = [...before, newComponentMarkdown, ...after].join('\n')
+              : `<Timeline ${propsString} events={${eventsString}} />`
+            const updated = [...before, newComponentMarkdown, ...after].join('')
             setLastSavedChange(updated)
             editorRef.current.setMarkdown(updated)
             if (saveToWebhook) await saveToWebhook(updated)
-          }
         }
 
         const handleSave = () => {
@@ -164,7 +145,7 @@ export const TimelineEditPlugin = (EditorContext: React.Context<any>) => {
 
             {/* Modal for Editing */}
             <Transition appear show={editMode} as={Fragment}>
-              <Dialog as="div" className="relative z-50" onClose={handleCancel}>
+              <Dialog as="div" className="relative z-[99999]" onClose={handleCancel}>
                 <Transition.Child
                   as={Fragment}
                   enter="ease-out duration-300"
@@ -193,7 +174,7 @@ export const TimelineEditPlugin = (EditorContext: React.Context<any>) => {
                           as="h3"
                           className="text-lg font-medium text-primary mb-4"
                         >
-                          Editar Timeline
+                          Edit Timeline
                         </Dialog.Title>
 
                         {/* Editable Form */}

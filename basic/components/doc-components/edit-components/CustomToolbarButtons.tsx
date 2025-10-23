@@ -123,7 +123,7 @@ const componentOptions: ComponentOption[] = [
       type: 'checklist',
       label: 'Check List',
       icon: (
-        <i className="pi pi-bullet" style={{ fontSize: '1rem' }}></i>
+        <i className="pi pi-list-check" style={{ fontSize: '1rem' }}></i>
       )
     }
 ,
@@ -249,11 +249,11 @@ export const InsertComponentDropdown: React.FC<InsertComponentDropdownProps> = (
     }
      else if (type === 'timeline') {
       // Insert Timeline component as markdown
-      const timelineMarkdown = `<Timeline\n  events={[\n    {\n      title: \'Event 1\',
-      date: \'2023-01-01\',
-      content: \'Description of event 1'\n    },\n    {\n      title: \'Event 2\',
-      date: \'2023-01-02\',
-      content: \'Description of event 2'\n    }\n  ]}\n/>\n\n`;
+      const timelineMarkdown = `<Timeline\n  events={[\n    {\n      "title": \"Event 1\",
+      "date": \"2023-01-01\",
+      "content": \"Description of event 1"\n    },\n    {\n      "title": \"Event 2\",
+      "date": \"2023-01-02\",
+      "content": \"Description of event 2"\n    }\n  ]}\n/>\n\n`;
       insertMarkdown(timelineMarkdown)
       setIsOpen(false)
     }else if (type === 'checklist') {
