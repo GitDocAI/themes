@@ -142,8 +142,6 @@ pre:hover button[data-copy-target] {
   cursor: text;
 }
 
-.editable-article:hover {
-}
 
 .editable-article:focus,
 .editable-article.editing {
@@ -2534,6 +2532,5 @@ article span[class*="_code_"],
 .dark-theme .code-block-wrapper,
 .dark-theme .code-group,
 .dark-theme .code-tabs-wrapper {
-  border-color: rgba(100, 100, 100, 0.3) !important;
 }
 

@@ -44,14 +44,3 @@ export const CheckItem = ({ children, variant = 'do' }: CheckItemProps) => {
 
 
 
-export const UnCheckItem = ({ children, variant = 'do' }: CheckItemProps) => {
-  const { icon, iconClasses, textClasses } = itemConfig[variant];
-  return (
-    <div className="flex items-start gap-3 ">
-      <i className={clsx(icon, iconClasses, 'mt-1 text-lg')} />
-      <div className={clsx('w-full', textClasses)}>
-        {children}
-      </div>
-    </div>
-  );
-};
