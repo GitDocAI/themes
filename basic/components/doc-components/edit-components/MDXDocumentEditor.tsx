@@ -228,7 +228,7 @@ export function MDXDocumentEditor({
     })
     return ()=>{
     }
-  },[])
+  },[markdown])
 
 
 
