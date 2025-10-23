@@ -7,8 +7,10 @@ import {
 } from '@mdxeditor/editor'
 import { CardModal } from './plugins/card/CardModal'
 import { DataTableModal } from './plugins/table/DataTableModal'
+import { ImageInsertModal } from './plugins/image/ImageInsertModal'
+import { FrameInsertModal } from './plugins/frame/FrameInsertModal'
 
-type ComponentType = 'tip' | 'note' | 'warning' | 'danger' | 'info' | 'card' | 'codeblock' | 'datatable'
+type ComponentType = 'tip' | 'note' | 'warning' | 'danger' | 'info' | 'card' | 'codeblock' | 'datatable' | 'image' | 'frame'
 
 interface ComponentOption {
   type: ComponentType
@@ -17,6 +19,20 @@ interface ComponentOption {
 }
 
 const componentOptions: ComponentOption[] = [
+  {
+    type: 'image',
+    label: 'Image',
+    icon: (
+      <i className="pi pi-image" style={{ fontSize: '1rem' }}></i>
+    )
+  },
+  {
+    type: 'frame',
+    label: 'Frame',
+    icon: (
+      <i className="pi pi-window-maximize" style={{ fontSize: '1rem' }}></i>
+    )
+  },
   {
     type: 'tip',
     label: 'Tip',
@@ -75,11 +91,18 @@ const componentOptions: ComponentOption[] = [
   },
 ]
 
-export const InsertComponentDropdown = () => {
+interface InsertComponentDropdownProps {
+  webhookUrl?: string
+  authentication?: string
+}
+
+export const InsertComponentDropdown: React.FC<InsertComponentDropdownProps> = ({ webhookUrl = '', authentication = '' }) => {
   const [isOpen, setIsOpen] = useState(false)
   const [dropdownStyle, setDropdownStyle] = useState<React.CSSProperties>({})
   const [showCardModal, setShowCardModal] = useState(false)
   const [showDataTableModal, setShowDataTableModal] = useState(false)
+  const [showImageModal, setShowImageModal] = useState(false)
+  const [showFrameModal, setShowFrameModal] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const buttonRef = useRef<HTMLButtonElement>(null)
   const insertMarkdown = usePublisher(insertMarkdown$)
@@ -112,10 +135,54 @@ export const InsertComponentDropdown = () => {
     }
   }, [isOpen])
 
+  const handleImageUpload = async (file: File): Promise<string> => {
+    try {
+      const formData = new FormData()
+      const timestamp = Date.now()
+      const extension = file.name.split('.').pop()
+      const filename = `screenshot_${timestamp}.${extension}`
+      const assetPath = `assets/${filename}`
+
+      formData.append('binary_content', file, filename)
+      formData.append('file_path', assetPath)
+
+      const response = await fetch(webhookUrl, {
+        method: 'POST',
+        body: formData,
+        ...(authentication && {
+          headers: {
+            'Authorization': authentication
+          }
+        })
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        throw new Error(`Failed to upload image: ${response.status} ${errorText}`)
+      }
+
+      // Return relative path with ../../../assets/ prefix
+      return `../../../assets/${filename}`
+
+    } catch (error) {
+      console.error('Error uploading image:', error)
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      throw new Error(`Failed to upload image: ${errorMessage}`)
+    }
+  }
+
   const handleInsert = (type: ComponentType) => {
-    if (type === 'codeblock') {
+    if (type === 'image') {
+      // Show Image modal
+      setShowImageModal(true)
+      setIsOpen(false)
+    } else if (type === 'frame') {
+      // Show Frame modal
+      setShowFrameModal(true)
+      setIsOpen(false)
+    } else if (type === 'codeblock') {
       // Insert code block as markdown - the codeBlockPlugin will parse and render it
-      const codeBlockMarkdown = '```js\n\n```\n\n'
+      const codeBlockMarkdown = '\n\n```js\n\n```\n\n'
       insertMarkdown(codeBlockMarkdown)
       setIsOpen(false)
     } else if (type === 'card') {
@@ -141,6 +208,21 @@ export const InsertComponentDropdown = () => {
 
   const handleDataTableInsert = (tableMarkdown: string) => {
     insertMarkdown(tableMarkdown + '\n\n')
+  }
+
+  const handleImageInsert = (imageMarkdown: string) => {
+    // Insert immediately, modal will close itself after calling this
+    insertMarkdown(imageMarkdown)
+  }
+
+  const handleFrameInsert = (alt: string, caption: string, imagePath: string) => {
+    let frameMarkdown = '<Frame'
+    frameMarkdown += `\n  src="${imagePath}"`
+    frameMarkdown += `\n  alt="${alt}"`
+    if (caption) frameMarkdown += `\n  caption="${caption}"`
+    frameMarkdown += '\n/>\n\n'
+    // Insert immediately, modal will close itself after calling this
+    insertMarkdown(frameMarkdown)
   }
 
   return (
@@ -195,6 +277,20 @@ export const InsertComponentDropdown = () => {
         onClose={() => setShowDataTableModal(false)}
         onInsert={handleDataTableInsert}
       />
+
+      <ImageInsertModal
+        isOpen={showImageModal}
+        onClose={() => setShowImageModal(false)}
+        onInsert={handleImageInsert}
+        onUpload={handleImageUpload}
+      />
+
+      <FrameInsertModal
+        isOpen={showFrameModal}
+        onClose={() => setShowFrameModal(false)}
+        onInsert={handleFrameInsert}
+        onUpload={handleImageUpload}
+      />
     </div>
   )
 }
@@ -236,26 +332,6 @@ export const ImageUploadButton: React.FC<ImageUploadButtonProps> = ({ webhookUrl
       formData.append('binary_content', file, filename)
       formData.append('file_path', assetPath)
 
-      console.log('Uploading image:', {
-        filename,
-        assetPath,
-        webhookUrl,
-        hasAuth: !!authentication,
-        formDataEntries: Array.from(formData.entries()).map(([key, value]) => ({
-          key,
-          value: value instanceof File ? `File(${value.name})` : value
-        }))
-      })
-
-      // Upload to webhook
-      // IMPORTANT: Do NOT set Content-Type header - browser sets it automatically with boundary
-      console.log('About to send request:', {
-        url: webhookUrl,
-        method: 'POST',
-        hasFormData: formData instanceof FormData,
-        formDataSize: Array.from(formData.entries()).length
-      })
-
       const response = await fetch(webhookUrl, {
         method: 'POST',
         body: formData,
@@ -265,12 +341,6 @@ export const ImageUploadButton: React.FC<ImageUploadButtonProps> = ({ webhookUrl
             'Authorization': authentication
           }
         })
-      })
-
-      console.log('Upload response:', {
-        status: response.status,
-        statusText: response.statusText,
-        requestContentType: 'auto-generated by browser for FormData'
       })
 
       if (!response.ok) {
@@ -285,7 +355,7 @@ export const ImageUploadButton: React.FC<ImageUploadButtonProps> = ({ webhookUrl
       }
 
       // Insert image markdown into editor
-      const relativePath = `./assets/${filename}`
+      const relativePath = `../../../assets/${filename}`
       const imageMarkdown = `<img\n  src="${relativePath}"\n  alt="Image description"\n/>\n\n`
       insertMarkdown(imageMarkdown)
 
