@@ -3,7 +3,7 @@
 import React from 'react'
 import { Timeline as PrimeTimeline } from 'primereact/timeline'
 
-interface TimelineEvent {
+export interface TimelineEvent {
   content: string | React.ReactNode
   title?: string
   date?: string
@@ -12,7 +12,7 @@ interface TimelineEvent {
   image?: string
 }
 
-interface TimelineProps {
+export interface TimelineProps {
   events: TimelineEvent[]
   layout?: 'vertical' | 'horizontal'
   align?: 'left' | 'right' | 'alternate' | 'top' | 'bottom'

@@ -611,7 +611,7 @@
         "headingPath": [
           "Introduction to Acme Platform"
         ],
-        "startLine": 10
+        "startLine": 11
       }
     },
     {
@@ -621,7 +621,7 @@
         "headingPath": [
           "Introduction to Acme Platform"
         ],
-        "startLine": 21
+        "startLine": 22
       }
     },
     {
@@ -632,7 +632,7 @@
           "Introduction to Acme Platform",
           "What is Acme Platform?"
         ],
-        "startLine": 32
+        "startLine": 34
       }
     },
     {
@@ -643,7 +643,7 @@
           "Introduction to Acme Platform",
           "Key Benefits"
         ],
-        "startLine": 43
+        "startLine": 45
       }
     },
     {
@@ -652,9 +652,9 @@
         "text": "go from idea to production in minutes, not days. What is Acme Platform? Acme Platform is an innovative cloudnative platform that combines the power of modern infrastructure with developerfriendly tools. It helps teams: Rapidly deploy applications to the cloud Scale automatically based on demand Monitor performance in realtime Collaborate effectively across teams Key Benefits Reduces deployment time by 90% with automated CI/CD Scales automatically to handle traffic spikes Provides comprehensive monitoring and analytics Supports all major programming languages and frameworks How It Works Acme Platform follows a simple threestep process: 1.",
         "headingPath": [
           "Introduction to Acme Platform",
-          "How It Works"
+          "Key Benefits"
         ],
-        "startLine": 54
+        "startLine": 56
       }
     },
     {
@@ -663,9 +663,9 @@
         "text": "CI/CD Scales automatically to handle traffic spikes Provides comprehensive monitoring and analytics Supports all major programming languages and frameworks How It Works Acme Platform follows a simple threestep process: 1. Connect Your Code Link your Git repository to Acme Platform 2.",
         "headingPath": [
           "Introduction to Acme Platform",
-          "Getting Started"
+          "How It Works"
         ],
-        "startLine": 65
+        "startLine": 68
       }
     },
     {
@@ -674,9 +674,9 @@
         "text": "analytics Supports all major programming languages and frameworks How It Works Acme Platform follows a simple threestep process: 1. Connect Your Code Link your Git repository to Acme Platform 2. Automated Build Our system automatically builds and tests your application 3.",
         "headingPath": [
           "Introduction to Acme Platform",
-          ""
+          "Getting Started"
         ],
-        "startLine": 76
+        "startLine": 79
       }
     },
     {
@@ -685,10 +685,9 @@
         "text": "Acme Platform follows a simple threestep process: 1. Connect Your Code Link your Git repository to Acme Platform 2. Automated Build Our system automatically builds and tests your application 3. Deploy & Scale Your app is deployed with automatic scaling and monitoring INFO Acme Platform supports all major programming languages and frameworks, including JavaScript, Python, Java, Go, and more.",
         "headingPath": [
           "Introduction to Acme Platform",
-          "Quick Start Guide",
-          "Step 1: Sign Up"
+          "Quick Start Guide"
         ],
-        "startLine": 87
+        "startLine": 90
       }
     },
     {
@@ -698,9 +697,9 @@
         "headingPath": [
           "Introduction to Acme Platform",
           "Quick Start Guide",
-          "Step 2: Link Your Git Repository"
+          "Step 1: Sign Up"
         ],
-        "startLine": 98
+        "startLine": 102
       }
     },
     {
@@ -708,9 +707,9 @@
       "chunk": {
         "text": "with automatic scaling and monitoring INFO Acme Platform supports all major programming languages and frameworks, including JavaScript, Python, Java, Go, and more. Getting Started Ready to transform your development workflow? Here's what you need to get started: A Git repository GitHub, GitLab, or Bitbucket A cloud account AWS, Azure, or GCP 5 minutes of your time Let's move on to the Installation Guide to set up your first Acme Platform project.",
         "headingPath": [
-          "Link your repository"
+          "Login to your account"
         ],
-        "startLine": 109
+        "startLine": 113
       }
     },
     {
@@ -721,7 +720,7 @@
           "Link your repository",
           "Step 3: Deploy Your App"
         ],
-        "startLine": 119
+        "startLine": 124
       }
     },
     {
@@ -732,7 +731,7 @@
           "Link your repository",
           "Advanced Configuration (Vertical Guide)"
         ],
-        "startLine": 130
+        "startLine": 136
       }
     },
     {
@@ -744,7 +743,7 @@
           "Advanced Configuration (Vertical Guide)",
           "Configure Your Environment"
         ],
-        "startLine": 141
+        "startLine": 147
       }
     },
     {
@@ -756,7 +755,7 @@
           "Advanced Configuration (Vertical Guide)",
           "Create Configuration File"
         ],
-        "startLine": 152
+        "startLine": 158
       }
     },
     {
@@ -768,7 +767,7 @@
           "Advanced Configuration (Vertical Guide)",
           "Create Configuration File"
         ],
-        "startLine": 163
+        "startLine": 170
       }
     },
     {
@@ -780,7 +779,7 @@
           "Advanced Configuration (Vertical Guide)",
           "Create Configuration File"
         ],
-        "startLine": 174
+        "startLine": 181
       }
     },
     {
@@ -792,7 +791,7 @@
           "Advanced Configuration (Vertical Guide)",
           "Connect Your Database"
         ],
-        "startLine": 185
+        "startLine": 192
       }
     },
     {
@@ -802,9 +801,9 @@
         "headingPath": [
           "Link your repository",
           "Advanced Configuration (Vertical Guide)",
-          "Final Deployment"
+          "Connect Your Database"
         ],
-        "startLine": 196
+        "startLine": 204
       }
     },
     {
@@ -812,9 +811,9 @@
       "chunk": {
         "text": "is now live and scaling automatically. Advanced Configuration Vertical Guide For advanced users who need more control: Configure Your Environment Set up your development environment with all required tools: Node. js: Version 18 or higher Docker: For containerization Git: Version control Cloud CLI: AWS, Azure, or GCP CLI tools WARNING Make sure all tools are properly installed before proceeding to the next step.",
         "headingPath": [
-          "Monitor deployment"
+          "Deploy to production"
         ],
-        "startLine": 207
+        "startLine": 215
       }
     },
     {
@@ -824,7 +823,7 @@
         "headingPath": [
           "Monitor deployment"
         ],
-        "startLine": 218
+        "startLine": 226
       }
     },
     {
@@ -834,7 +833,7 @@
         "headingPath": [
           "Monitor deployment"
         ],
-        "startLine": 229
+        "startLine": 238
       }
     },
     {

@@ -11,7 +11,7 @@ interface CarouselImage {
 }
 
 interface CarouselProps {
-  images: CarouselImage[]
+  images?: CarouselImage[]
   numVisible?: number
   numScroll?: number
   autoplayInterval?: number

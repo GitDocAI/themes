@@ -6,16 +6,22 @@ import { ImageEditPlugin } from './image/ImageEditPlugin'
 import { CollapseEditPlugin } from './collapse/CollapseEditPlugin'
 import { FrameEditPlugin } from './frame/FrameEditPlugin'
 import { CarouselEditPlugin } from './carousel/CarouselEditPlugin'
+import { TimelineEditPlugin } from './timeline/TimelineEditPlugin'
+import { AccordionEditPlugin } from './accordion/AccordionEditPlugin'
 import { ChartEditPlugin } from './chart/ChartEditPlugin'
 import { ScrollPanelEditPlugin } from './scrollpanel/ScrollPanelEditPlugin'
 
 export const createDescriptorsFromComponents=(EditorContext:React.Context<any>) => {
-  return Object.entries(components).map(([name, Comp]) =>{
+  const directives = Object.entries(components).map(([name, Comp]) =>{
    switch(name){
       case 'DataTable':
        return TableEditPlugin(EditorContext)
       case 'Card':
        return CardEditPlugin(EditorContext)
+      case 'Timeline':
+       return TimelineEditPlugin(EditorContext)
+      case 'Accordion':
+       return AccordionEditPlugin(EditorContext)
       case 'img':
        return ImageEditPlugin(EditorContext)
       case 'Frame':
@@ -52,6 +58,8 @@ export const createDescriptorsFromComponents=(EditorContext:React.Context<any>) 
 
     }
   })
+
+  return [...directives]
 }
 
 function extractProps(mdastNode: any) {

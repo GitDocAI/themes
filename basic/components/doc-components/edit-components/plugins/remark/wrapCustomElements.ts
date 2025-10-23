@@ -7,7 +7,6 @@ import { visit } from 'unist-util-visit'
 
 function wrapTablesAndAdmonitionsPlugin() {
   return (tree: any) => {
-    // 1️⃣ Envolver tablas en <DataTable>
     visit(tree, 'table', (node, index, parent) => {
       if (!parent || typeof index !== 'number') return
 
@@ -26,7 +25,9 @@ function wrapTablesAndAdmonitionsPlugin() {
       parent.children[index] = dataTableNode
     })
 
-    // 2️⃣ Detectar admonitions tipo [!TIP], [!NOTE], [!WARNING], [!INFO]
+
+
+    //[!TIP], [!NOTE], [!WARNING], [!INFO]
     visit(tree, 'paragraph', (node, index, parent) => {
       if (!parent || typeof index !== 'number') return
       if (!node.children?.length) return
@@ -40,8 +41,6 @@ function wrapTablesAndAdmonitionsPlugin() {
       const level = match[1].toUpperCase()
       const componentName = level.charAt(0).toUpperCase() + level.slice(1).toLowerCase()
 
-      // 🔹 Extraer el texto dentro del bloque
-      // Todo lo que viene después del párrafo de [!TIP] hasta el siguiente salto doble
       const followingNodes = []
       let i = index + 1
       while (i < parent.children.length) {
@@ -51,13 +50,11 @@ function wrapTablesAndAdmonitionsPlugin() {
         i++
       }
 
-      // 🔹 Crear el nodo JSX de admonition
       const admonitionNode = {
         type: 'mdxJsxFlowElement',
         name: componentName, // Ej: Tip, Warning, Info, Note
         attributes: [],
         children: [
-          // Clon del texto del párrafo original sin el marcador
           {
             type: 'paragraph',
             children: [
@@ -72,9 +69,18 @@ function wrapTablesAndAdmonitionsPlugin() {
         ],
       }
 
-      // 🔹 Reemplazamos el bloque completo
       parent.children.splice(index, 1 + followingNodes.length, admonitionNode)
     })
+
+    //remove blockquote if it has a AlertBlock Inside
+    visit(tree, 'blockquote', (node, index, parent) => {
+      if(node.children[0].type!='mdxJsxFlowElement') return
+      const children = node.children
+      parent.children.splice(index,1,...children)
+    })
+
+
+
   }
 }
 
