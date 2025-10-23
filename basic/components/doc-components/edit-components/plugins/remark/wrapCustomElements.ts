@@ -11,9 +11,7 @@ function wrapTablesAndAdmonitionsPlugin() {
       if (!parent || typeof index !== 'number') return
 
       const prevNode = parent.children[index - 1]
-      if (prevNode?.type === 'mdxJsxFlowElement' || parent.type === 'mdxJsxFlowElement') {
-        return
-      }
+      if (prevNode?.type === 'mdxJsxFlowElement' || parent.type === 'mdxJsxFlowElement') return
 
       const dataTableNode = {
         type: 'mdxJsxFlowElement',
@@ -25,9 +23,6 @@ function wrapTablesAndAdmonitionsPlugin() {
       parent.children[index] = dataTableNode
     })
 
-
-
-    //[!TIP], [!NOTE], [!WARNING], [!INFO]
     visit(tree, 'paragraph', (node, index, parent) => {
       if (!parent || typeof index !== 'number') return
       if (!node.children?.length) return
@@ -52,7 +47,7 @@ function wrapTablesAndAdmonitionsPlugin() {
 
       const admonitionNode = {
         type: 'mdxJsxFlowElement',
-        name: componentName, // Ej: Tip, Warning, Info, Note
+        name: componentName,
         attributes: [],
         children: [
           {
@@ -72,15 +67,43 @@ function wrapTablesAndAdmonitionsPlugin() {
       parent.children.splice(index, 1 + followingNodes.length, admonitionNode)
     })
 
-    //remove blockquote if it has a AlertBlock Inside
     visit(tree, 'blockquote', (node, index, parent) => {
-      if(node.children[0].type!='mdxJsxFlowElement') return
-      const children = node.children
-      parent.children.splice(index,1,...children)
+      if (node.children[0]?.type !== 'mdxJsxFlowElement') return
+      parent.children.splice(index, 1, ...node.children)
     })
 
+    visit(tree, 'list', (node, index, parent) => {
+      if (!parent || typeof index !== 'number') return
+      if (!node.children?.length) return
 
+      const hasChecklistItems = node.children.some((item: any) => typeof item.checked === 'boolean')
+      if (!hasChecklistItems) return
 
+      const checkItems = node.children.map((item: any) => {
+        const variant = item.checked ? 'do' : 'dont'
+
+        return {
+          type: 'mdxJsxFlowElement',
+          name: 'CheckItem',
+          attributes: [
+            { type: 'mdxJsxAttribute', name: 'variant', value: variant },
+          ],
+          children: item.children,
+        }
+      })
+
+      if (parent.type !== 'mdxJsxFlowElement' || parent.name !== 'CheckList') {
+        const checkListNode = {
+          type: 'mdxJsxFlowElement',
+          name: 'CheckList',
+          attributes: [],
+          children: checkItems,
+        }
+        parent.children[index] = checkListNode
+      } else {
+        node.children = checkItems
+      }
+    })
   }
 }
 

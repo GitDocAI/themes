@@ -649,7 +649,7 @@
     {
       "path": "v1.0.0/documentation/getting_started/introduction.mdx",
       "chunk": {
-        "text": "go from idea to production in minutes, not days. What is Acme Platform? Acme Platform is an innovative cloudnative platform that combines the power of modern infrastructure with developerfriendly tools. It helps teams: Rapidly deploy applications to the cloud Scale automatically based on demand Monitor performance in realtime Collaborate effectively across teams Key Benefits Reduces deployment time by 90% with automated CI/CD Scales automatically to handle traffic spikes Provides comprehensive monitoring and analytics Supports all major programming languages and frameworks How It Works Acme Platform follows a simple threestep process: 1.",
+        "text": "go from idea to production in minutes, not days. What is Acme Platform? Acme Platform is an innovative cloudnative platform that combines the power of modern infrastructure with developerfriendly tools. It helps teams: Rapidly deploy applications to the cloud Scale automatically based on demand Monitor performance in realtime Collaborate effectively across teams Key Benefits x something Reduces deployment time by 90% with automated CI/CD Scales automatically to handle traffic spikes Provides comprehensive monitoring and analytics Supports all major programming languages and frameworks How It Works Acme Platform follows a simple threestep process: 1.",
         "headingPath": [
           "Introduction to Acme Platform",
           "Key Benefits"
@@ -687,7 +687,7 @@
           "Introduction to Acme Platform",
           "Quick Start Guide"
         ],
-        "startLine": 90
+        "startLine": 91
       }
     },
     {
@@ -707,7 +707,7 @@
       "chunk": {
         "text": "with automatic scaling and monitoring INFO Acme Platform supports all major programming languages and frameworks, including JavaScript, Python, Java, Go, and more. Getting Started Ready to transform your development workflow? Here's what you need to get started: A Git repository GitHub, GitLab, or Bitbucket A cloud account AWS, Azure, or GCP 5 minutes of your time Let's move on to the Installation Guide to set up your first Acme Platform project.",
         "headingPath": [
-          "Login to your account"
+          "Install the Acme CLI"
         ],
         "startLine": 113
       }
@@ -720,7 +720,7 @@
           "Link your repository",
           "Step 3: Deploy Your App"
         ],
-        "startLine": 124
+        "startLine": 125
       }
     },
     {
@@ -729,7 +729,7 @@
         "text": "to the Installation Guide to set up your first Acme Platform project. NOTE Acme Platform is designed to work with teams of all sizes, from solo developers to enterprise organizations. Quick Start Guide Follow these steps to get your first app deployed: Step 1: Sign Up Create your Acme Platform account in seconds: 1.",
         "headingPath": [
           "Link your repository",
-          "Advanced Configuration (Vertical Guide)"
+          "Step 3: Deploy Your App"
         ],
         "startLine": 136
       }
@@ -755,7 +755,7 @@
           "Advanced Configuration (Vertical Guide)",
           "Create Configuration File"
         ],
-        "startLine": 158
+        "startLine": 159
       }
     },
     {
@@ -779,7 +779,7 @@
           "Advanced Configuration (Vertical Guide)",
           "Create Configuration File"
         ],
-        "startLine": 181
+        "startLine": 182
       }
     },
     {
@@ -791,7 +791,7 @@
           "Advanced Configuration (Vertical Guide)",
           "Connect Your Database"
         ],
-        "startLine": 192
+        "startLine": 193
       }
     },
     {
@@ -813,7 +813,7 @@
         "headingPath": [
           "Deploy to production"
         ],
-        "startLine": 215
+        "startLine": 216
       }
     },
     {
@@ -823,7 +823,7 @@
         "headingPath": [
           "Monitor deployment"
         ],
-        "startLine": 226
+        "startLine": 227
       }
     },
     {
@@ -833,7 +833,7 @@
         "headingPath": [
           "Monitor deployment"
         ],
-        "startLine": 238
+        "startLine": 239
       }
     },
     {
@@ -1599,6 +1599,7 @@
     "collabor",
     "effect",
     "benefit",
+    "someth",
     "spike",
     "program",
     "languag",
@@ -2331,6 +2332,7 @@
     3.8094026953624978,
     4.725693427236653,
     4.725693427236653,
+    4.725693427236653,
     4.320228319128488,
     3.472930458741285,
     3.472930458741285,
@@ -2400,6 +2402,7 @@
       3.2216160304603783,
       0,
       4.0325462466767075,
+      0,
       0,
       0,
       0,
@@ -3854,6 +3857,7 @@
       0,
       0,
       0,
+      0,
       0
     ],
     [
@@ -3876,6 +3880,7 @@
       3.2216160304603783,
       4.0325462466767075,
       4.0325462466767075,
+      0,
       0,
       0,
       0,
@@ -5318,6 +5323,7 @@
       0,
       0,
       0,
+      0,
       0
     ],
     [
@@ -5347,6 +5353,7 @@
       6.041890669996455,
       0,
       3.1162555148025524,
+      0,
       0,
       0,
       0,
@@ -6782,6 +6789,7 @@
       0,
       0,
       0,
+      0,
       0
     ],
     [
@@ -6815,6 +6823,7 @@
       0,
       0,
       4.0325462466767075,
+      0,
       0,
       0,
       0,
@@ -7554,6 +7563,7 @@
       2.6462518855568167,
       2.7107904066943878,
       3.1162555148025524,
+      0,
       0,
       0,
       0,
@@ -8978,6 +8988,7 @@
       0,
       0,
       0,
+      0,
       0
     ],
     [
@@ -9125,6 +9136,7 @@
       3.627081138568543,
       3.627081138568543,
       7.254162277137086,
+      0,
       0,
       0,
       0,
@@ -10442,6 +10454,7 @@
       0,
       0,
       0,
+      0,
       0
     ],
     [
@@ -10611,6 +10624,7 @@
       4.0325462466767075,
       4.0325462466767075,
       4.0325462466767075,
+      0,
       0,
       0,
       0,
@@ -11906,6 +11920,7 @@
       0,
       0,
       0,
+      0,
       0
     ],
     [
@@ -12638,6 +12653,7 @@
       0,
       0,
       0,
+      0,
       0
     ],
     [
@@ -12763,6 +12779,7 @@
       0,
       5.056937699800866,
       2.7107904066943878,
+      0,
       0,
       0,
       0,
@@ -13594,6 +13611,7 @@
       3.2216160304603783,
       3.472930458741285,
       3.0209453349982276,
+      0,
       0,
       0,
       0,
@@ -14834,6 +14852,7 @@
       0,
       0,
       0,
+      0,
       0
     ],
     [
@@ -15067,6 +15086,7 @@
       3.8094026953624978,
       3.8094026953624978,
       3.8094026953624978,
+      0,
       0,
       0,
       0,
@@ -16298,6 +16318,7 @@
       0,
       0,
       0,
+      0,
       0
     ],
     [
@@ -16538,6 +16559,7 @@
       4.0325462466767075,
       4.0325462466767075,
       4.0325462466767075,
+      0,
       0,
       0,
       0,
@@ -17762,6 +17784,7 @@
       0,
       0,
       0,
+      0,
       0
     ],
     [
@@ -18030,6 +18053,7 @@
       4.320228319128488,
       4.320228319128488,
       2.853891250335061,
+      0,
       0,
       0,
       0,
@@ -19226,6 +19250,7 @@
       0,
       0,
       0,
+      0,
       0
     ],
     [
@@ -19599,6 +19624,7 @@
       3.0209453349982276,
       4.320228319128488,
       4.320228319128488,
+      0,
       0,
       0,
       0,
@@ -20690,6 +20716,7 @@
       0,
       0,
       0,
+      0,
       0
     ],
     [
@@ -21073,6 +21100,7 @@
       4.0325462466767075,
       3.8094026953624978,
       4.320228319128488,
+      0,
       0,
       0,
       0,
@@ -22154,6 +22182,7 @@
       0,
       0,
       0,
+      0,
       0
     ],
     [
@@ -22561,6 +22590,7 @@
       4.320228319128488,
       4.320228319128488,
       2.585627263740382,
+      0,
       0,
       0,
       0,
@@ -23618,6 +23648,7 @@
       0,
       0,
       0,
+      0,
       0
     ],
     [
@@ -24137,6 +24168,7 @@
       4.725693427236653,
       4.725693427236653,
       4.320228319128488,
+      0,
       0,
       0,
       0,
@@ -25082,6 +25114,7 @@
       0,
       0,
       0,
+      0,
       0
     ],
     [
@@ -25415,6 +25448,7 @@
       0,
       0,
       3.339399066116762,
+      0,
       0,
       0,
       0,
@@ -26546,6 +26580,7 @@
       0,
       0,
       0,
+      0,
       0
     ],
     [
@@ -27080,6 +27115,7 @@
       3.8094026953624978,
       3.8094026953624978,
       3.472930458741285,
+      0,
       0,
       0,
       0,
@@ -28010,6 +28046,7 @@
       0,
       0,
       0,
+      0,
       0
     ],
     [
@@ -28582,6 +28619,7 @@
       4.0325462466767075,
       3.472930458741285,
       4.0325462466767075,
+      0,
       0,
       0,
       0,
@@ -29474,6 +29512,7 @@
       0,
       0,
       0,
+      0,
       0
     ],
     [
@@ -30075,6 +30114,7 @@
       4.725693427236653,
       4.0325462466767075,
       3.8094026953624978,
+      0,
       0,
       0,
       0,
@@ -30938,6 +30978,7 @@
       0,
       0,
       0,
+      0,
       0
     ],
     [
@@ -31670,6 +31711,7 @@
       0,
       0,
       0,
+      0,
       0
     ],
     [
@@ -32274,6 +32316,7 @@
       3.8094026953624978,
       4.0325462466767075,
       4.0325462466767075,
+      0,
       0,
       0,
       0,
@@ -33009,6 +33052,7 @@
       4.0325462466767075,
       4.320228319128488,
       4.320228319128488,
+      0,
       0,
       0,
       0,
@@ -33866,6 +33910,7 @@
       0,
       0,
       0,
+      0,
       0
     ],
     [
@@ -34476,6 +34521,7 @@
       0,
       4.320228319128488,
       4.320228319128488,
+      0,
       0,
       0,
       0,
@@ -35212,6 +35258,7 @@
       2.7797832781813394,
       2.7797832781813394,
       4.320228319128488,
+      0,
       0,
       0,
       0,
@@ -36062,6 +36109,7 @@
       0,
       0,
       0,
+      0,
       0
     ],
     [
@@ -36695,6 +36743,7 @@
       3.627081138568543,
       3.627081138568543,
       3.8094026953624978,
+      0,
       0,
       0,
       0,
@@ -37428,6 +37477,7 @@
       3.627081138568543,
       3.8094026953624978,
       4.0325462466767075,
+      0,
       0,
       0,
       0,
@@ -38258,6 +38308,7 @@
       0,
       0,
       0,
+      0,
       0
     ],
     [
@@ -38901,6 +38952,7 @@
       0,
       0,
       4.0325462466767075,
+      0,
       0,
       0,
       0,
@@ -39722,6 +39774,7 @@
       0,
       0,
       0,
+      0,
       0
     ],
     [
@@ -40368,6 +40421,7 @@
       4.0325462466767075,
       4.320228319128488,
       4.320228319128488,
+      0,
       0,
       0,
       0,
@@ -41186,6 +41240,7 @@
       0,
       0,
       0,
+      0,
       0
     ],
     [
@@ -41847,6 +41902,7 @@
       4.0325462466767075,
       0,
       4.320228319128488,
+      0,
       0,
       0,
       0,
@@ -42584,6 +42640,7 @@
       4.320228319128488,
       3.8094026953624978,
       4.320228319128488,
+      0,
       0,
       0,
       0,
@@ -43382,6 +43439,7 @@
       0,
       0,
       0,
+      0,
       0
     ],
     [
@@ -44049,6 +44107,7 @@
       0,
       0,
       3.8094026953624978,
+      0,
       0,
       0,
       0,
@@ -44846,6 +44905,7 @@
       0,
       0,
       0,
+      0,
       0
     ],
     [
@@ -45518,6 +45578,7 @@
       4.320228319128488,
       4.725693427236653,
       3.8094026953624978,
+      4.725693427236653,
       4.725693427236653,
       4.725693427236653,
       4.320228319128488,
@@ -46252,6 +46313,7 @@
       0,
       0,
       0,
+      0,
       4.320228319128488,
       3.472930458741285,
       3.472930458741285,
@@ -46897,6 +46959,7 @@
       0,
       0,
       3.339399066116762,
+      0,
       0,
       0,
       0,
@@ -47717,6 +47780,7 @@
       0,
       0,
       0,
+      0,
       3.472930458741285,
       3.472930458741285,
       3.339399066116762,
@@ -48361,6 +48425,7 @@
       0,
       0,
       3.339399066116762,
+      0,
       0,
       0,
       0,
@@ -49181,6 +49246,7 @@
       0,
       0,
       0,
+      0,
       3.472930458741285,
       3.472930458741285,
       0,
@@ -49873,6 +49939,7 @@
       0,
       0,
       2.853891250335061,
+      0,
       0,
       0,
       0,
@@ -50647,6 +50714,7 @@
       0,
       0,
       0,
+      0,
       3.339399066116762,
       0,
       0,
@@ -51379,6 +51447,7 @@
       0,
       0,
       0,
+      0,
       3.339399066116762,
       0,
       0,
@@ -52069,6 +52138,7 @@
       0,
       0,
       2.853891250335061,
+      0,
       0,
       0,
       0,
@@ -52838,6 +52908,7 @@
       0,
       0,
       3.8094026953624978,
+      0,
       0,
       0,
       0,
@@ -53570,6 +53641,7 @@
       0,
       0,
       3.8094026953624978,
+      0,
       0,
       0,
       0,
@@ -54309,6 +54381,7 @@
       0,
       0,
       0,
+      0,
       3.627081138568543,
       6.232511029605105,
       10.018197198350286,
@@ -55019,6 +55092,7 @@
       0,
       0,
       3.8094026953624978,
+      0,
       0,
       0,
       0,
@@ -55774,6 +55848,7 @@
       0,
       0,
       0,
+      0,
       3.1162555148025524,
       0,
       0,
@@ -56506,6 +56581,7 @@
       0,
       0,
       0,
+      0,
       3.1162555148025524,
       0,
       0,
@@ -57181,6 +57257,7 @@
       0,
       0,
       3.472930458741285,
+      0,
       0,
       0,
       0,
@@ -58022,6 +58099,7 @@
       0,
       0,
       0,
+      0,
       0
     ],
     [
@@ -58657,6 +58735,7 @@
       0,
       0,
       2.853891250335061,
+      0,
       0,
       0,
       0,
@@ -59389,6 +59468,7 @@
       0,
       0,
       2.853891250335061,
+      0,
       0,
       0,
       0,
@@ -60208,6 +60288,7 @@
       0,
       0,
       0,
+      0,
       3.8094026953624978,
       0,
       4.0325462466767075,
@@ -60749,6 +60830,7 @@
       0,
       0,
       3.2216160304603783,
+      0,
       0,
       0,
       0,
@@ -61659,6 +61741,7 @@
       0,
       0,
       0,
+      0,
       3.8094026953624978,
       0,
       0,
@@ -62314,6 +62397,7 @@
       3.472930458741285,
       0,
       3.627081138568543,
+      0,
       0,
       0,
       0,
@@ -63075,6 +63159,7 @@
       0,
       0,
       4.320228319128488,
+      0,
       0,
       0,
       0,
