@@ -7,18 +7,19 @@ import { CollapseEditPlugin } from './collapse/CollapseEditPlugin'
 import { FrameEditPlugin } from './frame/FrameEditPlugin'
 import { CarouselEditPlugin } from './carousel/CarouselEditPlugin'
 import { TimelineEditPlugin } from './timeline/TimelineEditPlugin'
+import { AccordionEditPlugin } from './accordion/AccordionEditPlugin'
 
 export const createDescriptorsFromComponents=(EditorContext:React.Context<any>) => {
   const directives = Object.entries(components).map(([name, Comp]) =>{
    switch(name){
       case 'DataTable':
        return TableEditPlugin(EditorContext)
-      case 'DataTable':
-       return TableEditPlugin(EditorContext)
       case 'Card':
        return CardEditPlugin(EditorContext)
       case 'Timeline':
        return TimelineEditPlugin(EditorContext)
+      case 'Accordion':
+       return AccordionEditPlugin(EditorContext)
       case 'img':
        return ImageEditPlugin(EditorContext)
       case 'Frame':
