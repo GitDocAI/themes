@@ -12,6 +12,8 @@ import InvalidConfigPage from '@/components/InvalidConfig'
 import { GlobalScript } from '@/components/doc-components/GlobalScript'
 import { PrimeReactProvider } from "primereact/api";
 import { ImageWrapper } from '@/components/ImageWrapper'
+import { ConfigProvider } from '@/components/settings/ConfigContext'
+import { ConfigLayoutWrapper } from '@/components/settings/ConfigLayoutWrapper'
 
 import { openapi_path_builder } from '../shared/path_builder';
 
@@ -49,7 +51,11 @@ const RootLayout: FC<{ children: ReactNode }> = async ({ children }) => {
       </Head>
       <body style={{ margin: 0 }} >
          <PrimeReactProvider value={createPrimeReactTheme()} >
-          <DefaultTheme themeinfo={site as any} pageMap={pageMap} >{children}</DefaultTheme>
+          <ConfigProvider initialConfig={site as any}>
+            <ConfigLayoutWrapper>
+              <DefaultTheme themeinfo={site as any} pageMap={pageMap} >{children}</DefaultTheme>
+            </ConfigLayoutWrapper>
+          </ConfigProvider>
          </PrimeReactProvider>
         <GlobalScript />
         <ImageWrapper />
