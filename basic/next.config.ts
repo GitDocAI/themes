@@ -29,8 +29,27 @@ export default async function config() {
 
   return withNextra({
     devIndicators: false,
+    reactStrictMode: false,
     env: {
       SITE_CONFIG: JSON.stringify(siteConfig),
+    },
+    webpack: (config, { dev, isServer }) => {
+      if (dev && !isServer) {
+        // Disable Fast Refresh and MDX watching if DISABLE_FAST_REFRESH is set
+        if (process.env.DISABLE_FAST_REFRESH === 'true') {
+          // Try to disable Fast Refresh by filtering out the React Refresh plugin
+          config.plugins = config.plugins.filter(
+            (plugin: any) => plugin.constructor.name !== 'ReactFreshWebpackPlugin'
+          );
+
+          // Disable watching for MDX files in development
+          config.watchOptions = {
+            ...config.watchOptions,
+            ignored: ['**/content/**/*.mdx', '**/node_modules'],
+          };
+        }
+      }
+      return config;
     },
   });
 }

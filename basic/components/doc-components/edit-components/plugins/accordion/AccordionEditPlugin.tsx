@@ -147,7 +147,10 @@ export const AccordionEditPlugin = (EditorContext: React.Context<any>) => {
       const { start, end } = mdastNode.position
 
       const before = currentMarkdown.slice(0, start.offset)
-      const after = currentMarkdown.slice(end.offset)
+      let after = currentMarkdown.slice(end.offset)
+
+      // Clean up trailing newlines to avoid duplication
+      after = after.replace(/^\n{1,2}/, '')
 
       // Build new accordion markdown
       let newAccordionMarkdown = '<Accordion'
@@ -165,7 +168,8 @@ export const AccordionEditPlugin = (EditorContext: React.Context<any>) => {
 
       newAccordionMarkdown += '</Accordion>'
 
-      const updated = before + newAccordionMarkdown + after
+      // Ensure proper spacing around the accordion
+      const updated = before + newAccordionMarkdown + '\n\n' + after
 
       editorRef.current.setMarkdown(updated)
       await saveToWebhook(updated)
@@ -182,7 +186,11 @@ export const AccordionEditPlugin = (EditorContext: React.Context<any>) => {
       const { start, end } = mdastNode.position
 
       const before = currentMarkdown.slice(0, start.offset)
-      const after = currentMarkdown.slice(end.offset)
+      let after = currentMarkdown.slice(end.offset)
+
+      // Clean up trailing newlines after the accordion to avoid leaving orphaned content
+      // Remove up to 2 newlines after the accordion
+      after = after.replace(/^\n{1,2}/, '')
 
       const updated = before + after
 

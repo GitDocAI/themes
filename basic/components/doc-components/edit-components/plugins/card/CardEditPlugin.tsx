@@ -47,9 +47,13 @@ const EditableCard = ({ mdastNode }: { mdastNode: any }) => {
     const { start, end } = mdastNode.position
 
     const before = currentMarkdown.slice(0, start.offset)
-    const after = currentMarkdown.slice(end.offset)
+    let after = currentMarkdown.slice(end.offset)
 
-    const updated = before + cardMarkdown + after
+    // Clean up trailing newlines to avoid duplication
+    after = after.replace(/^\n{1,2}/, '')
+
+    // Ensure proper spacing around the card
+    const updated = before + cardMarkdown + '\n\n' + after
 
     editorRef.current.setMarkdown(updated)
     await saveToWebhook(updated)
@@ -66,7 +70,11 @@ const EditableCard = ({ mdastNode }: { mdastNode: any }) => {
     const { start, end } = mdastNode.position
 
     const before = currentMarkdown.slice(0, start.offset)
-    const after = currentMarkdown.slice(end.offset)
+    let after = currentMarkdown.slice(end.offset)
+
+    // Clean up trailing newlines after the card to avoid leaving orphaned content
+    // Remove up to 2 newlines after the card
+    after = after.replace(/^\n{1,2}/, '')
 
     const updated = before + after
 

@@ -147,15 +147,26 @@ export const ChartEditPlugin = (EditorContext: React.Context<any>) => {
 
       const currentMarkdown = editorRef.current.getMarkdown()
 
-      // Find and replace the chart - using regex to match <Chart...>...</Chart>
-      const chartRegex = /<Chart[\s\S]*?<\/Chart>/g
+      // Use the mdastNode position to identify the exact location
+      if (!mdastNode.position || !mdastNode.position.start || !mdastNode.position.end) {
+        console.error('Chart position not found')
+        return
+      }
 
-      const newMarkdown = currentMarkdown.replace(chartRegex, newChartMarkdown.trim())
+      const { start, end } = mdastNode.position
 
-      editorRef.current.setMarkdown(newMarkdown)
+      const before = currentMarkdown.slice(0, start.offset)
+      let after = currentMarkdown.slice(end.offset)
 
-      // Save to webhook
-      await saveToWebhook(newMarkdown)
+      // Clean up trailing newlines to avoid duplication
+      after = after.replace(/^\n{1,2}/, '')
+
+      // Ensure proper spacing around the chart
+      const updated = before + newChartMarkdown.trim() + '\n\n' + after
+
+      editorRef.current.setMarkdown(updated)
+      await saveToWebhook(updated)
+
       setShowEditModal(false)
     }
 
@@ -164,14 +175,25 @@ export const ChartEditPlugin = (EditorContext: React.Context<any>) => {
 
       const currentMarkdown = editorRef.current.getMarkdown()
 
-      // Remove chart from markdown
-      const chartRegex = /<Chart[\s\S]*?<\/Chart>/g
-      const newMarkdown = currentMarkdown.replace(chartRegex, '')
+      // Use the mdastNode position to identify the exact location
+      if (!mdastNode.position || !mdastNode.position.start || !mdastNode.position.end) {
+        console.error('Chart position not found')
+        return
+      }
 
-      editorRef.current.setMarkdown(newMarkdown)
+      const { start, end } = mdastNode.position
 
-      // Save to webhook
-      await saveToWebhook(newMarkdown)
+      const before = currentMarkdown.slice(0, start.offset)
+      let after = currentMarkdown.slice(end.offset)
+
+      // Clean up trailing newlines after the chart to avoid leaving orphaned content
+      // Remove up to 2 newlines after the chart
+      after = after.replace(/^\n{1,2}/, '')
+
+      const updated = before + after
+
+      editorRef.current.setMarkdown(updated)
+      await saveToWebhook(updated)
     }
 
     return (

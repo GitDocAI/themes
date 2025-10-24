@@ -72,7 +72,10 @@ export const CarouselEditPlugin = (EditorContext: React.Context<any>) => {
       const { start, end } = mdastNode.position
 
       const before = currentMarkdown.slice(0, start.offset)
-      const after = currentMarkdown.slice(end.offset)
+      let after = currentMarkdown.slice(end.offset)
+
+      // Clean up trailing newlines to avoid duplication
+      after = after.replace(/^\n{1,2}/, '')
 
       // Build new carousel markdown
       const imagesJson = JSON.stringify(newImages)
@@ -82,7 +85,8 @@ export const CarouselEditPlugin = (EditorContext: React.Context<any>) => {
       newCarouselMarkdown += `  circular={${newCircular}}\n`
       newCarouselMarkdown += '/>'
 
-      const updated = before + newCarouselMarkdown + after
+      // Ensure proper spacing around the carousel
+      const updated = before + newCarouselMarkdown + '\n\n' + after
 
       editorRef.current.setMarkdown(updated)
       await saveToWebhook(updated)
@@ -99,7 +103,11 @@ export const CarouselEditPlugin = (EditorContext: React.Context<any>) => {
       const { start, end } = mdastNode.position
 
       const before = currentMarkdown.slice(0, start.offset)
-      const after = currentMarkdown.slice(end.offset)
+      let after = currentMarkdown.slice(end.offset)
+
+      // Clean up trailing newlines after the carousel to avoid leaving orphaned content
+      // Remove up to 2 newlines after the carousel
+      after = after.replace(/^\n{1,2}/, '')
 
       const updated = before + after
 
