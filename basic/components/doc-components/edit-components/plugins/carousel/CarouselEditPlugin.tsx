@@ -68,12 +68,11 @@ export const CarouselEditPlugin = (EditorContext: React.Context<any>) => {
 
       const currentMarkdown = editorRef.current.getMarkdown()
 
-      // Build regex to match the old Carousel with any whitespace variations
-      const escapedImagesJson = JSON.stringify(images).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+      // Use the mdastNode position to identify the exact location
+      const { start, end } = mdastNode.position
 
-      // Try to match the carousel - this is tricky because JSON can have different formatting
-      // We'll do a simpler approach: find <Carousel and replace until />
-      const carouselRegex = /<Carousel[\s\S]*?\/>/g
+      const before = currentMarkdown.slice(0, start.offset)
+      const after = currentMarkdown.slice(end.offset)
 
       // Build new carousel markdown
       const imagesJson = JSON.stringify(newImages)
@@ -83,13 +82,11 @@ export const CarouselEditPlugin = (EditorContext: React.Context<any>) => {
       newCarouselMarkdown += `  circular={${newCircular}}\n`
       newCarouselMarkdown += '/>'
 
-      // Replace in markdown
-      const newMarkdown = currentMarkdown.replace(carouselRegex, newCarouselMarkdown)
+      const updated = before + newCarouselMarkdown + after
 
-      editorRef.current.setMarkdown(newMarkdown)
+      editorRef.current.setMarkdown(updated)
+      await saveToWebhook(updated)
 
-      // Save to webhook
-      await saveToWebhook(newMarkdown)
       setShowEditModal(false)
     }
 
@@ -98,14 +95,16 @@ export const CarouselEditPlugin = (EditorContext: React.Context<any>) => {
 
       const currentMarkdown = editorRef.current.getMarkdown()
 
-      // Remove carousel from markdown - find and remove <Carousel.../>
-      const carouselRegex = /<Carousel[\s\S]*?\/>/g
-      const newMarkdown = currentMarkdown.replace(carouselRegex, '')
+      // Use the mdastNode position to identify the exact location
+      const { start, end } = mdastNode.position
 
-      editorRef.current.setMarkdown(newMarkdown)
+      const before = currentMarkdown.slice(0, start.offset)
+      const after = currentMarkdown.slice(end.offset)
 
-      // Save to webhook
-      await saveToWebhook(newMarkdown)
+      const updated = before + after
+
+      editorRef.current.setMarkdown(updated)
+      await saveToWebhook(updated)
     }
 
     return (
