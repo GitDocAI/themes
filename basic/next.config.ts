@@ -28,6 +28,7 @@ export default async function config() {
   }
 
   return withNextra({
+    devIndicators: false,
     env: {
       SITE_CONFIG: JSON.stringify(siteConfig),
     },

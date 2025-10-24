@@ -1,271 +1,248 @@
 # Cloud Services Integration
 
-Acme Platform provides seamless integration with major cloud services, enabling you to build powerful applications with managed infrastructure.
+Learn how to integrate your application with popular cloud service providers.
 
-![Cloud Services Architecture](https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&h=400&fit=crop&auto=format)
+## Overview
 
-## Supported Cloud Providers
+Our platform provides seamless integration with major cloud providers, enabling you to leverage powerful infrastructure without the complexity.
 
-Acme Platform works with all major cloud providers:
+### Supported Providers
 
-### Amazon Web Services (AWS)
+We currently support:
 
-1. **Compute Services** - EC2, Lambda, ECS integration
-2. **Storage** - S3, EBS, EFS support
-3. **Databases** - RDS, DynamoDB, DocumentDB
-4. **Networking** - VPC, CloudFront, Route 53
+<Card title="AWS Integration Guide" subtitle="Connect your AWS services seamlessly" image="https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=400&h=200&fit=crop">
+  Amazon Web Services provides a complete ecosystem of cloud infrastructure. Our platform offers native integration with EC2, S3, Lambda, RDS, and more AWS services.
+</Card>
 
-> [!TIP]
-> Acme Platform automatically optimizes your AWS resource usage to minimize costs.
+* **Amazon Web Services (AWS)** - Complete AWS ecosystem
+* **Google Cloud Platform (GCP)** - Full GCP services
+* **Microsoft Azure** - Azure cloud services
+* **DigitalOcean** - Simple cloud infrastructure
 
-## Database Integration
+## Getting Started with Cloud Integration
 
-### Managed Database Services
+### Prerequisites
 
-Acme Platform supports multiple database engines:
+Before connecting to cloud services:
 
+1. Active account with your chosen provider
+2. API credentials or access keys
+3. Appropriate permissions configured
+4. Billing set up (if required)
 
-### Database Configuration
+## AWS Integration
 
-Configure your database connection:
+### Setting Up AWS
 
-```javascript
-// Database setup example
-const config = {
-  database: {
-    type: 'postgresql',
-    host: 'db.acmecorp.com',
-    port: 5432,
-    username: 'app_user',
-    password: process.env.DB_PASSWORD,
-    database: 'production_db'
-  }
-}
+Connect your AWS account in three steps:
+
+#### Step 1: Generate Access Keys
+
+Create IAM credentials in the AWS console with appropriate permissions.
+
+#### Step 2: Configure Credentials
+
+Add your AWS credentials to the configuration:
+
+```yaml
+cloud:
+  provider: aws
+  region: us-east-1
+  credentials:
+    access_key_id: YOUR_ACCESS_KEY
+    secret_access_key: YOUR_SECRET_KEY
 ```
 
-The platform will automatically:
-- Handle connection pooling
-- Set up read replicas for scaling
-- Configure automatic backups
-- Monitor performance metrics
+> ***Never commit credentials to version control.*** Use environment variables instead.
 
-### Connection Examples
+#### Step 3: Verify Connection
 
-```javascript
-// Simple database query
-async function getUsers() {
-  const result = await db.query('SELECT * FROM users WHERE active = true');
-  return result.rows;
-}
+Test your AWS connection:
+
+```bash
+platform cloud test
 ```
 
-> [!INFO]
-> Acme Platform provides built-in connection pooling and automatic failover for high availability.
+### AWS Services
+
+#### Compute Services
+
+* **EC2** - Virtual machines
+* **Lambda** - Serverless functions
+* **ECS** - Container orchestration
+
+#### Storage Services
+
+* **S3** - Object storage
+* **EBS** - Block storage
+* **EFS** - File storage
+
+#### Database Services
+
+* **RDS** - Relational databases
+* **DynamoDB** - NoSQL database
+* **ElastiCache** - In-memory caching
+
+## Google Cloud Platform
+
+### GCP Setup
+
+Similar to AWS, but with GCP-specific configuration:
+
+```yaml
+cloud:
+  provider: gcp
+  project_id: your-project-id
+  region: us-central1
+  credentials_file: /path/to/service-account.json
+```
+
+### Key GCP Services
+
+1. **Compute Engine** - VMs and instances
+2. **Cloud Storage** - Object storage
+3. **Cloud SQL** - Managed databases
+4. **Cloud Functions** - Serverless computing
+
+## Microsoft Azure
+
+### Azure Configuration
+
+Connect to Azure using:
+
+```yaml
+cloud:
+  provider: azure
+  subscription_id: your-subscription-id
+  resource_group: your-resource-group
+  region: eastus
+```
+
+### Azure Services
+
+* **Virtual Machines** - Compute instances
+* **Blob Storage** - Object storage
+* **Azure SQL** - Managed SQL databases
+* **Functions** - Serverless platform
 
 ## Storage Solutions
 
 ### Object Storage
 
-Seamlessly integrate with cloud storage:
-
-- **File Uploads** - Direct integration with S3, GCS, Azure Blob
-- **CDN Integration** - Automatic CloudFront/CloudFlare setup
-- **Image Processing** - On-the-fly image optimization
-- **Backup Solutions** - Automated backup strategies
-
-### File Management API
-
-```javascript
-// Upload file example
-const uploadResult = await acme.storage.upload({
-  file: fileBuffer,
-  bucket: 'user-uploads',
-  key: 'profile-images/user-123.jpg',
-  metadata: {
-    userId: '123',
-    uploadDate: new Date().toISOString()
-  }
-});
-```
-
-## Monitoring & Observability
-
-### Built-in Monitoring
-
-The platform provides comprehensive monitoring out of the box:
-
-<CheckList>
-  <CheckItem variant="do">
-    **Application Performance** - Response times, throughput
-  </CheckItem>
-  <CheckItem variant="do">
-    **Infrastructure Metrics** - CPU, memory, disk usage
-  </CheckItem>
-  <CheckItem variant="do">
-    **Error Tracking** - Automatic error detection and alerts
-  </CheckItem>
-  <CheckItem variant="do">
-    **Custom Metrics** - Define your own business metrics
-  </CheckItem>
-</CheckList>
-
-### Logging Configuration
-
-```json
-{
-  "logging": {
-    "level": "info",
-    "format": "json",
-    "destinations": [
-      "console",
-      "cloudwatch",
-      "elasticsearch"
-    ]
-  }
-}
-```
-
-## Security Features
-
-### Authentication & Authorization
-
-> [!WARNING]
-> Always implement proper authentication and authorization for production applications.
-
-Acme Platform provides multiple authentication options:
-
-- **OAuth 2.0** - Integration with Google, GitHub, Microsoft
-- **JWT Tokens** - Stateless authentication
-- **API Keys** - Service-to-service authentication
-- **RBAC** - Role-based access control
-
-### Security Best Practices
-
-<CheckList>
-  <CheckItem variant="do">
-    Enable HTTPS for all endpoints
-  </CheckItem>
-  <CheckItem variant="do">
-    Use environment variables for secrets
-  </CheckItem>
-  <CheckItem variant="do">
-    Implement rate limiting
-  </CheckItem>
-  <CheckItem variant="do">
-    Regular security audits
-  </CheckItem>
-</CheckList>
-
-<CheckList>
-  <CheckItem variant="dont">
-    Store secrets in source code
-  </CheckItem>
-  <CheckItem variant="dont">
-    Use default passwords
-  </CheckItem>
-  <CheckItem variant="dont">
-    Expose internal APIs publicly
-  </CheckItem>
-</CheckList>
-
-## API Gateway Integration
-
-### Automatic API Management
-
-The platform automatically sets up:
-
-- **Load Balancing** - Distribute traffic across instances
-- **Rate Limiting** - Protect against abuse
-- **Request/Response Transformation** - Data formatting
-- **Caching** - Improve performance
-
-### API Configuration
-
-```json
-{
-  "api": {
-    "rateLimit": {
-      "requests": 100,
-      "window": "1m"
-    },
-    "cors": {
-      "origins": ["https://myapp.com"],
-      "methods": ["GET", "POST", "PUT", "DELETE"]
-    },
-    "authentication": {
-      "required": true,
-      "methods": ["jwt", "apikey"]
-    }
-  }
-}
-```
-
-## Scaling & Performance
-
-### Auto-scaling Configuration
-
-Configure automatic scaling based on various metrics:
-
-```json
-{
-  "scaling": {
-    "metric": "cpu",
-    "target": 70,
-    "minInstances": 2,
-    "maxInstances": 20,
-    "scaleUpCooldown": "5m",
-    "scaleDownCooldown": "10m"
-  }
-}
-```
-
-### Performance Optimization
-
-The platform automatically optimizes:
-
-- **Cold Start Reduction** - Keep functions warm
-- **Connection Pooling** - Reuse database connections
-- **Caching Strategies** - Multiple cache layers
-- **CDN Integration** - Global content delivery
-
-## Development Tools
-
-### Local Development
-
-Test your integrations locally:
+Use cloud object storage for files and media:
 
 ```bash
-# Start local development environment
-acme dev --services=database,redis,storage
+# Upload a file
+platform storage upload local-file.pdf bucket/path/
 
-# Run with specific cloud provider
-acme dev --provider=aws --region=us-west-2
+# Download a file
+platform storage download bucket/path/file.pdf local-file.pdf
+
+# List files
+platform storage list bucket/path/
 ```
 
-### Testing & Debugging
+### Database Integration
 
-<CheckList>
-  <CheckItem variant="do">
-    **Unit Testing** - Test individual components
-  </CheckItem>
-  <CheckItem variant="do">
-    **Integration Testing** - Test service interactions
-  </CheckItem>
-  <CheckItem variant="do">
-    **Load Testing** - Performance under stress
-  </CheckItem>
-  <CheckItem variant="do">
-    **Debugging Tools** - Built-in debugging support
-  </CheckItem>
-</CheckList>
+Connect to managed databases:
+
+```yaml
+database:
+  type: postgresql
+  host: your-db.region.provider.com
+  port: 5432
+  name: production_db
+  ssl: true
+```
+
+## Monitoring & Logging
+
+### Cloud Monitoring
+
+All cloud providers offer monitoring solutions:
+
+* **AWS CloudWatch** - AWS metrics and logs
+* **GCP Cloud Monitoring** - GCP observability
+* **Azure Monitor** - Azure monitoring suite
+
+### Log Aggregation
+
+Centralize your logs from all cloud services:
+
+```yaml
+logging:
+  destination: cloud
+  retention_days: 30
+  level: info
+```
+
+## Security Best Practices
+
+### Network Security
+
+1. **Use VPC/VNet** - Isolate your resources
+2. **Configure firewalls** - Restrict access
+3. **Enable encryption** - Protect data in transit and at rest
+4. **Implement IAM** - Least privilege access
+
+> Always follow the *principle of least privilege* when granting permissions.
+
+### Credentials Management
+
+* Store credentials in environment variables
+* Use secret management services (AWS Secrets Manager, etc.)
+* Rotate credentials regularly
+* Never log or expose credentials
+
+## Cost Optimization
+
+### Monitor Your Spending
+
+Track cloud costs effectively:
+
+* Set up billing alerts
+* Review usage regularly
+* Use cost allocation tags
+* Implement auto-scaling
+
+### Cost-Saving Tips
+
+1. Use reserved instances for predictable workloads
+2. Implement auto-shutdown for dev/test environments
+3. Choose appropriate instance sizes
+4. Leverage spot/preemptible instances
+
+## Backup & Disaster Recovery
+
+### Automated Backups
+
+Configure automatic backups:
+
+```yaml
+backup:
+  enabled: true
+  frequency: daily
+  retention: 30
+  regions:
+    - primary: us-east-1
+    - secondary: us-west-2
+```
+
+### Disaster Recovery
+
+Implement a disaster recovery strategy:
+
+* ***Regular backups*** to multiple regions
+* *Automated failover* configuration
+* **Recovery time objectives (RTO)** planning
+* **Recovery point objectives (RPO)** definition
 
 ## Next Steps
 
-- Learn about [Security Configuration](/v1.0.0/documentation/core_features/theme_system)
-- Explore [Monitoring & Analytics](/v1.0.0/documentation/core_features/version_control)
-- Check out our [API Reference](/v1.0.0/api_reference/documents/create) for detailed documentation
+* Configure [Security Settings](/v1.0.0/documentation/core_features/security_configuration)
+* Set up [Monitoring](/v1.0.0/documentation/core_features/monitoring_analytics)
+* Review our API examples
 
----
+***
 
-> [!NOTE]
-> Cloud services integration is continuously expanding. New providers and services are added regularly based on user demand.
+*Cloud integration opens up endless possibilities for scaling and reliability.*

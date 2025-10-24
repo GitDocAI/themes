@@ -18,9 +18,9 @@ interface CardModalProps {
 }
 
 const COMMON_ICONS = [
-  'pi-bolt', 'pi-book', 'pi-file', 'pi-folder', 'pi-link', 'pi-star', 'pi-heart', 'pi-bell',
-  'pi-check', 'pi-times', 'pi-cog', 'pi-user', 'pi-envelope', 'pi-calendar', 'pi-clock',
-  'pi-chart-line', 'pi-database', 'pi-code', 'pi-desktop', 'pi-globe', 'pi-shield'
+  'pi pi-bolt', 'pi pi-book', 'pi pi-file', 'pi pi-folder', 'pi pi-link', 'pi pi-star', 'pi pi-heart', 'pi pi-bell',
+  'pi pi-check', 'pi pi-times', 'pi pi-cog', 'pi pi-user', 'pi pi-envelope', 'pi pi-calendar', 'pi pi-clock',
+  'pi pi-chart-line', 'pi pi-database', 'pi pi-code', 'pi pi-desktop', 'pi pi-globe', 'pi pi-shield'
 ]
 
 export const CardModal: React.FC<CardModalProps> = ({ isOpen, onClose, onInsert, initialData }) => {
@@ -41,7 +41,13 @@ export const CardModal: React.FC<CardModalProps> = ({ isOpen, onClose, onInsert,
 
     // Add optional props if they have values
     if (subtitle) cardMarkdown += ` subtitle="${subtitle}"`
-    if (icon) cardMarkdown += ` icon="${icon}"`
+
+    // Normalize icon - ensure it has "pi " prefix if it doesn't already
+    if (icon) {
+      const normalizedIcon = icon.startsWith('pi ') || icon.includes(' ') ? icon : `pi ${icon}`
+      cardMarkdown += ` icon="${normalizedIcon}"`
+    }
+
     if (image) cardMarkdown += ` image="${image}"`
     if (href) cardMarkdown += ` href="${href}"`
 
@@ -124,10 +130,19 @@ export const CardModal: React.FC<CardModalProps> = ({ isOpen, onClose, onInsert,
               <label className="block text-sm font-medium mb-1.5 text-gray-700 dark:text-gray-300">
                 Icon (optional)
               </label>
+              <div className="text-xs text-gray-600 dark:text-gray-400 mb-2">
+                Select from common icons or enter custom PrimeIcon class
+              </div>
               <select
-                value={icon}
-                onChange={(e) => setIcon(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm outline-none bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
+                value={COMMON_ICONS.includes(icon) ? icon : 'custom'}
+                onChange={(e) => {
+                  if (e.target.value === 'custom') {
+                    setIcon('')
+                  } else {
+                    setIcon(e.target.value)
+                  }
+                }}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm outline-none bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 mb-2"
               >
                 <option value="">No icon</option>
                 {COMMON_ICONS.map((iconName) => (
@@ -135,17 +150,17 @@ export const CardModal: React.FC<CardModalProps> = ({ isOpen, onClose, onInsert,
                     {iconName}
                   </option>
                 ))}
+                <option value="custom">Custom icon...</option>
               </select>
-              <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                Or enter custom PrimeIcon class
-              </div>
-              <input
-                type="text"
-                value={icon}
-                onChange={(e) => setIcon(e.target.value)}
-                placeholder="e.g., pi pi-star"
-                className="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md text-[13px] outline-none mt-1.5 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
-              />
+              {(!COMMON_ICONS.includes(icon) && icon !== '') && (
+                <input
+                  type="text"
+                  value={icon}
+                  onChange={(e) => setIcon(e.target.value)}
+                  placeholder="e.g., pi pi-star"
+                  className="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md text-[13px] outline-none bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
+                />
+              )}
             </div>
 
             {/* Image URL (optional) */}

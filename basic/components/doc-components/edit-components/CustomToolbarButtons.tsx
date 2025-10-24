@@ -11,8 +11,10 @@ import { ImageInsertModal } from './plugins/image/ImageInsertModal'
 import { FrameInsertModal } from './plugins/frame/FrameInsertModal'
 import { CarouselInsertModal } from './plugins/carousel/CarouselInsertModal'
 import { ChartInsertModal } from './plugins/chart/ChartInsertModal'
+import { MessageSelectModal } from './plugins/message/MessageSelectModal'
+import { AccordionEditModal } from './plugins/accordion/AccordionEditModal'
 
-type ComponentType = 'tip' | 'note' | 'warning' | 'danger' | 'info' | 'card' | 'codeblock' | 'datatable' | 'image' | 'frame' | 'carousel' | 'chart' | 'timeline' |'checklist' | 'scrollpanel'
+type ComponentType = 'accordion' | 'card' | 'carousel' | 'chart' | 'checklist' | 'codeblock' | 'codegroup' | 'columns' | 'datatable' | 'frame' | 'image' | 'message' | 'request' | 'response' | 'scrollpanel' | 'stepper' | 'tabview' | 'timeline'
 
 interface ComponentOption {
   type: ComponentType
@@ -22,52 +24,10 @@ interface ComponentOption {
 
 const componentOptions: ComponentOption[] = [
   {
-    type: 'image',
-    label: 'Image',
+    type: 'accordion',
+    label: 'Accordion',
     icon: (
-      <i className="pi pi-image" style={{ fontSize: '1rem' }}></i>
-    )
-  },
-  {
-    type: 'frame',
-    label: 'Frame',
-    icon: (
-      <i className="pi pi-window-maximize" style={{ fontSize: '1rem' }}></i>
-    )
-  },
-  {
-    type: 'tip',
-    label: 'Tip',
-    icon: (
-      <i className="pi pi-lightbulb" style={{ fontSize: '1rem' }}></i>
-    )
-  },
-  {
-    type: 'note',
-    label: 'Note',
-    icon: (
-      <i className="pi pi-pencil" style={{ fontSize: '1rem' }}></i>
-    )
-  },
-  {
-    type: 'warning',
-    label: 'Warning',
-    icon: (
-      <i className="pi pi-exclamation-triangle" style={{ fontSize: '1rem' }}></i>
-    )
-  },
-  {
-    type: 'danger',
-    label: 'Danger',
-    icon: (
-      <i className="pi pi-times-circle" style={{ fontSize: '1rem' }}></i>
-    )
-  },
-  {
-    type: 'info',
-    label: 'Info',
-    icon: (
-      <i className="pi pi-info-circle" style={{ fontSize: '1rem' }}></i>
+      <i className="pi pi-chevron-down" style={{ fontSize: '1rem' }}></i>
     )
   },
   {
@@ -75,20 +35,6 @@ const componentOptions: ComponentOption[] = [
     label: 'Card',
     icon: (
       <i className="pi pi-credit-card" style={{ fontSize: '1rem' }}></i>
-    )
-  },
-  {
-    type: 'codeblock',
-    label: 'Code Block',
-    icon: (
-      <i className="pi pi-code" style={{ fontSize: '1rem' }}></i>
-    )
-  },
-  {
-    type: 'datatable',
-    label: 'Data Table',
-    icon: (
-      <i className="pi pi-table" style={{ fontSize: '1rem' }}></i>
     )
   },
   {
@@ -106,27 +52,103 @@ const componentOptions: ComponentOption[] = [
     )
   },
   {
+    type: 'checklist',
+    label: 'Check List',
+    icon: (
+      <i className="pi pi-list-check" style={{ fontSize: '1rem' }}></i>
+    )
+  },
+  {
+    type: 'codeblock',
+    label: 'Code Block',
+    icon: (
+      <i className="pi pi-code" style={{ fontSize: '1rem' }}></i>
+    )
+  },
+  {
+    type: 'codegroup',
+    label: 'Code Group',
+    icon: (
+      <i className="pi pi-copy" style={{ fontSize: '1rem' }}></i>
+    )
+  },
+  {
+    type: 'columns',
+    label: 'Columns',
+    icon: (
+      <i className="pi pi-table" style={{ fontSize: '1rem' }}></i>
+    )
+  },
+  {
+    type: 'datatable',
+    label: 'Data Table',
+    icon: (
+      <i className="pi pi-table" style={{ fontSize: '1rem' }}></i>
+    )
+  },
+  {
+    type: 'frame',
+    label: 'Frame',
+    icon: (
+      <i className="pi pi-window-maximize" style={{ fontSize: '1rem' }}></i>
+    )
+  },
+  {
+    type: 'image',
+    label: 'Image',
+    icon: (
+      <i className="pi pi-image" style={{ fontSize: '1rem' }}></i>
+    )
+  },
+  {
+    type: 'message',
+    label: 'Message',
+    icon: (
+      <i className="pi pi-comment" style={{ fontSize: '1rem' }}></i>
+    )
+  },
+  {
+    type: 'request',
+    label: 'Request',
+    icon: (
+      <i className="pi pi-send" style={{ fontSize: '1rem' }}></i>
+    )
+  },
+  {
+    type: 'response',
+    label: 'Response',
+    icon: (
+      <i className="pi pi-reply" style={{ fontSize: '1rem' }}></i>
+    )
+  },
+  {
     type: 'scrollpanel',
     label: 'Scroll Panel',
     icon: (
       <i className="pi pi-align-justify" style={{ fontSize: '1rem' }}></i>
     )
   },
-    {
-      type: 'timeline',
-      label: 'Timeline',
-      icon: (
-        <i className="pi pi-clock" style={{ fontSize: '1rem' }}></i>
-      )
-    },
-    {
-      type: 'checklist',
-      label: 'Check List',
-      icon: (
-        <i className="pi pi-list-check" style={{ fontSize: '1rem' }}></i>
-      )
-    }
-,
+  {
+    type: 'stepper',
+    label: 'Stepper',
+    icon: (
+      <i className="pi pi-sort-numeric-up" style={{ fontSize: '1rem' }}></i>
+    )
+  },
+  {
+    type: 'tabview',
+    label: 'Tab View',
+    icon: (
+      <i className="pi pi-bars" style={{ fontSize: '1rem' }}></i>
+    )
+  },
+  {
+    type: 'timeline',
+    label: 'Timeline',
+    icon: (
+      <i className="pi pi-clock" style={{ fontSize: '1rem' }}></i>
+    )
+  }
 ]
 
 interface InsertComponentDropdownProps {
@@ -143,6 +165,8 @@ export const InsertComponentDropdown: React.FC<InsertComponentDropdownProps> = (
   const [showFrameModal, setShowFrameModal] = useState(false)
   const [showCarouselModal, setShowCarouselModal] = useState(false)
   const [showChartModal, setShowChartModal] = useState(false)
+  const [showMessageModal, setShowMessageModal] = useState(false)
+  const [showAccordionModal, setShowAccordionModal] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const buttonRef = useRef<HTMLButtonElement>(null)
   const insertMarkdown = usePublisher(insertMarkdown$)
@@ -213,68 +237,80 @@ export const InsertComponentDropdown: React.FC<InsertComponentDropdownProps> = (
 
   const handleInsert = (type: ComponentType) => {
     if (type === 'image') {
-      // Show Image modal
       setShowImageModal(true)
       setIsOpen(false)
     } else if (type === 'frame') {
-      // Show Frame modal
       setShowFrameModal(true)
       setIsOpen(false)
-    } else if (type === 'codeblock') {
-      // Insert code block as markdown - the codeBlockPlugin will parse and render it
-      const codeBlockMarkdown = '\n\n```js\n\n```\n\n'
-      insertMarkdown(codeBlockMarkdown)
-      setIsOpen(false)
     } else if (type === 'card') {
-      // Show Card modal
       setShowCardModal(true)
       setIsOpen(false)
     } else if (type === 'datatable') {
-      // Show DataTable modal
       setShowDataTableModal(true)
       setIsOpen(false)
     } else if (type === 'carousel') {
-      // Show Carousel modal
       setShowCarouselModal(true)
       setIsOpen(false)
     } else if (type === 'chart') {
-      // Show Chart modal
       setShowChartModal(true)
       setIsOpen(false)
+    } else if (type === 'message') {
+      setShowMessageModal(true)
+      setIsOpen(false)
+    } else if (type === 'accordion') {
+      setShowAccordionModal(true)
+      setIsOpen(false)
+    } else if (type === 'codeblock') {
+      const codeBlockMarkdown = '\n\n```js\n\n```\n\n'
+      insertMarkdown(codeBlockMarkdown)
+      setIsOpen(false)
+    } else if (type === 'codegroup') {
+      const codeGroupMarkdown = `<CodeGroup>\n  <File name="example.js" lang="js" code={\`console.log('Hello World')\`} />\n  <File name="example.py" lang="python" code={\`print('Hello World')\`} />\n</CodeGroup>\n\n`
+      insertMarkdown(codeGroupMarkdown)
+      setIsOpen(false)
+    } else if (type === 'columns') {
+      const columnsMarkdown = `<Columns cols={2}>\n  <div>Column 1 content</div>\n  <div>Column 2 content</div>\n</Columns>\n\n`
+      insertMarkdown(columnsMarkdown)
+      setIsOpen(false)
+    } else if (type === 'checklist') {
+      const checklistMarkdown = `<CheckList>\n  <CheckItem variant='on'>Completed item</CheckItem>\n  <CheckItem variant='off'>Pending item</CheckItem>\n</CheckList>\n\n`
+      insertMarkdown(checklistMarkdown)
+      setIsOpen(false)
     } else if (type === 'scrollpanel') {
-      // Insert ScrollPanel as markdown
       const scrollPanelMarkdown = '<ScrollPanel>\n\n</ScrollPanel>\n\n'
       insertMarkdown(scrollPanelMarkdown)
       setIsOpen(false)
-    }
-     else if (type === 'timeline') {
-      // Insert Timeline component as markdown
-      const timelineMarkdown = `<Timeline\n  events={[\n    {\n      "title": \"Event 1\",
-      "date": \"2023-01-01\",
-      "content": \"Description of event 1"\n    },\n    {\n      "title": \"Event 2\",
-      "date": \"2023-01-02\",
-      "content": \"Description of event 2"\n    }\n  ]}\n/>\n\n`;
+    } else if (type === 'stepper') {
+      const stepperMarkdown = `<Stepper>\n  <StepperPanel header="Step 1">\n    Content for step 1\n  </StepperPanel>\n  <StepperPanel header="Step 2">\n    Content for step 2\n  </StepperPanel>\n</Stepper>\n\n`
+      insertMarkdown(stepperMarkdown)
+      setIsOpen(false)
+    } else if (type === 'tabview') {
+      const tabViewMarkdown = `<TabView>\n  <TabPanel header="Tab 1">\n    Content for tab 1\n  </TabPanel>\n  <TabPanel header="Tab 2">\n    Content for tab 2\n  </TabPanel>\n</TabView>\n\n`
+      insertMarkdown(tabViewMarkdown)
+      setIsOpen(false)
+    } else if (type === 'timeline') {
+      const timelineMarkdown = `<Timeline\n  events={[\n    {\n      "title": "Event 1",\n      "date": "2023-01-01",\n      "content": "Description of event 1"\n    },\n    {\n      "title": "Event 2",\n      "date": "2023-01-02",\n      "content": "Description of event 2"\n    }\n  ]}\n/>\n\n`
       insertMarkdown(timelineMarkdown)
       setIsOpen(false)
-    }else if (type === 'checklist') {
-      const timelineMarkdown = `<CheckList>
-                <CheckItem variant='on'> New Element </CheckItem>
-             </CheckList>`;
-      insertMarkdown(timelineMarkdown)
+    } else if (type === 'request') {
+      const requestMarkdown = `<Request>\n\n\`\`\`bash\ncurl -X GET https://api.example.com/endpoint\n\`\`\`\n\n</Request>\n\n`
+      insertMarkdown(requestMarkdown)
       setIsOpen(false)
-    }
-
-    else {
-      // Insert JSX component as markdown (Info, Tip, Warning, Danger, Note)
-      const componentName = type.charAt(0).toUpperCase() + type.slice(1)
-      const jsxMarkdown = '<' + componentName + '>\n\n</' + componentName + '>\n\n'
-      insertMarkdown(jsxMarkdown)
+    } else if (type === 'response') {
+      const responseMarkdown = `<Response>\n\n\`\`\`json\n{\n  "status": "success",\n  "data": {}\n}\n\`\`\`\n\n</Response>\n\n`
+      insertMarkdown(responseMarkdown)
       setIsOpen(false)
     }
   }
 
   const handleCardInsert = (cardMarkdown: string) => {
     insertMarkdown(cardMarkdown + '\n\n')
+  }
+
+  const handleMessageInsert = (type: 'tip' | 'note' | 'warning' | 'danger' | 'info') => {
+    const componentName = type.charAt(0).toUpperCase() + type.slice(1)
+    const jsxMarkdown = '<' + componentName + '>\n\n</' + componentName + '>\n\n'
+    insertMarkdown(jsxMarkdown)
   }
 
   const handleDataTableInsert = (tableMarkdown: string) => {
@@ -322,6 +358,26 @@ export const InsertComponentDropdown: React.FC<InsertComponentDropdownProps> = (
 
   const handleChartInsert = (chartMarkdown: string) => {
     insertMarkdown(chartMarkdown)
+  }
+
+  const handleAccordionInsert = (tabs: any[], multiple: boolean) => {
+    // Build accordion markdown
+    let accordionMarkdown = '<Accordion'
+    if (multiple) {
+      accordionMarkdown += ' multiple'
+    }
+    accordionMarkdown += '>\n'
+
+    // Add each tab
+    tabs.forEach((tab) => {
+      accordionMarkdown += `  <AccordionTab header="${tab.header}">\n`
+      accordionMarkdown += `    ${tab.content}\n`
+      accordionMarkdown += `  </AccordionTab>\n`
+    })
+
+    accordionMarkdown += '</Accordion>\n\n'
+
+    insertMarkdown(accordionMarkdown)
   }
 
   return (
@@ -402,6 +458,18 @@ export const InsertComponentDropdown: React.FC<InsertComponentDropdownProps> = (
         isOpen={showChartModal}
         onClose={() => setShowChartModal(false)}
         onInsert={handleChartInsert}
+      />
+
+      <MessageSelectModal
+        isOpen={showMessageModal}
+        onClose={() => setShowMessageModal(false)}
+        onSelect={handleMessageInsert}
+      />
+
+      <AccordionEditModal
+        isOpen={showAccordionModal}
+        onClose={() => setShowAccordionModal(false)}
+        onUpdate={handleAccordionInsert}
       />
     </div>
   )

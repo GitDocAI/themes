@@ -20,11 +20,16 @@ export const BasicPrimeCard: React.FC<PrimeCardProps> = ({
   children,
   ...props
 }) => {
+  // Normalize icon className - add "pi" prefix if not present
+  const iconClassName = icon
+    ? (icon.startsWith('pi ') || icon.startsWith('pi-') ? icon : `pi ${icon}`)
+    : undefined
+
   const header = image ? (
     <img alt={title || 'Card image'} src={image} />
-  ) : icon ? (
+  ) : iconClassName ? (
     <div className="prime-card-icon-header">
-      <i className={icon}></i>
+      <i className={iconClassName}></i>
     </div>
   ) : undefined
 

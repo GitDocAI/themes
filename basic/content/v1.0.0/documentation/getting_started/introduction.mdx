@@ -1,238 +1,96 @@
-# Introduction to Acme Platform
+understand the core concepts and get started quickly.
 
-Welcome to Acme Platform, the comprehensive solution that empowers modern teams to build, deploy, and scale applications with ease.
+## What is This Platform?
 
-    | Property | Description                           |
-    | -------- | ------------------------------------- |
-    | Name     | Full name of user                     |
-    | Age      | Reported age                          |
-    | Joined   | Whether the user joined the community |
-    | Joined   | Whether the user joined the community |
-    | Joined   | Whether the user joined the community |
-    | Joined   | Whether the user joined the community |
+Our platform is a **modern solution** designed to simplify complex workflows and enhance productivity. It provides an intuitive interface for managing your projects and collaborating with your team.
 
+### Key Features
 
+The platform includes several powerful features:
 
-<Accordion multiple activeIndex={[0, 2]}>
-</Accordion>
-
-
-<Timeline events={[{ "title": "Inicio", "content": "Proyecto creado", "icon": "pi pi-flag" },{ "title": "Desarrollo", "content": "Implementando módulos", "icon": "pi pi-code" }]} >
-</Timeline>
-
-
-
-<RightPanel>
-  <ResponseExample
-    responses={{"200":{"description":"Token is valid","content":{"application/json":{"schema":{"type":"object","properties":{"expiresAt":{"type":"string","format":"date-time","description":"Token expiration time"},"scopes":{"type":"array","description":"Token permissions","items":{"type":"string"}},"user":{"type":"object","properties":{"email":{"type":"string","format":"email"},"id":{"type":"string","format":"uuid"},"name":{"type":"string"},"role":{"type":"string","enum":["admin","developer","viewer"]}},"required_fields":["id","name","email","role"]},"valid":{"type":"boolean","description":"Whether the token is valid"}},"required_fields":["valid"]}}}},"400":{"description":"Bad request - invalid input parameters","content":{"application/json":{"schema":{"type":"object","properties":{"code":{"type":"string","description":"Error code"},"details":{"type":"object","description":"Additional error details"},"message":{"type":"string","description":"Error message"},"timestamp":{"type":"string","format":"date-time","description":"Error timestamp"}},"required_fields":["code","message","timestamp"]}}}},"401":{"description":"Unauthorized - authentication required","content":{"application/json":{"schema":{"type":"object","properties":{"code":{"type":"string","description":"Error code"},"details":{"type":"object","description":"Additional error details"},"message":{"type":"string","description":"Error message"},"timestamp":{"type":"string","format":"date-time","description":"Error timestamp"}},"required_fields":["code","message","timestamp"]}}}},"500":{"description":"Internal server error","content":{"application/json":{"schema":{"type":"object","properties":{"code":{"type":"string","description":"Error code"},"details":{"type":"object","description":"Additional error details"},"message":{"type":"string","description":"Error message"},"timestamp":{"type":"string","format":"date-time","description":"Error timestamp"}},"required_fields":["code","message","timestamp"]}}}}}}
-  />
-</RightPanel>
-
-> [!TIP]
-> Acme Platform provides everything you need to go from idea to production in minutes, not days.
-
-## What is Acme Platform?
-
-Acme Platform is an innovative cloud-native platform that combines the power of modern infrastructure with developer-friendly tools. It helps teams:
-
-- **Rapidly deploy** applications to the cloud
-- **Scale automatically** based on demand
-- **Monitor performance** in real-time
-- **Collaborate effectively** across teams
-
-## Key Benefits
-
-<CheckList>
-  - [x] something
-  <CheckItem variant="do">
-    Reduces deployment time by 90% with automated CI/CD
-  </CheckItem>
-  <CheckItem variant="do">
-    Scales automatically to handle traffic spikes
-  </CheckItem>
-  <CheckItem variant="do">
-    Provides comprehensive monitoring and analytics
-  </CheckItem>
-  <CheckItem variant="do">
-    Supports all major programming languages and frameworks
-  </CheckItem>
-</CheckList>
-
-## How It Works
-
-Acme Platform follows a simple three-step process:
-
-1. **Connect Your Code** - Link your Git repository to Acme Platform
-2. **Automated Build** - Our system automatically builds and tests your application
-3. **Deploy & Scale** - Your app is deployed with automatic scaling and monitoring
-
-> [!INFO]
-> Acme Platform supports all major programming languages and frameworks, including JavaScript, Python, Java, Go, and more.
+* Real-time collaboration
+* Advanced security measures
+* Scalable infrastructure
+* Comprehensive analytics
 
 ## Getting Started
 
-Ready to transform your development workflow? Here's what you need to get started:
+> Before you begin, make sure you have reviewed the system requirements and have the necessary permissions.
 
-- A Git repository (GitHub, GitLab, or Bitbucket)
-- A cloud account (AWS, Azure, or GCP)
-- 5 minutes of your time
+### Prerequisites
 
-Let's move on to the [Installation Guide](/v1.0.0/documentation/getting_started/installation) to set up your first Acme Platform project.
+To use this platform effectively, you should have:
 
----
+1. Basic understanding of cloud services
+2. Access credentials provided by your administrator
+3. A modern web browser (Chrome, Firefox, Safari, or Edge)
 
-> [!NOTE]
-> Acme Platform is designed to work with teams of all sizes, from solo developers to enterprise organizations.
+## Core Concepts
 
-## Quick Start Guide
+Understanding these fundamental concepts will help you make the most of the platform:
 
-Follow these steps to get your first app deployed:
+### Projects
 
-<Stepper>
-  <StepperPanel header="Create Account">
-    ### Step 1: Sign Up
+Projects are the primary organizational unit. Each project can contain multiple resources and team members. *Projects can be customized* to fit your specific workflow needs.
 
-    Create your Acme Platform account in seconds:
+### Resources
 
-    1. Go to the signup page
-    2. Enter your email and password
-    3. Verify your email address
+Resources are the individual assets within a project. They can be:
 
-    > [!TIP]
-    > Use your work email to get team collaboration features automatically.
-  </StepperPanel>
+* Documents and files
+* Configuration settings
+* API integrations
+* Custom workflows
 
-  <StepperPanel header="Connect Repository">
-    ### Step 2: Link Your Git Repository
+### Teams
 
-    Connect your code repository to Acme Platform:
+Collaboration is at the heart of our platform. Teams allow you to:
 
-    ```bash
-    # Install the Acme CLI
-    npm install -g acme-cli
+1. **Assign roles and permissions** to different members
+2. Share resources securely
+3. Track changes and activity
+4. Communicate effectively
 
-    # Login to your account
-    acme login
+## Architecture Overview
 
-    # Link your repository
-    acme init
-    ```
+The platform is built on a modern, scalable architecture:
 
-    We support GitHub, GitLab, Bitbucket, and any Git repository.
-  </StepperPanel>
+###### Infrastructure Layer
 
-  <StepperPanel header="Deploy">
-    ### Step 3: Deploy Your App
+The foundation provides robust, reliable services.
 
-    Deploy with a single command:
+##### Data Layer
 
-    ```bash
-    acme deploy --env production
-    ```
+Secure storage and processing of your information.
 
-    **Congratulations!** Your app is now live and scaling automatically.
-  </StepperPanel>
-</Stepper>
+#### Application Layer
 
-## Advanced Configuration (Vertical Guide)
+User-facing features and functionality.
 
-For advanced users who need more control:
+### Integration Layer
 
-<Stepper orientation="vertical" linear>
-  <StepperPanel header="Environment Setup">
-    ### Configure Your Environment
+Connect with external services and tools.
 
-    Set up your development environment with all required tools:
+## Security First
 
-    - **Node.js**: Version 18 or higher
-    - **Docker**: For containerization
-    - **Git**: Version control
-    - **Cloud CLI**: AWS, Azure, or GCP CLI tools
+Security is ***paramount*** in our design. Every aspect of the platform incorporates industry-standard security practices:
 
-    > [!WARNING]
-    > Make sure all tools are properly installed before proceeding to the next step.
-  </StepperPanel>
+> All data is encrypted both in transit and at rest. Multi-factor authentication is available for enhanced security.
 
-  <StepperPanel header="Project Configuration">
-    ### Create Configuration File
+We continuously monitor and update our security measures to protect your data against emerging threats.
 
-    Create an `acme.yml` file in your project root:
+## Next Steps
 
-    ```yaml
-    version: 1.0
-    name: my-awesome-app
-    runtime: node18
+Now that you understand the basics, you can:
 
-    build:
-      command: npm run build
-      output: dist
+<Card title="Security Best Practices" icon="pi pi-shield" href="/v1.0.0/documentation/core_features/security_configuration">
+  Learn how to implement industry-standard security measures to protect your data. This guide covers authentication, encryption, and access control strategies.
+</Card>
 
-    env:
-      NODE_ENV: production
-      API_URL: https://api.example.com
+* Continue to the [Installation Guide](/v1.0.0/documentation/getting_started/installation)
+* Explore the [Quick Start](/v1.0.0/documentation/getting_started/quick_start) tutorial
+* Learn about [Cloud Services](/v1.0.0/documentation/core_features/cloud_services)
 
-    scaling:
-      min: 2
-      max: 10
-      target_cpu: 70
-    ```
+***
 
-    <Tip>
-    Use environment-specific configuration files for different deployment environments.
-    </Tip>
-  </StepperPanel>
-
-  <StepperPanel header="Database Setup">
-    ### Connect Your Database
-
-    Configure your database connection:
-
-    <DataTable>
-    | Database | Support | Auto-scaling |
-    |----------|---------|--------------|
-    | PostgreSQL | Yes   | Yes          |
-    | MySQL    | Yes     | Yes          |
-    | MongoDB  | Yes     | Yes          |
-    | Redis    | Yes     | No           |
-    </DataTable>
-
-    Connection string format:
-    ```
-    postgresql://user:password@host:port/database
-    ```
-  </StepperPanel>
-
-  <StepperPanel header="Deploy & Monitor">
-    ### Final Deployment
-
-    Deploy your fully configured application:
-
-    ```bash
-    # Run pre-deployment checks
-    acme validate
-
-    # Deploy to production
-    acme deploy --env production --region us-east-1
-
-    # Monitor deployment
-    acme logs --follow
-    ```
-
-    <CheckList>
-      <CheckItem variant="do">
-        Monitor the deployment logs for any errors
-      </CheckItem>
-      <CheckItem variant="do">
-        Set up alerts for critical metrics
-      </CheckItem>
-      <CheckItem variant="do">
-        Configure backup schedules
-      </CheckItem>
-      <CheckItem variant="dont">
-        Skip the validation step
-      </CheckItem>
-    </CheckList>
-
-    **Success!** Your application is now running with advanced configuration.
-  </StepperPanel>
-</Stepper>
+*For additional support, please contact our team or visit our community forums.*

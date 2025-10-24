@@ -1,504 +1,360 @@
-import React, { useContext, useState } from "react"
-import { components } from "@/shared/mdx_components/components"
+'use client'
+
+import { useContext, useState } from 'react'
+import { Accordion, AccordionTab } from 'primereact/accordion'
+import { AccordionEditModal } from './AccordionEditModal'
 
 export const AccordionEditPlugin = (EditorContext: React.Context<any>) => {
-  return {
-    name: 'Accordion',
-    kind: 'flow',
-    props: [
-      { name: 'multiple', type: 'string' },
-      { name: 'activeIndex', type: 'expression' },
-    ],
-    hasChildren: true,
-    Editor: ({ mdastNode }: any) => {
-      // Extract props from mdastNode attributes
-      const extractProps = (node: any) => {
-        const props: Record<string, any> = {}
-        if (node.attributes && Array.isArray(node.attributes)) {
-          for (const attr of node.attributes) {
-            if (attr.value?.type === "mdxJsxAttributeValueExpression") {
-              try {
-                props[attr.name] = JSON.parse(attr.value?.value)
-              } catch {
-                props[attr.name] = attr.value?.value
-              }
-            } else {
-              props[attr.name] = attr.value === null ? true : attr.value
+  const EditableAccordion = ({ mdastNode }: { mdastNode: any }) => {
+    const [showEditModal, setShowEditModal] = useState(false)
+    const context = useContext(EditorContext)
+    const editorRef = context?.editorRef
+    const saveToWebhook = context?.saveToWebhook
+
+    const props: Record<string, any> = {}
+
+    // Extract props from mdastNode
+    if (mdastNode.attributes && Array.isArray(mdastNode.attributes)) {
+      for (const attr of mdastNode.attributes) {
+        if (attr.value?.type === "mdxJsxAttributeValueExpression") {
+          try {
+            props[attr.name] = JSON.parse(attr.value?.value)
+          } catch (error) {
+            props[attr.name] = attr.value?.value
+          }
+          continue
+        }
+        props[attr.name] = attr.value === null ? true : attr.value
+      }
+    }
+
+    // Extract props helper
+    const extractProps = (node: any) => {
+      const props: Record<string, any> = {}
+      if (node.attributes && Array.isArray(node.attributes)) {
+        for (const attr of node.attributes) {
+          if (attr.value?.type === "mdxJsxAttributeValueExpression") {
+            try {
+              props[attr.name] = JSON.parse(attr.value?.value)
+            } catch {
+              props[attr.name] = attr.value?.value
             }
+          } else {
+            props[attr.name] = attr.value === null ? true : attr.value
           }
         }
-        return props
+      }
+      return props
+    }
+
+    // Convert mdast node back to markdown string
+    const nodeToMarkdown = (node: any): string => {
+      if (!node) return ''
+      if (typeof node === 'string') return node
+
+      // Text nodes
+      if (node.type === 'text') return node.value || ''
+
+      // Paragraphs
+      if (node.type === 'paragraph') {
+        const content = node.children?.map(nodeToMarkdown).join('') || ''
+        return content + '\n\n'
       }
 
-      // Extract accordion tabs from children
-      const extractTabs = (node: any) => {
-        const tabs: any[] = []
-
-        if (!node.children) return tabs
-
-        node.children.forEach((child: any) => {
-          if (child.type === 'mdxJsxFlowElement' && child.name === 'AccordionTab') {
-            const tab: any = { header: '', content: '' }
-
-            // Extract header from attributes
-            if (child.attributes && Array.isArray(child.attributes)) {
-              for (const attr of child.attributes) {
-                if (attr.name === 'header') {
-                  tab.header = attr.value
-                }
-              }
-            }
-
-            // Extract content
-            tab.content = extractContent(child)
-
-            tabs.push(tab)
-          }
-        })
-
-        return tabs
+      // Strong (bold)
+      if (node.type === 'strong') {
+        const content = node.children?.map(nodeToMarkdown).join('') || ''
+        return `**${content}**`
       }
 
-      const extractContent = (tabNode: any): string => {
-        if (!tabNode.children) return ''
-
-        const textParts: string[] = []
-
-        const traverse = (node: any) => {
-          if (node.type === 'text') {
-            textParts.push(node.value)
-          } else if (node.type === 'paragraph' && node.children) {
-            node.children.forEach((child: any) => traverse(child))
-            textParts.push('\n')
-          } else if (node.children) {
-            node.children.forEach((child: any) => traverse(child))
-          }
-        }
-
-        tabNode.children.forEach((child: any) => traverse(child))
-        return textParts.join('').trim()
+      // Emphasis (italic)
+      if (node.type === 'emphasis') {
+        const content = node.children?.map(nodeToMarkdown).join('') || ''
+        return `*${content}*`
       }
 
-      const AccordionWrapper = () => {
-        const [isEditing, setIsEditing] = useState(false)
-        const [isHovering, setIsHovering] = useState(false)
-        const [editData, setEditData] = useState({
-          multiple: extractProps(mdastNode).multiple || false,
-          activeIndex: extractProps(mdastNode).activeIndex,
-          tabs: extractTabs(mdastNode)
-        })
-
-        const context = useContext(EditorContext)
-        const editorRef = context?.editorRef
-
-        const handleDelete = () => {
-          if (!editorRef?.current) return
-          const currentMarkdown = editorRef.current.getMarkdown()
-
-          const lines = currentMarkdown.split('\n')
-          let inAccordion = false
-          let filteredLines: string[] = []
-
-          for (let i = 0; i < lines.length; i++) {
-            if (lines[i].trim().startsWith('<Accordion')) {
-              inAccordion = true
-              continue
-            }
-            if (inAccordion && lines[i].trim() === '</Accordion>') {
-              inAccordion = false
-              continue
-            }
-            if (!inAccordion) {
-              filteredLines.push(lines[i])
-            }
+      // Lists
+      if (node.type === 'list') {
+        return node.children?.map((item: any, idx: number) => {
+          const content = nodeToMarkdown(item)
+          if (node.ordered) {
+            return `${idx + 1}. ${content}`
+          } else {
+            return `- ${content}`
           }
+        }).join('') || ''
+      }
 
-          editorRef.current.setMarkdown(filteredLines.join('\n'))
+      // List items
+      if (node.type === 'listItem') {
+        return node.children?.map(nodeToMarkdown).join('') || ''
+      }
+
+      // Code blocks
+      if (node.type === 'code') {
+        return '```' + (node.lang || '') + '\n' + (node.value || '') + '\n```\n\n'
+      }
+
+      // Inline code
+      if (node.type === 'inlineCode') {
+        return '`' + (node.value || '') + '`'
+      }
+
+      // Blockquotes
+      if (node.type === 'blockquote') {
+        const content = node.children?.map(nodeToMarkdown).join('') || ''
+        return '> ' + content.replace(/\n/g, '\n> ') + '\n\n'
+      }
+
+      // Links
+      if (node.type === 'link') {
+        const text = node.children?.map(nodeToMarkdown).join('') || ''
+        return `[${text}](${node.url || ''})`
+      }
+
+      // Headings
+      if (node.type === 'heading') {
+        const level = '#'.repeat(node.depth || 1)
+        const content = node.children?.map(nodeToMarkdown).join('') || ''
+        return `${level} ${content}\n\n`
+      }
+
+      // Fallback: process children
+      if (node.children && Array.isArray(node.children)) {
+        return node.children.map(nodeToMarkdown).join('')
+      }
+
+      return ''
+    }
+
+    // Extract initial tabs for modal
+    const initialTabs = mdastNode.children?.map((child: any, index: number) => {
+      if (child.name === 'AccordionTab') {
+        const tabProps = extractProps(child)
+        const header = tabProps.header || `Tab ${index + 1}`
+        const content = child.children?.map(nodeToMarkdown).join('').trim() || ''
+        return { header, content }
+      }
+      return null
+    }).filter(Boolean) || []
+
+    const handleUpdate = async (tabs: any[], multiple: boolean) => {
+      if (!editorRef?.current || !saveToWebhook) return
+
+      const currentMarkdown = editorRef.current.getMarkdown()
+
+      // Use the mdastNode position to identify the exact location
+      const { start, end } = mdastNode.position
+
+      const before = currentMarkdown.slice(0, start.offset)
+      const after = currentMarkdown.slice(end.offset)
+
+      // Build new accordion markdown
+      let newAccordionMarkdown = '<Accordion'
+      if (multiple) {
+        newAccordionMarkdown += ' multiple'
+      }
+      newAccordionMarkdown += '>\n'
+
+      // Add each tab
+      tabs.forEach((tab) => {
+        newAccordionMarkdown += `  <AccordionTab header="${tab.header}">\n`
+        newAccordionMarkdown += `    ${tab.content}\n`
+        newAccordionMarkdown += `  </AccordionTab>\n`
+      })
+
+      newAccordionMarkdown += '</Accordion>'
+
+      const updated = before + newAccordionMarkdown + after
+
+      editorRef.current.setMarkdown(updated)
+      await saveToWebhook(updated)
+
+      setShowEditModal(false)
+    }
+
+    const handleDelete = async () => {
+      if (!editorRef?.current || !saveToWebhook) return
+
+      const currentMarkdown = editorRef.current.getMarkdown()
+
+      // Use the mdastNode position to identify the exact location
+      const { start, end } = mdastNode.position
+
+      const before = currentMarkdown.slice(0, start.offset)
+      const after = currentMarkdown.slice(end.offset)
+
+      const updated = before + after
+
+      editorRef.current.setMarkdown(updated)
+      await saveToWebhook(updated)
+    }
+
+    // Helper to render MDX content as simple HTML
+    const renderMDXContent = (children: any[]): React.ReactNode => {
+      if (!children || !Array.isArray(children)) return null
+
+      return children.map((child: any, idx: number) => {
+        // Handle text nodes
+        if (child.type === 'text') {
+          return child.value
         }
 
-        const handleSave = () => {
-          if (!editorRef?.current) return
-          const currentMarkdown = editorRef.current.getMarkdown()
+        // Handle paragraphs
+        if (child.type === 'paragraph') {
+          return <p key={idx}>{renderMDXContent(child.children)}</p>
+        }
 
-          // Generate new markdown
-          const props: string[] = []
-          if (editData.multiple) props.push('multiple')
-          if (editData.activeIndex !== undefined) {
-            const indexValue = typeof editData.activeIndex === 'string'
-              ? editData.activeIndex
-              : JSON.stringify(editData.activeIndex)
-            props.push(`activeIndex={${indexValue}}`)
+        // Handle strong (bold)
+        if (child.type === 'strong') {
+          return <strong key={idx}>{renderMDXContent(child.children)}</strong>
+        }
+
+        // Handle emphasis (italic)
+        if (child.type === 'emphasis') {
+          return <em key={idx}>{renderMDXContent(child.children)}</em>
+        }
+
+        // Handle lists
+        if (child.type === 'list') {
+          const ListTag = child.ordered ? 'ol' : 'ul'
+          return <ListTag key={idx}>{renderMDXContent(child.children)}</ListTag>
+        }
+
+        // Handle list items
+        if (child.type === 'listItem') {
+          return <li key={idx}>{renderMDXContent(child.children)}</li>
+        }
+
+        // Handle code blocks
+        if (child.type === 'code') {
+          return <pre key={idx}><code>{child.value}</code></pre>
+        }
+
+        // Handle inline code
+        if (child.type === 'inlineCode') {
+          return <code key={idx}>{child.value}</code>
+        }
+
+        // Handle blockquotes
+        if (child.type === 'blockquote') {
+          return <blockquote key={idx}>{renderMDXContent(child.children)}</blockquote>
+        }
+
+        // Handle links
+        if (child.type === 'link') {
+          return <a key={idx} href={child.url}>{renderMDXContent(child.children)}</a>
+        }
+
+        // Handle headings
+        if (child.type === 'heading') {
+          const depth = child.depth || 1
+          switch (depth) {
+            case 1: return <h1 key={idx}>{renderMDXContent(child.children)}</h1>
+            case 2: return <h2 key={idx}>{renderMDXContent(child.children)}</h2>
+            case 3: return <h3 key={idx}>{renderMDXContent(child.children)}</h3>
+            case 4: return <h4 key={idx}>{renderMDXContent(child.children)}</h4>
+            case 5: return <h5 key={idx}>{renderMDXContent(child.children)}</h5>
+            case 6: return <h6 key={idx}>{renderMDXContent(child.children)}</h6>
+            default: return <h3 key={idx}>{renderMDXContent(child.children)}</h3>
           }
-
-          const propsStr = props.length > 0 ? ' ' + props.join(' ') : ''
-
-          const tabs = editData.tabs.map((tab: any) => {
-            return `  <AccordionTab header="${tab.header}">
-    ${tab.content}
-  </AccordionTab>`
-          }).join('\n')
-
-          const newMarkdown = `<Accordion${propsStr}>
-${tabs}
-</Accordion>`
-
-          // Replace old with new
-          const lines = currentMarkdown.split('\n')
-          let inAccordion = false
-          let startIndex = -1
-          let endIndex = -1
-
-          for (let i = 0; i < lines.length; i++) {
-            if (lines[i].trim().startsWith('<Accordion')) {
-              inAccordion = true
-              startIndex = i
-            }
-            if (inAccordion && lines[i].trim() === '</Accordion>') {
-              endIndex = i
-              break
-            }
-          }
-
-          if (startIndex !== -1 && endIndex !== -1) {
-            const before = lines.slice(0, startIndex)
-            const after = lines.slice(endIndex + 1)
-            const updated = [...before, newMarkdown, ...after].join('\n')
-            editorRef.current.setMarkdown(updated)
-          }
-
-          setIsEditing(false)
         }
 
-        const handleCancel = () => {
-          setEditData({
-            multiple: extractProps(mdastNode).multiple || false,
-            activeIndex: extractProps(mdastNode).activeIndex,
-            tabs: extractTabs(mdastNode)
-          })
-          setIsEditing(false)
+        // Fallback: render children if they exist
+        if (child.children) {
+          return renderMDXContent(child.children)
         }
 
-        const addTab = () => {
-          setEditData({
-            ...editData,
-            tabs: [...editData.tabs, { header: 'New Tab', content: '' }]
-          })
-        }
+        return null
+      })
+    }
 
-        const removeTab = (index: number) => {
-          if (editData.tabs.length > 1) {
-            setEditData({
-              ...editData,
-              tabs: editData.tabs.filter((_: any, i: number) => i !== index)
-            })
-          }
-        }
-
-        const updateTab = (index: number, field: string, value: string) => {
-          const newTabs = [...editData.tabs]
-          newTabs[index] = { ...newTabs[index], [field]: value }
-          setEditData({ ...editData, tabs: newTabs })
-        }
-
-        const moveTab = (index: number, direction: 'up' | 'down') => {
-          const newTabs = [...editData.tabs]
-          const targetIndex = direction === 'up' ? index - 1 : index + 1
-
-          if (targetIndex < 0 || targetIndex >= newTabs.length) return
-
-          [newTabs[index], newTabs[targetIndex]] = [newTabs[targetIndex], newTabs[index]]
-          setEditData({ ...editData, tabs: newTabs })
-        }
-
-        if (isEditing) {
-          return (
-            <div
-              contentEditable={false}
-              suppressContentEditableWarning={true}
-              style={{
-                margin: '16px 0',
-                userSelect: 'none',
-                border: '2px solid rgb(var(--color-primary))',
-                borderRadius: '8px',
-                padding: '16px',
-                backgroundColor: '#f8f9fa'
-              }}
-            >
-              {/* Edit Mode Header */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 600 }}>Editing Accordion</h4>
-                <div style={{ display: 'flex', gap: '8px' }}>
-                  <button
-                    onClick={handleCancel}
-                    style={{
-                      backgroundColor: '#6c757d',
-                      color: '#ffffff',
-                      padding: '6px 12px',
-                      borderRadius: '4px',
-                      fontSize: '0.875rem',
-                      border: 'none',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleSave}
-                    style={{
-                      backgroundColor: 'rgb(var(--color-primary))',
-                      color: '#ffffff',
-                      padding: '6px 12px',
-                      borderRadius: '4px',
-                      fontSize: '0.875rem',
-                      border: 'none',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    Save
-                  </button>
-                </div>
-              </div>
-
-              {/* Accordion Settings */}
-              <div style={{ marginBottom: '16px', padding: '12px', backgroundColor: 'white', borderRadius: '4px' }}>
-                <h5 style={{ margin: '0 0 12px 0', fontSize: '0.875rem' }}>Settings</h5>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                  <div>
-                    <label style={{ display: 'flex', alignItems: 'center', fontSize: '0.875rem', cursor: 'pointer' }}>
-                      <input
-                        type="checkbox"
-                        checked={editData.multiple}
-                        onChange={(e) => setEditData({ ...editData, multiple: e.target.checked })}
-                        style={{ marginRight: '8px' }}
-                      />
-                      Allow Multiple Tabs Open
-                    </label>
-                  </div>
-                </div>
-              </div>
-
-              {/* Tabs */}
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                  <h5 style={{ margin: 0, fontSize: '0.875rem' }}>Accordion Tabs</h5>
-                  <button
-                    onClick={addTab}
-                    style={{
-                      backgroundColor: 'rgb(var(--color-primary))',
-                      color: '#ffffff',
-                      padding: '4px 8px',
-                      borderRadius: '4px',
-                      fontSize: '0.75rem',
-                      border: 'none',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '4px'
-                    }}
-                  >
-                    <i className="pi pi-plus" style={{ fontSize: '0.75rem' }}></i>
-                    Add Tab
-                  </button>
-                </div>
-
-                {editData.tabs.map((tab: any, index: number) => (
-                  <div
-                    key={index}
-                    style={{
-                      marginBottom: '12px',
-                      padding: '12px',
-                      backgroundColor: 'white',
-                      borderRadius: '4px',
-                      border: '1px solid #dee2e6'
-                    }}
-                  >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                      <strong style={{ fontSize: '0.875rem' }}>Tab {index + 1}</strong>
-                      <div style={{ display: 'flex', gap: '4px' }}>
-                        {index > 0 && (
-                          <button
-                            onClick={() => moveTab(index, 'up')}
-                            style={{
-                              backgroundColor: 'transparent',
-                              color: '#6c757d',
-                              padding: '4px 8px',
-                              borderRadius: '4px',
-                              fontSize: '0.75rem',
-                              border: 'none',
-                              cursor: 'pointer'
-                            }}
-                            title="Move Up"
-                          >
-                            <i className="pi pi-arrow-up"></i>
-                          </button>
-                        )}
-                        {index < editData.tabs.length - 1 && (
-                          <button
-                            onClick={() => moveTab(index, 'down')}
-                            style={{
-                              backgroundColor: 'transparent',
-                              color: '#6c757d',
-                              padding: '4px 8px',
-                              borderRadius: '4px',
-                              fontSize: '0.75rem',
-                              border: 'none',
-                              cursor: 'pointer'
-                            }}
-                            title="Move Down"
-                          >
-                            <i className="pi pi-arrow-down"></i>
-                          </button>
-                        )}
-                        {editData.tabs.length > 1 && (
-                          <button
-                            onClick={() => removeTab(index)}
-                            style={{
-                              backgroundColor: 'transparent',
-                              color: '#dc3545',
-                              padding: '4px 8px',
-                              borderRadius: '4px',
-                              fontSize: '0.75rem',
-                              border: 'none',
-                              cursor: 'pointer'
-                            }}
-                            title="Delete Tab"
-                          >
-                            <i className="pi pi-trash"></i>
-                          </button>
-                        )}
-                      </div>
-                    </div>
-
-                    <div style={{ marginBottom: '8px' }}>
-                      <label style={{ display: 'block', fontSize: '0.75rem', marginBottom: '4px', fontWeight: 500 }}>
-                        Header *
-                      </label>
-                      <input
-                        type="text"
-                        value={tab.header}
-                        onChange={(e) => updateTab(index, 'header', e.target.value)}
-                        placeholder="Tab header"
-                        style={{
-                          width: '100%',
-                          padding: '6px',
-                          borderRadius: '4px',
-                          border: '1px solid #ced4da',
-                          fontSize: '0.875rem'
-                        }}
-                      />
-                    </div>
-
-                    <div>
-                      <label style={{ display: 'block', fontSize: '0.75rem', marginBottom: '4px', fontWeight: 500 }}>
-                        Content *
-                      </label>
-                      <textarea
-                        value={tab.content}
-                        onChange={(e) => updateTab(index, 'content', e.target.value)}
-                        placeholder="Tab content"
-                        rows={4}
-                        style={{
-                          width: '100%',
-                          padding: '6px',
-                          borderRadius: '4px',
-                          border: '1px solid #ced4da',
-                          fontSize: '0.875rem',
-                          fontFamily: 'inherit',
-                          resize: 'vertical'
-                        }}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )
-        }
-
-        // View mode
-        const tabs = extractTabs(mdastNode)
-        const accordionProps = extractProps(mdastNode)
+    // Render each AccordionTab with rendered MDX content
+    const accordionTabs = mdastNode.children?.map((child: any, index: number) => {
+      if (child.name === 'AccordionTab') {
+        const tabProps = extractProps(child)
+        const header = tabProps.header || `Tab ${index + 1}`
 
         return (
-          <div
-            contentEditable={false}
-            suppressContentEditableWarning={true}
-            style={{ margin: '16px 0', userSelect: 'none', position: 'relative' }}
-            onMouseEnter={() => setIsHovering(true)}
-            onMouseLeave={() => setIsHovering(false)}
-          >
-            {/* Action buttons */}
-            <div
-              style={{
-                position: 'absolute',
-                top: '8px',
-                right: '8px',
-                zIndex: 10,
-                display: 'flex',
-                gap: '8px',
-                opacity: isHovering ? 1 : 0,
-                pointerEvents: isHovering ? 'auto' : 'none',
-                transition: 'opacity 0.2s'
-              }}
-            >
-              <button
-                onClick={() => setIsEditing(true)}
-                style={{
-                  backgroundColor: 'rgb(var(--color-primary))',
-                  color: '#ffffff',
-                  padding: '6px 12px',
-                  borderRadius: '4px',
-                  fontSize: '0.875rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  border: 'none',
-                  cursor: 'pointer',
-                  transition: 'opacity 0.2s'
-                }}
-                onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.85')}
-                onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
-                title="Edit Accordion"
-              >
-                <i className="pi pi-pencil" style={{ fontSize: '0.875rem' }}></i>
-                Edit
-              </button>
-              <button
-                onClick={handleDelete}
-                style={{
-                  backgroundColor: 'rgb(220, 38, 38)',
-                  color: '#ffffff',
-                  padding: '6px 12px',
-                  borderRadius: '4px',
-                  fontSize: '0.875rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  border: 'none',
-                  cursor: 'pointer',
-                  transition: 'opacity 0.2s'
-                }}
-                onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.85')}
-                onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
-                title="Delete Accordion"
-              >
-                <i className="pi pi-trash" style={{ fontSize: '0.875rem' }}></i>
-                Delete
-              </button>
+          <AccordionTab key={index} header={header}>
+            <div className="accordion-tab-content">
+              {renderMDXContent(child.children)}
             </div>
-
-            <components.Accordion {...accordionProps}>
-              {tabs.map((tab: any, index: number) => (
-                <components.AccordionTab key={index} header={tab.header}>
-                  {tab.content}
-                </components.AccordionTab>
-              ))}
-            </components.Accordion>
-          </div>
+          </AccordionTab>
         )
       }
+      return null
+    }).filter(Boolean)
 
-      return <AccordionWrapper />
-    },
+    return (
+      <div contentEditable={false} style={{ margin: '16px 0', position: 'relative' }}>
+        <div style={{ position: 'relative' }}>
+          <Accordion {...props}>
+            {accordionTabs}
+          </Accordion>
+          <div style={{
+            position: 'absolute',
+            top: '8px',
+            right: '8px',
+            display: 'flex',
+            gap: '8px',
+            zIndex: 10,
+          }}>
+            <button
+              onClick={() => setShowEditModal(true)}
+              style={{
+                padding: '6px 12px',
+                fontSize: '12px',
+                backgroundColor: '#2563eb',
+                color: 'white',
+                border: 'none',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontWeight: '600',
+                boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+                transition: 'all 0.2s',
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#1d4ed8'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#2563eb'}
+            >
+              Edit
+            </button>
+            <button
+              onClick={handleDelete}
+              style={{
+                padding: '6px 12px',
+                fontSize: '12px',
+                backgroundColor: '#dc2626',
+                color: 'white',
+                border: 'none',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontWeight: '600',
+                boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+                transition: 'all 0.2s',
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#b91c1c'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#dc2626'}
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+        <AccordionEditModal
+          isOpen={showEditModal}
+          onClose={() => setShowEditModal(false)}
+          onUpdate={handleUpdate}
+          initialTabs={initialTabs}
+          initialMultiple={props.multiple || false}
+        />
+      </div>
+    )
+  }
+
+  return {
+    name: 'Accordion',
+    kind: 'flow' as const,
+    hasChildren: true,
+    Editor: EditableAccordion,
   }
 }

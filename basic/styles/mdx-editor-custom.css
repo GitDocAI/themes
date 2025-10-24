@@ -1555,3 +1555,40 @@ form textarea:focus {
   background: rgb(var(--color-primary, 96 165 250) / 0.35) !important;
   color: rgb(var(--color-primary, 96 165 250)) !important;
 }
+
+/* Force bold color to use global primary color - all possible selectors */
+.mdxeditor strong,
+.mdxeditor b,
+.mdxeditor-root-contenteditable strong,
+.mdxeditor-root-contenteditable b,
+.mdxeditor [data-lexical-editor="true"] strong,
+.mdxeditor [data-lexical-editor="true"] b,
+.mdxeditor span[data-lexical-text="true"] strong,
+.mdxeditor span[data-lexical-text="true"] b,
+.mdxeditor div[data-lexical-editor="true"] strong,
+.mdxeditor div[data-lexical-editor="true"] b,
+.mdxeditor p strong,
+.mdxeditor p b,
+.mdxeditor [class*="ContentEditable"] strong,
+.mdxeditor [class*="ContentEditable"] b {
+  color: rgb(var(--color-main)) !important;
+  font-weight: 600 !important;
+}
+
+.dark-theme .mdxeditor strong,
+.dark-theme .mdxeditor b,
+.dark-theme .mdxeditor-root-contenteditable strong,
+.dark-theme .mdxeditor-root-contenteditable b,
+.dark-theme .mdxeditor [data-lexical-editor="true"] strong,
+.dark-theme .mdxeditor [data-lexical-editor="true"] b,
+.dark-theme .mdxeditor span[data-lexical-text="true"] strong,
+.dark-theme .mdxeditor span[data-lexical-text="true"] b,
+.dark-theme .mdxeditor div[data-lexical-editor="true"] strong,
+.dark-theme .mdxeditor div[data-lexical-editor="true"] b,
+.dark-theme .mdxeditor p strong,
+.dark-theme .mdxeditor p b,
+.dark-theme .mdxeditor [class*="ContentEditable"] strong,
+.dark-theme .mdxeditor [class*="ContentEditable"] b {
+  color: rgb(var(--color-main)) !important;
+  font-weight: 600 !important;
+}

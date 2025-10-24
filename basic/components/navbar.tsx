@@ -25,7 +25,7 @@ export const Navbar: FC<{
         dangerouslySetInnerHTML={{
           __html: `
             .custom-button {
-              background-color: rgb(var(--color-primary));
+              background-color: rgb(var(--color-main));
               color: white;
               padding: 0.5rem 1rem;
               border-radius: 9999px;
@@ -38,7 +38,7 @@ export const Navbar: FC<{
             }
 
             .dark-theme .custom-button {
-              background-color: rgb(var(--color-primary));
+              background-color: rgb(var(--color-main));
               color: white;
             }
           `

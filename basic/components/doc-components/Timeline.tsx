@@ -30,11 +30,13 @@ export const BasicTimeline: React.FC<TimelineProps> = ({
   ...props
 }) => {
   const customizedMarker = (item: TimelineEvent) => {
+    if (!item) return null
+
     return (
       <span
         className="custom-timeline-marker"
         style={{
-          backgroundColor: item.color || 'rgb(var(--color-primary))',
+          backgroundColor: item.color || 'rgb(var(--color-main))',
           color: 'white',
           borderRadius: '50%',
           width: '2.5rem',
@@ -45,12 +47,14 @@ export const BasicTimeline: React.FC<TimelineProps> = ({
           boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
         }}
       >
-        {item.icon ? <i className={item.icon}></i> : null}
+        {item.icon ? <i className={item.icon} style={{ color: 'white' }}></i> : null}
       </span>
     )
   }
 
   const customizedContent = (item: TimelineEvent) => {
+    if (!item) return null
+
     // If it's a complex event with title or image, render as a card
     if (item.title || item.image) {
       return (
@@ -82,6 +86,8 @@ export const BasicTimeline: React.FC<TimelineProps> = ({
   }
 
   const customizedOpposite = (item: TimelineEvent) => {
+    if (!item) return <span>&nbsp;</span>
+
     // Only show date in opposite if we're not showing it in the card
     if (item.date && !item.title && !item.image) {
       return <small className="timeline-date">{item.date}</small>

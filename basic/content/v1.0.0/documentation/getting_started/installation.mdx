@@ -1,121 +1,174 @@
 # Installation Guide
 
-Get Acme Platform up and running in your project in just a few minutes.
+This guide walks you through the installation process step by step.
 
-## Prerequisites
-<DataTable page={1}>
-| Property | Description                           |
-| -------- | ------------------------------------- |
-| Name     | Full name of user                     |
-| Age      | Reported age                          |
-| Joined   | Whether the user joined the community |
-</DataTable>
-Before installing Acme CLI, make sure you have:
+## System Requirements
 
+Before installing, ensure your system meets these **minimum requirements**:
+
+### Hardware Requirements
+
+* **Processor:** 2 GHz dual-core or better
+* **Memory:** 4 GB RAM minimum, 8 GB recommended
+* **Storage:** 10 GB available disk space
+* **Network:** Broadband internet connection
+
+### Software Requirements
+
+* Operating System: Windows 10+, macOS 10.14+, or Linux (Ubuntu 18.04+)
+* Node.js version 16 or higher
+* npm or yarn package manager
 
 ## Installation Methods
 
-### Method 1: NPM Package (Recommended)
+There are several ways to install the platform. Choose the method that best fits your needs:
 
-Install Acme CLI globally or as a dev dependency:
+<Accordion>
+  <AccordionTab header="Quick Install">
+    The quick install method is perfect for most users. It handles all dependencies automatically.
 
-```bash
-# Global installation
-npm install -g acme-cli
+    > This is the ***easiest and fastest*** way to get started.
 
-# Or as a dev dependency
-npm install --save-dev acme-cli
-```
+    **Steps:**
 
-### Method 2: Using npx
+    1. Download the installer package
 
-Run Acme CLI without installing:
+    2. Run the installation script
 
-```bash
-npx acme-cli init
-```
+    3. Follow the on-screen prompts
 
-## Quick Setup
+    4. Verify the installation
 
-1. **Initialize your project**
+    The entire process typically takes 5-10 minutes depending on your internet connection.
+  </AccordionTab>
 
-```bash
-acme init
-```
+  <AccordionTab header="Manual Installation">
+    For advanced users who need more control over the installation process.
 
-This command will:
-- Create an `acme.config.json` file
-- Set up the basic project structure
-- Install necessary dependencies
+    **Prerequisites**
 
-2. **Configure your project**
+    Before proceeding with manual installation:
 
-Edit the generated `acme.config.json`:
+    * Ensure all dependencies are installed
 
-```json
-{
-  "name": "My Project",
-  "description": "Project description",
-  "environment": "development",
-  "region": "us-east-1"
-}
-```
+    * Have administrator/sudo privileges
 
-3. **Deploy your first application**
+    * Review the configuration options
 
-```bash
-acme deploy
-```
+    **Installation Steps**
 
-> [!TIP]
-> Use acme deploy --watch to automatically redeploy when your code changes.
+    1. **Download the Package**
+
+    Download the latest release from our official repository. Make sure to verify the checksum to ensure file integrity.
+
+    2. **Extract Files**
+
+    Extract the downloaded archive to your preferred location:
+
+    ```
+    /opt/platform (Linux/macOS)
+    C:\Program Files\Platform (Windows)
+    ```
+
+    3. **Configure Environment**
+
+    Set up your environment variables and configuration files according to your needs.
+
+    4. **Run Installation**
+
+    Execute the installation command with appropriate parameters.
+  </AccordionTab>
+
+  <AccordionTab header="Docker Installation">
+    For containerized deployments using Docker:
+
+    **Pull the Image**
+
+    Download the official Docker image from our registry:
+
+    ```bash
+    docker pull platform/app:latest
+    ```
+
+    **Configure Volumes**
+
+    Set up persistent storage for your data:
+
+    ```bash
+    docker volume create platform-data
+    ```
+
+    **Start the Container**
+
+    Launch the container with your configuration:
+
+    ```bash
+    docker run -d -p 3000:3000 -v platform-data:/data platform/app:latest
+    ```
+  </AccordionTab>
+</Accordion>
+
+## Configuration
+
+After installation, you need to configure the application:
+
+### Basic Configuration
+
+The basic configuration includes:
+
+1. **Database connection** - Set up your database credentials
+2. **API keys** - Configure authentication keys
+3. **Network settings** - Define ports and hostnames
+4. *Storage paths* - Specify data directories
+
+### Advanced Configuration
+
+For production environments, consider these additional settings:
+
+* Load balancing configuration
+* Caching strategies
+* Logging levels and destinations
+* Backup and recovery options
+
+> Always back up your configuration files before making changes.
 
 ## Verification
 
-To verify your installation is working correctly:
+To verify your installation:
 
-```bash
-acme --version
-```
+### Check Version
 
-You should see the version number displayed.
+Run the version command to confirm successful installation.
 
-## Development Server
+### Test Connectivity
 
-Start the development server to preview your application:
+Ensure all services can communicate properly.
 
-```bash
-acme dev
-```
+### Review Logs
 
-Your application will be available at `http://localhost:3000`.
-
-> [!WARNING]
-> Make sure port 3000 is available, or specify a different port using --port flag.
-
-## Next Steps
-
-Now that Acme CLI is installed, you can:
-
-- Learn about the [Quick Start](/v1.0.0/documentation/getting_started/quick_start) process
-- Explore [Core Features](/v1.0.0/documentation/core_features/ai_documentation)
-- Customize your [Configuration](/v1.0.0/documentation/core_features/theme_system)
+Check the installation logs for any warnings or errors.
 
 ## Troubleshooting
 
-### Common Issues
+Common installation issues and solutions:
 
-<CheckList>
-  <CheckItem variant="dont">
-    **Port already in use**: Use `acme dev --port 3001` to specify a different port
-  </CheckItem>
-  <CheckItem variant="dont">
-    **Permission errors**: Try running with `sudo` on macOS/Linux or as Administrator on Windows
-  </CheckItem>
-  <CheckItem variant="dont">
-    **Node version issues**: Ensure you're using Node.js 18 or higher
-  </CheckItem>
-</CheckList>
+#### Permission Errors
 
-> [!INFO]
-> For more help check the troubleshooting section.
+If you encounter permission errors, make sure you have the necessary access rights. You may need to run the installer with elevated privileges.
+
+#### Dependency Conflicts
+
+Dependency conflicts can occur when required versions don't match. *Update your dependencies* to compatible versions.
+
+#### Port Already in Use
+
+The default port may already be occupied. Either stop the conflicting service or configure a different port.
+
+## Post-Installation
+
+Once installed successfully:
+
+1. Create your first project
+2. Configure user accounts
+3. Set up integrations
+4. Review security settings

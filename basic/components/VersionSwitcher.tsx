@@ -7,6 +7,11 @@ import { Version } from '@/models/InnerConfiguration'
 
 const VersionSwitcher = ({ versions }: { versions: Version[] }) => {
 
+  // No renderizar si no hay versiones
+  if (!versions || versions.length === 0) {
+    return null
+  }
+
   const pathname = usePathname()
   const inputRef = useRef(null)
 
@@ -16,7 +21,7 @@ const VersionSwitcher = ({ versions }: { versions: Version[] }) => {
 
   // Detectar versión desde la URL actual
   useEffect(() => {
-    if (!pathname) return
+    if (!pathname || !versions || versions.length === 0) return
     const current = versions.find(v => v.paths.includes(pathname)) ?? versions[0]
     if (!current) return
     if (versions.find(v => (v.version == current!.version))) {

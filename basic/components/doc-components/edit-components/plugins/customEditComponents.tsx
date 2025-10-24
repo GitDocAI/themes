@@ -8,6 +8,7 @@ import { FrameEditPlugin } from './frame/FrameEditPlugin'
 import { CarouselEditPlugin } from './carousel/CarouselEditPlugin'
 import { TimelineEditPlugin } from './timeline/TimelineEditPlugin'
 import { AccordionEditPlugin } from './accordion/AccordionEditPlugin'
+import { AccordionTabEditPlugin } from './accordion/AccordionTabEditPlugin'
 import { ChartEditPlugin } from './chart/ChartEditPlugin'
 import { ScrollPanelEditPlugin } from './scrollpanel/ScrollPanelEditPlugin'
 import { CheckItemEditPlugin } from './checklist/CheckItemPlugin'
@@ -24,6 +25,8 @@ export const createDescriptorsFromComponents=(EditorContext:React.Context<any>) 
        return TimelineEditPlugin(EditorContext)
       case 'Accordion':
        return AccordionEditPlugin(EditorContext)
+      case 'AccordionTab':
+       return AccordionTabEditPlugin()
       case 'img':
        return ImageEditPlugin(EditorContext)
       case 'Frame':
@@ -66,7 +69,7 @@ export const createDescriptorsFromComponents=(EditorContext:React.Context<any>) 
     }
   })
 
-  return [...directives]
+  return [...directives].filter(d => d !== null)
 }
 
 function extractProps(mdastNode: any) {

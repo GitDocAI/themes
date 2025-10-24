@@ -1,151 +1,142 @@
 # Quick Start Guide
 
-Get your first Acme Platform application running in under 5 minutes.
+Get your first application running in under 5 minutes with this step-by-step guide.
 
-![Acme Platform Dashboard](https://images.unsplash.com/photo-1551650975-87deedd944c3?w=800&h=400&fit=crop&auto=format)
+## Before You Begin
 
-## Step 1: Create Your Project
+Make sure you have completed the [Installation](/v1.0.0/documentation/getting_started/installation) process.
 
-Initialize a new Acme Platform project:
+### What You'll Need
 
-```bash
-mkdir my-app && cd my-app
-acme init
-```
+* Terminal or command prompt access
+* Text editor of your choice
+* 5 minutes of your time
 
-> [!TIP]
-> You can also initialize Acme Platform in an existing project directory.
+## Step 1: Initialize Your Project
 
-## Step 2: Basic Configuration
-
-Your `acme.config.json` should look like this:
-
-```json
-{
-  "name": "My Awesome App",
-  "description": "A sample application built with Acme Platform",
-  "environment": "development",
-  "region": "us-east-1",
-  "runtime": "nodejs18"
-}
-```
-
-## Step 3: Create Your First Function
-
-Create a simple API endpoint:
+Create a new project directory and initialize it:
 
 ```bash
-mkdir -p src/api
-echo "export default function handler(req, res) {
-  res.json({ message: 'Hello from Acme!' });
-}" > src/api/hello.js
+mkdir my-first-project
+cd my-first-project
+platform init
 ```
 
-## Step 4: Deploy Your Application
+This command will:
 
-Deploy to the cloud:
+* Create the necessary project structure
+* Generate configuration files
+* Install required dependencies
+
+> The initialization process usually takes 30-60 seconds.
+
+## Step 2: Configure Your Project
+
+Edit the generated configuration file `config.yml`:
+
+```yaml
+name: My First Project
+version: 1.0.0
+environment: development
+```
+
+### Understanding the Configuration
+
+* **name** - The display name of your project
+* **version** - Semantic version number
+* **environment** - Current environment (development, staging, production)
+
+## Step 3: Create Your First Resource
+
+Create a simple resource file:
 
 ```bash
-acme deploy
+touch src/hello.txt
+echo "Hello, World!" > src/hello.txt
 ```
 
-<CheckList>
-  <CheckItem variant="do">
-    Platform will build your application automatically
-  </CheckItem>
-  <CheckItem variant="do">
-    Set up load balancing and auto-scaling
-  </CheckItem>
-  <CheckItem variant="do">
-    Configure monitoring and logging
-  </CheckItem>
-</CheckList>
+## Step 4: Run the Development Server
 
-## Step 5: Test Your Deployment
-
-Your application will be available at a generated URL:
+Start the local development server:
 
 ```bash
-acme status
+platform dev
 ```
 
-> [!INFO]
-> The deployment usually takes 2-3 minutes. You'll receive a URL once it's ready.
+Your application is now running at `http://localhost:3000`
+
+### Development Server Features
+
+The development server provides:
+
+1. ***Hot reload*** - Automatic refresh on file changes
+2. *Error reporting* - Detailed error messages in the browser
+3. **Performance metrics** - Built-in performance monitoring
+
+## Step 5: Deploy Your Project
+
+When you're ready, deploy to production:
+
+```bash
+platform deploy --env production
+```
+
+> Deployment typically takes 2-3 minutes depending on your project size.
 
 ## What's Next?
 
-### Add Environment Variables
+### Explore Core Features
 
-Configure environment-specific settings:
+<Card title="Getting Started Resources">
+  This card provides quick access to essential documentation and guides. Perfect for beginners who want to understand the platform fundamentals.
+</Card>
 
-```json
-{
-  "env": {
-    "DATABASE_URL": "postgres://localhost/myapp",
-    "API_KEY": "${SECRET_API_KEY}",
-    "NODE_ENV": "production"
-  }
-}
-```
+* [Cloud Services](/v1.0.0/documentation/core_features/cloud_services) - Connect to cloud providers
+* [Security Configuration](/v1.0.0/documentation/core_features/security_configuration) - Secure your application
+* [Monitoring & Analytics](/v1.0.0/documentation/core_features/monitoring_analytics) - Track performance
 
-### Set Up Custom Domains
+### Advanced Topics
 
-Configure your custom domain:
+Once you're comfortable with the basics:
 
-```json
-{
-  "domains": [
-    {
-      "name": "api.mycompany.com",
-      "ssl": true
-    }
-  ]
-}
-```
+###### Authentication
 
-### Configure Scaling Rules
+Set up user authentication and authorization.
 
-Set up automatic scaling based on load:
+###### Database Integration
 
-```json
-{
-  "scaling": {
-    "minInstances": 1,
-    "maxInstances": 10,
-    "targetCPU": 70
-  }
-}
-```
+Connect your application to a database.
 
-> [!WARNING]
-> Remember to set appropriate scaling limits to control costs.
+###### Custom Workflows
 
-## Advanced Features
+Create automated workflows for your team.
 
-Explore these powerful features once you're comfortable with the basics:
+## Troubleshooting
 
-<CheckList>
-  <CheckItem variant="do">
-    **Database Integration**: Connect to managed databases
-  </CheckItem>
-  <CheckItem variant="do">
-    **CI/CD Pipelines**: Automated testing and deployment
-  </CheckItem>
-  <CheckItem variant="do">
-    **Monitoring**: Real-time performance metrics
-  </CheckItem>
-  <CheckItem variant="do">
-    **Logging**: Centralized log management
-  </CheckItem>
-</CheckList>
+### Common Issues
+
+**Port 3000 is already in use**
+
+* Use `--port` flag to specify a different port
+
+**Build fails during deployment**
+
+* Check your configuration file syntax
+* Ensure all dependencies are listed
+
+**Can't connect to development server**
+
+* Verify firewall settings
+* Check if the process is actually running
 
 ## Next Steps
 
-- Explore [Cloud Services](/v1.0.0/documentation/core_features/ai_documentation) integration
-- Learn about [Security Configuration](/v1.0.0/documentation/core_features/theme_system)
-- Set up [Monitoring & Analytics](/v1.0.0/documentation/core_features/version_control)
+Continue your journey:
 
----
+* Read about [Architecture](/v1.0.0/documentation/getting_started/introduction#architecture-overview)
+* Learn [Best Practices](#)
+* Join our [Community Forum](#)
 
-> [!NOTE]
-> This quick start guide covers the essentials. For detailed configuration options, check out our comprehensive documentation sections.
+***
+
+*Congratulations on completing the quick start guide! You're now ready to build amazing applications.*

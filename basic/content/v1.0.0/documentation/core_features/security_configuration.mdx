@@ -1,402 +1,331 @@
 # Security Configuration
 
-Protect your applications with Acme Platform's comprehensive security features and best practices.
+Protect your applications and data with comprehensive security features and industry best practices.
 
 ## Overview
 
-Acme Platform provides enterprise-grade security features:
+Enterprise-grade security is built into every layer of the platform. Our security framework provides multiple layers of protection to keep your applications and data safe.
 
-- **Authentication & Authorization** - Multiple auth methods
-- **Data Encryption** - End-to-end encryption
-- **Network Security** - VPC and firewall protection
-- **Compliance** - SOC 2, GDPR, HIPAA ready
-- **Vulnerability Scanning** - Automated security checks
+### Core Security Features
 
-> [!TIP]
-> Security is enabled by default. All communications are encrypted and access is logged.
+Security capabilities include:
+
+* **Authentication & Authorization** - Multiple authentication methods and role-based access control
+* **Data Encryption** - End-to-end encryption for data in transit and at rest
+* **Network Security** - VPC isolation and firewall protection
+* **Compliance Support** - Tools for SOC 2, GDPR, HIPAA compliance
+* **Vulnerability Scanning** - Automated security checks and monitoring
+
+> Security is enabled by default. All communications are encrypted and access is logged for audit purposes.
 
 ## Authentication Methods
 
-### API Key Authentication
+The platform supports multiple authentication methods. You can use one or combine several for enhanced security:
 
-Simple and secure API key management:
+<Accordion multiple>
+  <AccordionTab header="API Key Authentication">
+    API keys provide simple and secure authentication for programmatic access.
 
-```json
-{
-  "auth": {
-    "type": "apikey",
-    "header": "X-API-Key",
-    "validation": {
-      "required": true,
-      "rateLimit": 1000
-    }
-  }
-}
-```
+    **Key Management Best Practices**
 
-<CheckList>
-  <CheckItem variant="do">
-    Rotate API keys regularly (every 90 days)
-  </CheckItem>
-  <CheckItem variant="do">
-    Use different keys for different environments
-  </CheckItem>
-  <CheckItem variant="do">
-    Monitor API key usage patterns
-  </CheckItem>
-  <CheckItem variant="do">
-    Implement key scoping for limited access
-  </CheckItem>
-</CheckList>
+    1. Rotate API keys regularly (recommended: every 90 days)
+    2. Use different keys for different environments
+    3. Monitor API key usage patterns for anomalies
+    4. Implement key scoping to limit access permissions
+    5. Store keys securely using environment variables
 
-### OAuth 2.0 Integration
+    > ***Never commit API keys to version control.*** Always use environment variables or secure secret management services.
 
-Connect with popular identity providers:
+    **Example Configuration:**
 
-```json
-{
-  "oauth": {
-    "providers": [
-      {
-        "name": "google",
-        "clientId": "${GOOGLE_CLIENT_ID}",
-        "clientSecret": "${GOOGLE_CLIENT_SECRET}",
-        "scopes": ["email", "profile"]
-      },
-      {
-        "name": "github",
-        "clientId": "${GITHUB_CLIENT_ID}",
-        "clientSecret": "${GITHUB_CLIENT_SECRET}"
-      }
-    ]
-  }
-}
-```
+    ```bash
+    export API_KEY=your_secure_api_key_here
+    export API_SECRET=your_secret_key_here
+    ```
+  </AccordionTab>
 
-### JWT Token Management
+  <AccordionTab header="OAuth 2.0 Integration">
+    Connect with popular identity providers for seamless user authentication. Supported providers include Google, GitHub, Microsoft, and other major platforms.
 
-Implement stateless authentication:
+    **OAuth Configuration**
 
-```javascript
-// Generate JWT token
-const token = await acme.auth.generateToken({
-  userId: user.id,
-  email: user.email,
-  roles: ['user'],
-  expiresIn: '24h'
-});
+    OAuth integration enables users to authenticate using their existing accounts, reducing friction and improving security through established identity providers.
 
-// Verify JWT token
-const decoded = await acme.auth.verifyToken(token);
-```
+    **Supported Providers:**
 
-> [!INFO]
-> JWT tokens are automatically signed with RS256 algorithm for maximum security.
+    * **Google** - OAuth 2.0 with Google accounts
+    * **GitHub** - OAuth Apps integration
+    * **Microsoft** - Azure Active Directory
+    * **Facebook** - Facebook Login
+    * **Custom OIDC** - Any OpenID Connect provider
 
-## Role-Based Access Control (RBAC)
+    **Benefits:**
 
-### Define Roles and Permissions
+    * No password management required
+    * Leverages existing trusted accounts
+    * Improved user experience
+    * Enhanced security through provider MFA
+  </AccordionTab>
 
-Configure granular access control:
+  <AccordionTab header="JWT Token Management">
+    JSON Web Tokens (JWT) enable stateless authentication across distributed systems. Tokens are automatically signed using industry-standard algorithms for maximum security.
 
-```json
-{
-  "rbac": {
-    "roles": [
-      {
-        "name": "admin",
-        "permissions": ["*"]
-      },
-      {
-        "name": "editor",
-        "permissions": ["read", "write", "update"]
-      },
-      {
-        "name": "viewer",
-        "permissions": ["read"]
-      }
-    ]
-  }
-}
-```
+    **Token Security Features**
 
-### Permission Enforcement
+    * Tokens expire automatically after a configurable period
+    * Refresh tokens enable long-lived sessions
+    * Token validation happens on every request
+    * Compromised tokens can be revoked immediately
 
-```javascript
-// Check permissions in your code
-const hasPermission = await acme.auth.checkPermission(
-  user.id,
-  'write',
-  'documents'
-);
+    **Token Structure:**
 
-if (!hasPermission) {
-  throw new Error('Insufficient permissions');
-}
-```
+    A JWT consists of three parts:
+
+    1. **Header** - Token type and signing algorithm
+    2. **Payload** - Claims and user information
+    3. **Signature** - Verification signature
+
+    **Best Practices:**
+
+    * Use short expiration times (15-30 minutes)
+    * Implement refresh token rotation
+    * Store tokens securely (httpOnly cookies)
+    * Validate tokens on every protected request
+  </AccordionTab>
+
+  <AccordionTab header="Multi-Factor Authentication (MFA)">
+    Add an extra layer of security with multi-factor authentication.
+
+    **MFA Methods:**
+
+    * **TOTP** - Time-based One-Time Passwords (Google Authenticator, Authy)
+    * **SMS** - Text message verification codes
+    * **Email** - Email-based verification
+    * **Hardware Keys** - YubiKey and other FIDO2 devices
+
+    **Implementation:**
+
+    MFA can be required for:
+
+    * All users (enforced)
+    * Specific roles (administrators, editors)
+    * Sensitive operations (password changes, permission updates)
+    * IP-based policies (new locations, suspicious activity)
+
+    > ***Recommendation:*** Enable MFA for all administrative accounts.
+  </AccordionTab>
+</Accordion>
+
+## Role-Based Access Control
+
+### Understanding RBAC
+
+Role-Based Access Control (RBAC) enables granular permission management across your applications. Define roles and assign specific permissions to control what users can do.
+
+### Common Role Patterns
+
+###### Administrator Role
+
+Full access to all system features and configurations. Use sparingly and audit regularly.
+
+###### Editor Role
+
+Can read, write, and update content but cannot modify system settings or user permissions.
+
+###### Viewer Role
+
+Read-only access to resources. Cannot make changes but can view and export data.
+
+### Permission Management
+
+Implement permission checks throughout your application to ensure users only access authorized resources. Permissions can be assigned at resource, feature, or action levels.
 
 ## Data Encryption
 
 ### Encryption at Rest
 
-All data is encrypted using AES-256:
+All stored data is encrypted using AES-256 encryption, the industry standard for data at rest.
 
-- **Database Encryption** - Transparent data encryption
-- **File Storage** - Server-side encryption with customer keys
-- **Backup Encryption** - Encrypted backups and snapshots
+**Protected Data Types:**
+
+* **Database Records** - Transparent data encryption for all database content
+* **File Storage** - Server-side encryption with customer-managed keys
+* **Backups** - Encrypted backups and snapshots
+* **Configuration Files** - Sensitive configuration data encrypted
 
 ### Encryption in Transit
 
-<CheckList>
-  <CheckItem variant="do">
-    **TLS 1.3** - Latest encryption protocol
-  </CheckItem>
-  <CheckItem variant="do">
-    **Certificate Management** - Automatic SSL certificate renewal
-  </CheckItem>
-  <CheckItem variant="do">
-    **HSTS** - HTTP Strict Transport Security
-  </CheckItem>
-  <CheckItem variant="do">
-    **Perfect Forward Secrecy** - Session key protection
-  </CheckItem>
-</CheckList>
+All data transmitted between clients and servers is protected using modern encryption protocols.
 
-### Custom Encryption
+**Security Protocols:**
 
-Implement application-level encryption:
+1. **TLS 1.3** - Latest transport layer security protocol
+2. **Certificate Management** - Automatic SSL certificate renewal and validation
+3. **HSTS** - HTTP Strict Transport Security enforced
+4. **Perfect Forward Secrecy** - Unique session keys protect past sessions
 
-```javascript
-// Encrypt sensitive data
-const encrypted = await acme.crypto.encrypt(
-  sensitiveData,
-  process.env.ENCRYPTION_KEY
-);
+### Application-Level Encryption
 
-// Decrypt when needed
-const decrypted = await acme.crypto.decrypt(
-  encrypted,
-  process.env.ENCRYPTION_KEY
-);
-```
+For sensitive data requiring additional protection, implement application-level encryption before storage. This provides an extra security layer beyond infrastructure encryption.
 
 ## Network Security
 
-### Virtual Private Cloud (VPC)
+### Virtual Private Cloud
 
-Isolate your applications in private networks:
+Isolate your applications in private networks with configurable network topology. VPC provides network-level isolation and control.
 
-```json
-{
-  "network": {
-    "vpc": {
-      "cidr": "10.0.0.0/16",
-      "subnets": [
-        {
-          "name": "public",
-          "cidr": "10.0.1.0/24",
-          "type": "public"
-        },
-        {
-          "name": "private",
-          "cidr": "10.0.2.0/24",
-          "type": "private"
-        }
-      ]
-    }
-  }
-}
-```
+#### Network Segmentation
 
-### Firewall Rules
+* **Public Subnets** - Internet-facing resources with controlled access
+* **Private Subnets** - Internal resources isolated from internet
+* **Database Subnets** - Dedicated isolated networks for databases
+* **Management Subnets** - Secure access for administrative functions
 
-Configure network access controls:
+### Firewall Configuration
 
-```json
-{
-  "firewall": {
-    "rules": [
-      {
-        "name": "allow-https",
-        "port": 443,
-        "protocol": "tcp",
-        "source": "0.0.0.0/0"
-      },
-      {
-        "name": "allow-ssh",
-        "port": 22,
-        "protocol": "tcp",
-        "source": "192.168.1.0/24"
-      }
-    ]
-  }
-}
-```
+Configure firewall rules to control network traffic between resources and from external sources.
 
-> [!WARNING]
-> Never expose unnecessary ports to the internet. Use principle of least privilege.
+**Firewall Best Practices:**
+
+1. Default deny all traffic
+2. Explicitly allow only required traffic
+3. Use IP allowlisting for administrative access
+4. Regular review and audit of firewall rules
+5. Implement egress filtering for outbound traffic
+
+> *Always follow the principle of least privilege when configuring network access.*
 
 ## Security Monitoring
 
 ### Audit Logging
 
-All security events are automatically logged:
+Comprehensive audit logs capture all security-relevant events for compliance and forensic analysis.
 
-- **Authentication attempts** - Success and failure logs
-- **Authorization decisions** - Permission checks
-- **Data access** - Who accessed what data when
-- **Configuration changes** - Security setting modifications
+**Logged Events:**
+
+* Authentication attempts (successful and failed)
+* Authorization decisions and permission checks
+* Data access and modifications
+* Configuration changes
+* Administrative actions
 
 ### Security Alerts
 
-Configure automated alerts:
+Configure automated alerts for suspicious activities and security incidents. Real-time alerting enables rapid response to potential threats.
 
-```json
-{
-  "alerts": {
-    "failedLogins": {
-      "threshold": 5,
-      "window": "5m",
-      "action": "block_ip"
-    },
-    "privilegeEscalation": {
-      "threshold": 1,
-      "action": "notify_admin"
-    }
-  }
-}
-```
+#### Alert Types
 
-### Vulnerability Scanning
+* **Failed Authentication** - Multiple failed login attempts
+* **Privilege Escalation** - Unauthorized permission changes
+* **Data Exfiltration** - Unusual data transfer patterns
+* **Configuration Changes** - Modifications to security settings
 
-<CheckList>
-  <CheckItem variant="do">
-    **Dependency Scanning** - Check for vulnerable packages
-  </CheckItem>
-  <CheckItem variant="do">
-    **Container Scanning** - Scan Docker images for vulnerabilities
-  </CheckItem>
-  <CheckItem variant="do">
-    **Code Analysis** - Static analysis for security issues
-  </CheckItem>
-  <CheckItem variant="do">
-    **Infrastructure Scanning** - Check cloud configuration
-  </CheckItem>
-</CheckList>
+### Vulnerability Management
+
+Regular vulnerability scanning identifies potential security issues before they can be exploited.
+
+**Scanning Coverage:**
+
+* Dependency vulnerability scanning
+* Container image security scanning
+* Static code analysis for security issues
+* Infrastructure configuration scanning
+* Network security assessment
 
 ## Compliance & Standards
 
-### Compliance Frameworks
+### Supported Compliance Frameworks
 
-Acme Platform helps meet compliance requirements:
+The platform provides features and controls to help meet common compliance requirements:
 
-- **SOC 2 Type II** - Security and availability controls
-- **GDPR** - Data protection and privacy
-- **HIPAA** - Healthcare data protection
-- **PCI DSS** - Payment card data security
+* **SOC 2 Type II** - Security and availability controls
+* **GDPR** - Data protection and privacy regulations
+* **HIPAA** - Healthcare data protection requirements
+* **PCI DSS** - Payment card data security standards
 
 ### Data Privacy
 
-Configure data handling policies:
+Configure data handling policies to comply with privacy regulations and organizational requirements.
 
-```json
-{
-  "privacy": {
-    "dataRetention": "7y",
-    "anonymization": true,
-    "rightToDelete": true,
-    "consentTracking": true
-  }
-}
-```
+**Privacy Controls:**
+
+1. Configurable data retention periods
+2. Data anonymization and pseudonymization
+3. Right to deletion and data portability
+4. Consent tracking and management
+5. Data processing agreements
 
 ## Security Best Practices
 
 ### Development Security
 
-<CheckList>
-  <CheckItem variant="do">
-    Use environment variables for secrets
-  </CheckItem>
-  <CheckItem variant="do">
-    Implement input validation and sanitization
-  </CheckItem>
-  <CheckItem variant="do">
-    Enable security headers (CSRF, XSS protection)
-  </CheckItem>
-  <CheckItem variant="do">
-    Regular security testing and code reviews
-  </CheckItem>
-</CheckList>
+**Recommended Practices:**
 
-<CheckList>
-  <CheckItem variant="dont">
-    Hardcode secrets in source code
-  </CheckItem>
-  <CheckItem variant="dont">
-    Use default passwords or keys
-  </CheckItem>
-  <CheckItem variant="dont">
-    Disable security features for convenience
-  </CheckItem>
-  <CheckItem variant="dont">
-    Ignore security warnings or alerts
-  </CheckItem>
-</CheckList>
+* Use environment variables for all secrets and credentials
+* Implement input validation and sanitization
+* Enable security headers (CSRF, XSS protection)
+* Regular security testing and code reviews
+* Dependency updates and patch management
+
+**Common Mistakes to Avoid:**
+
+* Hardcoding secrets in source code
+* Using default passwords or keys
+* Disabling security features for convenience
+* Ignoring security warnings or alerts
+* Storing sensitive data in logs
 
 ### Operational Security
 
-Configure security operations:
+#### Password Policy
 
-```json
-{
-  "security": {
-    "passwordPolicy": {
-      "minLength": 12,
-      "requireUppercase": true,
-      "requireNumbers": true,
-      "requireSymbols": true
-    },
-    "sessionTimeout": "24h",
-    "maxLoginAttempts": 3,
-    "twoFactorAuth": "required"
-  }
-}
-```
+Implement strong password requirements:
+
+* Minimum length: 12 characters
+* Require uppercase and lowercase letters
+* Require numbers and special characters
+* Password expiration and history
+* Multi-factor authentication enforcement
+
+#### Session Management
+
+* Configure appropriate session timeouts
+* Limit concurrent sessions per user
+* Implement session invalidation on logout
+* Secure session token storage
+* Monitor for session hijacking attempts
 
 ## Incident Response
 
 ### Security Incident Handling
 
-Automated incident response:
+Establish a clear process for handling security incidents:
 
-1. **Detection** - Automated threat detection
-2. **Containment** - Isolate affected systems
-3. **Investigation** - Analyze security events
-4. **Recovery** - Restore normal operations
-5. **Lessons Learned** - Improve security posture
+1. **Detection** - Identify and validate security incidents
+2. **Containment** - Isolate affected systems to prevent spread
+3. **Investigation** - Analyze the incident to understand impact
+4. **Eradication** - Remove threats and vulnerabilities
+5. **Recovery** - Restore normal operations securely
+6. **Lessons Learned** - Document and improve security posture
 
 ### Backup & Recovery
 
-```json
-{
-  "backup": {
-    "frequency": "daily",
-    "retention": "30d",
-    "encryption": true,
-    "offsite": true,
-    "testing": "monthly"
-  }
-}
-```
+Regular backups ensure business continuity and data protection:
+
+* **Daily automated backups** with configurable retention
+* **Encrypted backup storage** in multiple locations
+* **Regular backup testing** to ensure recoverability
+* **Point-in-time recovery** for data restoration
+* **Offsite backup storage** for disaster recovery
 
 ## Next Steps
 
-- Explore [Monitoring & Analytics](/v1.0.0/documentation/core_features/version_control)
-- Learn about [Cloud Services](/v1.0.0/documentation/core_features/ai_documentation) integration
-- Check out our [API Reference](/v1.0.0/api_reference/documents/create) for security endpoints
+Continue securing your application:
 
----
+* Set up [Monitoring & Analytics](/v1.0.0/documentation/core_features/monitoring_analytics) for security events
+* Integrate with [Cloud Services](/v1.0.0/documentation/core_features/cloud_services) securely
+* Review security settings regularly
 
-> [!NOTE]
-> Security is an ongoing process. Regularly review and update your security configuration based on new threats and requirements.
+***
+
+*Security is an ongoing process. Regularly review and update your security configuration based on evolving threats and requirements.*

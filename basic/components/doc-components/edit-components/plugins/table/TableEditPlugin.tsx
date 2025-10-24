@@ -182,47 +182,19 @@ export const TableEditPlugin = (EditorContext:React.Context<any>)=>{
                             >
                               <button
                                 onClick={handleEdit}
-                                style={{
-                                  backgroundColor: 'rgb(var(--color-primary))',
-                                  color: '#ffffff',
-                                  padding: '6px 12px',
-                                  borderRadius: '4px',
-                                  fontSize: '0.875rem',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  gap: '6px',
-                                  border: 'none',
-                                  cursor: 'pointer',
-                                  transition: 'opacity 0.2s'
-                                }}
-                                onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.85')}
-                                onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
+                                className="bg-primary text-white px-3 py-1 rounded text-sm flex items-center gap-1 hover:opacity-90 transition-opacity"
                                 title="Edit Table"
                               >
-                                <i className="pi pi-pencil" style={{ fontSize: '0.875rem' }}></i>
+                                <i className="pi pi-pencil" />
                                 Edit
                               </button>
                               <button
                                 onClick={handleDelete}
-                                style={{
-                                  backgroundColor: 'rgb(220, 38, 38)',
-                                  color: '#ffffff',
-                                  padding: '6px 12px',
-                                  borderRadius: '4px',
-                                  fontSize: '0.875rem',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  gap: '6px',
-                                  border: 'none',
-                                  cursor: 'pointer',
-                                  transition: 'opacity 0.2s'
-                                }}
-                                onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.85')}
-                                onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
+                                className="bg-red-500/80 text-white px-3 py-1 rounded text-sm flex items-center gap-1 hover:opacity-90 transition-opacity"
                                 title="Delete Table"
                               >
-                                <i className="pi pi-trash" style={{ fontSize: '0.875rem' }}></i>
-                                Delete
+                                <i className="pi pi-trash" />
+                                Remove
                               </button>
                             </div>
 

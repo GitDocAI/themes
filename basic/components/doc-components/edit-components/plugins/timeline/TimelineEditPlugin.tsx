@@ -128,7 +128,7 @@ export const TimelineEditPlugin = (EditorContext: React.Context<any>) => {
             >
               <button
                 onClick={() => setEditMode(true)}
-                className="bg-primary text-background px-3 py-1 rounded text-sm flex items-center gap-1 hover:opacity-90 transition-opacity"
+                className="bg-primary text-white px-3 py-1 rounded text-sm flex items-center gap-1 hover:opacity-90 transition-opacity"
                 title="Edit Timeline"
               >
                 <i className="pi pi-pencil" />
@@ -136,7 +136,7 @@ export const TimelineEditPlugin = (EditorContext: React.Context<any>) => {
               </button>
               <button
                 onClick={handleDelete}
-                className="bg-red-600 text-background px-3 py-1 rounded text-sm flex items-center gap-1 hover:opacity-90 transition-opacity"
+                className="bg-red-500/80 text-white px-3 py-1 rounded text-sm flex items-center gap-1 hover:opacity-90 transition-opacity"
                 title="Remove Timeline"
               >
                 <i className="pi pi-trash" />
@@ -245,7 +245,7 @@ export const TimelineEditPlugin = (EditorContext: React.Context<any>) => {
                           </button>
                           <button
                             onClick={handleSave}
-                            className="px-4 py-2 text-sm font-medium text-background bg-primary rounded hover:opacity-90 transition-opacity"
+                            className="px-4 py-2 text-sm font-medium text-white bg-primary rounded hover:opacity-90 transition-opacity"
                           >
                             Save
                           </button>
