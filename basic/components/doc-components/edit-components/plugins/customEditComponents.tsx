@@ -11,8 +11,6 @@ import { AccordionEditPlugin } from './accordion/AccordionEditPlugin'
 import { AccordionTabEditPlugin } from './accordion/AccordionTabEditPlugin'
 import { ChartEditPlugin } from './chart/ChartEditPlugin'
 import { ScrollPanelEditPlugin } from './scrollpanel/ScrollPanelEditPlugin'
-import { CheckItemEditPlugin } from './checklist/CheckItemPlugin'
-import { CheckListEditPlugin } from './checklist/CheckListPlugin'
 
 export const createDescriptorsFromComponents=(EditorContext:React.Context<any>) => {
   const directives = Object.entries(components).map(([name, Comp]) =>{
@@ -39,10 +37,6 @@ export const createDescriptorsFromComponents=(EditorContext:React.Context<any>) 
        return ScrollPanelEditPlugin(EditorContext)
       case 'Collapse':
        return CollapseEditPlugin()
-      case 'CheckList':
-       return CheckListEditPlugin(EditorContext)
-      case 'CheckItem':
-       return CheckItemEditPlugin(EditorContext)
 
       default:
        return   {

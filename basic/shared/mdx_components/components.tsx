@@ -2,7 +2,6 @@ import React from 'react'
 import { AlertBlock } from '../../components/doc-components/AlertBlock'
 import { BlockQuote } from '../../components/doc-components/BlockQuote'
 import { CodeBlock } from '../../components/doc-components/CodeBlock'
-import { CheckItem, CheckList } from '../../components/doc-components/CheckList'
 import { BasicCustomTable } from '@/components/doc-components/CustomTable'
 import { BasicCustomChart } from '@/components/doc-components/CustomChart'
 import { BasicTabView, BasicTabPanel } from '@/components/doc-components/TabView'
@@ -64,17 +63,21 @@ export const components = {
   li: ({ children }: any) => {
     const childrenArray = React.Children.toArray(children).filter((ch: any) => ch.props?.type === 'checkbox')
     if (childrenArray.length > 0) {
+      const checkbox = childrenArray[0] as any
+      const isChecked = checkbox?.props?.checked
       const inner = React.Children.toArray(children).filter((ch: any) => ch.props?.type !== 'checkbox')
+
       return (
-        <CheckItem variant={(childrenArray[0] as any)?.props?.checked ? 'do' : 'dont'}>
-          {inner}
-        </CheckItem>
+        <li className="flex items-start gap-3 list-none mb-2">
+          <i className={`${isChecked ? 'pi pi-check-square' : 'pi pi-stop'} text-primary mt-1 text-lg flex-shrink-0`} />
+          <div className="w-full text-secondary">
+            {inner}
+          </div>
+        </li>
       )
     }
     return <li className="mb-1">{children}</li>
   },
-  CheckList,
-  CheckItem,
 
   // --- Links & media ---
   a: ({ href, children, ...props }: any) => (

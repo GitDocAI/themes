@@ -52,13 +52,6 @@ const componentOptions: ComponentOption[] = [
     )
   },
   {
-    type: 'checklist',
-    label: 'Check List',
-    icon: (
-      <i className="pi pi-list-check" style={{ fontSize: '1rem' }}></i>
-    )
-  },
-  {
     type: 'codeblock',
     label: 'Code Block',
     icon: (
@@ -271,10 +264,6 @@ export const InsertComponentDropdown: React.FC<InsertComponentDropdownProps> = (
     } else if (type === 'columns') {
       const columnsMarkdown = `<Columns cols={2}>\n  <div>Column 1 content</div>\n  <div>Column 2 content</div>\n</Columns>\n\n`
       insertMarkdown(columnsMarkdown)
-      setIsOpen(false)
-    } else if (type === 'checklist') {
-      const checklistMarkdown = `<CheckList>\n  <CheckItem variant='on'>Completed item</CheckItem>\n  <CheckItem variant='off'>Pending item</CheckItem>\n</CheckList>\n\n`
-      insertMarkdown(checklistMarkdown)
       setIsOpen(false)
     } else if (type === 'scrollpanel') {
       const scrollPanelMarkdown = '<ScrollPanel>\n\n</ScrollPanel>\n\n'
