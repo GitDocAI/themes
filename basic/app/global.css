@@ -1238,28 +1238,26 @@ article#mdx-content {
   background-color: rgb(var(--color-main) / 0.05) !important;
 }
 
-/* Clickable Card Link Styles */
-.prime-card-link {
-  text-decoration: none !important;
-  color: inherit !important;
-  display: block !important;
+/* Clickable Card Wrapper Styles */
+.prime-card-clickable-wrapper {
+  cursor: pointer !important;
   transition: transform 0.2s ease, box-shadow 0.2s ease !important;
 }
 
-.prime-card-link:hover {
+.prime-card-clickable-wrapper:hover {
   transform: translateY(-4px) !important;
 }
 
-.prime-card-link:hover .p-card {
+.prime-card-clickable-wrapper:hover .p-card {
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15) !important;
   border-color: rgb(var(--color-main)) !important;
 }
 
-.prime-card-link:active {
+.prime-card-clickable-wrapper:active {
   transform: translateY(-2px) !important;
 }
 
-.dark-theme .prime-card-link:hover .p-card {
+.dark-theme .prime-card-clickable-wrapper:hover .p-card {
   box-shadow: 0 8px 16px rgba(255, 255, 255, 0.1) !important;
   border-color: rgb(var(--color-main)) !important;
 }

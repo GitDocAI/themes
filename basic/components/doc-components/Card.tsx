@@ -48,10 +48,8 @@ export const BasicPrimeCard: React.FC<PrimeCardProps> = ({
 
   if (href) {
     return (
-      <div className="my-6">
-        <a href={href} className="prime-card-link">
-          {cardContent}
-        </a>
+      <div className="my-6 prime-card-clickable-wrapper" onClick={() => window.location.href = href}>
+        {cardContent}
       </div>
     )
   }

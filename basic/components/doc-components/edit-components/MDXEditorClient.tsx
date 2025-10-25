@@ -35,6 +35,51 @@ export const MDXEditorClient: React.FC<MDXEditorClientProps> = ({
   const isEditingRef = useRef(false)
   const lastSaveTimeRef = useRef(0)
 
+  // Flush changes to filesystem when navigating away or reloading
+  useEffect(() => {
+    const flushChanges = () => {
+      if (webhookUrl) {
+        const flushUrl = webhookUrl.replace(/\/[^/]*$/, '/flush')
+
+        console.log('[MDXEditor] Sending flush request to:', flushUrl)
+
+        // Simple POST without authentication to avoid CORS issues
+        // The individual file changes already went through the authenticated webhook
+        fetch(flushUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({}),
+          keepalive: true, // Ensures request completes even if page unloads
+        })
+          .then(response => {
+            console.log('[MDXEditor] Flush response status:', response.status)
+            return response.json()
+          })
+          .then(data => {
+            console.log('[MDXEditor] Flush result:', data)
+          })
+          .catch(err => {
+            console.error('[MDXEditor] Flush request failed:', err)
+          })
+      }
+    }
+
+    // Listen for page reload/close
+    const handleBeforeUnload = () => {
+      flushChanges()
+    }
+
+    window.addEventListener('beforeunload', handleBeforeUnload)
+
+    return () => {
+      // Cleanup function - called when component unmounts (page change)
+      flushChanges()
+      window.removeEventListener('beforeunload', handleBeforeUnload)
+    }
+  }, [webhookUrl, authentication])
+
   // Fetch the original markdown content
   useEffect(() => {
     const fetchMarkdown = async () => {

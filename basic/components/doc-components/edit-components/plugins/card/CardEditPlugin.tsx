@@ -42,44 +42,55 @@ const EditableCard = ({ mdastNode }: { mdastNode: any }) => {
     if (!editorRef?.current || !saveToWebhook) return
 
     const currentMarkdown = editorRef.current.getMarkdown()
+    let updated = currentMarkdown
 
-    // Use the mdastNode position to identify the exact location
-    const { start, end } = mdastNode.position
+    // Try to use mdastNode position first (works for existing components)
+    if (mdastNode.position && mdastNode.position.start && mdastNode.position.end && mdastNode.position.start.offset !== 0) {
+      const { start, end } = mdastNode.position
 
-    const before = currentMarkdown.slice(0, start.offset)
-    let after = currentMarkdown.slice(end.offset)
+      const before = currentMarkdown.slice(0, start.offset)
+      const after = currentMarkdown.slice(end.offset)
 
-    // Clean up trailing newlines to avoid duplication
-    after = after.replace(/^\n{1,2}/, '')
+      updated = before + cardMarkdown + after
+      console.log('[CardEdit] Updated card using position')
+    } else {
+      // Fallback: Use content-based matching (for newly created components with position 0)
+      console.log('[CardEdit] Position invalid or 0, using content-based fallback')
 
-    // Ensure proper spacing around the card
-    const updated = before + cardMarkdown + '\n\n' + after
+      // Build the old card markdown to find and replace
+      let oldCardMarkdown = '<Card'
+      if (title) oldCardMarkdown += ` title="${title}"`
+      if (subtitle) oldCardMarkdown += ` subtitle="${subtitle}"`
+      if (icon) oldCardMarkdown += ` icon="${icon}"`
+      if (image) oldCardMarkdown += ` image="${image}"`
+      if (href) oldCardMarkdown += ` href="${href}"`
+      oldCardMarkdown += `>\n  ${getContentText(mdastNode)}\n</Card>`
+
+      console.log('[CardEdit] Looking for old card (fallback):', oldCardMarkdown)
+
+      // Replace in markdown
+      updated = currentMarkdown.replace(oldCardMarkdown, cardMarkdown)
+
+      if (updated === currentMarkdown) {
+        console.warn('[CardEdit] Card not found in markdown, trying alternative match')
+        // Try without exact whitespace matching
+        const escapedOld = oldCardMarkdown.replace(/\s+/g, '\\s+')
+        const regex = new RegExp(escapedOld.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\\s\+/g, '\\s+'))
+        updated = currentMarkdown.replace(regex, cardMarkdown)
+
+        if (updated === currentMarkdown) {
+          console.error('[CardEdit] Could not find card to update')
+          return
+        }
+      }
+
+      console.log('[CardEdit] Updated card using content-based matching')
+    }
 
     editorRef.current.setMarkdown(updated)
     await saveToWebhook(updated)
 
     setShowEditModal(false)
-  }
-
-  const handleDelete = async () => {
-    if (!editorRef?.current || !saveToWebhook) return
-
-    const currentMarkdown = editorRef.current.getMarkdown()
-
-    // Use the mdastNode position to identify the exact location
-    const { start, end } = mdastNode.position
-
-    const before = currentMarkdown.slice(0, start.offset)
-    let after = currentMarkdown.slice(end.offset)
-
-    // Clean up trailing newlines after the card to avoid leaving orphaned content
-    // Remove up to 2 newlines after the card
-    after = after.replace(/^\n{1,2}/, '')
-
-    const updated = before + after
-
-    editorRef.current.setMarkdown(updated)
-    await saveToWebhook(updated)
   }
 
   return (
@@ -110,25 +121,6 @@ const EditableCard = ({ mdastNode }: { mdastNode: any }) => {
           onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#2563eb'}
         >
           Edit
-        </button>
-        <button
-          onClick={handleDelete}
-          style={{
-            padding: '6px 12px',
-            fontSize: '12px',
-            backgroundColor: '#dc2626',
-            color: 'white',
-            border: 'none',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            fontWeight: '600',
-            boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-            transition: 'all 0.2s',
-          }}
-          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#b91c1c'}
-          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#dc2626'}
-        >
-          Delete
         </button>
       </div>
       <BasicPrimeCard title={title} subtitle={subtitle} icon={icon} href={href} image={image}>

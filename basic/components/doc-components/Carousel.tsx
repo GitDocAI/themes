@@ -75,18 +75,20 @@ export const BasicCarousel: React.FC<CarouselProps> = ({
   }
 
   return (
-    <div className="carousel-wrapper">
-      <PrimeCarousel
-        value={images}
-        numVisible={numVisible}
-        numScroll={numScroll}
-        responsiveOptions={responsiveOptions}
-        itemTemplate={itemTemplate}
-        circular={circular}
-        autoplayInterval={autoplayInterval}
-        showIndicators={showIndicators}
-        showNavigators={showNavigators}
-      />
+    <div className="mx-auto px-4 max-w-4xl">
+      <div className="carousel-wrapper">
+        <PrimeCarousel
+          value={images}
+          numVisible={numVisible}
+          numScroll={numScroll}
+          responsiveOptions={responsiveOptions}
+          itemTemplate={itemTemplate}
+          circular={circular}
+          autoplayInterval={autoplayInterval}
+          showIndicators={showIndicators}
+          showNavigators={showNavigators}
+        />
+      </div>
     </div>
   )
 }

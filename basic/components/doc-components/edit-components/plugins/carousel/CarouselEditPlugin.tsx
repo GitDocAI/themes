@@ -68,51 +68,62 @@ export const CarouselEditPlugin = (EditorContext: React.Context<any>) => {
 
       const currentMarkdown = editorRef.current.getMarkdown()
 
-      // Use the mdastNode position to identify the exact location
-      const { start, end } = mdastNode.position
-
-      const before = currentMarkdown.slice(0, start.offset)
-      let after = currentMarkdown.slice(end.offset)
-
-      // Clean up trailing newlines to avoid duplication
-      after = after.replace(/^\n{1,2}/, '')
-
       // Build new carousel markdown
-      const imagesJson = JSON.stringify(newImages)
+      const newImagesJson = JSON.stringify(newImages)
       let newCarouselMarkdown = '<Carousel\n'
-      newCarouselMarkdown += `  images={${imagesJson}}\n`
+      newCarouselMarkdown += `  images={${newImagesJson}}\n`
       newCarouselMarkdown += `  numVisible={${newNumVisible}}\n`
       newCarouselMarkdown += `  circular={${newCircular}}\n`
       newCarouselMarkdown += '/>'
 
-      // Ensure proper spacing around the carousel
-      const updated = before + newCarouselMarkdown + '\n\n' + after
+      let updated = currentMarkdown
+
+      // Try to use mdastNode position first (works for existing components)
+      if (mdastNode.position && mdastNode.position.start && mdastNode.position.end && mdastNode.position.start.offset !== 0) {
+        const { start, end } = mdastNode.position
+
+        const before = currentMarkdown.slice(0, start.offset)
+        const after = currentMarkdown.slice(end.offset)
+
+        updated = before + newCarouselMarkdown + after
+        console.log('[CarouselEdit] Updated carousel using position')
+      } else {
+        // Fallback: Use content-based matching (for newly created components with position 0)
+        console.log('[CarouselEdit] Position invalid or 0, using content-based fallback')
+
+        // Build the old carousel markdown to find and replace
+        const oldImagesJson = JSON.stringify(images)
+        let oldCarouselMarkdown = '<Carousel\n'
+        oldCarouselMarkdown += `  images={${oldImagesJson}}\n`
+        oldCarouselMarkdown += `  numVisible={${numVisible}}\n`
+        oldCarouselMarkdown += `  circular={${circular}}\n`
+        oldCarouselMarkdown += '/>'
+
+        console.log('[CarouselEdit] Looking for old carousel (fallback):', oldCarouselMarkdown)
+
+        // Replace in markdown
+        updated = currentMarkdown.replace(oldCarouselMarkdown, newCarouselMarkdown)
+
+        if (updated === currentMarkdown) {
+          console.warn('[CarouselEdit] Carousel not found in markdown, trying alternative match')
+          // Try without exact whitespace matching
+          const escapedOld = oldCarouselMarkdown.replace(/\s+/g, '\\s+')
+          const regex = new RegExp(escapedOld.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\\s\+/g, '\\s+'))
+          updated = currentMarkdown.replace(regex, newCarouselMarkdown)
+
+          if (updated === currentMarkdown) {
+            console.error('[CarouselEdit] Could not find carousel to update')
+            return
+          }
+        }
+
+        console.log('[CarouselEdit] Updated carousel using content-based matching')
+      }
 
       editorRef.current.setMarkdown(updated)
       await saveToWebhook(updated)
 
       setShowEditModal(false)
-    }
-
-    const handleDelete = async () => {
-      if (!editorRef?.current || !saveToWebhook) return
-
-      const currentMarkdown = editorRef.current.getMarkdown()
-
-      // Use the mdastNode position to identify the exact location
-      const { start, end } = mdastNode.position
-
-      const before = currentMarkdown.slice(0, start.offset)
-      let after = currentMarkdown.slice(end.offset)
-
-      // Clean up trailing newlines after the carousel to avoid leaving orphaned content
-      // Remove up to 2 newlines after the carousel
-      after = after.replace(/^\n{1,2}/, '')
-
-      const updated = before + after
-
-      editorRef.current.setMarkdown(updated)
-      await saveToWebhook(updated)
     }
 
     return (
@@ -145,25 +156,6 @@ export const CarouselEditPlugin = (EditorContext: React.Context<any>) => {
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#2563eb'}
             >
               Edit
-            </button>
-            <button
-              onClick={handleDelete}
-              style={{
-                padding: '6px 12px',
-                fontSize: '12px',
-                backgroundColor: '#dc2626',
-                color: 'white',
-                border: 'none',
-                borderRadius: '6px',
-                cursor: 'pointer',
-                fontWeight: '600',
-                boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-                transition: 'all 0.2s',
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#b91c1c'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#dc2626'}
-            >
-              Delete
             </button>
           </div>
         </div>

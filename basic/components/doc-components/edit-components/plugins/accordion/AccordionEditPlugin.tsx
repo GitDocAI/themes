@@ -143,17 +143,8 @@ export const AccordionEditPlugin = (EditorContext: React.Context<any>) => {
 
       const currentMarkdown = editorRef.current.getMarkdown()
 
-      // Use the mdastNode position to identify the exact location
-      const { start, end } = mdastNode.position
-
-      const before = currentMarkdown.slice(0, start.offset)
-      let after = currentMarkdown.slice(end.offset)
-
-      // Clean up trailing newlines to avoid duplication
-      after = after.replace(/^\n{1,2}/, '')
-
       // Build new accordion markdown
-      let newAccordionMarkdown = '<Accordion'
+      let newAccordionMarkdown = '\n\n<Accordion'
       if (multiple) {
         newAccordionMarkdown += ' multiple'
       }
@@ -166,36 +157,83 @@ export const AccordionEditPlugin = (EditorContext: React.Context<any>) => {
         newAccordionMarkdown += `  </AccordionTab>\n`
       })
 
-      newAccordionMarkdown += '</Accordion>'
+      newAccordionMarkdown += '</Accordion>\n\n'
 
-      // Ensure proper spacing around the accordion
-      const updated = before + newAccordionMarkdown + '\n\n' + after
+      let updated = currentMarkdown
+
+      // Try to use mdastNode position first (works for existing components)
+      if (mdastNode.position && mdastNode.position.start && mdastNode.position.end && mdastNode.position.start.offset !== 0) {
+        const { start, end } = mdastNode.position
+
+        const before = currentMarkdown.slice(0, start.offset)
+        const after = currentMarkdown.slice(end.offset)
+
+        updated = before + newAccordionMarkdown + after
+        console.log('[AccordionEdit] Updated accordion using position')
+      } else {
+        // Fallback: Use content-based matching (for newly created components with position 0)
+        console.log('[AccordionEdit] Position invalid or 0, using content-based fallback')
+
+        // Re-extract current tabs from mdastNode
+        const currentTabs = mdastNode.children?.map((child: any, index: number) => {
+          if (child.name === 'AccordionTab') {
+            const tabProps = extractProps(child)
+            const header = tabProps.header || `Tab ${index + 1}`
+            const content = child.children?.map(nodeToMarkdown).join('').trim() || ''
+            return { header, content }
+          }
+          return null
+        }).filter(Boolean) || []
+
+        // Build the old accordion markdown to find and replace
+        let oldAccordionMarkdown = '<Accordion'
+        if (props.multiple) {
+          oldAccordionMarkdown += ' multiple'
+        }
+        oldAccordionMarkdown += '>\n'
+
+        currentTabs.forEach((tab: any) => {
+          oldAccordionMarkdown += `  <AccordionTab header="${tab.header}">\n`
+          oldAccordionMarkdown += `    ${tab.content}\n`
+          oldAccordionMarkdown += `  </AccordionTab>\n`
+        })
+
+        oldAccordionMarkdown += '</Accordion>'
+
+        console.log('[AccordionEdit] Looking for old accordion (fallback)')
+
+        // Try to find and replace
+        updated = currentMarkdown.replace(oldAccordionMarkdown, newAccordionMarkdown.trim())
+
+        if (updated === currentMarkdown) {
+          // Try with flexible whitespace
+          const escapeRegex = (str: string) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+          const pattern = `<Accordion[^>]*>\\s*` +
+            currentTabs.map((tab: any) => {
+              const escapedHeader = escapeRegex(tab.header)
+              const escapedContent = escapeRegex(tab.content)
+              return `<AccordionTab\\s+header="${escapedHeader}"[^>]*>\\s*` +
+                     escapedContent.replace(/\s+/g, '\\s+') +
+                     `\\s*</AccordionTab>\\s*`
+            }).join('') +
+            `</Accordion>`
+
+          const regex = new RegExp(pattern)
+          updated = currentMarkdown.replace(regex, newAccordionMarkdown.trim())
+
+          if (updated === currentMarkdown) {
+            console.error('[AccordionEdit] Could not find accordion to update')
+            return
+          }
+        }
+
+        console.log('[AccordionEdit] Updated accordion using content-based matching')
+      }
 
       editorRef.current.setMarkdown(updated)
       await saveToWebhook(updated)
 
       setShowEditModal(false)
-    }
-
-    const handleDelete = async () => {
-      if (!editorRef?.current || !saveToWebhook) return
-
-      const currentMarkdown = editorRef.current.getMarkdown()
-
-      // Use the mdastNode position to identify the exact location
-      const { start, end } = mdastNode.position
-
-      const before = currentMarkdown.slice(0, start.offset)
-      let after = currentMarkdown.slice(end.offset)
-
-      // Clean up trailing newlines after the accordion to avoid leaving orphaned content
-      // Remove up to 2 newlines after the accordion
-      after = after.replace(/^\n{1,2}/, '')
-
-      const updated = before + after
-
-      editorRef.current.setMarkdown(updated)
-      await saveToWebhook(updated)
     }
 
     // Helper to render MDX content as simple HTML
@@ -326,25 +364,6 @@ export const AccordionEditPlugin = (EditorContext: React.Context<any>) => {
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#2563eb'}
             >
               Edit
-            </button>
-            <button
-              onClick={handleDelete}
-              style={{
-                padding: '6px 12px',
-                fontSize: '12px',
-                backgroundColor: '#dc2626',
-                color: 'white',
-                border: 'none',
-                borderRadius: '6px',
-                cursor: 'pointer',
-                fontWeight: '600',
-                boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-                transition: 'all 0.2s',
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#b91c1c'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#dc2626'}
-            >
-              Delete
             </button>
           </div>
         </div>

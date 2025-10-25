@@ -183,9 +183,12 @@ export const CarouselInsertModal: React.FC<CarouselInsertModalProps> = ({
                 <input
                   type="number"
                   min="1"
-                  max="5"
+                  max="3"
                   value={numVisible}
-                  onChange={(e) => setNumVisible(parseInt(e.target.value) || 3)}
+                  onChange={(e) => {
+                    const value = parseInt(e.target.value) || 3
+                    setNumVisible(Math.min(value, 3))
+                  }}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm outline-none bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                 />
               </div>

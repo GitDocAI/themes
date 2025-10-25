@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "node -r ./.suppress.js ./node_modules/next/dist/bin/next dev --turbopack",
-    "live-editor": "DISABLE_FAST_REFRESH=true NEXT_PUBLIC_ENABLE_LIVE_EDITOR=true node -r ./.suppress.js ./node_modules/next/dist/bin/next dev --turbopack",
+    "dev": "NEXT_PUBLIC_ENABLE_LIVE_EDITOR=true node -r ./.suppress.js ./node_modules/next/dist/bin/next dev --turbopack",
+    "live-editor": "NEXT_PUBLIC_ENABLE_LIVE_EDITOR=true node -r ./.suppress.js ./node_modules/next/dist/bin/next dev --turbopack",
     "build": "node -r ./.suppress.js ./node_modules/next/dist/bin/next build",
     "start": "node -r ./.suppress.js ./node_modules/next/dist/bin/next start",
     "preview": "node -r ./.suppress.js ./node_modules/next/dist/bin/next build && node -r ./.suppress.js ./node_modules/next/dist/bin/next start",

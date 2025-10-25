@@ -142,58 +142,96 @@ export const ChartEditPlugin = (EditorContext: React.Context<any>) => {
       cutout: props.cutout,
     }
 
+    // Helper to build chart markdown from data
+    const buildChartMarkdown = (type: string, data: { datasetNames: string[], rows: any[] }, options: any) => {
+      // Build markdown table
+      let tableMarkdown = '| ' + ['Label', ...data.datasetNames].join(' | ') + ' |\n'
+      tableMarkdown += '| ' + Array(data.datasetNames.length + 1).fill('---').join(' | ') + ' |\n'
+
+      data.rows.forEach(row => {
+        tableMarkdown += '| ' + row.label + ' | ' + row.values.join(' | ') + ' |\n'
+      })
+
+      // Build Chart component with attributes
+      let chartMarkdown = `<Chart\n  type="${type}"`
+
+      if (type === 'bar') {
+        if (options.indexAxis && options.indexAxis !== 'x') chartMarkdown += `\n  indexAxis="${options.indexAxis}"`
+        if (options.stacked) chartMarkdown += `\n  stacked={true}`
+      }
+
+      if (type === 'line') {
+        if (options.tension !== undefined && options.tension !== 0.4) chartMarkdown += `\n  tension={${options.tension}}`
+        if (options.fill) chartMarkdown += `\n  fill={true}`
+      }
+
+      if (type === 'doughnut' && options.cutout && options.cutout !== '50%') {
+        chartMarkdown += `\n  cutout="${options.cutout}"`
+      }
+
+      if (options.legend === false) chartMarkdown += `\n  legend={false}`
+
+      chartMarkdown += '\n>\n\n'
+      chartMarkdown += tableMarkdown
+      chartMarkdown += '\n</Chart>'
+
+      return chartMarkdown
+    }
+
     const handleUpdate = async (newChartMarkdown: string) => {
       if (!editorRef?.current || !saveToWebhook) return
 
       const currentMarkdown = editorRef.current.getMarkdown()
+      let updated = currentMarkdown
 
-      // Use the mdastNode position to identify the exact location
-      if (!mdastNode.position || !mdastNode.position.start || !mdastNode.position.end) {
-        console.error('Chart position not found')
-        return
+      // Try to use mdastNode position first (works for existing components)
+      if (mdastNode.position && mdastNode.position.start && mdastNode.position.end && mdastNode.position.start.offset !== 0) {
+        const { start, end } = mdastNode.position
+
+        const before = currentMarkdown.slice(0, start.offset)
+        const after = currentMarkdown.slice(end.offset)
+
+        updated = before + newChartMarkdown.trim() + after
+        console.log('[ChartEdit] Updated chart using position')
+      } else {
+        // Fallback: Use flexible pattern matching (for newly created components with position 0)
+        console.log('[ChartEdit] Position invalid or 0, using pattern-based fallback')
+
+        // Create a flexible regex pattern that matches the chart by type and table structure
+        const escapeRegex = (str: string) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+
+        // Build pattern for chart opening tag with type
+        let pattern = `<Chart\\s+type="${escapeRegex(chartType)}"`
+
+        // Add optional attributes (with flexible whitespace)
+        pattern += `[^>]*>`
+
+        // Match any content until closing tag (including table)
+        pattern += `[\\s\\S]*?`
+
+        // Match closing tag
+        pattern += `</Chart>`
+
+        console.log('[ChartEdit] Using pattern:', pattern)
+
+        const regex = new RegExp(pattern)
+        const match = currentMarkdown.match(regex)
+
+        if (match) {
+          console.log('[ChartEdit] Found chart to replace:', match[0].substring(0, 100) + '...')
+          updated = currentMarkdown.replace(regex, newChartMarkdown.trim())
+          console.log('[ChartEdit] Updated chart using pattern-based matching')
+        } else {
+          console.error('[ChartEdit] Could not find chart to update')
+          console.error('[ChartEdit] Looking for chart with type:', chartType)
+          return
+        }
       }
-
-      const { start, end } = mdastNode.position
-
-      const before = currentMarkdown.slice(0, start.offset)
-      let after = currentMarkdown.slice(end.offset)
-
-      // Clean up trailing newlines to avoid duplication
-      after = after.replace(/^\n{1,2}/, '')
-
-      // Ensure proper spacing around the chart
-      const updated = before + newChartMarkdown.trim() + '\n\n' + after
 
       editorRef.current.setMarkdown(updated)
       await saveToWebhook(updated)
 
       setShowEditModal(false)
-    }
-
-    const handleDelete = async () => {
-      if (!editorRef?.current || !saveToWebhook) return
-
-      const currentMarkdown = editorRef.current.getMarkdown()
-
-      // Use the mdastNode position to identify the exact location
-      if (!mdastNode.position || !mdastNode.position.start || !mdastNode.position.end) {
-        console.error('Chart position not found')
-        return
-      }
-
-      const { start, end } = mdastNode.position
-
-      const before = currentMarkdown.slice(0, start.offset)
-      let after = currentMarkdown.slice(end.offset)
-
-      // Clean up trailing newlines after the chart to avoid leaving orphaned content
-      // Remove up to 2 newlines after the chart
-      after = after.replace(/^\n{1,2}/, '')
-
-      const updated = before + after
-
-      editorRef.current.setMarkdown(updated)
-      await saveToWebhook(updated)
     }
 
     return (
@@ -228,25 +266,6 @@ export const ChartEditPlugin = (EditorContext: React.Context<any>) => {
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#2563eb'}
             >
               Edit
-            </button>
-            <button
-              onClick={handleDelete}
-              style={{
-                padding: '6px 12px',
-                fontSize: '12px',
-                backgroundColor: '#dc2626',
-                color: 'white',
-                border: 'none',
-                borderRadius: '6px',
-                cursor: 'pointer',
-                fontWeight: '600',
-                boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-                transition: 'all 0.2s',
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#b91c1c'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#dc2626'}
-            >
-              Delete
             </button>
           </div>
         </div>
