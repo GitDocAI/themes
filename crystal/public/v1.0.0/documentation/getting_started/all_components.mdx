@@ -1,0 +1,688 @@
+# Complete Component Showcase
+
+This page demonstrates **ALL** available components in the Crystal theme.
+
+## Text Formatting
+
+### Headings
+
+# Heading 1
+## Heading 2
+### Heading 3
+
+### Inline Styles
+
+This is **bold text**, this is *italic text*, this is ~~strikethrough~~, this is <u>underlined</u>, and this is `inline code`.
+
+You can also combine them: **_bold and italic_**, **~~bold and strikethrough~~**.
+
+### Blockquotes
+
+> This is a standard blockquote.
+> It can span multiple lines.
+
+## Lists
+
+### Bullet List
+
+- First item
+- Second item
+  - Nested item 1
+  - Nested item 2
+- Third item
+
+### Numbered List
+
+1. First step
+2. Second step
+3. Third step
+   1. Sub-step A
+   2. Sub-step B
+
+### Task List
+
+- [ ] Incomplete task
+- [x] Completed task
+- [ ] Another incomplete task
+- [x] Another completed task
+
+## Code
+
+### Inline Code
+
+Use `npm install` to install dependencies.
+
+### Code Block
+
+```javascript
+function greet(name) {
+  console.log(`Hello, ${name}!`);
+}
+
+greet('World');
+```
+
+```python
+def greet(name):
+    print(f"Hello, {name}!")
+
+greet("World")
+```
+
+### Code Group
+
+Code groups allow you to show the same functionality in multiple languages with tabs:
+
+<CodeGroup>
+  <Code lang="javascript">
+    // Fetch API example
+    fetch('/api/users')
+      .then(response => response.json())
+      .then(data => console.log(data))
+      .catch(error => console.error('Error:', error))
+  </Code>
+  <Code lang="python">
+    # Requests library example
+    import requests
+
+    response = requests.get('/api/users')
+    data = response.json()
+    print(data)
+  </Code>
+  <Code lang="go">
+    // Go HTTP example
+    package main
+
+    import (
+        "encoding/json"
+        "net/http"
+    )
+
+    resp, err := http.Get("/api/users")
+    if err != nil {
+        panic(err)
+    }
+    defer resp.Body.Close()
+  </Code>
+  <Code lang="rust">
+    // Rust reqwest example
+    use reqwest;
+
+    let response = reqwest::get("/api/users")
+        .await?
+        .text()
+        .await?;
+
+    println!("{}", response);
+  </Code>
+</CodeGroup>
+
+## Media
+
+### Images
+
+![Crystal Platform](https://images.unsplash.com/photo-1557682224-5b8590cd9ec5?w=800&h=400&fit=crop&auto=format&q=90)
+
+### Links
+
+Check out the [installation guide](/v1.0.0/documentation/getting_started/installation) for more info.
+
+Visit [our website](https://example.com) to learn more.
+
+---
+
+## Custom Components
+
+### Cards
+
+<Card title="Getting Started" icon="pi pi-rocket" iconAlign="left" href="/v1.0.0/documentation/getting_started/introduction">
+
+Learn the basics and get up and running quickly with Crystal Platform.
+
+**What you'll learn:**
+- Installation and setup
+- Core concepts
+- Your first documentation site
+
+</Card>
+
+<Card title="API Reference" icon="pi pi-book" iconAlign="center">
+
+Complete API documentation for all available endpoints and methods.
+
+```javascript
+fetch('/api/users')
+  .then(res => res.json())
+  .then(data => console.log(data))
+```
+
+[View API Docs →](/v1.0.0/api_reference/documents/create)
+
+</Card>
+
+<Card title="Tutorials" icon="pi pi-graduation-cap" iconAlign="right" href="/v1.0.0/documentation/getting_started/quick_start">
+
+### Step-by-step guides
+
+Follow along with our interactive tutorials:
+
+- [ ] Complete the quick start
+- [ ] Build your first component
+- [ ] Deploy to production
+
+</Card>
+
+### Info Blocks
+
+<Tip>
+Use keyboard shortcuts to speed up your workflow!
+</Tip>
+
+<Info>
+This feature is available in all plans.
+</Info>
+
+<Note>
+Remember to save your work frequently.
+</Note>
+
+<Warning>
+This action cannot be undone.
+</Warning>
+
+<Danger>
+Never commit secrets to your repository!
+</Danger>
+
+### Labels
+
+<Label label="New" color="#10b981" size="sm" />
+<Label label="Beta" color="#3b82f6" size="md" />
+<Label label="Deprecated" color="#ef4444" size="lg" />
+
+### Endpoints
+
+<Endpoint method="GET" path="/api/users" />
+
+<Endpoint method="POST" path="/api/users" />
+
+<Endpoint method="PUT" path="/api/users/:id" />
+
+<Endpoint method="DELETE" path="/api/users/:id" />
+
+### Accordion
+
+<Accordion multiple={true}>
+  <AccordionTab title="Getting Started with Crystal Platform">
+
+    ### What is Crystal Platform?
+
+    Crystal Platform is a modern documentation framework that makes it easy to create beautiful, interactive documentation.
+
+    **Key Features:**
+    - Real-time editing with live preview
+    - MDX support with custom components
+    - Beautiful, responsive themes
+    - Built-in search functionality
+    - Version control integration
+
+    <Info>
+    All features are available in the open-source version!
+    </Info>
+
+  </AccordionTab>
+
+  <AccordionTab title="Installation & Setup">
+
+    ### Quick Install
+
+    Install Crystal Platform using npm:
+
+    ```bash
+    npm install @gitdocai/crystal-theme
+    ```
+
+    Or using yarn:
+
+    ```bash
+    yarn add @gitdocai/crystal-theme
+    ```
+
+    ### Configuration
+
+    Create a `crystal.config.js` file:
+
+    ```javascript
+    export default {
+      theme: 'crystal',
+      title: 'My Documentation',
+      version: '1.0.0'
+    }
+    ```
+
+    <Tip>
+    Check out our [installation guide](/v1.0.0/documentation/getting_started/installation) for detailed instructions.
+    </Tip>
+
+  </AccordionTab>
+
+  <AccordionTab title="Available Components">
+
+    Crystal theme includes **31 components** organized in categories:
+
+    | Category | Components | Count |
+    |----------|-----------|-------|
+    | Text & Formatting | Headings, Bold, Italic, etc. | 10 |
+    | Lists | Bullet, Numbered, Task | 3 |
+    | Code & Media | Code blocks, Images, Links | 4 |
+    | Layout | Card, Columns, Panels | 4 |
+    | Info Blocks | Tip, Warning, Danger, etc. | 5 |
+    | Interactive | Accordion, Tabs, Tables | 3 |
+    | Technical | Endpoint, Label | 2 |
+
+    **Example API Endpoint:**
+
+    <Endpoint method="GET" path="/api/components" />
+
+  </AccordionTab>
+
+  <AccordionTab title="Best Practices">
+
+    ### Do's and Don'ts
+
+    Follow these guidelines for the best results:
+
+    **✅ Do:**
+    - Use semantic headings (H1, H2, H3)
+    - Add alt text to all images
+    - Keep code examples concise and relevant
+    - Use Info blocks to highlight important information
+
+    **❌ Don't:**
+    - Nest too many components deeply
+    - Use H1 multiple times on the same page
+    - Forget to test your documentation on mobile
+
+  </AccordionTab>
+
+  <AccordionTab title="Troubleshooting & FAQ">
+
+    ### Common Issues
+
+    **Q: My components are not rendering**
+
+    Make sure you've imported all required dependencies and that your MDX parser is configured correctly.
+
+    **Q: Can I use custom styling?**
+
+    Yes! Crystal supports custom CSS and theme customization through the config file.
+
+    <Warning>
+    Always test your changes in development mode before deploying to production.
+    </Warning>
+
+    **Q: How do I add code highlighting?**
+
+    Code highlighting is built-in. Just specify the language:
+
+    ```python
+    def hello_world():
+        print("Hello, Crystal!")
+    ```
+
+    ### Need More Help?
+
+    - 📚 [Read the full documentation](/v1.0.0/documentation/getting_started/introduction)
+    - 💬 Join our community forum
+    - 🐛 [Report issues on GitHub](https://github.com)
+
+  </AccordionTab>
+</Accordion>
+
+### Tabs
+
+<Tabs>
+  <Tab title="JavaScript Example">
+
+    ### Quick Start with JavaScript
+
+    JavaScript is a versatile programming language used for web development.
+
+    **Installation:**
+
+    ```bash
+    npm install express
+    ```
+
+    **Example Code:**
+
+    ```javascript
+    const express = require('express')
+    const app = express()
+
+    app.get('/', (req, res) => {
+      res.json({ message: 'Hello World!' })
+    })
+
+    app.listen(3000, () => {
+      console.log('Server running on port 3000')
+    })
+    ```
+
+    <Tip>
+    Use nodemon for automatic server restarts during development!
+    </Tip>
+
+  </Tab>
+
+  <Tab title="Python Example">
+
+    ### Quick Start with Python
+
+    Python is a high-level programming language known for its simplicity and readability.
+
+    **Installation:**
+
+    ```bash
+    pip install flask
+    ```
+
+    **Example Code:**
+
+    ```python
+    from flask import Flask, jsonify
+
+    app = Flask(__name__)
+
+    @app.route('/')
+    def hello():
+        return jsonify(message='Hello World!')
+
+    if __name__ == '__main__':
+        app.run(debug=True, port=5000)
+    ```
+
+    **Key Features:**
+    - Clean, readable syntax
+    - Extensive standard library
+    - Great for data science and web development
+    - Strong community support
+
+  </Tab>
+
+  <Tab title="Go Example">
+
+    ### Quick Start with Go
+
+    Go is a statically typed, compiled language designed for building scalable applications.
+
+    **Installation:**
+
+    ```bash
+    go mod init myapp
+    ```
+
+    **Example Code:**
+
+    ```go
+    package main
+
+    import (
+        "encoding/json"
+        "net/http"
+    )
+
+    type Response struct {
+        Message string `json:"message"`
+    }
+
+    func handler(w http.ResponseWriter, r *http.Request) {
+        w.Header().Set("Content-Type", "application/json")
+        json.NewEncoder(w).Encode(Response{Message: "Hello World!"})
+    }
+
+    func main() {
+        http.HandleFunc("/", handler)
+        http.ListenAndServe(":8080", nil)
+    }
+    ```
+
+    <Info>
+    Go is excellent for building microservices and high-performance APIs!
+    </Info>
+
+  </Tab>
+
+  <Tab title="Comparison">
+
+    ### Language Comparison Table
+
+    | Feature | JavaScript | Python | Go |
+    |---------|-----------|--------|-----|
+    | **Type System** | Dynamic | Dynamic | Static |
+    | **Performance** | Medium | Medium | High |
+    | **Learning Curve** | Easy | Easy | Medium |
+    | **Best For** | Web, Full-stack | Data Science, AI | Systems, Cloud |
+    | **Concurrency** | Event Loop | Threading | Goroutines |
+    | **Compile Time** | Interpreted | Interpreted | Compiled |
+
+    ### When to Use Each
+
+    - **JavaScript** - Full-stack web development
+    - **Python** - Data analysis and machine learning
+    - **Go** - Microservices and cloud-native apps
+
+    <Warning>
+    Choose the right tool for your specific use case - there's no one-size-fits-all solution!
+    </Warning>
+
+  </Tab>
+</Tabs>
+
+### Columns
+
+<Columns columns={2}>
+  <Column>
+    ## Left Column
+
+    This content appears in the left column. You can put any markdown content here, including lists, code blocks, and more.
+
+    - Item 1
+    - Item 2
+    - Item 3
+  </Column>
+  <Column>
+    ## Right Column
+
+    This content appears in the right column. It's great for side-by-side comparisons or showing related information.
+
+    ```javascript
+    const example = "code";
+    ```
+  </Column>
+</Columns>
+
+### Right Panel
+
+<RightPanel>
+  This content appears in a right-side panel. It's perfect for additional context, notes, or related information that complements the main content.
+</RightPanel>
+
+### Tables
+
+#### Simple Markdown Table
+
+| Name | Age | City |
+|------|-----|------|
+| Alice | 25 | New York |
+| Bob | 30 | San Francisco |
+| Charlie | 28 | London |
+
+#### Advanced Table with Sorting and Filtering
+
+<Table
+  data={[
+    ["Name<sortable><filterable>", "Email<sortable><filterable>", "Role<sortable><filterable>", "Status<sortable>"],
+    ["John Doe", "john@example.com", "Admin", "Active"],
+    ["Jane Smith", "jane@example.com", "Editor", "Active"],
+    ["Bob Johnson", "bob@example.com", "Viewer", "Inactive"],
+    ["Alice Williams", "alice@example.com", "Editor", "Active"],
+    ["Charlie Brown", "charlie@example.com", "Admin", "Active"]
+  ]}
+/>
+
+#### Table with Pagination
+
+<Table
+  pagination={true}
+  rowsPerPage={5}
+  rowsPerPageOptions={[5, 10, 20, 50]}
+  data={[
+    ["Product<sortable><filterable>", "Price<sortable>", "Stock<sortable>", "Category<sortable><filterable>"],
+    ["Laptop", "$999", "25", "Electronics"],
+    ["Mouse", "$29", "150", "Accessories"],
+    ["Keyboard", "$79", "80", "Accessories"],
+    ["Monitor", "$299", "45", "Electronics"],
+    ["Webcam", "$89", "60", "Electronics"],
+    ["USB Cable", "$9", "200", "Accessories"],
+    ["Headphones", "$149", "90", "Electronics"],
+    ["Desk Lamp", "$39", "120", "Furniture"],
+    ["Office Chair", "$299", "30", "Furniture"],
+    ["Standing Desk", "$599", "15", "Furniture"]
+  ]}
+/>
+
+#### Scrollable Table
+
+<Table
+  scrollable={true}
+  scrollHeight={300}
+  data={[
+    ["Country<sortable><filterable>", "Capital<sortable><filterable>", "Population<sortable>", "Area (km²)<sortable>"],
+    ["United States", "Washington D.C.", "331M", "9.8M"],
+    ["China", "Beijing", "1.4B", "9.6M"],
+    ["India", "New Delhi", "1.4B", "3.3M"],
+    ["Brazil", "Brasília", "213M", "8.5M"],
+    ["Russia", "Moscow", "146M", "17.1M"],
+    ["Japan", "Tokyo", "126M", "378K"],
+    ["Germany", "Berlin", "83M", "357K"],
+    ["France", "Paris", "67M", "644K"],
+    ["United Kingdom", "London", "68M", "243K"],
+    ["Italy", "Rome", "60M", "301K"],
+    ["Canada", "Ottawa", "38M", "9.9M"],
+    ["South Korea", "Seoul", "52M", "100K"],
+    ["Spain", "Madrid", "47M", "506K"],
+    ["Mexico", "Mexico City", "128M", "1.9M"],
+    ["Australia", "Canberra", "26M", "7.7M"]
+  ]}
+/>
+
+#### Table with All Features
+
+<Table
+  scrollable={true}
+  scrollHeight={400}
+  pagination={true}
+  rowsPerPage={10}
+  rowsPerPageOptions={[5, 10, 25, 50]}
+  data={[
+    ["ID<sortable>", "Title<sortable><filterable>", "Author<sortable><filterable>", "Genre<sortable><filterable>", "Year<sortable>", "Rating<sortable>"],
+    ["1", "The Great Gatsby", "F. Scott Fitzgerald", "Fiction", "1925", "4.5"],
+    ["2", "To Kill a Mockingbird", "Harper Lee", "Fiction", "1960", "4.8"],
+    ["3", "1984", "George Orwell", "Dystopian", "1949", "4.7"],
+    ["4", "Pride and Prejudice", "Jane Austen", "Romance", "1813", "4.6"],
+    ["5", "The Catcher in the Rye", "J.D. Salinger", "Fiction", "1951", "4.1"],
+    ["6", "Animal Farm", "George Orwell", "Satire", "1945", "4.5"],
+    ["7", "Lord of the Flies", "William Golding", "Fiction", "1954", "4.3"],
+    ["8", "Brave New World", "Aldous Huxley", "Dystopian", "1932", "4.4"],
+    ["9", "The Hobbit", "J.R.R. Tolkien", "Fantasy", "1937", "4.7"],
+    ["10", "Fahrenheit 451", "Ray Bradbury", "Dystopian", "1953", "4.6"],
+    ["11", "Jane Eyre", "Charlotte Brontë", "Romance", "1847", "4.5"],
+    ["12", "Wuthering Heights", "Emily Brontë", "Romance", "1847", "4.2"],
+    ["13", "The Lord of the Rings", "J.R.R. Tolkien", "Fantasy", "1954", "4.9"],
+    ["14", "Harry Potter", "J.K. Rowling", "Fantasy", "1997", "4.8"],
+    ["15", "The Chronicles of Narnia", "C.S. Lewis", "Fantasy", "1950", "4.6"]
+  ]}
+/>
+
+## All Together Now
+
+Here's a complex example combining multiple components:
+
+### User Authentication API
+
+<Endpoint method="POST" path="/api/auth/login" />
+
+<Label label="Requires Auth" color="#f59e0b" size="md" />
+
+> [!WARNING]
+> Always use HTTPS in production to protect user credentials.
+
+<Tabs>
+  <Tab title="Request">
+    ```json
+    {
+      "email": "user@example.com",
+      "password": "secure_password"
+    }
+    ```
+  </Tab>
+  <Tab title="Response">
+    ```json
+    {
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+      "user": {
+        "id": "123",
+        "email": "user@example.com"
+      }
+    }
+    ```
+  </Tab>
+  <Tab title="Errors">
+    ```json
+    {
+      "error": "Invalid credentials",
+      "code": 401
+    }
+    ```
+  </Tab>
+</Tabs>
+
+**✅ Best Practices:**
+- Validate email format before submission
+- Use strong password requirements
+- Implement rate limiting
+
+**❌ Avoid:**
+- Storing passwords in plain text
+- Returning detailed error messages in production
+
+---
+
+## Summary
+
+This page showcases all **31 components** available in Crystal theme:
+
+**Text & Formatting (10):**
+- Paragraph, H1-H3, Blockquote, Bold, Italic, Strikethrough, Underline, Inline Code
+
+**Lists (3):**
+- Bullet List, Numbered List, Task List
+
+**Code & Media (5):**
+- Code Block, Code Group, Horizontal Rule, Links, Images
+
+**Layout (3):**
+- Card, Columns, Right Panel
+
+**Info Blocks (5):**
+- Tip, Info, Note, Warning, Danger
+
+**Interactive (3):**
+- Accordion, Tabs, Table
+
+**Technical (2):**
+- Endpoint, Label
+
+> [!TIP]
+> All these components can be combined to create rich, interactive documentation!

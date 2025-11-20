@@ -1,26 +1,8 @@
 [
     {
-        "name": "basic",
-        "description": "A modern, minimalistic theme for documentation.",
-        "sample": "https://themes-basic.gitdoc.ai",
-        "preview": "/api/v1/site-appearance/previews/basic.png"
-    },
-    {
         "name": "crystal",
         "description": "Modern, elegant documentation with crystal-clear design and seamless user experience.",
         "sample": "https://themes-crystal.gitdoc.ai",
         "preview": "/api/v1/site-appearance/previews/crystal.png"
-    },
-    {
-        "name": "nova",
-        "description": "Elegant, professional documentation with a Nova-inspired design and streamlined user experience.",
-        "sample": "https://themes-nova.gitdoc.ai",
-        "preview": "/api/v1/site-appearance/previews/nova.png"
-    },
-    {
-        "name": "lume",
-        "description": "Modern, clean documentation with lume-inspired design and seamless user experience.",
-        "sample": "https://themes-lume.gitdoc.ai",
-        "preview": "/api/v1/site-appearance/previews/lume.png"
     }
 ]
