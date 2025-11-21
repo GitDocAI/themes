@@ -44,9 +44,9 @@ export const PageRenderer: React.FC<PageRendererProps> = ({ pageData, theme, onS
       // At this point, the refs still have the OLD page's data
       if (hasChangesRef.current && pageIdRef.current) {
         // Save using the refs which have the OLD page data
-        onSave(pageIdRef.current, { ...pageDataRef.current, content: contentRef.current }).catch(err => {
-          console.error('[PageRenderer] Failed to save on page change:', err)
-        })
+        // onSave(pageIdRef.current, { ...pageDataRef.current, content: contentRef.current }).catch(err => {
+        //   console.error('[PageRenderer] Failed to save on page change:', err)
+        // })
       }
     }
   }, [pageData.id, onSave])

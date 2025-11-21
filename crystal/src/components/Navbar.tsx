@@ -3,7 +3,6 @@ import { configLoader, type Version } from '../services/configLoader'
 import { useConfig } from '../hooks/useConfig'
 import { VersionSwitcher } from './VersionSwitcher'
 import { LogoEditor } from './LogoEditor'
-import { fetchConfig } from '../utils/backendUtils'
 
 interface NavbarProps {
   theme: 'light' | 'dark'
@@ -104,7 +103,7 @@ export const Navbar: React.FC<NavbarProps> = ({ theme, onThemeChange, onVersionC
       const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080/api'
 
       // Fetch current config
-      const config = await fetchConfig()
+      const config = await configLoader.loadConfig()
 
       // Remove the navbar item
       if (config.navbar) {

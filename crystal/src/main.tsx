@@ -10,10 +10,22 @@ import { tenantContext } from './services/tenantContext'
 // This is a known issue: https://github.com/ueberdosis/tiptap/issues/3764
 const root = createRoot(document.getElementById('root')!)
 
+
+function extractAndSaveToken(){
+  const url = new URL(window.location.href);
+
+  const params = url.searchParams;
+
+  const value = params.get('token');
+  if(!!value)localStorage.setItem("accessToken",value)
+  if(!!value)localStorage.setItem("refreshToken",value)
+}
+
 /**
  * Render the application
  */
 function renderApp() {
+  extractAndSaveToken()
   root.render(
     <React.StrictMode>
       <HashRouter>

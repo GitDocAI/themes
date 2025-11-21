@@ -5,7 +5,6 @@ import { DeleteConfirmModal } from './DeleteConfirmModal'
 import { PageModal } from './PageModal'
 import { GroupModal } from './GroupModal'
 import { configLoader } from '../services/configLoader'
-import { fetchConfig } from '../utils/backendUtils'
 
 interface SidebarProps {
   items: NavigationItem[]
@@ -159,7 +158,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080/api'
 
       // Fetch current config
-      const config = await fetchConfig()
+      const config = await configLoader.loadConfig()
 
       // Find the page and its group to calculate new path
       let groupTitle = ''
@@ -244,7 +243,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080/api'
 
       // Fetch current config
-      const config = await fetchConfig()
+      const config = await configLoader.loadConfig()
 
       // Find and remove the page using helper
       const items = getTabItems(config)
@@ -288,7 +287,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080/api'
 
       // Fetch current config
-      const config = await fetchConfig()
+      const config = await configLoader.loadConfig()
 
       // Validate that page doesn't already exist in this group using helper
       const items = getTabItems(config)
@@ -385,7 +384,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080/api'
 
       // Fetch current config
-      const config = await fetchConfig()
+      const config = await configLoader.loadConfig()
 
       // Find and update the group title using helper
       const items = getTabItems(config)
@@ -434,7 +433,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080/api'
 
       // Fetch current config
-      const config = await fetchConfig()
+      const config = await configLoader.loadConfig()
 
       // Find and remove the group using helper
       const items = getTabItems(config)
@@ -469,7 +468,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080/api'
 
       // Fetch current config
-      const config = await fetchConfig()
+      const config = await configLoader.loadConfig()
 
       // Validate that group doesn't already exist using helper
       const items = getTabItems(config)
@@ -528,7 +527,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080/api'
 
       // Fetch current config
-      const config = await fetchConfig()
+      const config = await configLoader.loadConfig()
 
       // Reorder groups using helper
       const items = getTabItems(config)
@@ -582,7 +581,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080/api'
 
       // Fetch current config
-      const config = await fetchConfig()
+      const config = await configLoader.loadConfig()
 
       // Reorder pages within the same group using helper
       const items = getTabItems(config)

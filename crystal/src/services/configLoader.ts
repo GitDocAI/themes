@@ -4,6 +4,8 @@
  * Loads and provides access to gitdocai.config.json configuration
  */
 
+import axiosInstance from '../utils/axiosInstance'
+
 import type { NavigationItem } from '../types/navigation'
 
 export interface Tab {
@@ -129,40 +131,15 @@ class ConfigLoader {
   }
 
   private async fetchConfig(): Promise<GitDocAIConfig> {
-    const { getBackendUrl, fetchWithAuth, isMultiTenantMode } = await import('../utils/fetchWithAuth')
-
     // Determine the correct path based on mode
-    let configUrl: string
-    if (isMultiTenantMode()) {
-      // Multi-tenant mode: always load from backend with auth
-      configUrl = `${getBackendUrl()}/config`
-    } else if (this.isProductionMode) {
-      // Production: load from public folder
-      configUrl = '/gitdocai.config.json'
-    } else {
-      // Dev/Preview: load from backend API
-      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080/api'
-      configUrl = `${backendUrl}/config`
+    const configUrl: string = '/docs/gitdocai.config.json';
+    try{
+      const response = await axiosInstance.get(configUrl,{ responseType: 'text'})
+      const config = JSON.parse(response.data)
+      return config
+    }catch(error){
+      throw new Error(`Failed to save configuration: ${error}`)
     }
-
-    // Add timestamp to URL for cache busting
-    const cacheBuster = `?t=${Date.now()}`
-
-    const response = await fetchWithAuth(`${configUrl}${cacheBuster}`, {
-      cache: 'no-cache',
-      headers: {
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-        'Pragma': 'no-cache',
-        'Expires': '0'
-      }
-    })
-
-    if (!response.ok) {
-      throw new Error(`Failed to load config: ${response.statusText}`)
-    }
-
-    const config = await response.json()
-    return config
   }
 
   /**

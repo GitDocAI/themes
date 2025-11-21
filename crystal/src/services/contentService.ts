@@ -2,23 +2,23 @@
  * Content Service
  * Handles saving content to filesystem or API
  */
-
+import axiosInstance from '../utils/axiosInstance'
 import { pageLoader } from './pageLoader'
 import { apiReferenceLoader } from './apiReferenceLoader'
 import { configLoader } from './configLoader'
+import type { AxiosResponse } from 'axios'
 
 export class ContentService {
   /**
    * Save content to backend API
    */
   static async saveContent(docId: string, content: string): Promise<void> {
+    console.log(content)
+    alert()
     // Import fetchWithAuth utilities
-    const { getBackendUrl, fetchWithAuth } = await import('../utils/fetchWithAuth')
-
-    // Remove leading slash from docId if present to avoid double slashes
+     // Remove leading slash from docId if present to avoid double slashes
     const cleanDocId = docId.startsWith('/') ? docId.slice(1) : docId
-    const url = `${getBackendUrl()}/docs/${cleanDocId}`
-
+    const url = `/docs/${cleanDocId}`
     // Detect content type based on file extension or content format
     const isMdxFile = cleanDocId.endsWith('.mdx')
     const isJsonContent = content.trim().startsWith('{') || content.trim().startsWith('[')
@@ -39,17 +39,10 @@ export class ContentService {
       }
       body = JSON.stringify({ content })
     }
-
-    const response = await fetchWithAuth(url, {
-      method: 'PUT',
-      headers,
-      body,
-    })
-
-    if (!response.ok) {
-      const errorText = await response.text()
-      console.error('[ContentService] Error response:', errorText)
-      throw new Error(`Failed to save content: ${response.statusText} - ${errorText}`)
+    try{
+        await  axiosInstance.put(url,body)
+    }catch(error){
+      throw new Error(`Failed to save content: ${error}`)
     }
 
     // Invalidate cache after successful save
@@ -64,26 +57,20 @@ export class ContentService {
    */
   static async saveConfig(config: any): Promise<void> {
     // Import fetchWithAuth utilities
-    const { getBackendUrl, fetchWithAuth } = await import('../utils/fetchWithAuth')
 
     const configString = JSON.stringify(config, null, 2)
+    const url ='/docs/gitdocai.config.json'
 
-    const response = await fetchWithAuth(`${getBackendUrl()}/config`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: configString,
-    })
-
-    if (!response.ok) {
-      const errorText = await response.text()
-      throw new Error(`Failed to save configuration: ${response.statusText} - ${errorText}`)
+    let response:AxiosResponse;
+    try{
+        response = await  axiosInstance.put(url,configString)
+    }catch(error){
+      throw new Error(`Failed to save configuration: ${error}`)
     }
-
     // Reload config after successful save to invalidate cache
     await configLoader.reloadConfig()
-
     console.log('[ContentService] Configuration saved and cache reloaded')
   }
 }
+
+export const contentService = new ContentService()

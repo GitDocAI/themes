@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { configLoader } from '../services/configLoader'
 import { useConfig } from '../hooks/useConfig'
-import { fetchConfig } from '../utils/backendUtils'
 
 interface SettingsSidebarProps {
   theme: 'light' | 'dark'
@@ -57,7 +56,7 @@ export const SettingsSidebar: React.FC<SettingsSidebarProps> = ({
   useEffect(() => {
     const loadConfig = async () => {
       try {
-        const data = await fetchConfig()
+        const data = await configLoader.loadConfig()
         const hasBanner = !!data.banner
         setBannerEnabled(hasBanner)
 
@@ -87,7 +86,7 @@ export const SettingsSidebar: React.FC<SettingsSidebarProps> = ({
 
     try {
       // Read the current full config to merge with our changes
-      const currentFullConfig = await fetchConfig()
+      const currentFullConfig = await configLoader.loadConfig()
 
       // Merge only the fields we're managing, keeping others intact
       const updatedConfig = {

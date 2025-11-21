@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect } from 'react'
-import { fetchConfig } from '../utils/backendUtils'
 import { configLoader } from '../services/configLoader'
 
 interface LogoEditorProps {
@@ -26,7 +25,7 @@ export const LogoEditor: React.FC<LogoEditorProps> = ({ theme, allowUpload = fal
   useEffect(() => {
     const loadLogos = async () => {
       try {
-        const data = await fetchConfig()
+        const data = await configLoader.loadConfig()
 
         // Always set values, even if empty
         const lightLogo = data.logo?.light || ''
@@ -128,7 +127,7 @@ export const LogoEditor: React.FC<LogoEditorProps> = ({ theme, allowUpload = fal
 
     try {
       // Read the current full config
-      const currentFullConfig = await fetchConfig()
+      const currentFullConfig = await configLoader.loadConfig()
 
       // Update logo config
       const updatedConfig = {

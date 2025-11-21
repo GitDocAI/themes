@@ -2,7 +2,6 @@ import { useState, useRef, useEffect } from 'react'
 import { VersionModal } from './VersionModal'
 import { DeleteConfirmModal } from './DeleteConfirmModal'
 import { configLoader } from '../services/configLoader'
-import { fetchConfig } from '../utils/backendUtils'
 
 export interface Version {
   version: string
@@ -74,7 +73,7 @@ export const VersionSwitcher: React.FC<VersionSwitcherProps> = ({
       const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080/api'
 
       // Fetch current config
-      const config = await fetchConfig()
+      const config = await configLoader.loadConfig()
 
       // Add new version to navigation.versions
       if (!config.navigation) {
@@ -118,7 +117,7 @@ export const VersionSwitcher: React.FC<VersionSwitcherProps> = ({
       const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080/api'
 
       // Fetch current config
-      const config = await fetchConfig()
+      const config = await configLoader.loadConfig()
 
       // Find and update version name in navigation.versions
       if (config.navigation?.versions) {
@@ -158,7 +157,7 @@ export const VersionSwitcher: React.FC<VersionSwitcherProps> = ({
       const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080/api'
 
       // Fetch current config
-      const config = await fetchConfig()
+      const config = await configLoader.loadConfig()
 
       // Remove version from navigation.versions
       if (config.navigation?.versions) {
@@ -207,7 +206,7 @@ export const VersionSwitcher: React.FC<VersionSwitcherProps> = ({
       const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080/api'
 
       // Fetch current config
-      const config = await fetchConfig()
+      const config = await configLoader.loadConfig()
 
       // Reorder versions
       if (config.navigation?.versions) {
