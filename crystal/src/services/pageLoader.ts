@@ -53,11 +53,10 @@ class PageLoader {
        }
        const cleanPath = pagePath.startsWith('/') ? pagePath.slice(1) : pagePath
 
-       mdxPath = `/docs/${cleanPath}`
-
-      const response = await axiosInstance.get(mdxPath,{ responseType: 'text'})
+       mdxPath = `/docs/content/${cleanPath}?t=${Date.now()}`
 
 
+      const response = await axiosInstance.get(mdxPath)
       const mdxContent =  response.data
 
       // Parse MDX to TipTap JSON

@@ -233,6 +233,7 @@ export default function vectorSearchPlugin(viteMode?: string): Plugin {
       // Only run in production mode (when VITE_MODE is production or not set)
       const isProduction = !viteMode || viteMode === 'production'
 
+      return
       if (!isProduction) {
         console.log(`\n⏭️  Skipping search index generation (VITE_MODE=${viteMode})\n`)
         return

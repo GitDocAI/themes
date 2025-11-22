@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { configLoader } from '../services/configLoader'
 import { useConfig } from '../hooks/useConfig'
+import { ContentService, contentService } from '../services/contentService'
 
 interface SettingsSidebarProps {
   theme: 'light' | 'dark'
@@ -157,24 +158,10 @@ export const SettingsSidebar: React.FC<SettingsSidebarProps> = ({
         const filename = `${timestamp}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`
         const filePath = `assets/${filename}`
 
+
         try {
-          const response = await fetch('http://localhost:8080/api/files/upload', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              file_path: filePath,
-              file_data: base64String,
-            }),
-          })
-
-          if (!response.ok) {
-            throw new Error('Failed to upload file')
-          }
-
-          const data = await response.json()
-          setConfig(prev => ({ ...prev, favicon: `/${data.file_path}` }))
+          const response = await ContentService.saveContent(filePath,base64String)
+          setConfig(prev => ({ ...prev, favicon: `docs/content/assests/${filePath}` }))
           setFaviconUploading(false)
         } catch (err) {
           console.error('Upload error:', err)

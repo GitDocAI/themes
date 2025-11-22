@@ -13,12 +13,10 @@ export class ContentService {
    * Save content to backend API
    */
   static async saveContent(docId: string, content: string): Promise<void> {
-    console.log(content)
-    alert()
     // Import fetchWithAuth utilities
      // Remove leading slash from docId if present to avoid double slashes
     const cleanDocId = docId.startsWith('/') ? docId.slice(1) : docId
-    const url = `/docs/${cleanDocId}`
+    const url = `/docs/content/${cleanDocId}?t=${Date.now()}`
     // Detect content type based on file extension or content format
     const isMdxFile = cleanDocId.endsWith('.mdx')
     const isJsonContent = content.trim().startsWith('{') || content.trim().startsWith('[')
@@ -59,7 +57,7 @@ export class ContentService {
     // Import fetchWithAuth utilities
 
     const configString = JSON.stringify(config, null, 2)
-    const url ='/docs/gitdocai.config.json'
+    const url ='/docs/content/gitdocai.config.json'
 
     let response:AxiosResponse;
     try{

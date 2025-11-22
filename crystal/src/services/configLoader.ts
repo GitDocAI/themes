@@ -132,7 +132,7 @@ class ConfigLoader {
 
   private async fetchConfig(): Promise<GitDocAIConfig> {
     // Determine the correct path based on mode
-    const configUrl: string = '/docs/gitdocai.config.json';
+    const configUrl: string = '/docs/content/gitdocai.config.json';
     try{
       const response = await axiosInstance.get(configUrl,{ responseType: 'text'})
       const config = JSON.parse(response.data)

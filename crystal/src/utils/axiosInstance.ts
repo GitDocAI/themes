@@ -1,7 +1,7 @@
 import axios, { type AxiosRequestConfig, type AxiosResponse, AxiosError } from 'axios'
 
 const axiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_BACKEND_URL || 'http://localhost:8082/api'
+  baseURL: import.meta.env.VITE_BACKEND_URL || 'http://localhost:8082'
 })
 
 export const setTokens = (accessToken: string, refreshToken: string) => {
