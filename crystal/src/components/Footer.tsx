@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { configLoader } from '../services/configLoader'
 import { useConfig } from '../hooks/useConfig'
-import { fetchConfig } from '../utils/backendUtils'
 
 interface FooterItem {
   type: string
@@ -56,8 +55,7 @@ export const Footer: React.FC<FooterProps> = ({ theme, isDevMode = false }) => {
       const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080/api'
 
       // Fetch current config
-      const config = await fetchConfig()
-
+      const config = await configLoader.loadConfig()
       // Update site name
       config.name = editingSiteNameValue
 

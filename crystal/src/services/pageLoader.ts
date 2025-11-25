@@ -3,6 +3,7 @@
  * Loads page content from MDX files and converts to TipTap JSON
  */
 
+import axiosInstance from '../utils/axiosInstance'
 import { mdxParser } from './mdxParser'
 
 export interface Block {
@@ -43,44 +44,20 @@ class PageLoader {
       if (this.cache.has(pagePath)) {
         return this.cache.get(pagePath)!
       }
-
-      // Import fetchWithAuth utilities
-      const { getBackendUrl, fetchWithAuth, isMultiTenantMode } = await import('../utils/fetchWithAuth')
-
-      // Determine the correct path based on mode
       let mdxPath: string
-      if (isMultiTenantMode()) {
-        // Multi-tenant mode: always load from backend with auth
-        // Remove leading slash from pagePath if present
-        const cleanPath = pagePath.startsWith('/') ? pagePath.slice(1) : pagePath
-        mdxPath = `${getBackendUrl()}/docs/${cleanPath}`
-      } else if (this.isProductionMode) {
-        // Production: load directly from public folder
-        mdxPath = pagePath // Keep .mdx extension
-      } else {
-        // Dev/Preview: load from backend API
-        mdxPath = `/api/docs${pagePath}`
-      }
+       // Multi-tenant mode: always load from backend with auth
+       // Remove leading slash from pagePath if present
+       const queryIndex  = pagePath.indexOf("?")
+       if(queryIndex>=0){
+          pagePath = pagePath.slice(0,queryIndex)
+       }
+       const cleanPath = pagePath.startsWith('/') ? pagePath.slice(1) : pagePath
 
-      // Add timestamp to URL for cache busting
-      const cacheBuster = `?t=${Date.now()}`
-      const urlWithCacheBuster = `${mdxPath}${cacheBuster}`
+       mdxPath = `/docs/content/${cleanPath}?t=${Date.now()}`
 
-      // Fetch MDX content with authentication if in multi-tenant mode
-      const response = await fetchWithAuth(urlWithCacheBuster, {
-        cache: 'no-cache', // Force fresh fetch every time
-        headers: {
-          'Cache-Control': 'no-cache',
-          'Pragma': 'no-cache'
-        }
-      })
 
-      if (!response.ok) {
-        console.error(`Failed to load page: ${mdxPath}`)
-        return null
-      }
-
-      const mdxContent = await response.text()
+      const response = await axiosInstance.get(mdxPath)
+      const mdxContent =  response.data
 
       // Parse MDX to TipTap JSON
       const tiptapContent = await mdxParser.parse(mdxContent)
