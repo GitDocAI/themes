@@ -1,6 +1,7 @@
 import { NodeViewWrapper } from '@tiptap/react'
 import type { NodeViewProps } from '@tiptap/react'
 import { useState, useEffect, useRef } from 'react'
+import { ContentService } from '../../../services/contentService'
 
 export const ImageNodeView = ({ node, editor, getPos }: NodeViewProps) => {
   const [theme, setTheme] = useState<'light' | 'dark'>('dark')
@@ -317,33 +318,10 @@ const ImageModal: React.FC<ImageModalProps> = ({ theme, src, alt, caption, type,
     try {
       // Read file as base64
       const reader = new FileReader()
-      reader.onload = async (event) => {
-        const base64Data = event.target?.result as string
-        const base64String = base64Data.split(',')[1] // Remove data:image/...;base64, prefix
-
-        // Generate filename
-        const timestamp = Date.now()
-        const filename = `${timestamp}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`
-        const filePath = `assets/${filename}`
-
+      reader.onload = async (_event) => {
         // Upload to backend
         try {
-          const response = await fetch('http://localhost:8080/api/files/upload', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              file_path: filePath,
-              file_data: base64String,
-            }),
-          })
-
-          if (!response.ok) {
-            throw new Error('Failed to upload file')
-          }
-
-          const data = await response.json()
+          const data = await ContentService.uploadFile(file)
 
           // Set the image source to the uploaded file path
           setImageSrc(`/${data.file_path}`)

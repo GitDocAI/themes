@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { configLoader } from '../services/configLoader'
+import { ContentService } from '../services/contentService'
 
 interface LogoEditorProps {
   theme: 'light' | 'dark'
@@ -57,32 +58,10 @@ export const LogoEditor: React.FC<LogoEditorProps> = ({ theme, allowUpload = fal
 
     try {
       const reader = new FileReader()
-      reader.onload = async (event) => {
-        const base64Data = event.target?.result as string
-        const base64String = base64Data.split(',')[1]
-
-        const timestamp = Date.now()
-        const filename = `${timestamp}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`
-        const filePath = `assets/${filename}`
+      reader.onload = async (_event) => {
 
         try {
-          const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080/api'
-          const response = await fetch(`${backendUrl}/files/upload`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              file_path: filePath,
-              file_data: base64String,
-            }),
-          })
-
-          if (!response.ok) {
-            throw new Error('Failed to upload file')
-          }
-
-          const data = await response.json()
+          const data = await ContentService.uploadFile(file)
           const uploadedPath = `/${data.file_path}`
 
 
@@ -138,19 +117,7 @@ export const LogoEditor: React.FC<LogoEditorProps> = ({ theme, allowUpload = fal
         }
       }
 
-      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080/api'
-      const response = await fetch(`${backendUrl}/config`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(updatedConfig),
-      })
-
-      if (!response.ok) {
-        const errorText = await response.text()
-        throw new Error(`Failed to save logos: ${errorText}`)
-      }
+      await ContentService.saveConfig(updatedConfig)
 
       setSaveSuccess(true)
       setTimeout(() => setSaveSuccess(false), 2000)

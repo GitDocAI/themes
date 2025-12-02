@@ -39,7 +39,7 @@ const ICON_CATEGORIES = {
 }
 
 export const CardNodeView = ({ node, updateAttributes, editor, getPos }: NodeViewProps) => {
-  const [_isPending, startTransition] = useTransition()
+  const [_, startTransition] = useTransition()
   const [isEditing, setIsEditing] = useState(false)
   const [title, setTitle] = useState(node.attrs.title || '')
   const [icon, setIcon] = useState(node.attrs.icon || '')

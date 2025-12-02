@@ -67,12 +67,8 @@ class ConfigLoader {
   private config: GitDocAIConfig | null = null
   private loading: Promise<GitDocAIConfig> | null = null
   private listeners: Set<() => void> = new Set()
-  private isProductionMode: boolean
 
   constructor() {
-    // Check if we're in production mode (VITE_MODE=production or VITE_MODE not set)
-    const viteMode = import.meta.env.VITE_MODE
-    this.isProductionMode = !viteMode || viteMode === 'production'
   }
 
   /**
@@ -130,18 +126,17 @@ class ConfigLoader {
     return this.config
   }
 
-  private async fetchConfig(): Promise<GitDocAIConfig> {
-    // Determine the correct path based on mode
-    const configUrl: string = '/docs/content/gitdocai.config.json';
+ private async fetchConfig(): Promise<GitDocAIConfig> {
+    // Use the correct API endpoint for loading configuration
+    const configUrl: string = '/api/v1/filesystem/file'; // Corrected path for loading config
     try{
-      const response = await axiosInstance.get(configUrl,{ responseType: 'text'})
-      const config = JSON.parse(response.data)
+      const response = await axiosInstance.post(configUrl, { path: '/gitdocai.config.json' }, { responseType: 'json' })
+      const config = JSON.parse(response.data.content)
       return config
     }catch(error){
-      throw new Error(`Failed to save configuration: ${error}`)
+      throw new Error(`Failed to load configuration: ${error}`)
     }
   }
-
   /**
    * Get current config (synchronous, returns null if not loaded)
    */

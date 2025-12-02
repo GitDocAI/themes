@@ -20,7 +20,7 @@ export const CodeGroupNodeView = ({ node, updateAttributes, editor, getPos }: No
   const [showLanguageSelector, setShowLanguageSelector] = useState(false)
   const selectorRef = useRef<HTMLDivElement>(null)
   const filenameInputRef = useRef<HTMLInputElement>(null)
-  const [_copied, _setCopied] = useState(false)
+  const [_, _setCopied] = useState(false)
   const codeRef = useRef<HTMLElement>(null)
   const [highlightedCode, setHighlightedCode] = useState<string[]>([])
   const [containerId] = useState(() => `cg-${Math.random().toString(36).substring(2, 11)}`)

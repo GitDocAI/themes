@@ -3,7 +3,7 @@ import { TiptapEditor } from './editor/TiptapEditor'
 
 interface RightPanelProps {
   theme: 'light' | 'dark'
-  content: any // Tiptap JSON content from the right panel node
+  content: Record<string, any> // Tiptap JSON content from the right panel node
   isDevMode?: boolean
 }
 

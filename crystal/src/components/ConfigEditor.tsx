@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { configLoader } from '../services/configLoader'
+import { ContentService } from '../services/contentService'
 
 interface ConfigEditorProps {
   theme: 'light' | 'dark'
@@ -32,17 +33,7 @@ export const ConfigEditor: React.FC<ConfigEditorProps> = ({ theme }) => {
 
       if (isApiMode) {
         // API mode: Send to server
-        const response = await fetch(`${source}/config`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: jsonString,
-        })
-
-        if (!response.ok) {
-          throw new Error('Failed to save configuration to API')
-        }
+        await ContentService.saveConfig(parsedConfig)
       } else {
         // Filesystem mode: We can't directly write to filesystem from browser
         // Show download option instead

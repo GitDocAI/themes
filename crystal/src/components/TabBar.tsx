@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import { configLoader } from '../services/configLoader'
 import type { Tab } from '../services/configLoader'
 import { DeleteConfirmModal } from './DeleteConfirmModal'
+import {  ContentService } from '../services/contentService'
 
 
 interface TabBarProps {
@@ -73,8 +74,6 @@ export const TabBar: React.FC<TabBarProps> = ({
     if (editingTabIndex === null || !currentVersion) return
 
     try {
-      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080/api'
-
       // Fetch current config
       const config = await configLoader.loadConfig()
       // Find the version and update the tab name
@@ -83,21 +82,13 @@ export const TabBar: React.FC<TabBarProps> = ({
           (v: any) => v.version === currentVersion
         )
 
-        if (versionIndex !== -1 && config.navigation.versions[versionIndex].tabs[editingTabIndex]) {
+        if (versionIndex !== -1 && config.navigation.versions[versionIndex].tabs && config.navigation.versions[versionIndex].tabs[editingTabIndex]) {
           config.navigation.versions[versionIndex].tabs[editingTabIndex].tab = editingTabName
         }
       }
 
       // Save config
-      const saveResponse = await fetch(`${backendUrl}/config`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(config),
-      })
-
-      if (!saveResponse.ok) {
-        throw new Error('Failed to save tab name')
-      }
+      await ContentService.saveConfig(config)
 
       // Update config in memory instead of reloading
       configLoader.updateConfig(config)
@@ -119,11 +110,9 @@ export const TabBar: React.FC<TabBarProps> = ({
   }
 
   const handleDeleteTab = async () => {
-    if (deletingTabIndex === null || !currentVersion) return
+    if (deletingTabIndex === null || deletingTabIndex === -1) return
 
     try {
-      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080/api'
-
       // Fetch current config
       const config = await configLoader.loadConfig()
       // Find the version and remove the tab
@@ -132,21 +121,20 @@ export const TabBar: React.FC<TabBarProps> = ({
           (v: any) => v.version === currentVersion
         )
 
-        if (versionIndex !== -1) {
+        if (versionIndex !== -1 && config.navigation.versions[versionIndex].tabs) {
           config.navigation.versions[versionIndex].tabs.splice(deletingTabIndex, 1)
         }
+      }else if(config.navigation?.tabs){
+          config.navigation.tabs.splice(deletingTabIndex, 1)
       }
 
+
+      const path =`${!currentVersion?"":`/${normalizeName(currentVersion)}`}/${normalizeName(deletingTabName)}`;
+
+      ContentService.removeItem(path)
       // Save config
-      const saveResponse = await fetch(`${backendUrl}/config`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(config),
-      })
+      await ContentService.saveConfig(config)
 
-      if (!saveResponse.ok) {
-        throw new Error('Failed to delete tab')
-      }
 
       // Update config in memory instead of reloading
       configLoader.updateConfig(config)
@@ -155,40 +143,55 @@ export const TabBar: React.FC<TabBarProps> = ({
     }
   }
 
+  const normalizeName=(name: string): string=> {
+    name = name.toLowerCase().replace(/ /g, "-");
+    const reg = /[^a-z0-9\-._]+/g;
+    return name.replace(reg, "");
+  }
+
+
+
   const handleAddNewTab = async () => {
-    if (!currentVersion) return
 
+
+
+    const newTab = {
+      tab: `New Tab`,
+      items: []
+    }
     try {
-      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080/api'
-
       // Fetch current config
       const config = await configLoader.loadConfig()
+      if(!config.navigation){
+          config.navigation={}
+      }
       // Find the version and add new tab
       if (config.navigation?.versions) {
         const versionIndex = config.navigation.versions.findIndex(
           (v: any) => v.version === currentVersion
         )
-
-        if (versionIndex !== -1) {
-          const newTab = {
-            tab: 'New Tab',
-            items: []
+        if (versionIndex !== -1 && config.navigation.versions[versionIndex].tabs) {
+          if(config.navigation.versions[versionIndex].tabs.length>=0){
+            newTab.tab += ` ${config.navigation.versions[versionIndex].tabs.length}`
           }
           config.navigation.versions[versionIndex].tabs.push(newTab)
         }
+      }else{
+
+          if(!config.navigation!.tabs){
+            config.navigation!.tabs=[]
+          }
+          if(config.navigation.tabs.length>=0){
+            newTab.tab += ` ${config.navigation.tabs.length}`
+          }
+        config.navigation?.tabs?.push(newTab)
       }
 
       // Save config
-      const saveResponse = await fetch(`${backendUrl}/config`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(config),
-      })
 
-      if (!saveResponse.ok) {
-        throw new Error('Failed to add new tab')
-      }
-
+      const path =`${!currentVersion?"":`/${normalizeName(currentVersion)}`}/${normalizeName(deletingTabName)}`;
+      ContentService.createEntryFolder(path)
+      await ContentService.saveConfig(config)
       // Update config in memory instead of reloading
       configLoader.updateConfig(config)
     } catch (error) {
@@ -214,8 +217,6 @@ export const TabBar: React.FC<TabBarProps> = ({
     if (!isDevMode || draggedTabIndex === null || draggedTabIndex === dropIndex || !currentVersion) return
 
     try {
-      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080/api'
-
       // Fetch current config
       const config = await configLoader.loadConfig()
 
@@ -225,7 +226,7 @@ export const TabBar: React.FC<TabBarProps> = ({
           (v: any) => v.version === currentVersion
         )
 
-        if (versionIndex !== -1) {
+        if (versionIndex !== -1 && config.navigation.versions[versionIndex].tabs) {
           const tabs = config.navigation.versions[versionIndex].tabs
           const [draggedTab] = tabs.splice(draggedTabIndex, 1)
           tabs.splice(dropIndex, 0, draggedTab)
@@ -233,15 +234,7 @@ export const TabBar: React.FC<TabBarProps> = ({
       }
 
       // Save config
-      const saveResponse = await fetch(`${backendUrl}/config`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(config),
-      })
-
-      if (!saveResponse.ok) {
-        throw new Error('Failed to reorder tabs')
-      }
+      await ContentService.saveConfig(config)
 
       // Update config in memory instead of reloading
       configLoader.updateConfig(config)

@@ -2,8 +2,7 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
 import React from 'react';
-import {BrowserRouter, Router } from 'react-router-dom'
-import { tenantContext } from './services/tenantContext'
+import {BrowserRouter } from 'react-router-dom'
 
 // StrictMode is disabled to avoid TipTap flushSync warnings
 // TipTap uses flushSync internally for custom node views which conflicts with React 18's StrictMode

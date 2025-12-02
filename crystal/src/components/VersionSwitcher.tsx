@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { VersionModal } from './VersionModal'
 import { DeleteConfirmModal } from './DeleteConfirmModal'
 import { configLoader } from '../services/configLoader'
+import { ContentService } from '../services/contentService'
 
 export interface Version {
   version: string
@@ -68,10 +69,14 @@ export const VersionSwitcher: React.FC<VersionSwitcherProps> = ({
     setIsOpen(!isOpen)
   }
 
+  const normalizeName=(name: string): string=> {
+    name = name.toLowerCase().replace(/ /g, "-");
+    const reg = /[^a-z0-9\-._]+/g;
+    return name.replace(reg, "");
+  }
+
   const handleAddVersion = async (versionName: string) => {
     try {
-      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080/api'
-
       // Fetch current config
       const config = await configLoader.loadConfig()
 
@@ -89,18 +94,13 @@ export const VersionSwitcher: React.FC<VersionSwitcherProps> = ({
         tabs: []
       }
 
+      const path =`${!currentVersion?"":`/${normalizeName(currentVersion)}`}}`;
+      ContentService.createEntryFolder(path)
+
       config.navigation.versions.push(newVersion)
 
       // Save config
-      const saveResponse = await fetch(`${backendUrl}/config`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(config),
-      })
-
-      if (!saveResponse.ok) {
-        throw new Error('Failed to save version')
-      }
+      await ContentService.saveConfig(config)
 
       // Update config in memory instead of reloading
       configLoader.updateConfig(config)
@@ -114,8 +114,6 @@ export const VersionSwitcher: React.FC<VersionSwitcherProps> = ({
     if (!editingVersion) return
 
     try {
-      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080/api'
-
       // Fetch current config
       const config = await configLoader.loadConfig()
 
@@ -130,16 +128,11 @@ export const VersionSwitcher: React.FC<VersionSwitcherProps> = ({
         }
       }
 
+      const old_path =`${!currentVersion?"":`/${normalizeName(currentVersion)}`}}`;
+      const new_path =`${!newVersionName?"":`/${normalizeName(newVersionName)}`}}`;
+      ContentService.renameFile(old_path,new_path,"folder")
       // Save config
-      const saveResponse = await fetch(`${backendUrl}/config`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(config),
-      })
-
-      if (!saveResponse.ok) {
-        throw new Error('Failed to update version')
-      }
+      await ContentService.saveConfig(config)
 
       // Update config in memory instead of reloading
       configLoader.updateConfig(config)
@@ -154,8 +147,6 @@ export const VersionSwitcher: React.FC<VersionSwitcherProps> = ({
     if (!deletingVersion) return
 
     try {
-      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080/api'
-
       // Fetch current config
       const config = await configLoader.loadConfig()
 
@@ -166,16 +157,10 @@ export const VersionSwitcher: React.FC<VersionSwitcherProps> = ({
         )
       }
 
+      const path =`${!currentVersion?"":`/${normalizeName(currentVersion)}`}}`;
+      ContentService.removeItem(path)
       // Save config
-      const saveResponse = await fetch(`${backendUrl}/config`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(config),
-      })
-
-      if (!saveResponse.ok) {
-        throw new Error('Failed to delete version')
-      }
+      await ContentService.saveConfig(config)
 
       // Update config in memory instead of reloading
       configLoader.updateConfig(config)
@@ -203,8 +188,6 @@ export const VersionSwitcher: React.FC<VersionSwitcherProps> = ({
     if (!isDevMode || draggedVersionIndex === null || draggedVersionIndex === dropIndex) return
 
     try {
-      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080/api'
-
       // Fetch current config
       const config = await configLoader.loadConfig()
 
@@ -217,15 +200,7 @@ export const VersionSwitcher: React.FC<VersionSwitcherProps> = ({
       }
 
       // Save config
-      const saveResponse = await fetch(`${backendUrl}/config`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(config),
-      })
-
-      if (!saveResponse.ok) {
-        throw new Error('Failed to reorder versions')
-      }
+      await ContentService.saveConfig(config)
 
       // Update config in memory instead of reloading
       configLoader.updateConfig(config)

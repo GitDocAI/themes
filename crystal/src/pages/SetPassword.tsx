@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useForm } from "react-hook-form";
+import { useForm, type ControllerRenderProps } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import authService from "../services/authService";
@@ -66,7 +66,7 @@ export default function SetPassword() {
               <FormField
                 control={form.control}
                 name="password"
-                render={({ field }) => (
+                render={({ field }: { field: ControllerRenderProps<z.infer<typeof formSchema>, "password"> }) => (
                   <FormItem>
                     <FormLabel>Password</FormLabel>
                     <FormControl>
@@ -79,7 +79,7 @@ export default function SetPassword() {
               <FormField
                 control={form.control}
                 name="confirm_password"
-                render={({ field }) => (
+                render={({ field }: { field: ControllerRenderProps<z.infer<typeof formSchema>, "confirm_password"> }) => (
                   <FormItem>
                     <FormLabel>Confirm Password</FormLabel>
                     <FormControl>

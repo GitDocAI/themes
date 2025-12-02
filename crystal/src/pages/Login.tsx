@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import './Login.css'; // Importamos los estilos
 
 const Login = () => {
@@ -7,7 +7,7 @@ const Login = () => {
   const [password, setPassword] = useState('');
 
   // Función que se ejecuta al enviar el formulario
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault(); // Evita que la página se recargue
 
     // Aquí iría tu lógica de conexión a la API (backend)

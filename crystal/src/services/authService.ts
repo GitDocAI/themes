@@ -37,6 +37,7 @@ class AuthService{
       setTokens(access_token,refreshToken)
 
     }catch(_error){
+      // Intentionally empty block, error is handled by the caller
     }
   }
   async forgotPassword(){
@@ -47,7 +48,9 @@ class AuthService{
     try{
       await axiosInstance.post("/auth/logout" )
       clearTokens()
-    }catch(_error){}
+    }catch(_error){
+      // Intentionally empty block, error is handled by the caller
+    }
   }
 
 }

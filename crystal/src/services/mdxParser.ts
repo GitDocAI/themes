@@ -746,8 +746,7 @@ class MDXParserService {
       else if (typeof attrs.data === 'string') {
         try {
           data = JSON.parse(attrs.data)
-        } catch (e) {
-          console.warn('[MDXParser] Failed to parse table data:', attrs.data)
+        } catch (_e) {
         }
       }
       // If it's a JSX expression, evaluate it

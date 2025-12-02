@@ -3,7 +3,7 @@ import type { NodeViewProps } from '@tiptap/react'
 import { useState, useEffect, useTransition } from 'react'
 
 export const AccordionTabNodeView = ({ node, updateAttributes, editor, getPos }: NodeViewProps) => {
-  const [_isPending, startTransition] = useTransition()
+  const [_, startTransition] = useTransition()
   const [isActive, setIsActive] = useState(node.attrs.isActive || false)
   const [editingHeader, setEditingHeader] = useState(false)
   const [headerValue, setHeaderValue] = useState(node.attrs.header || 'Tab')

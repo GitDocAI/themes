@@ -96,8 +96,9 @@ class MDXSerializerService {
    */
   private serializeNode(node: TipTapNode, options: SerializeOptions = {}): string {
     switch (node.type) {
-      case 'heading':
+      case 'heading': {
         return this.serializeHeading(node)
+      }
 
       case 'paragraph':
         return this.serializeParagraph(node)
@@ -263,7 +264,8 @@ class MDXSerializerService {
   /**
    * Serialize list item
    */
-  private serializeListItem(node: TipTapNode, _options: SerializeOptions): string {
+  private serializeListItem(node: TipTapNode, options: SerializeOptions): string {
+    void options
     const content = node.content || []
     const parts: string[] = []
 
@@ -291,7 +293,8 @@ class MDXSerializerService {
   /**
    * Serialize task item
    */
-  private serializeTaskItem(node: TipTapNode, _options: SerializeOptions): string {
+  private serializeTaskItem(node: TipTapNode, options: SerializeOptions): string {
+    void options
     const checked = node.attrs?.checked || false
     const checkbox = checked ? '[x]' : '[ ]'
     const content = node.content || []

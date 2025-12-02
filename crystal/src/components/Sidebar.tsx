@@ -5,6 +5,7 @@ import { DeleteConfirmModal } from './DeleteConfirmModal'
 import { PageModal } from './PageModal'
 import { GroupModal } from './GroupModal'
 import { configLoader } from '../services/configLoader'
+import { ContentService } from '../services/contentService'
 
 interface SidebarProps {
   items: NavigationItem[]
@@ -155,8 +156,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
     if (!editingPagePath) return
 
     try {
-      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080/api'
-
       // Fetch current config
       const config = await configLoader.loadConfig()
 
@@ -186,32 +185,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
       // If the path changed, rename the file on the backend
       if (editingPagePath !== newPagePath) {
-        const renameResponse = await fetch(`${backendUrl}/files/rename`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            old_path: editingPagePath,
-            new_path: newPagePath
-          }),
-        })
-
-        if (!renameResponse.ok) {
-          const errorData = await renameResponse.text()
-          throw new Error(`Failed to rename file: ${errorData}`)
-        }
-
+        await ContentService.renameFile(editingPagePath, newPagePath)
       }
 
       // Save config with updated title and path
-      const saveResponse = await fetch(`${backendUrl}/config`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(config),
-      })
-
-      if (!saveResponse.ok) {
-        throw new Error('Failed to save page title')
-      }
+      await ContentService.saveConfig(config)
 
       // Update config in memory instead of reloading
       configLoader.updateConfig(config)
@@ -240,8 +218,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
     if (!deletingItemPath) return
 
     try {
-      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080/api'
-
       // Fetch current config
       const config = await configLoader.loadConfig()
 
@@ -260,15 +236,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
       }
 
       // Save config
-      const saveResponse = await fetch(`${backendUrl}/config`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(config),
-      })
-
-      if (!saveResponse.ok) {
-        throw new Error('Failed to delete page')
-      }
+      await ContentService.saveConfig(config)
+      ContentService.removeItem(deletingItemPath)
 
       // Update config in memory instead of reloading
       configLoader.updateConfig(config)
@@ -284,8 +253,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
     const newPagePath = generatePagePath(pageModalGroupTitle, pageName)
 
     try {
-      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080/api'
-
       // Fetch current config
       const config = await configLoader.loadConfig()
 
@@ -312,18 +279,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
       }
 
       // Save config
-      const saveResponse = await fetch(`${backendUrl}/config`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(config),
-      })
-
-      if (!saveResponse.ok) {
-        throw new Error('Failed to save new page')
-      }
+      await ContentService.saveConfig(config)
 
       // Create the JSON file with initial TipTap content structure
-      const jsonPath = newPagePath.replace('.mdx', '.json')
       const initialContent = {
         content: {
           type: 'doc',
@@ -351,15 +309,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         }
       }
 
-      const createFileResponse = await fetch(`${backendUrl}/docs${jsonPath}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content: JSON.stringify(initialContent, null, 2) }),
-      })
-
-      if (!createFileResponse.ok) {
-        throw new Error('Failed to create JSON file')
-      }
+      await ContentService.saveContent(newPagePath, JSON.stringify(initialContent.content, null, 2))
 
       // Update config in memory instead of reloading
       configLoader.updateConfig(config)
@@ -381,8 +331,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
     if (!editingGroupTitle) return
 
     try {
-      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080/api'
-
       // Fetch current config
       const config = await configLoader.loadConfig()
 
@@ -398,15 +346,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       }
 
       // Save config
-      const saveResponse = await fetch(`${backendUrl}/config`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(config),
-      })
-
-      if (!saveResponse.ok) {
-        throw new Error('Failed to save group title')
-      }
+      await ContentService.saveConfig(config)
 
       // Update config in memory instead of reloading
       configLoader.updateConfig(config)
@@ -430,8 +370,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
     if (!deletingGroupTitle) return
 
     try {
-      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080/api'
-
       // Fetch current config
       const config = await configLoader.loadConfig()
 
@@ -445,15 +383,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       }
 
       // Save config
-      const saveResponse = await fetch(`${backendUrl}/config`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(config),
-      })
-
-      if (!saveResponse.ok) {
-        throw new Error('Failed to delete group')
-      }
+      await ContentService.saveConfig(config)
 
       // Update config in memory instead of reloading
       configLoader.updateConfig(config)
@@ -465,8 +395,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
   // Add new group
   const handleAddNewGroup = async (groupName: string) => {
     try {
-      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080/api'
-
       // Fetch current config
       const config = await configLoader.loadConfig()
 
@@ -488,15 +416,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       }
 
       // Save config
-      const saveResponse = await fetch(`${backendUrl}/config`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(config),
-      })
-
-      if (!saveResponse.ok) {
-        throw new Error('Failed to save new group')
-      }
+      await ContentService.saveConfig(config)
 
       // Update config in memory instead of reloading
       configLoader.updateConfig(config)
@@ -524,8 +444,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
     if (!isDevMode || !isAPIReferenceTab() === false || draggedGroupIndex === null || draggedGroupIndex === dropIndex) return
 
     try {
-      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080/api'
-
       // Fetch current config
       const config = await configLoader.loadConfig()
 
@@ -537,15 +455,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       }
 
       // Save config
-      const saveResponse = await fetch(`${backendUrl}/config`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(config),
-      })
-
-      if (!saveResponse.ok) {
-        throw new Error('Failed to reorder groups')
-      }
+      await ContentService.saveConfig(config)
 
       // Reset drag states first, before updating config
       setDraggedGroupIndex(null)
@@ -578,8 +488,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
     if (!isDevMode || isAPIReferenceTab() || !draggedPagePath || !draggedPageGroupTitle || draggedPagePath === dropPagePath) return
 
     try {
-      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080/api'
-
       // Fetch current config
       const config = await configLoader.loadConfig()
 
@@ -604,15 +512,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       }
 
       // Save config
-      const saveResponse = await fetch(`${backendUrl}/config`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(config),
-      })
-
-      if (!saveResponse.ok) {
-        throw new Error('Failed to reorder pages')
-      }
+      await ContentService.saveConfig(config)
 
       // Reset drag states first, before updating config
       setDraggedPagePath(null)
@@ -631,7 +531,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     const paddingLeft = depth * 16
 
     switch (item.type) {
-      case 'group':
+      case 'group': {
         const isEditingGroup = editingGroupTitle === item.title
         const isHoveringGroup = hoveredGroupTitle === item.title
         const groupIndex = items.findIndex(i => i.title === item.title)
@@ -805,8 +705,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </div>
           </div>
         )
+      }
 
-      case 'dropdown':
+      case 'dropdown': {
         const isDropdownOpen = openDropdowns.has(item.title)
         return (
           <div key={item.title} style={{ paddingLeft: `${paddingLeft}px` }}>
@@ -849,8 +750,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
             )}
           </div>
         )
+      }
 
-      case 'page':
+      case 'page': {
         const isActive = item.page === currentPath
         const isEditingThis = editingPagePath === item.page
         const isHovering = hoveredPagePath === item.page
@@ -1003,9 +905,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
             )}
           </div>
         )
+      }
 
       case 'openapi':
-      case 'swagger':
+      case 'swagger': {
         const isApiActive = item.page === currentPath
         return (
           <a
@@ -1065,6 +968,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <span style={{ flexGrow: 1, minWidth: 0 }}>{item.title}</span>
           </a>
         )
+      }
 
       default:
         return null

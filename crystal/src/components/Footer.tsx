@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { configLoader } from '../services/configLoader'
 import { useConfig } from '../hooks/useConfig'
+import { ContentService } from '../services/contentService'
 
 interface FooterItem {
   type: string
@@ -52,23 +53,13 @@ export const Footer: React.FC<FooterProps> = ({ theme, isDevMode = false }) => {
 
   const handleSiteNameSave = async () => {
     try {
-      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080/api'
-
       // Fetch current config
       const config = await configLoader.loadConfig()
       // Update site name
       config.name = editingSiteNameValue
 
       // Save config
-      const saveResponse = await fetch(`${backendUrl}/config`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(config),
-      })
-
-      if (!saveResponse.ok) {
-        throw new Error('Failed to save site name')
-      }
+      await ContentService.saveConfig(config)
 
       // Update config in memory and local state
       configLoader.updateConfig(config)
@@ -107,10 +98,8 @@ export const Footer: React.FC<FooterProps> = ({ theme, isDevMode = false }) => {
 
   const handleDeleteItem = async (index: number) => {
     try {
-      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080/api'
-
       // Fetch current config
-      const config = await fetchConfig()
+      const config = await configLoader.loadConfig()
 
       // Remove the footer item
       if (config.footer) {
@@ -118,15 +107,7 @@ export const Footer: React.FC<FooterProps> = ({ theme, isDevMode = false }) => {
       }
 
       // Save config
-      const saveResponse = await fetch(`${backendUrl}/config`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(config),
-      })
-
-      if (!saveResponse.ok) {
-        throw new Error('Failed to delete footer item')
-      }
+      await ContentService.saveConfig(config)
 
       // Update config in memory and local state
       configLoader.updateConfig(config)
@@ -142,10 +123,8 @@ export const Footer: React.FC<FooterProps> = ({ theme, isDevMode = false }) => {
     if (editingItemIndex === null) return
 
     try {
-      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080/api'
-
       // Fetch current config
-      const config = await fetchConfig()
+      const config = await configLoader.loadConfig()
 
       if (!config.footer) {
         config.footer = []
@@ -167,15 +146,7 @@ export const Footer: React.FC<FooterProps> = ({ theme, isDevMode = false }) => {
       }
 
       // Save config
-      const saveResponse = await fetch(`${backendUrl}/config`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(config),
-      })
-
-      if (!saveResponse.ok) {
-        throw new Error('Failed to save footer item')
-      }
+      await ContentService.saveConfig(config)
 
       // Update config in memory and local state
       configLoader.updateConfig(config)
@@ -220,10 +191,8 @@ export const Footer: React.FC<FooterProps> = ({ theme, isDevMode = false }) => {
     if (!isDevMode || draggedItemIndex === null || draggedItemIndex === dropIndex) return
 
     try {
-      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080/api'
-
       // Fetch current config
-      const config = await fetchConfig()
+      const config = await configLoader.loadConfig()
 
       // Reorder items
       const updatedFooterItems = [...footerItems]
@@ -234,15 +203,7 @@ export const Footer: React.FC<FooterProps> = ({ theme, isDevMode = false }) => {
       config.footer = updatedFooterItems
 
       // Save config
-      const saveResponse = await fetch(`${backendUrl}/config`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(config),
-      })
-
-      if (!saveResponse.ok) {
-        throw new Error('Failed to reorder footer items')
-      }
+      await ContentService.saveConfig(config)
 
       // Update config in memory and local state
       configLoader.updateConfig(config)

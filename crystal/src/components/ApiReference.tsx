@@ -8,6 +8,23 @@ import { CodeGroup, CodeTab } from './CodeGroup'
 import { Label } from './Label'
 import { Endpoint } from './Endpoint'
 
+interface OpenAPISchema {
+  type?: string
+  example?: any
+  properties?: Record<string, OpenAPISchema>
+  items?: OpenAPISchema
+  [key: string]: any
+}
+
+interface OpenAPIResponseSchema {
+  description?: string
+  content?: {
+    [contentType: string]: {
+      schema?: OpenAPISchema
+    }
+  }
+}
+
 export const ApiReference: React.FC<ApiReferenceProps & { theme?: 'light' | 'dark' }> = ({
   title,
   summary,
@@ -25,20 +42,20 @@ export const ApiReference: React.FC<ApiReferenceProps & { theme?: 'light' | 'dar
   theme = 'light',
 }) => {
   // Generate response examples for CodeGroup
-  const responseExamples = Object.entries(responses).map(([statusCode, responseSchema]) => {
+  const responseExamples = Object.entries(responses).map(([statusCode, responseSchema]: [string, OpenAPIResponseSchema]) => {
     const contentType = responseSchema.content ? Object.keys(responseSchema.content)[0] : 'application/json'
     const schema = responseSchema.content?.[contentType]?.schema
 
     // Generate example based on schema
-    const generateExample = (sch: any): any => {
+    const generateExample = (sch: OpenAPISchema): any => {
       if (!sch) return {}
       if (sch.example) return sch.example
       if (sch.type === 'array' && sch.items) {
         return [generateExample(sch.items)]
       }
       if (sch.type === 'object' && sch.properties) {
-        const obj: any = {}
-        Object.entries(sch.properties).forEach(([key, prop]: [string, any]) => {
+        const obj: Record<string, any> = {}
+        Object.entries(sch.properties).forEach(([key, prop]: [string, OpenAPISchema]) => {
           obj[key] = prop.example || generateExample(prop)
         })
         return obj
@@ -137,7 +154,7 @@ export const ApiReference: React.FC<ApiReferenceProps & { theme?: 'light' | 'dar
       {/* Method and Path */}
       {(method && path) && (
         <div style={{ marginBottom: '2rem' }}>
-          <Endpoint method={method as any} path={path} theme={theme} />
+          <Endpoint method={method as 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'} path={path} theme={theme} />
         </div>
       )}
 

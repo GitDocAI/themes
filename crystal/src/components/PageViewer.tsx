@@ -6,7 +6,6 @@ import { apiReferenceLoader } from '../services/apiReferenceLoader'
 import { isApiReferencePath } from '../utils/apiReferenceUtils'
 import { ApiReference } from './ApiReference'
 import type { ApiReferenceProps } from '../types/ApiReference'
-import { mdxSerializer } from '../services/mdxSerializer'
 
 interface PageViewerProps {
   pagePath: string
@@ -116,19 +115,19 @@ export const PageViewer: React.FC<PageViewerProps> = ({ pagePath, theme, isDevMo
   // If in dev mode, use the editable PageRenderer
   if (isDevMode) {
     // Detect if pageData is a direct Tiptap document (has type: "doc")
-    const isTiptapDoc = (pageData as any).type === 'doc'
+    const isTiptapDoc = pageData && pageData.content && pageData.content.type === 'doc'
 
     const editablePageData = {
       id: pagePath,
-      title: pageData.blocks?.find((b: any) => b.type === 'h1')?.content || 'Untitled',
+      title: pageData.blocks?.find((b) => b.type === 'h1')?.content || 'Untitled',
       description: '',
       // Support both formats: legacy blocks array or new Tiptap content
-      blocks: pageData.blocks ? pageData.blocks.map((block: any, idx: number) => ({
+      blocks: pageData.blocks ? pageData.blocks.map((block, idx) => ({
         ...block,
         id: `block-${idx}`
       })) : undefined,
       // If it's a direct Tiptap doc, use it as content, otherwise pass the whole pageData
-      content: isTiptapDoc ? (pageData as any) : (pageData as any).content || (pageData as any)
+      content: isTiptapDoc ? pageData.content : pageData.content || undefined
     }
 
     return (
@@ -138,7 +137,7 @@ export const PageViewer: React.FC<PageViewerProps> = ({ pagePath, theme, isDevMo
         minHeight: '400px'
       }}>
         <PageRenderer
-          pageData={editablePageData as any}
+          pageData={editablePageData}
           theme={theme}
           isDevMode={true}
           allowUpload={allowUpload}
@@ -146,13 +145,9 @@ export const PageViewer: React.FC<PageViewerProps> = ({ pagePath, theme, isDevMo
             // Serialize TipTap content to MDX format
             const tiptapDoc = isTiptapDoc
               ? updatedData.content  // Direct Tiptap doc
-              : { type: 'doc', content: updatedData.content.content || [] } // Wrap in doc
-
-            // Convert TipTap JSON to MDX string
-            const mdxContent = mdxSerializer.serialize(tiptapDoc)
-
+              : { type: 'doc', content: updatedData.content?.content || [] } // Wrap in doc
             // Save as MDX file
-            await ContentService.saveContent(pageId, mdxContent)
+            await ContentService.saveContent(pageId, JSON.stringify(tiptapDoc) as any)
           }}
         />
       </div>
@@ -161,16 +156,16 @@ export const PageViewer: React.FC<PageViewerProps> = ({ pagePath, theme, isDevMo
 
   // Preview mode - read-only, use TiptapEditor in non-editable mode
   // Detect if pageData is a direct Tiptap document (has type: "doc")
-  const isTiptapDoc = (pageData as any).type === 'doc'
+  const isTiptapDoc = pageData && pageData.content && pageData.content.type === 'doc'
 
   const previewPageData = {
     id: pagePath,
-    title: pageData.blocks?.find((b: any) => b.type === 'h1')?.content || 'Untitled',
+    title: pageData.blocks?.find((b) => b.type === 'h1')?.content || 'Untitled',
     description: '',
     // Support both formats: legacy blocks array or new Tiptap content
     blocks: pageData.blocks,
     // If it's a direct Tiptap doc, use it as content, otherwise pass the whole pageData
-    content: isTiptapDoc ? (pageData as any) : (pageData as any).content || (pageData as any)
+    content: isTiptapDoc ? pageData.content : pageData.content || undefined
   }
 
   return (

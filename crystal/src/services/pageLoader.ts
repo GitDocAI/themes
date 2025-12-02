@@ -24,12 +24,8 @@ export interface PageData {
 
 class PageLoader {
   private cache: Map<string, PageData> = new Map()
-  private isProductionMode: boolean
 
   constructor() {
-    // Check if we're in production mode (VITE_MODE=production or VITE_MODE not set)
-    const viteMode = import.meta.env.VITE_MODE
-    this.isProductionMode = !viteMode || viteMode === 'production'
   }
 
   /**
@@ -44,7 +40,7 @@ class PageLoader {
       if (this.cache.has(pagePath)) {
         return this.cache.get(pagePath)!
       }
-      let mdxPath: string
+      let mdxPath: string=""
        // Multi-tenant mode: always load from backend with auth
        // Remove leading slash from pagePath if present
        const queryIndex  = pagePath.indexOf("?")
@@ -53,11 +49,9 @@ class PageLoader {
        }
        const cleanPath = pagePath.startsWith('/') ? pagePath.slice(1) : pagePath
 
-       mdxPath = `/docs/content/${cleanPath}?t=${Date.now()}`
-
-
-      const response = await axiosInstance.get(mdxPath)
-      const mdxContent =  response.data
+       mdxPath = `/api/v1/filesystem/file?t=${Date.now()}`
+      const response = await axiosInstance.post(mdxPath,{path:cleanPath})
+      const mdxContent =  response.data.content
 
       // Parse MDX to TipTap JSON
       const tiptapContent = await mdxParser.parse(mdxContent)

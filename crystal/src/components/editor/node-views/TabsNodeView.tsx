@@ -1,9 +1,8 @@
 import { NodeViewWrapper, NodeViewContent } from '@tiptap/react'
 import type { NodeViewProps } from '@tiptap/react'
-import { useState, useEffect, useTransition, useRef } from 'react'
+import { useState, useEffect,  useRef } from 'react'
 
 export const TabsNodeView = ({ node, editor, getPos }: NodeViewProps) => {
-  const [_isPending, _startTransition] = useTransition()
   const [theme, setTheme] = useState<'light' | 'dark'>('dark')
   const [maxHeight, setMaxHeight] = useState<number>(0)
   const contentRefs = useRef<Map<number, HTMLDivElement>>(new Map())

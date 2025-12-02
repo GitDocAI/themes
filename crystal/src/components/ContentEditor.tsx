@@ -1,10 +1,10 @@
 import { useState } from 'react'
 
 interface ContentEditorProps {
-  data: any
+  data: unknown
   docId: string
   theme: 'light' | 'dark'
-  onSave: (docId: string, data: any) => Promise<void>
+  onSave: (docId: string, data: unknown) => Promise<void>
 }
 
 export const ContentEditor: React.FC<ContentEditorProps> = ({

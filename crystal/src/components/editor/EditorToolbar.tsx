@@ -1,6 +1,7 @@
 import { Editor } from '@tiptap/react'
 import { useState, useRef, useEffect, useImperativeHandle, forwardRef } from 'react'
 import './types'
+import { ContentService } from '../../services/contentService'
 
 interface EditorToolbarProps {
   editor: Editor
@@ -1228,31 +1229,9 @@ const ImageInsertModal: React.FC<ImageInsertModalProps> = ({ theme, onSave, onCa
 
     try {
       const reader = new FileReader()
-      reader.onload = async (event) => {
-        const base64Data = event.target?.result as string
-        const base64String = base64Data.split(',')[1]
-
-        const timestamp = Date.now()
-        const filename = `${timestamp}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`
-        const filePath = `assets/${filename}`
-
+      reader.onload = async (_event) => {
         try {
-          const response = await fetch('http://localhost:8080/api/files/upload', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              file_path: filePath,
-              file_data: base64String,
-            }),
-          })
-
-          if (!response.ok) {
-            throw new Error('Failed to upload file')
-          }
-
-          const data = await response.json()
+          const data = await ContentService.uploadFile(file)
           setImageSrc(`/${data.file_path}`)
           setImageType('local')
           setUploading(false)

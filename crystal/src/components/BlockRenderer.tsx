@@ -1,5 +1,11 @@
 import type { Block } from '../services/pageLoader'
 
+interface CodeSnippet {
+  label?: string
+  code: string
+  language?: string
+}
+
 interface BlockRendererProps {
   block: Block
   theme: 'light' | 'dark'
@@ -85,7 +91,7 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({ block, theme }) =>
         />
       )
 
-    case 'blockquote':
+    case 'blockquote': {
       // Remove the '>' character if it exists
       const quoteContent = block.content?.replace(/^>\s*/, '') || ''
       return (
@@ -105,8 +111,9 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({ block, theme }) =>
           dangerouslySetInnerHTML={{ __html: renderText(quoteContent) }}
         />
       )
+    }
 
-    case 'bullet-list':
+    case 'bullet-list': {
       return (
         <ul
           style={{
@@ -134,8 +141,9 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({ block, theme }) =>
           })}
         </ul>
       )
+    }
 
-    case 'numbered-list':
+    case 'numbered-list': {
       return (
         <ol
           style={{
@@ -163,6 +171,7 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({ block, theme }) =>
           })}
         </ol>
       )
+    }
 
     case 'separator':
       return (
@@ -235,7 +244,7 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({ block, theme }) =>
       // For preview, just show all code snippets stacked
       return (
         <div style={{ marginBottom: '16px' }}>
-          {block.snippets?.map((snippet: any, idx: number) => (
+          {block.snippets?.map((snippet: CodeSnippet, idx: number) => (
             <div key={idx} style={{ marginBottom: idx < (block.snippets?.length ?? 0) - 1 ? '8px' : '0' }}>
               {snippet.label && (
                 <div

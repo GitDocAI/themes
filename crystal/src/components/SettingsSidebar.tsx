@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { configLoader } from '../services/configLoader'
 import { useConfig } from '../hooks/useConfig'
-import { ContentService, contentService } from '../services/contentService'
+import { ContentService } from '../services/contentService'
 
 interface SettingsSidebarProps {
   theme: 'light' | 'dark'
@@ -101,24 +101,18 @@ export const SettingsSidebar: React.FC<SettingsSidebarProps> = ({
 
       // Handle banner - if enabled, add it; if disabled, remove it completely
       if (bannerEnabled && config.banner) {
-        updatedConfig.banner = config.banner
+        updatedConfig.banner = {
+          message: config.banner.message || '',
+          colors: {
+            light: config.banner.colors?.light || '',
+            dark: config.banner.colors?.dark || ''
+          }
+        }
       } else if (!bannerEnabled) {
         delete updatedConfig.banner
       }
 
-      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080/api'
-      const response = await fetch(`${backendUrl}/config`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(updatedConfig),
-      })
-
-      if (!response.ok) {
-        const errorText = await response.text()
-        throw new Error(`Failed to save configuration: ${errorText}`)
-      }
+      await ContentService.saveConfig(updatedConfig)
 
       setSaveSuccess(true)
       setTimeout(() => setSaveSuccess(false), 3000)
@@ -160,7 +154,7 @@ export const SettingsSidebar: React.FC<SettingsSidebarProps> = ({
 
 
         try {
-          const response = await ContentService.saveContent(filePath,base64String)
+          await ContentService.saveContent(filePath,base64String)
           setConfig(prev => ({ ...prev, favicon: `docs/content/assests/${filePath}` }))
           setFaviconUploading(false)
         } catch (err) {

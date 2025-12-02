@@ -8,7 +8,7 @@ interface PageData {
   title: string
   description?: string
   blocks?: Block[] // Legacy format
-  content?: any // Tiptap JSON format
+  content?: Record<string, any> // Tiptap JSON format
 }
 
 interface PageRendererProps {
@@ -21,11 +21,11 @@ interface PageRendererProps {
 
 export const PageRenderer: React.FC<PageRendererProps> = ({ pageData, theme, onSave, isDevMode = false, allowUpload = false }) => {
   // Convert legacy format to Tiptap JSON if needed
-  const [content, setContent] = useState<any>(pageData.content || convertBlocksToTiptap(pageData.blocks || []))
+  const [content, setContent] = useState<Record<string, any>>(pageData.content || convertBlocksToTiptap(pageData.blocks || []))
   const [hasChanges, setHasChanges] = useState(false)
   const [showSaveNotification, setShowSaveNotification] = useState(false)
   const saveTimeoutRef = useRef<number | null>(null)
-  const contentRef = useRef<any>(content)
+  const contentRef = useRef<Record<string, any>>(content)
   const hasChangesRef = useRef<boolean>(hasChanges)
   const pageIdRef = useRef<string>(pageData.id)
   const pageDataRef = useRef<PageData>(pageData)
@@ -66,7 +66,7 @@ export const PageRenderer: React.FC<PageRendererProps> = ({ pageData, theme, onS
     hasChangesRef.current = false
   }, [pageData.id, pageData.content, pageData.blocks])
 
-  const handleTiptapUpdate = (updatedContent: any) => {
+  const handleTiptapUpdate = (updatedContent: Record<string, any>) => {
     setContent(updatedContent)
     setHasChanges(true)
 
@@ -197,7 +197,7 @@ function convertBlocksToTiptap(blocks: Block[]): any {
       switch (block.type) {
         case 'h1':
         case 'h2':
-        case 'h3':
+        case 'h3': {
           const level = block.type === 'h1' ? 1 : block.type === 'h2' ? 2 : 3
           return {
             type: 'heading',
@@ -206,6 +206,7 @@ function convertBlocksToTiptap(blocks: Block[]): any {
               ? [{ type: 'text', text: block.content }]
               : undefined,
           }
+        }
 
         case 'paragraph':
           return {

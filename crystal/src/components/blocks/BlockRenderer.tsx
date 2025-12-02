@@ -49,20 +49,22 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({ block, theme, onUp
   switch (block.type) {
     case 'h1':
     case 'h2':
-    case 'h3':
+    case 'h3': {
       // Convert to heading format for HeadingBlock
       const level = block.type === 'h1' ? 1 : block.type === 'h2' ? 2 : 3
       return <HeadingBlock {...commonProps} block={{ ...block, level }} />
+    }
 
     case 'paragraph':
     case 'blockquote':
       return <ParagraphBlock {...commonProps} />
 
     case 'bullet-list':
-    case 'numbered-list':
+    case 'numbered-list': {
       // Convert to list format for ListBlock
       const ordered = block.type === 'numbered-list'
       return <ListBlock {...commonProps} block={{ ...block, ordered }} />
+    }
 
     case 'separator':
       return (

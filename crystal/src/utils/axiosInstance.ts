@@ -1,7 +1,8 @@
 import axios, { type AxiosRequestConfig, type AxiosResponse, AxiosError } from 'axios'
+const viteMode = import.meta.env.VITE_MODE || 'production';
 
 const axiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_BACKEND_URL || 'http://localhost:8082'
+  baseURL: import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080/api'
 })
 
 export const setTokens = (accessToken: string, refreshToken: string) => {
@@ -37,6 +38,7 @@ axiosInstance.interceptors.request.use(
     const accessToken = getAccessToken()
     const loginPath = '/auth/login'
 
+    console.log(accessToken)
     // Check if the request URL is not the login path and a token exists
     if (accessToken && config.url && !config.url.includes(loginPath)) {
       config.headers.Authorization = `Bearer ${accessToken}`
@@ -79,7 +81,11 @@ axiosInstance.interceptors.response.use(
           .catch((err: AxiosError) => {
             processQueue(err)
             clearTokens()
-            window.location.href = '/login' // Redirect to login on refresh failure
+            if(viteMode !== 'production'){
+              window.location.href = '/403'
+            }else{
+              window.location.href = '/login' // Redirect to login on refresh failure
+            }
             reject(err)
           })
           .finally(() => {

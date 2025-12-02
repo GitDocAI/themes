@@ -24,7 +24,7 @@ interface CodeTabProps {
   children?: string | React.ReactNode
 }
 
-const extractText = (node: any): string => {
+const extractText = (node: React.ReactNode): string => {
   if (typeof node === 'string') return node
   if (typeof node === 'number') return String(node)
   if (Array.isArray(node)) return node.map(extractText).join('')
@@ -72,10 +72,10 @@ export const CodeGroup: React.FC<CodeGroupProps> = ({
   useEffect(() => {
     const parsedFiles: CodeFile[] = []
 
-    React.Children.forEach(children, (child) => {
+    React.Children.forEach(children, (child: any) => {
       if (!React.isValidElement(child)) return
 
-      const props = child.props as any
+      const props = child.props as CodeTabProps
 
       if (props.lang) {
         const filename = dropdown

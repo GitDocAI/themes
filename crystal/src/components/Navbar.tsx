@@ -3,6 +3,7 @@ import { configLoader, type Version } from '../services/configLoader'
 import { useConfig } from '../hooks/useConfig'
 import { VersionSwitcher } from './VersionSwitcher'
 import { LogoEditor } from './LogoEditor'
+import { ContentService } from '../services/contentService'
 
 interface NavbarProps {
   theme: 'light' | 'dark'
@@ -100,8 +101,6 @@ export const Navbar: React.FC<NavbarProps> = ({ theme, onThemeChange, onVersionC
 
   const handleDeleteItem = async (index: number) => {
     try {
-      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080/api'
-
       // Fetch current config
       const config = await configLoader.loadConfig()
 
@@ -111,15 +110,7 @@ export const Navbar: React.FC<NavbarProps> = ({ theme, onThemeChange, onVersionC
       }
 
       // Save config
-      const saveResponse = await fetch(`${backendUrl}/config`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(config),
-      })
-
-      if (!saveResponse.ok) {
-        throw new Error('Failed to delete navbar item')
-      }
+      await ContentService.saveConfig(config)
 
       // Update config in memory and local state
       configLoader.updateConfig(config)
@@ -135,10 +126,8 @@ export const Navbar: React.FC<NavbarProps> = ({ theme, onThemeChange, onVersionC
     if (editingItemIndex === null) return
 
     try {
-      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080/api'
-
       // Fetch current config
-      const config = await fetchConfig()
+      const config = await configLoader.loadConfig()
 
       if (!config.navbar) {
         config.navbar = []
@@ -161,15 +150,7 @@ export const Navbar: React.FC<NavbarProps> = ({ theme, onThemeChange, onVersionC
       }
 
       // Save config
-      const saveResponse = await fetch(`${backendUrl}/config`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(config),
-      })
-
-      if (!saveResponse.ok) {
-        throw new Error('Failed to save navbar item')
-      }
+      await ContentService.saveConfig(config)
 
       // Update config in memory and local state
       configLoader.updateConfig(config)
@@ -217,10 +198,8 @@ export const Navbar: React.FC<NavbarProps> = ({ theme, onThemeChange, onVersionC
     if (!isDevMode || draggedItemIndex === null || draggedItemIndex === dropIndex) return
 
     try {
-      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080/api'
-
       // Fetch current config
-      const config = await fetchConfig()
+      const config = await configLoader.loadConfig()
 
       // Reorder items
       const updatedNavItems = [...navItems]
@@ -228,18 +207,13 @@ export const Navbar: React.FC<NavbarProps> = ({ theme, onThemeChange, onVersionC
       updatedNavItems.splice(dropIndex, 0, draggedItem)
 
       // Update config
-      config.navbar = updatedNavItems
+      config.navbar = updatedNavItems.map(item => ({
+        ...item,
+        type: item.type as 'link' | 'button'
+      }))
 
       // Save config
-      const saveResponse = await fetch(`${backendUrl}/config`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(config),
-      })
-
-      if (!saveResponse.ok) {
-        throw new Error('Failed to reorder navbar items')
-      }
+      await ContentService.saveConfig(config)
 
       // Update config in memory and local state
       configLoader.updateConfig(config)
@@ -373,7 +347,7 @@ export const Navbar: React.FC<NavbarProps> = ({ theme, onThemeChange, onVersionC
           onChange={(e) => setSearchQuery(e.target.value)}
           onClick={() => {
             if (isProductionMode) {
-              onSearchClick && onSearchClick()
+              onSearchClick?.()
             } else {
               setShowSearchWarning(true)
               setTimeout(() => setShowSearchWarning(false), 3000)

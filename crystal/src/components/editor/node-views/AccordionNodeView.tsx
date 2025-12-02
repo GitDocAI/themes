@@ -3,7 +3,7 @@ import type { NodeViewProps } from '@tiptap/react'
 import { useState, useEffect, useTransition } from 'react'
 
 export const AccordionNodeView = ({ node, updateAttributes, editor, getPos }: NodeViewProps) => {
-  const [_isPending, startTransition] = useTransition()
+  const [_, startTransition] = useTransition()
   const [multiple, setMultiple] = useState<boolean>(node.attrs.multiple || false)
   const [theme, setTheme] = useState<'light' | 'dark'>('dark')
 

@@ -4,7 +4,7 @@ import { useState, useEffect, useTransition } from 'react'
 import { Label } from '../../Label'
 
 export const LabelNodeView = ({ node, updateAttributes, editor, getPos }: NodeViewProps) => {
-  const [_isPending, startTransition] = useTransition()
+  const [_,startTransition] = useTransition()
   const [isEditing, setIsEditing] = useState(false)
   const [label, setLabel] = useState(node.attrs.label || 'Label')
   const [color, setColor] = useState(node.attrs.color || '#3b82f6')
