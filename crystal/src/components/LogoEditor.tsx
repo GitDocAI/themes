@@ -62,7 +62,7 @@ export const LogoEditor: React.FC<LogoEditorProps> = ({ theme, allowUpload = fal
 
         try {
           const data = await ContentService.uploadFile(file)
-          const uploadedPath = `/${data.file_path}`
+          const uploadedPath = `${data.file_path}`
 
 
           // Wait a bit for the file to be written to disk
