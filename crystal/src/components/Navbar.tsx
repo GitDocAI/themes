@@ -3,6 +3,7 @@ import { configLoader, type Version } from '../services/configLoader'
 import { useConfig } from '../hooks/useConfig'
 import { VersionSwitcher } from './VersionSwitcher'
 import { LogoEditor } from './LogoEditor'
+import { Image } from './ui/Image'
 import { ContentService } from '../services/contentService'
 
 interface NavbarProps {
@@ -254,15 +255,10 @@ export const Navbar: React.FC<NavbarProps> = ({ theme, onThemeChange, onVersionC
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: '6px' }}>
           <div style={{ display: 'inline-block' }}>
             {logo ? (
-              <img
+              <Image
                 src={logo}
                 alt={siteName}
                 style={{ height: '32px', width: 'auto', display: 'block' }}
-                onError={(e) => {
-                  // Hide image if it fails to load and show name instead
-                  (e.target as HTMLImageElement).style.display = 'none'
-                  setLogo('')
-                }}
               />
             ) : (
               <span style={{

@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { configLoader } from '../services/configLoader'
 import { ContentService } from '../services/contentService'
+import { Image } from './ui/Image'
 
 interface LogoEditorProps {
   theme: 'light' | 'dark'
@@ -366,24 +367,10 @@ export const LogoEditor: React.FC<LogoEditorProps> = ({ theme, allowUpload = fal
               justifyContent: 'center',
               minHeight: '100px'
             }}>
-              <img
+              <Image
                 src={lightLogoUrl}
                 alt="Light logo preview"
                 style={{ maxHeight: '80px', maxWidth: '100%', objectFit: 'contain' }}
-                onError={(e) => {
-                  console.error('[LogoEditor] Failed to load light logo:', lightLogoUrl)
-                  const img = e.target as HTMLImageElement
-                  img.style.display = 'none'
-                  const parent = img.parentElement
-                  if (parent && !parent.querySelector('.error-message')) {
-                    const errorMsg = document.createElement('span')
-                    errorMsg.className = 'error-message'
-                    errorMsg.textContent = 'Failed to load image'
-                    errorMsg.style.color = theme === 'light' ? '#991b1b' : '#fca5a5'
-                    errorMsg.style.fontSize = '13px'
-                    parent.appendChild(errorMsg)
-                  }
-                }}
               />
             </div>
           </div>
@@ -521,24 +508,10 @@ export const LogoEditor: React.FC<LogoEditorProps> = ({ theme, allowUpload = fal
                 justifyContent: 'center',
                 minHeight: '100px'
               }}>
-                <img
+                <Image
                   src={darkLogoUrl}
                   alt="Dark logo preview"
                   style={{ maxHeight: '80px', maxWidth: '100%', objectFit: 'contain' }}
-                  onError={(e) => {
-                    console.error('[LogoEditor] Failed to load dark logo:', darkLogoUrl)
-                    const img = e.target as HTMLImageElement
-                    img.style.display = 'none'
-                    const parent = img.parentElement
-                    if (parent && !parent.querySelector('.error-message')) {
-                      const errorMsg = document.createElement('span')
-                      errorMsg.className = 'error-message'
-                      errorMsg.textContent = 'Failed to load image'
-                      errorMsg.style.color = theme === 'light' ? '#991b1b' : '#fca5a5'
-                      errorMsg.style.fontSize = '13px'
-                      parent.appendChild(errorMsg)
-                    }
-                  }}
                 />
               </div>
             </div>

@@ -2,12 +2,12 @@ import { NodeViewWrapper } from '@tiptap/react'
 import type { NodeViewProps } from '@tiptap/react'
 import { useState, useEffect, useRef } from 'react'
 import { ContentService } from '../../../services/contentService'
+import { Image } from '../../ui/Image'
 
 export const ImageNodeView = ({ node, editor, getPos }: NodeViewProps) => {
   const [theme, setTheme] = useState<'light' | 'dark'>('dark')
   const [showModal, setShowModal] = useState<boolean>(false)
   const [showImageExpanded, setShowImageExpanded] = useState<boolean>(false)
-  const [imageError, setImageError] = useState<boolean>(false)
 
   const isEditable = editor.isEditable
   const src = node.attrs.src
@@ -53,13 +53,9 @@ export const ImageNodeView = ({ node, editor, getPos }: NodeViewProps) => {
   }
 
   const handleImageClick = () => {
-    if (!isEditable && src && !imageError) {
+    if (!isEditable && src) {
       setShowImageExpanded(true)
     }
-  }
-
-  const handleImageError = () => {
-    setImageError(true)
   }
 
   return (
@@ -92,41 +88,18 @@ export const ImageNodeView = ({ node, editor, getPos }: NodeViewProps) => {
           }}
         >
           {/* Image */}
-          {imageError ? (
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                minHeight: '200px',
-                backgroundColor: theme === 'light' ? '#f3f4f6' : '#111827',
-                borderRadius: '8px',
-                padding: '2rem',
-                color: theme === 'light' ? '#6b7280' : '#9ca3af',
-                fontSize: '14px',
-                textAlign: 'center',
-              }}
-            >
-              <div>
-                <i className="pi pi-image" style={{ fontSize: '48px', opacity: 0.5, marginBottom: '1rem' }}></i>
-                <div>{alt}</div>
-              </div>
-            </div>
-          ) : (
-            <img
-              src={src || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg"%3E%3C/svg%3E'}
-              alt={alt}
-              onError={handleImageError}
-              onClick={handleImageClick}
-              style={{
-                maxWidth: '100%',
-                height: 'auto',
-                display: 'block',
-                borderRadius: '8px',
-                cursor: !isEditable && src && !imageError ? 'pointer' : 'default',
-              }}
-            />
-          )}
+          <Image
+            src={src || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg"%3E%3C/svg%3E'}
+            alt={alt}
+            onClick={handleImageClick}
+            style={{
+              maxWidth: '100%',
+              height: 'auto',
+              display: 'block',
+              borderRadius: '8px',
+              cursor: !isEditable && src ? 'pointer' : 'default',
+            }}
+          />
 
           {/* Caption */}
           {caption && (
@@ -234,7 +207,7 @@ export const ImageNodeView = ({ node, editor, getPos }: NodeViewProps) => {
           }}
           onClick={() => setShowImageExpanded(false)}
         >
-          <img
+          <Image
             src={src}
             alt={alt}
             style={{

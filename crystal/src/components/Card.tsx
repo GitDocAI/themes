@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { configLoader } from '../services/configLoader'
 import './Card.css'
+import { Image } from './ui/Image'
 
 interface CardProps {
   title?: string
@@ -63,7 +64,7 @@ export const Card: React.FC<CardProps> = ({
         {/* Image header (if image is provided) */}
         {image && (
           <div className="modern-card-header">
-            <img
+            <Image
               src={image}
               alt={title || 'Card image'}
               className="modern-card-image"
