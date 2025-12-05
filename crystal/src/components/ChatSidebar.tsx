@@ -7,35 +7,39 @@ interface Message {
   timestamp: Date
 }
 
-interface ChatContext {
-  type: 'text' | 'file';
-  content: string;
-  fileName?: string;
+export interface ChatContext {
+  id: string
+  type: 'text' | 'file' | 'intention'
+  content?: string
+  fileName?: string
 }
 
 interface ChatSidebarProps {
-  theme?: 'light' | 'dark';
-  context?: ChatContext | null;
-  onContextClear?: () => void;
+  theme?: 'light' | 'dark'
+  externalContexts?: ChatContext[]
+  onUpdateContext:(ctx:ChatContext[])=>void
 }
 
 export const ChatSidebar: React.FC<ChatSidebarProps> = ({
   theme = 'light',
+  externalContexts = [],
+  onUpdateContext
 }) => {
   const [isOpen, setIsOpen] = useState(false)
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-            text: (() => {
-              const hour = new Date().getHours()
-              if (hour < 12 && hour> 6) return '¡Good Morning! How can i help?'
-              if (hour < 18 && hour > 12) return '¡Good Afternoon! What will be now?'
-              return '¡Good Night! May i be usefull?'
-            })(),
+      text: (() => {
+        const hour = new Date().getHours()
+        if (hour < 12 && hour > 6) return '¡Good Morning! How can i help?'
+        if (hour < 18 && hour > 12) return '¡Good Afternoon! What will be now?'
+        return '¡Good Night! May i be usefull?'
+      })(),
       sender: 'bot',
       timestamp: new Date()
     }
   ])
+  const [contexts, setContexts] = useState<ChatContext[]>([])
   const [inputValue, setInputValue] = useState('')
   const [isTyping, setIsTyping] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -55,6 +59,20 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
     }
   }, [isOpen])
 
+
+  useEffect(()=>{
+    if (!isOpen) {
+      setIsOpen(true)
+    }
+  },[externalContexts])
+
+  // Sincronizar contextos externos
+  useEffect(() => {
+    if (externalContexts.length > 0) {
+      setContexts(externalContexts)
+    }
+  }, [externalContexts])
+
   const handleSendMessage = async () => {
     if (!inputValue.trim()) return
 
@@ -69,7 +87,6 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
     setInputValue('')
     setIsTyping(true)
 
-    // Simular respuesta del bot
     setTimeout(() => {
       const botMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -89,12 +106,25 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
     }
   }
 
+  const handleAddContext = () => {
+    console.log('Agregar contexto')
+  }
+
+  const handleRemoveContext = (id: string) => {
+    setContexts(prev => prev.filter(ctx => {
+      return ctx.id !== id
+    }))
+    onUpdateContext(contexts)
+  }
+
   const formatTime = (date: Date) => {
     return date.toLocaleTimeString('es-ES', {
       hour: '2-digit',
       minute: '2-digit'
     })
   }
+
+  const visibleContexts = contexts.filter(ctx => ctx.type === 'file' || ctx.type === 'text')
 
   return (
     <>
@@ -106,7 +136,7 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
           right: '24px',
           width: '56px',
           height: '56px',
-          background: theme === 'light' ? '#1f293799' : '#ffffff99' ,
+          background: theme === 'light' ? '#1f293799' : '#ffffff99',
           color: theme === 'light' ? '#ffffff' : '#1f2937',
           border: 'none',
           cursor: 'pointer',
@@ -177,19 +207,23 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
               🤖
             </div>
             <div>
-              <h2 style={{
-                margin: 0,
-                fontSize: '18px',
-                fontWeight: '600',
-                color: theme === 'light' ? '#111827' : '#f9fafb'
-              }}>
+              <h2
+                style={{
+                  margin: 0,
+                  fontSize: '18px',
+                  fontWeight: '600',
+                  color: theme === 'light' ? '#111827' : '#f9fafb'
+                }}
+              >
                 Chat with ai
               </h2>
-              <p style={{
-                margin: 0,
-                fontSize: '12px',
-                color: theme === 'light' ? '#6b7280' : '#9ca3af'
-              }}>
+              <p
+                style={{
+                  margin: 0,
+                  fontSize: '12px',
+                  color: theme === 'light' ? '#6b7280' : '#9ca3af'
+                }}
+              >
                 online
               </p>
             </div>
@@ -242,13 +276,22 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
                 style={{
                   maxWidth: '75%',
                   padding: '12px 16px',
-                  borderRadius: message.sender === 'user' ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
-                  backgroundColor: message.sender === 'user'
-                    ? (theme === 'light' ? '#3b82f6' : '#6366f1')
-                    : (theme === 'light' ? '#f3f4f6' : '#374151'),
-                  color: message.sender === 'user'
-                    ? '#ffffff'
-                    : (theme === 'light' ? '#111827' : '#f9fafb'),
+                  borderRadius:
+                    message.sender === 'user' ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
+                  backgroundColor:
+                    message.sender === 'user'
+                      ? theme === 'light'
+                        ? '#3b82f6'
+                        : '#6366f1'
+                      : theme === 'light'
+                      ? '#f3f4f6'
+                      : '#374151',
+                  color:
+                    message.sender === 'user'
+                      ? '#ffffff'
+                      : theme === 'light'
+                      ? '#111827'
+                      : '#f9fafb',
                   fontSize: '14px',
                   lineHeight: '1.5',
                   wordWrap: 'break-word'
@@ -315,6 +358,67 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
           <div ref={messagesEndRef} />
         </div>
 
+        {/* Context Section */}
+        {visibleContexts.length > 0 && (
+          <div
+            style={{
+              padding: '12px 24px',
+              borderTop: `1px solid ${theme === 'light' ? '#e5e7eb' : '#374151'}`,
+              backgroundColor: theme === 'light' ? '#f9fafb' : '#111827',
+              maxHeight: '150px',
+              overflowY: 'auto'
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '8px'
+              }}
+            >
+              {visibleContexts.map((context) => (
+                <div
+                  key={context.id}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '8px 12px',
+                    backgroundColor: theme === 'light' ? '#e0f2fe' : '#1e3a8a',
+                    borderRadius: '8px',
+                    fontSize: '13px',
+                    color: theme === 'light' ? '#0369a1' : '#93c5fd'
+                  }}
+                >
+                  <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {context.type === 'file' ? (
+                      <>📎 {context.fileName || 'File'}</>
+                    ) : (
+                      <>📝 {context.content?.substring(0, 30)}...</>
+                    )}
+                  </span>
+                  <button
+                    onClick={() => handleRemoveContext(context.id)}
+                    style={{
+                      background: 'transparent',
+                      border: 'none',
+                      cursor: 'pointer',
+                      color: theme === 'light' ? '#0369a1' : '#93c5fd',
+                      fontSize: '16px',
+                      padding: '2px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Input Container */}
         <div
           style={{
@@ -330,6 +434,35 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
               alignItems: 'flex-end'
             }}
           >
+            <button
+              onClick={handleAddContext}
+              style={{
+                width: '44px',
+                height: '44px',
+                borderRadius: '50%',
+                backgroundColor: theme === 'light' ? '#e5e7eb' : '#4b5563',
+                color: theme === 'light' ? '#374151' : '#e5e7eb',
+                border: 'none',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '20px',
+                transition: 'all 0.2s',
+                flexShrink: 0
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = theme === 'light' ? '#d1d5db' : '#6b7280'
+                e.currentTarget.style.transform = 'scale(1.05)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = theme === 'light' ? '#e5e7eb' : '#4b5563'
+                e.currentTarget.style.transform = 'scale(1)'
+              }}
+              title="Agregar contexto"
+            >
+              +
+            </button>
             <input
               ref={inputRef}
               type="text"
@@ -363,9 +496,17 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
                 height: '44px',
                 borderRadius: '50%',
                 backgroundColor: inputValue.trim()
-                  ? (theme === 'light' ? '#3b82f6' : '#6366f1')
-                  : (theme === 'light' ? '#e5e7eb' : '#4b5563'),
-                color: inputValue.trim() ? '#ffffff' : (theme === 'light' ? '#9ca3af' : '#6b7280'),
+                  ? theme === 'light'
+                    ? '#3b82f6'
+                    : '#6366f1'
+                  : theme === 'light'
+                  ? '#e5e7eb'
+                  : '#4b5563',
+                color: inputValue.trim()
+                  ? '#ffffff'
+                  : theme === 'light'
+                  ? '#9ca3af'
+                  : '#6b7280',
                 border: 'none',
                 cursor: inputValue.trim() ? 'pointer' : 'not-allowed',
                 display: 'flex',

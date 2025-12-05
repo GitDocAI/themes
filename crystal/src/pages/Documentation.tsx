@@ -22,7 +22,7 @@ import 'primereact/resources/themes/lara-light-blue/theme.css'
 import 'primeicons/primeicons.css'
 import '../App.css'
 import OptionsSidebar from '../components/OptionsSidebar'
-import { ChatSidebar } from '../components/ChatSidebar'
+import { ChatSidebar,type ChatContext } from '../components/ChatSidebar'
 import TextSelectionContextMenu from '../components/ContextMenu'
 
 function Documentation() {
@@ -42,6 +42,7 @@ function Documentation() {
   const [sidebarItems, setSidebarItems] = useState<NavigationItem[]>([])
   const [currentPath, setCurrentPath] = useState<string>('')
   const [showSearchModal, setShowSearchModal] = useState<boolean>(false)
+  const [aiContexts,setAiContexts] =useState<ChatContext[]>([])
 
   // Use custom hook to detect RightPanel content
   const rightPanelContent = useRightPanelContent(currentPath)
@@ -267,7 +268,61 @@ function Documentation() {
   }
 
   const passContextoAi=(contextText:string,intention:string)=>{
-    console.log(contextText,intention)
+    const currentFileName = window.location.href.replace(window.location.origin,"");
+
+    const currentFileContext:ChatContext= {
+        id: `current_file-${Date.now()}`,
+        type:  'file',
+        fileName: currentFileName
+    }
+    const textContext:ChatContext= {
+        id: `selelected-${Date.now()}`,
+        type:  'text',
+        content:contextText,
+        fileName:currentFileName
+    }
+    const intentionContext:ChatContext= {
+        id: `intention`,
+        type:  'intention',
+        content:intention
+    }
+
+    setAiContexts(prevAiContexts => {
+      const fileContextExists = prevAiContexts.some(
+        context => context.type === 'file' && context.fileName === currentFileName
+      );
+
+      const textContextExists = prevAiContexts.some(
+        context => context.type === 'text' && context.content === contextText && context.fileName === currentFileName
+      );
+
+      const newAiContexts = [...prevAiContexts];
+
+      if (!fileContextExists) {
+        newAiContexts.push(currentFileContext);
+      }
+
+      if (!textContextExists) {
+        newAiContexts.push(textContext);
+      }
+
+      // Handle intention context
+      const intentionIndex = newAiContexts.findIndex(context => context.type === 'intention');
+      if (intentionIndex !== -1) {
+        // Update existing intention context (if needed, based on 'intention' parameter)
+        // For now, we're just keeping one, so no update needed in this example
+      } else {
+        newAiContexts.push(intentionContext);
+      }
+
+      // Ensure only one intention context exists
+      const intentionContexts = newAiContexts.filter(context => context.type === 'intention');
+      if (intentionContexts.length > 1) {
+        newAiContexts.splice(newAiContexts.indexOf(intentionContexts[1]), 1); // Remove the second intention context
+      }
+
+      return newAiContexts;
+    });
   }
 
   return (
@@ -305,7 +360,7 @@ function Documentation() {
           !isProductionMode  &&
           <OptionsSidebar theme={theme}>
 
-            <ChatSidebar />
+            <ChatSidebar externalContexts={aiContexts} onUpdateContext={(ctx)=>setAiContexts(ctx)} />
 
             <SettingsSidebar
               theme={theme}

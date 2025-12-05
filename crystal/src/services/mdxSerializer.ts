@@ -76,7 +76,7 @@ class MDXSerializerService {
       'bulletList',
       'orderedList',
       'taskList',
-      'image',
+      'imageBlock',
       'infoBlock',
       'cardBlock',
       'accordionBlock',

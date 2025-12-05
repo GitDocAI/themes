@@ -12,9 +12,9 @@ const OptionsSidebar = ({ children,theme  }: OptionsSidebarProps) => {
       <style>{`
         .options-sidebar {
           position: fixed;
-          top: 5.9rem;
+          top: 0rem;
           right: 0;
-          height: calc(100% - 3rem);
+          height: calc(100dvh);
           background: ${theme === 'light' ? '#1f293729' : '#ffffff09'} ;
           transition: width 0.3s ease;
           z-index: 1000;
@@ -28,7 +28,7 @@ const OptionsSidebar = ({ children,theme  }: OptionsSidebarProps) => {
         }
 
         .options-sidebar.closed {
-          width: 8rem;
+          width: 3rem;
         }
 
         .sidebar-toggle-btn {
@@ -49,7 +49,7 @@ const OptionsSidebar = ({ children,theme  }: OptionsSidebarProps) => {
         }
 
         .sidebar-content {
-          padding: 1rem;
+          padding: 0.1rem;
           flex: 1;
           overflow-y: auto;
         }

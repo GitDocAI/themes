@@ -13,6 +13,7 @@
     "@hookform/resolvers": "^5.2.2",
     "@radix-ui/react-label": "^2.1.8",
     "@radix-ui/react-slot": "^1.2.4",
+    "@tailwindcss/vite": "^4.1.17",
     "@tiptap/extension-code-block-lowlight": "^3.8.0",
     "@tiptap/extension-drag-handle": "^3.8.0",
     "@tiptap/extension-drag-handle-react": "^3.8.0",
@@ -47,6 +48,7 @@
     "remark-parse": "^11.0.0",
     "shiki": "^3.13.0",
     "tailwind-merge": "^3.4.0",
+    "tailwindcss": "^4.1.17",
     "tippy.js": "^6.3.7",
     "unified": "^11.0.5",
     "zod": "^4.1.12"
