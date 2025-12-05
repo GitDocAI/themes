@@ -19,6 +19,7 @@ interface MdxNode {
   meta?: string
   url?: string
   alt?: string
+  title?:string
   name?: string
   attributes?: Array<{ type: string; name: string; value: any }>
   data?: any
@@ -354,12 +355,15 @@ class MDXParserService {
    * Convert image node
    */
   private convertImage(node: MdxNode): TipTapNode {
+
+    console.log(node)
+
     return {
       type: 'imageBlock',
       attrs: {
         src: node.url || '',
         alt: node.alt || 'Image',
-        caption: '',
+        caption: node.title||'',
         type: 'url'
       }
     }
@@ -370,8 +374,21 @@ class MDXParserService {
    */
   private convertMDXComponent(node: MdxNode): TipTapNode | TipTapNode[] | null {
     const componentName = node.name
-
     switch (componentName) {
+      case 'img':
+          const mdxNode ={
+              url:'',
+              alt:'',
+          }
+          node.attributes?.forEach(at=>{
+          if(at.name=='src'){
+            mdxNode.url=at.value
+          }
+          if(at.name=='alt'){
+            mdxNode.alt=at.value
+          }
+        })
+        return this.convertImage(mdxNode as MdxNode)
       case 'Card':
         return this.convertCardComponent(node)
 

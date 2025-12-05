@@ -37,8 +37,6 @@ axiosInstance.interceptors.request.use(
   (config) => {
     const accessToken = getAccessToken()
     const loginPath = '/auth/login'
-
-    console.log(accessToken)
     // Check if the request URL is not the login path and a token exists
     if (accessToken && config.url && !config.url.includes(loginPath)) {
       config.headers.Authorization = `Bearer ${accessToken}`

@@ -59,6 +59,7 @@ export const ImageBlock = Node.create({
               alt: attrs?.alt || 'Image',
               caption: attrs?.caption || '',
               type: attrs?.type || 'url',
+              ...attrs
             },
           })
         },

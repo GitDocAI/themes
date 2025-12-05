@@ -115,12 +115,20 @@ const EditorToolbarComponent = forwardRef<EditorToolbarRef, EditorToolbarProps>(
     editor
       .chain()
       .focus()
-      .setCardBlock({
-        title: 'New Card',
-        icon: 'pi pi-star',
-        href: '',
-      })
-      .run()
+   .insertContent({
+            type: 'cardBlock',
+            attrs: {
+              id: `card-${Date.now()}`,
+              title: 'New Card',
+              icon: 'pi pi-star',
+              href: '',
+              content:'asas'
+            },
+          }).run()
+
+
+
+
     setShowInsertDropdown(false)
   }
 
@@ -132,6 +140,12 @@ const EditorToolbarComponent = forwardRef<EditorToolbarRef, EditorToolbarProps>(
       .run()
     setShowInsertDropdown(false)
   }
+
+
+  const insertImageNode =(src:string, alt:string, caption:string, type:any) => {
+        editor.chain().focus().setImageBlock({ src, alt, caption, type  }).run()
+        setShowImageModal(false)
+    }
 
   const insertColumnGroup = () => {
     editor
@@ -1178,10 +1192,7 @@ const EditorToolbarComponent = forwardRef<EditorToolbarRef, EditorToolbarProps>(
       {showImageModal && (
         <ImageInsertModal
           theme={theme}
-          onSave={(src, alt, caption, type) => {
-            editor.chain().focus().setImageBlock({ src, alt, caption, type }).run()
-            setShowImageModal(false)
-          }}
+          onSave={insertImageNode}
           onCancel={() => setShowImageModal(false)}
         />
       )}
@@ -1232,7 +1243,7 @@ const ImageInsertModal: React.FC<ImageInsertModalProps> = ({ theme, onSave, onCa
       reader.onload = async (_event) => {
         try {
           const data = await ContentService.uploadFile(file)
-          setImageSrc(`/${data.file_path}`)
+          setImageSrc(`${data.file_path}`)
           setImageType('local')
           setUploading(false)
         } catch (err) {

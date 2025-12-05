@@ -95,7 +95,10 @@ class MDXSerializerService {
    * Serialize a single node
    */
   private serializeNode(node: TipTapNode, options: SerializeOptions = {}): string {
+
     switch (node.type) {
+
+
       case 'heading': {
         return this.serializeHeading(node)
       }
@@ -127,7 +130,7 @@ class MDXSerializerService {
       case 'horizontalRule':
         return '---'
 
-      case 'image':
+      case 'imageBlock':
         return this.serializeImage(node)
 
       case 'hardBreak':
@@ -325,7 +328,7 @@ class MDXSerializerService {
   private serializeImage(node: TipTapNode): string {
     const src = node.attrs?.src || ''
     const alt = node.attrs?.alt || ''
-    const title = node.attrs?.title
+    const title = node.attrs?.caption
 
     if (title) {
       return `![${alt}](${src} "${title}")`
