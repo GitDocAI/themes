@@ -17,6 +17,20 @@ export const TOC: React.FC<TOCProps> = ({ theme, currentPath }) => {
   const activeRef = useRef<HTMLLIElement | null>(null)
   const isUserScrolling = useRef<boolean>(false)
   const scrollTimeoutRef = useRef<number | null>(null)
+  const [isLargeScreen, setIsLargeScreen] = useState(false)
+
+  // Hide TOC on small screens
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(min-width: 2048px)')
+    setIsLargeScreen(mediaQuery.matches)
+    const handleMediaQueryChange = (e: MediaQueryListEvent) => {
+      setIsLargeScreen(e.matches)
+    }
+    mediaQuery.addEventListener('change', handleMediaQueryChange)
+    return () => {
+      mediaQuery.removeEventListener('change', handleMediaQueryChange)
+    }
+  }, [])
 
   // Extract headings from the document
   useEffect(() => {
@@ -193,6 +207,9 @@ export const TOC: React.FC<TOCProps> = ({ theme, currentPath }) => {
     }
   }
 
+  if (!isLargeScreen) {
+    return null
+  }
 
   return (
     <aside

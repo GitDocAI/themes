@@ -21,6 +21,9 @@ import { useTextHighlight } from '../hooks/useTextHighlight'
 import 'primereact/resources/themes/lara-light-blue/theme.css'
 import 'primeicons/primeicons.css'
 import '../App.css'
+import OptionsSidebar from '../components/OptionsSidebar'
+import { ChatSidebar } from '../components/ChatSidebar'
+import TextSelectionContextMenu from '../components/ContextMenu'
 
 function Documentation() {
   const { theme, toggleTheme, isConfigLoaded } = useTheme()
@@ -263,8 +266,12 @@ function Documentation() {
     setIsSettingsSidebarOpen(prev => !prev)
   }
 
+  const passContextoAi=(contextText:string,intention:string)=>{
+    console.log(contextText,intention)
+  }
+
   return (
-    <>
+    <TextSelectionContextMenu theme={theme} onAiUpgrade={(selected)=>{passContextoAi(selected,"upgrade")}} onAiChat={(selected)=>{passContextoAi(selected,"ask")}}>
       {/* Main content wrapper that shifts when sidebar is open */}
       <div
         style={{
@@ -292,6 +299,23 @@ function Documentation() {
             isDevMode={isProductionMode ? false : isDevMode}
             currentVersion={currentVersion}
           />
+        )}
+
+        {(
+          !isProductionMode  &&
+          <OptionsSidebar theme={theme}>
+
+            <ChatSidebar />
+
+            <SettingsSidebar
+              theme={theme}
+              isDevMode={isDevMode}
+              onDevModeToggle={toggleDevMode}
+              isOpen={isSettingsSidebarOpen}
+              onToggle={toggleSettingsSidebar}
+              allowUpload={isDevEnvironment}
+            />
+          </OptionsSidebar>
         )}
 
         {/* Layout with Sidebar, Content, and TOC */}
@@ -378,18 +402,6 @@ function Documentation() {
         </div>
       </div>
 
-      {/* Settings Sidebar - Only if NOT in production mode */}
-      {!isProductionMode && (
-        <SettingsSidebar
-          theme={theme}
-          isDevMode={isDevMode}
-          onDevModeToggle={toggleDevMode}
-          isOpen={isSettingsSidebarOpen}
-          onToggle={toggleSettingsSidebar}
-          allowUpload={isDevEnvironment}
-        />
-      )}
-
       {/* Search Modal */}
       <SearchModal
         visible={showSearchModal}
@@ -397,7 +409,7 @@ function Documentation() {
         onNavigate={handleNavigate}
         theme={theme}
       />
-    </>
+    </TextSelectionContextMenu>
   )
 }
 

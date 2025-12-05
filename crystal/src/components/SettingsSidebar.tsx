@@ -209,14 +209,12 @@ export const SettingsSidebar: React.FC<SettingsSidebarProps> = ({
       <button
         onClick={onToggle}
         style={{
-          position: 'fixed',
           bottom: '24px',
           right: '24px',
           width: '56px',
           height: '56px',
-          borderRadius: '50%',
-          backgroundColor: theme === 'light' ? '#3b82f6' : '#6366f1',
-          color: '#ffffff',
+          background: theme === 'light' ? '#1f293799' : '#ffffff99' ,
+          color: theme === 'light' ? '#ffffff' : '#1f2937',
           border: 'none',
           cursor: 'pointer',
           display: 'flex',
