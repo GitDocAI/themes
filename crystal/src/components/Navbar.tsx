@@ -17,8 +17,6 @@ interface NavbarProps {
 }
 
 export const Navbar: React.FC<NavbarProps> = ({ theme, onThemeChange, onVersionChange, currentVersion, isDevMode = false, allowUpload = false, onSearchClick = () => {} }) => {
-  const viteMode = import.meta.env.VITE_MODE || 'production'
-  const isProductionMode = viteMode === 'production'
   const { updateTrigger } = useConfig()
   const [logo, setLogo] = useState('')
   const [siteName, setSiteName] = useState('')
