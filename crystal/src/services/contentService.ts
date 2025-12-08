@@ -17,7 +17,7 @@ export class ContentService {
     // Remove leading slash from docId if present to avoid double slashes
     const cleanDocId = docId.startsWith('/') ? docId.slice(1) : docId
 
-    const url = '/api/v1/filesystem/entry'
+    const url = '/content/api/v1/filesystem/entry'
     // Detect content type based on file extension or content format
     const isMdxFile = cleanDocId.endsWith('.mdx')
     const isJsonContent = content.trim().startsWith('{') || content.trim().startsWith('[')
@@ -65,7 +65,7 @@ export class ContentService {
     // Remove leading slash from docId if present to avoid double slashes
     const cleanDocId = docId.startsWith('/') ? docId.slice(1) : docId
 
-    const url = '/api/v1/filesystem/entry'
+    const url = '/content/api/v1/filesystem/entry'
 
     const  body = {
           path: cleanDocId,
@@ -86,7 +86,7 @@ export class ContentService {
    * Save configuration to backend API
    */
   static async saveConfig(config: any): Promise<void> {
-    const url = '/api/v1/filesystem/entry'
+    const url = '/content/api/v1/filesystem/entry'
     try {
         await axiosInstance.post(url, {
           path: '/gitdocai.config.json',
@@ -107,7 +107,7 @@ export class ContentService {
    * Rename a file on the backend
    */
   static async renameFile(oldPath: string, newPath: string,type="file"): Promise<void> {
-    const url = '/api/v1/filesystem/move'
+    const url = '/content/api/v1/filesystem/move'
     try {
       await axiosInstance.post(url, { from: oldPath, to: newPath,type,action:"move" })
     } catch (error) {
@@ -117,7 +117,7 @@ export class ContentService {
 
 
   static async removeItem(path: string): Promise<void> {
-    const url = '/api/v1/filesystem/delete'
+    const url = '/content/api/v1/filesystem/delete'
     try {
       await axiosInstance.post(url, { path })
     } catch (error) {
@@ -129,7 +129,7 @@ export class ContentService {
    * Upload a file to the backend
    */
   static async uploadFile(file:File): Promise<any> {
-    const url = '/api/v1/filesystem/upload'
+    const url = '/content/api/v1/filesystem/upload'
 
     const formData = new FormData();
 
@@ -143,7 +143,7 @@ export class ContentService {
   }
 
   static async downloadFile(path:string): Promise<any> {
-    const url = '/api/v1/filesystem/download'
+    const url = '/content/api/v1/filesystem/download'
 
     try {
       const response = await axiosInstance.post(url, {path},{responseType:'blob'})

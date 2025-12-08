@@ -61,7 +61,7 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
 
 
   useEffect(()=>{
-    if (!isOpen) {
+    if (!isOpen && externalContexts.length>0) {
       setIsOpen(true)
     }
   },[externalContexts])

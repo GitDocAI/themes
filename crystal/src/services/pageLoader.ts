@@ -49,7 +49,7 @@ class PageLoader {
        }
        const cleanPath = pagePath.startsWith('/') ? pagePath.slice(1) : pagePath
 
-       mdxPath = `/api/v1/filesystem/file?t=${Date.now()}`
+       mdxPath = `/content/api/v1/filesystem/file?t=${Date.now()}`
       const response = await axiosInstance.post(mdxPath,{path:cleanPath})
       const mdxContent =  response.data.content
 

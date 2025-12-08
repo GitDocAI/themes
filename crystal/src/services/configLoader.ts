@@ -128,7 +128,7 @@ class ConfigLoader {
 
  private async fetchConfig(): Promise<GitDocAIConfig> {
     // Use the correct API endpoint for loading configuration
-    const configUrl: string = '/api/v1/filesystem/file';
+    const configUrl: string = '/content/api/v1/filesystem/file';
     try{
       const response = await axiosInstance.post(configUrl, { path: '/gitdocai.config.json' }, { responseType: 'json' })
       const config = JSON.parse(response.data.content)

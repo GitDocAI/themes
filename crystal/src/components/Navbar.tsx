@@ -33,7 +33,6 @@ export const Navbar: React.FC<NavbarProps> = ({ theme, onThemeChange, onVersionC
   const [versions, setVersions] = useState<Version[]>([])
   const [hasVersions, setHasVersions] = useState(false)
   const [showLogoEditor, setShowLogoEditor] = useState(false)
-  const [showSearchWarning, setShowSearchWarning] = useState(false)
   const [colors, setColors] = useState({
     primary: '',
     background: '',
@@ -332,7 +331,6 @@ export const Navbar: React.FC<NavbarProps> = ({ theme, onThemeChange, onVersionC
           left: '16px',
           top: '50%',
           transform: 'translateY(-50%)',
-          color: showSearchWarning ? '#ef4444' : colors.primary,
           fontSize: '14px',
           zIndex: 1
         }}></i>
@@ -342,21 +340,14 @@ export const Navbar: React.FC<NavbarProps> = ({ theme, onThemeChange, onVersionC
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           onClick={() => {
-            if (isProductionMode) {
               onSearchClick?.()
-            } else {
-              setShowSearchWarning(true)
-              setTimeout(() => setShowSearchWarning(false), 3000)
-            }
           }}
           readOnly
           style={{
             width: '100%',
             padding: '10px 80px 10px 40px',
             backgroundColor: theme === 'light' ? 'rgba(249, 250, 251, 0.8)' : 'rgba(31, 41, 55, 0.8)',
-            border: showSearchWarning
-              ? '1px solid #ef4444'
-              : `1px solid ${theme === 'light' ? 'rgba(229, 231, 235, 0.7)' : 'rgba(55, 65, 81, 0.7)'}`,
+            border: `1px solid ${theme === 'light' ? 'rgba(229, 231, 235, 0.7)' : 'rgba(55, 65, 81, 0.7)'}`,
             borderRadius: '12px',
             color: colors.text,
             fontSize: '14px',
@@ -364,27 +355,19 @@ export const Navbar: React.FC<NavbarProps> = ({ theme, onThemeChange, onVersionC
             transition: 'all 0.2s ease',
             boxSizing: 'border-box',
             backdropFilter: 'blur(8px)',
-            cursor: isProductionMode ? 'text' : 'not-allowed'
+            cursor:  'text'
           }}
           onMouseEnter={(e) => {
-            if (!showSearchWarning) {
               e.currentTarget.style.borderColor = colors.primary
-            }
           }}
           onMouseLeave={(e) => {
-            if (!showSearchWarning && document.activeElement !== e.currentTarget) {
               e.currentTarget.style.borderColor = theme === 'light' ? 'rgba(229, 231, 235, 0.7)' : 'rgba(55, 65, 81, 0.7)'
-            }
           }}
           onFocus={(e) => {
-            if (!showSearchWarning) {
               e.currentTarget.style.borderColor = colors.primary
-            }
           }}
           onBlur={(e) => {
-            if (!showSearchWarning) {
               e.currentTarget.style.borderColor = theme === 'light' ? 'rgba(229, 231, 235, 0.7)' : 'rgba(55, 65, 81, 0.7)'
-            }
           }}
         />
         <kbd style={{
@@ -406,26 +389,6 @@ export const Navbar: React.FC<NavbarProps> = ({ theme, onThemeChange, onVersionC
         </kbd>
 
         {/* Warning message when search is not available */}
-        {showSearchWarning && (
-          <div style={{
-            position: 'absolute',
-            top: '100%',
-            left: '0',
-            right: '0',
-            marginTop: '8px',
-            padding: '8px 12px',
-            backgroundColor: '#fef2f2',
-            border: '1px solid #ef4444',
-            borderRadius: '8px',
-            color: '#991b1b',
-            fontSize: '13px',
-            fontWeight: '500',
-            zIndex: 1000,
-            animation: 'fadeIn 0.2s ease-in-out'
-          }}>
-            Search not available in {viteMode} mode
-          </div>
-        )}
       </div>
 
       {/* Nav Items and Theme Toggle */}
