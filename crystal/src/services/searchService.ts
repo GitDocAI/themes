@@ -31,7 +31,7 @@ class SearchService {
   constructor() {
   }
 
-  async search(query: string, maxResults: number = 10,onData:(result:SearchResponse)=>void): Promise<any> {
+  async search(query: string, maxResults: number = 10,onData:(result:SearchResponse)=>void,onFinished:()=>void): Promise<any> {
     if (!!this.controller) this.controller!.abort();
       this.controller = new AbortController();
     if (!query.trim()) {
@@ -51,19 +51,28 @@ class SearchService {
     let buffer:string|undefined = "";
     while (true) {
       const { value, done } = await reader.read();
-      if (done) break;
+      if (done){
+        break;
+      }
 
       buffer += decoder.decode(value, { stream: true });
       const parts:any = buffer!.split("\n");
       buffer = parts.pop();
 
       for (const line of parts) {
-        console.log(line)
-        if (!line.trim()) continue;
           try{
-            const parsed = JSON.parse(line)
-            if ( Object.keys(parsed).includes("hits")){
-              onData(parsed)
+
+          if(line.startsWith('event:')){
+            continue
+          }
+
+          const parsed = JSON.parse(line.startsWith('data:')?line.replace('data:',''):line)
+          if ( Object.keys(parsed).includes("score")){
+              onData({
+                  success: true,
+                  hits: [parsed],
+                  total_results: 1,
+               })
             }else{
               onData({
                   success: false,
@@ -82,8 +91,7 @@ class SearchService {
           }
       }
     }
-
-
+    onFinished()
   }
 
 }

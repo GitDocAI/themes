@@ -11,9 +11,9 @@ import { RightPanel } from '../components/RightPanel'
 import { PrevNextNavigation } from '../components/PrevNextNavigation'
 import { SearchModal } from '../components/SearchModal'
 import { configLoader } from '../services/configLoader'
-import { navigationService } from '../services/navigationService'
+import { FindPagePathByName, navigationService } from '../services/navigationService'
 import type { Tab } from '../services/configLoader'
-import type { NavigationItem } from '../types/navigation'
+import type { NavigationDropdown, NavigationGroup, NavigationItem, NavigationPage } from '../types/navigation'
 import { useTheme } from '../hooks/useTheme'
 import { useRightPanelContent } from '../hooks/useRightPanelContent'
 import { useConfig } from '../hooks/useConfig'
@@ -234,6 +234,8 @@ function Documentation() {
 
   }
 
+
+
   const handleNavigate = (path: string, headingId?: string) => {
     // Use navigation service to navigate
     navigationService.navigateTo(path, currentVersion, currentTab)
@@ -258,6 +260,51 @@ function Documentation() {
       }, 300)
     }
   }
+
+
+  const findPage = (item:NavigationItem,page:string):string|null=>{
+    if(item.type!="page"&& item.type!="openapi"){
+     return (item as NavigationDropdown|NavigationGroup).children.map(ch=>findPage(ch,page)).filter(res=>!!res).pop()||null
+    }
+    const item_page = (item as NavigationPage)
+    if(item_page.title == page ||  item_page.page.split('/').includes(`${page}.mdx`)){
+      return item_page.page
+    }
+    return null
+  }
+  const handleSearchNavigate=(pageName:string,headingId?:string,tab?:string,version?:string)=>{
+    let path =FindPagePathByName(pageName,tab,version)||'/'
+    if(version){
+      handleVersionChange(version)
+    }
+    if(tab){
+      handleTabChange(tab)
+    }
+
+    navigationService.navigateTo(path, version, tab)
+    setCurrentPath(path)
+
+    if (headingId) {
+      setTimeout(() => {
+        const element = document.getElementById(headingId)
+        if (element) {
+          // Scroll to element with smooth behavior
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+
+          // Add highlight effect
+          element.style.transition = 'background-color 0.3s ease'
+          element.style.backgroundColor = 'rgba(59, 130, 246, 0.1)'
+
+          setTimeout(() => {
+            element.style.backgroundColor = ''
+          }, 2000)
+        }
+      }, 300)
+    }
+
+
+  }
+
 
   const toggleDevMode = () => {
     setIsDevMode(prev => !prev)
@@ -461,7 +508,7 @@ function Documentation() {
       <SearchModal
         visible={showSearchModal}
         onHide={() => setShowSearchModal(false)}
-        onNavigate={handleNavigate}
+        onNavigate={ handleSearchNavigate}
         theme={theme}
       />
     </TextSelectionContextMenu>

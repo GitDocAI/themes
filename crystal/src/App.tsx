@@ -4,6 +4,7 @@ import SetPassword from "./pages/SetPassword";
 import Login from "./pages/Login";
 import { getAccessToken } from "./utils/axiosInstance";
 import Forbidden from "./pages/403";
+import 'primeicons/primeicons.css';
 
 export default function App() {
   const viteMode = import.meta.env.VITE_MODE || 'production';

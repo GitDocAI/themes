@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
-
+import { SearchModal } from './SearchModal'
+import { FindPagePathByName } from '../services/navigationService'
 interface Message {
   id: string
   text: string
@@ -12,6 +13,7 @@ export interface ChatContext {
   type: 'text' | 'file' | 'intention'
   content?: string
   fileName?: string
+  headingId?:string
 }
 
 interface ChatSidebarProps {
@@ -26,6 +28,7 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
   onUpdateContext
 }) => {
   const [isOpen, setIsOpen] = useState(false)
+  const [showSearchModal,setShowSearchModal] = useState<boolean>(false)
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
@@ -47,6 +50,19 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }
+
+  const handleSearchResult=(page:string,headingId?:string,tab?:string,version?:string)=>{
+    const pagePath =FindPagePathByName(page,tab,version)
+    if(pagePath){
+      const context:ChatContext ={
+          id: `${pagePath}-${Date.now()}`,
+          type:  'file' ,
+          fileName: pagePath,
+          headingId:headingId
+      }
+      onUpdateContext([...contexts,context])
+    }
   }
 
   useEffect(() => {
@@ -107,7 +123,7 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
   }
 
   const handleAddContext = () => {
-    console.log('Agregar contexto')
+      setShowSearchModal(true)
   }
 
   const handleRemoveContext = (id: string) => {
@@ -542,7 +558,17 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
           }
         }
       `}</style>
+
+      <SearchModal
+        visible={showSearchModal}
+        onHide={() => setShowSearchModal(false)}
+        onNavigate={handleSearchResult}
+        theme={theme}
+      />
+
+
     </>
+
   )
 }
 

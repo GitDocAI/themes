@@ -8,7 +8,7 @@ const Forbidden = () => {
       fontSize: '2rem',
       fontWeight: 'bold',
     }}>
-      You are not allowed to see this page.
+      Your session has expired
     </div>
   );
 };

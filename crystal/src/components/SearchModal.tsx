@@ -6,7 +6,7 @@ import './SearchModal.css'
 interface SearchModalProps {
   visible: boolean
   onHide: () => void
-  onNavigate: (path: string, headingId?: string) => void
+  onNavigate: (path: string, headingId?: string,tab?:string,version?:string) => void
   theme: 'light' | 'dark'
 }
 
@@ -78,19 +78,22 @@ export const SearchModal: React.FC<SearchModalProps> = ({
       }
 
       setIsSearching(true)
-
+      setResults([])
       try {
+        const saved:any[] =[]
         await searchService.search(query, 20, (response: SearchResponse) => {
           setSelectedIndex(0)
-          setResults(response.hits) // <-- FIX: no arrays anidados
+          saved.push(...response.hits)
+          setTimeout(()=>setResults(saved),0)
+        },()=>{
+          setTimeout(()=>{},0)
           setIsSearching(false)
-        })
+          })
       } catch (err) {
         console.error('Search error:', err)
         setIsSearching(false)
       }
     }
-
     const timer = setTimeout(performSearch, 120)
     return () => clearTimeout(timer)
   }, [query])
@@ -123,11 +126,10 @@ export const SearchModal: React.FC<SearchModalProps> = ({
     const highlightUrl = new URL(window.location.href)
     highlightUrl.searchParams.set('highlight', query)
     window.history.pushState({}, '', highlightUrl)
-
-    onNavigate(hit.page_name ?? '/', hit.document_id)
-
+    onNavigate(hit.page_name ?? '', hit.document_id,hit.tab,hit.version)
     onHide()
   }
+
 
 
   const formatBreadcrumb = (hit: SearchHit): ReactNode => {
@@ -165,7 +167,11 @@ export const SearchModal: React.FC<SearchModalProps> = ({
 
         {/* Input */}
         <div className="search-input-container">
+          {isSearching ?
+          <i className="pi  pi-spin pi-spinner " ></i>
+            :
           <i className="pi pi-search search-input-icon" />
+          }
           <input
             ref={inputRef}
             value={query}
@@ -174,7 +180,6 @@ export const SearchModal: React.FC<SearchModalProps> = ({
             placeholder="Search documentation..."
             className="search-input-field"
           />
-          {isSearching && <i className="pi pi-spin pi-spinner search-loading-spinner" />}
           {isMac !== null && (
             <kbd className="search-kbd">{isMac ? '⌘K' : 'Ctrl+K'}</kbd>
           )}

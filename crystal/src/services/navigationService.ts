@@ -1,5 +1,5 @@
 import { configLoader } from './configLoader'
-import type { NavigationItem } from '../types/navigation'
+import type { NavigationItem,NavigationDropdown,NavigationGroup,NavigationPage } from '../types/navigation'
 
 export interface NavigationState {
   version?: string
@@ -275,5 +275,33 @@ class NavigationService {
     return []
   }
 }
+
+
+ const findPagePath = (item:NavigationItem,page:string):string|null=>{
+    if(item.type!="page"&& item.type!="openapi"){
+     return (item as NavigationDropdown|NavigationGroup).children.map(ch=>findPagePath(ch,page)).filter(res=>!!res).pop()||null
+    }
+    const item_page = (item as NavigationPage)
+    if(item_page.title == page ||  item_page.page.split('/').includes(`${page}.mdx`)){
+      return item_page.page
+    }
+    return null
+  }
+export const FindPagePathByName=(pageName:string,tab?:string,version?:string)=>{
+    let path =null
+    if(version){
+      const version_config =configLoader.getVersions().find(v=>v.version == version)
+      const tab_config = version_config?.tabs?.find(t=>t.tab==tab)
+      path = tab_config?.items?.map(item=>findPagePath(item,pageName)).filter(p=>!!p).pop() || "/"
+    }
+    if(tab){
+      if(path==null){
+        path = configLoader.getTabs()?.find(t=>t.tab==tab)?.items?.map(item=>findPagePath(item,pageName))
+        .filter(p=>!!p).pop() || "/"
+      }
+    }
+  return path
+}
+
 
 export const navigationService = new NavigationService()
