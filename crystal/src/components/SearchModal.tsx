@@ -57,18 +57,16 @@ export const SearchModal: React.FC<SearchModalProps> = ({
   }, [])
 
   useEffect(() => {
-    if (visible && inputRef.current) {
-      setTimeout(() => inputRef.current?.focus(), 100)
-    }
-  }, [visible])
+    setTimeout(() => inputRef.current?.focus(), 100)
 
-  useEffect(() => {
     if (!visible) {
       setQuery('')
       setResults([])
       setSelectedIndex(0)
     }
+
   }, [visible])
+
 
   useEffect(() => {
     const performSearch = async () => {
