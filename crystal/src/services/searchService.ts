@@ -98,7 +98,7 @@ class SearchService {
 
 
 
-async function buildAxiosConfig(url:string, body:any) {
+export async function buildAxiosConfig(url:string, body:any) {
   const fakeAdapter = async (config:any) => {
     return Promise.reject({ config });
   };

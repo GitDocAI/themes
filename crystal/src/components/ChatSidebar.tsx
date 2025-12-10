@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { SearchModal } from './SearchModal'
 import { FindPagePathByName } from '../services/navigationService'
+import { aiStreamService } from '../services/agentService'
 interface Message {
   id: string
   text: string
@@ -89,31 +90,81 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
     }
   }, [externalContexts])
 
-  const handleSendMessage = async () => {
-    if (!inputValue.trim()) return
+const handleSendMessage = async () => {
+  if (!inputValue.trim()) return;
 
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      text: inputValue,
-      sender: 'user',
+  const userMessage: Message = {
+    id: Date.now().toString(),
+    text: inputValue,
+    sender: 'user',
+    timestamp: new Date()
+  };
+
+  setMessages(prev => [...prev, userMessage]);
+
+  const botMessageId = (Date.now() + 1).toString();
+
+  setMessages(prev => [
+    ...prev,
+    {
+      id: botMessageId,
+      text: "",
+      sender: "bot",
       timestamp: new Date()
     }
+  ]);
 
-    setMessages(prev => [...prev, userMessage])
-    setInputValue('')
-    setIsTyping(true)
+  const question = inputValue;
+  setInputValue("");
+  setIsTyping(true);
 
-    setTimeout(() => {
-      const botMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        text: 'Gracias por tu mensaje. ¿Hay algo más en lo que pueda ayudarte?',
-        sender: 'bot',
-        timestamp: new Date()
-      }
-      setMessages(prev => [...prev, botMessage])
-      setIsTyping(false)
-    }, 1500)
-  }
+  if(contexts.find(c=>c.type=="intention" && c.content=="update" )){
+
+  aiStreamService.editWithAI(
+    question,
+    contexts.filter(c=>c.type!=="intention"),
+    (data) => {
+      setMessages((prev)=>{
+        setIsTyping(false);
+        return prev.map(msg =>
+          msg.id === botMessageId
+            ? { ...msg, text: msg.text + data.answer_chunk }
+            : msg
+        )
+        }
+      );
+
+    },
+
+    () => {
+      setIsTyping(false);
+    }
+  );
+
+  }else{
+  aiStreamService.askToAI(
+    question,
+    contexts.filter(c=>c.type!=="intention"),
+    (data) => {
+      setMessages((prev)=>{
+        setIsTyping(false);
+        return prev.map(msg =>
+          msg.id === botMessageId
+            ? { ...msg, text: msg.text + data.answer_chunk }
+            : msg
+        )
+        }
+      );
+
+    },
+
+    () => {
+      setIsTyping(false);
+    }
+  );
+    }
+
+};
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -278,7 +329,7 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
             backgroundColor: theme === 'light' ? '#ffffff' : '#1f2937'
           }}
         >
-          {messages.map((message) => (
+          {messages.filter(message=>message.sender!="bot"||message.text!="").map((message) => (
             <div
               key={message.id}
               style={{

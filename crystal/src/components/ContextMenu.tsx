@@ -44,7 +44,7 @@ const ContextMenu = ({ menuPosition, onOptionSelect,theme,closeFunc }:ContextMen
       <ul style={{ listStyleType: 'none', margin: 0, padding: '5px' }}>
         <li className="menu-items" style={{cursor:'pointer'}} onClick={() => onOptionSelect('copy')}>Copy</li>
         <li className="menu-items" style={{cursor:'pointer'}} onClick={() => onOptionSelect('askAI')}>Ask AI</li>
-        <li className="menu-items" style={{cursor:'pointer'}} onClick={() => onOptionSelect('modifyAI')}>Add to context</li>
+        <li className="menu-items" style={{cursor:'pointer'}} onClick={() => onOptionSelect('modifyAI')}>Edit with Ai</li>
       </ul>
     </div>
   );
