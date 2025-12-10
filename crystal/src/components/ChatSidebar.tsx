@@ -46,7 +46,7 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
   const [inputValue, setInputValue] = useState('')
   const [isTyping, setIsTyping] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
-  const inputRef = useRef<HTMLInputElement>(null)
+  const inputRef = useRef<HTMLTextAreaElement>(null)
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -479,9 +479,8 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
             >
               +
             </button>
-            <input
+            <textarea
               ref={inputRef}
-              type="text"
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onKeyPress={handleKeyPress}
@@ -497,13 +496,15 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
                 outline: 'none',
                 transition: 'border-color 0.2s'
               }}
+              max-rows={3}
+              rows={1}
               onFocus={(e) => {
                 e.currentTarget.style.borderColor = theme === 'light' ? '#3b82f6' : '#6366f1'
               }}
               onBlur={(e) => {
                 e.currentTarget.style.borderColor = theme === 'light' ? '#d1d5db' : '#4b5563'
               }}
-            />
+            ></textarea>
             <button
               onClick={handleSendMessage}
               disabled={!inputValue.trim()}
