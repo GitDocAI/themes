@@ -4,6 +4,7 @@ import { lazy, Suspense, useEffect, useState } from "react";
 import { configLoader } from "./services/configLoader";
 import ThemeLoadingScreen from "./commonPages/LoadingFalllback";
 import ThemeErrorScreen from "./commonPages/ErrorFallback";
+import { themeImports } from "./themeImports";
 
 export default function App() {
   const [theme, setTheme] = useState<string|null>(null);
@@ -27,10 +28,8 @@ export default function App() {
     return (<><ThemeLoadingScreen/></>)
   }
 
-  const Documentation = lazy(() => import(`./${theme}/pages/Documentation`));
-  const SetPassword = lazy(() => import(`./${theme}/pages/SetPassword`));
-  const Login = lazy(() => import(`./${theme}/pages/Login`));
-  const Forbidden = lazy(() => import(`./${theme}/pages/403`));
+
+  const {Documentation,SetPassword,Forbidden,Login}=themeImports(theme)!
 
   return (
     <Routes>
@@ -51,7 +50,6 @@ export default function App() {
         }
       />
       <Route path="/403" element={<Forbidden />} />
-
       {isAuth ? (
         <Route
           path="/*"
