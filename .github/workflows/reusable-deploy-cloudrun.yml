@@ -100,7 +100,7 @@ jobs:
           echo "📦 Using image: $IMAGE"
 
           # Copy environment-specific configuration file
-          cp services/${SERVICE_NAME}-${ENV}.yml /tmp/${SERVICE_NAME}-config.yaml
+          cp .github/services/${SERVICE_NAME}-${ENV}.yml /tmp/${SERVICE_NAME}-config.yaml
 
           # Replace dynamic placeholders
           sed -i "s|{{ IMAGE }}|$IMAGE|g" /tmp/${SERVICE_NAME}-config.yaml
