@@ -1,6 +1,6 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { getAccessToken } from "./utils/axiosInstance";
-import { lazy, Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { configLoader } from "./services/configLoader";
 import ThemeLoadingScreen from "./commonPages/LoadingFalllback";
 import ThemeErrorScreen from "./commonPages/ErrorFallback";
@@ -14,8 +14,8 @@ export default function App() {
   const isAuth = viteMode !== "production" || getAccessToken() !== null;
 
   useEffect(() => {
-    configLoader.getThemeName().then((t) => setTheme(t))
-    .catch(_e=>setLoadingError(true))
+    configLoader.getThemeName().then((t:string) => setTheme(t))
+    .catch((_e:any)=>setLoadingError(true))
     ;
   }, []);
 
