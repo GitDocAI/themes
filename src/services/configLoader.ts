@@ -105,6 +105,22 @@ class ConfigLoader {
   }
 
   /**
+  *Load theme name to know wich component to load
+  ***/
+
+  async getThemeName(): Promise<string> {
+    const configUrl: string = '/theme';
+    try{
+      const response = await axiosInstance.get(configUrl,{ responseType: 'text' })
+      return response.data
+    }catch(error){
+      throw new Error(`Failed to load configuration: ${error}`)
+    }
+  }
+
+
+
+  /**
    * Load configuration from gitdocai.config.json
    */
   async loadConfig(): Promise<GitDocAIConfig> {

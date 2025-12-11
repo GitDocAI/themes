@@ -1,5 +1,5 @@
 import React from 'react'
-import type { ResponseSchema } from '../../types/ApiReference'
+import type { ResponseSchema } from '../../../types/ApiReference'
 import { ApiSchemaRenderer } from './ApiSchemaRenderer'
 
 interface ResponseProps {

@@ -1,5 +1,5 @@
 import React from 'react'
-import type { SecuritySchema } from '../../types/ApiReference'
+import type { SecuritySchema } from '../../../types/ApiReference'
 
 interface AuthenticationProps {
   security?: any[]

@@ -1,5 +1,5 @@
 import React from 'react'
-import type { Parameter } from '../../types/ApiReference'
+import type { Parameter } from '../../../types/ApiReference'
 import { ApiSchemaRenderer } from './ApiSchemaRenderer'
 
 interface ParametersProps {

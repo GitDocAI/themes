@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import type { ApiSchema } from '../../types/ApiReference'
+import type { ApiSchema } from '../../../types/ApiReference'
 
 interface ApiSchemaRendererProps {
   name: string

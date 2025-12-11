@@ -1,5 +1,5 @@
 import React from 'react'
-import type { RequestBody as RequestBodyType } from '../../types/ApiReference'
+import type { RequestBody as RequestBodyType } from '../../../types/ApiReference'
 import { ApiSchemaRenderer } from './ApiSchemaRenderer'
 
 interface RequestBodyProps {

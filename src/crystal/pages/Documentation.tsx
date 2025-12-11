@@ -22,9 +22,9 @@ import 'primereact/resources/themes/lara-light-blue/theme.css'
 import 'primeicons/primeicons.css'
 import './Theme.css'
 import OptionsSidebar from '../components/OptionsSidebar'
-import { ChatSidebar,type ChatContext } from '../components/ChatSidebar'
+import { ChatSidebar } from '../components/ChatSidebar'
 import TextSelectionContextMenu from '../components/ContextMenu'
-
+import {type ChatContext} from '../../services/agentService'
 function Documentation() {
   const { theme, toggleTheme, isConfigLoaded } = useTheme()
   const { updateTrigger } = useConfig() // Subscribe to config changes

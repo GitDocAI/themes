@@ -1,5 +1,12 @@
-import type { ChatContext } from '../components/ChatSidebar';
 import {buildAxiosConfig} from './searchService'
+
+export interface ChatContext {
+  id: string
+  type: 'text' | 'file' | 'intention'
+  content?: string
+  fileName?: string
+  headingId?:string
+}
 
 
 

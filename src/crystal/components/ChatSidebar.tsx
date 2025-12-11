@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from 'react'
 import { SearchModal } from './SearchModal'
 import { FindPagePathByName } from '../../services/navigationService'
-import { aiStreamService } from '../../services/agentService'
+import { aiStreamService,type ChatContext } from '../../services/agentService'
+
 interface Message {
   id: string
   text: string
@@ -9,13 +10,6 @@ interface Message {
   timestamp: Date
 }
 
-export interface ChatContext {
-  id: string
-  type: 'text' | 'file' | 'intention'
-  content?: string
-  fileName?: string
-  headingId?:string
-}
 
 interface ChatSidebarProps {
   theme?: 'light' | 'dark'
