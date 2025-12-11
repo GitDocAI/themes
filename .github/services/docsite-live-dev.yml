@@ -42,3 +42,7 @@ spec:
           limits:
             cpu: "1000m"
             memory: 512Mi
+        env:
+        # Deployment marker - forces new revision on each deploy
+        - name: DEPLOYMENT_ID
+          value: "{{ DEPLOYMENT_ID }}"

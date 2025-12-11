@@ -27,10 +27,6 @@ on:
         required: true
         type: string
         description: 'Service Account'
-      working_directory:
-        required: false
-        type: string
-        description: 'Working directory for the build'
       node_version:
         required: false
         type: string
@@ -62,14 +58,12 @@ jobs:
         with:
           node-version: ${{ inputs.node_version }}
           cache: 'npm'
-          cache-dependency-path: ${{ inputs.working_directory }}/package-lock.json
+          cache-dependency-path: package-lock.json
 
       - name: Install dependencies
-        working-directory: ${{ inputs.working_directory }}
         run: npm ci
 
       - name: Build application
-        working-directory: ${{ inputs.working_directory }}
         env:
           NODE_OPTIONS: --max_old_space_size=8192
           VITE_MODE: ${{ inputs.vite_mode }}
@@ -90,7 +84,6 @@ jobs:
           gcloud auth configure-docker ${{ inputs.gcp_region }}-docker.pkg.dev
 
       - name: Build and Push Docker Image
-        working-directory: ${{ inputs.working_directory }}
         env:
           IMAGE_TAG: ${{ inputs.gcp_region }}-docker.pkg.dev/${{ inputs.gcp_project }}/gitdocai/${{ inputs.image_name }}:${{ inputs.tag }}
         run: |
