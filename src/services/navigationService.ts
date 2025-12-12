@@ -100,13 +100,6 @@ class NavigationService {
   /**
    * Save navigation state to localStorage
    */
-  saveState(state: NavigationState): void {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
-    } catch (error) {
-      console.error('Error saving navigation state to localStorage:', error)
-    }
-  }
 
   /**
    * Get navigation state from URL pathname
@@ -140,15 +133,9 @@ class NavigationService {
    */
   updateURL(state: NavigationState): void {
     if (!state.page) return
-
     // Use the page path directly in the URL (without .mdx)
     const cleanPath = state.page.replace(/\.mdx$/, '')
-
     // Store version and tab in localStorage for context, but don't show in URL
-    if (state.version || state.tab) {
-      this.saveState(state)
-    }
-
     window.history.replaceState({ ...state }, '', cleanPath)
   }
 
@@ -172,21 +159,13 @@ class NavigationService {
     const urlState = this.getStateFromURL()
     if (urlState && urlState.page) {
       page = urlState.page
-    } else {
-      // Try stored state for page only
-      const storedState = this.getStoredState()
-      if (storedState && storedState.page) {
-        page = storedState.page
-      }
     }
-
     // If no page found, use default
     if (!page) {
       page = this.findDefaultPage(version, tab) || ''
     }
 
     const state: NavigationState = { version, tab, page }
-    this.saveState({ page }) // Only save page to localStorage
     this.updateURL(state)
 
     return state
@@ -202,7 +181,6 @@ class NavigationService {
       page
     }
 
-    this.saveState({ page }) // Only save page to localStorage
     this.updateURL(state)
   }
 
@@ -215,7 +193,6 @@ class NavigationService {
     const page = this.findDefaultPage(version, tab) || ''
 
     const state: NavigationState = { version, tab, page }
-    this.saveState({ page }) // Only save page to localStorage
     this.updateURL(state)
 
     return state
@@ -228,7 +205,6 @@ class NavigationService {
     const page = this.findDefaultPage(version, tab) || ''
 
     const state: NavigationState = { version, tab, page }
-    this.saveState({ page }) // Only save page to localStorage
     this.updateURL(state)
 
     return state
