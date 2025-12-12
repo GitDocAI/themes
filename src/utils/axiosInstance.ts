@@ -94,6 +94,11 @@ axiosInstance.interceptors.response.use(
       })
     }
 
+     if (error.response?.status === 401&& viteMode!="production" && originalRequest?.url !== '/theme'
+    ) {
+       window.location.href = '/403'
+    }
+
     return Promise.reject(error)
   }
 )

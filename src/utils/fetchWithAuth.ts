@@ -68,19 +68,13 @@ export async function fetchWithAuth(
           })
           .catch((_err: any) => {
             clearTokens()
-            if(viteMode !== 'production'){
-              window.location.href = '/403'
-            }else{
-              window.location.href = '/login' // Redirect to login on refresh failure
-            }
-          return new Response()
+            window.location.href = '/login' // Redirect to login on refresh failure
+            return new Response()
           })
+    }else{
+         window.location.href = '/403'
     }
 
-    // Notify parent window about token expiration
-    if (window.parent !== window) {
-
-    }
 
     throw new Error('Authentication token expired. Please refresh.')
   }

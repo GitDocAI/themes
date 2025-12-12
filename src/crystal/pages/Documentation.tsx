@@ -234,12 +234,11 @@ function Documentation() {
 
   }
 
-
-
   const handleNavigate = (path: string, headingId?: string) => {
     // Use navigation service to navigate
     navigationService.navigateTo(path, currentVersion, currentTab)
     setCurrentPath(path)
+    window.scrollTo({ top: 0, behavior: 'instant' });
 
     // If headingId is provided, scroll to it after a short delay
     if (headingId) {
