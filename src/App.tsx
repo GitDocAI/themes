@@ -21,11 +21,33 @@ export default function App() {
 
 
   if(loadingError){
-    return (<><ThemeErrorScreen/></>)
+    return (
+
+      <Routes>
+      <Route path="/403" element={<ThemeErrorScreen/>} />
+        <Route
+          path="/*"
+          element={
+              <ThemeErrorScreen/>
+          }
+        />
+      </Routes>
+    )
   }
 
   if (!theme) {
-    return (<><ThemeLoadingScreen/></>)
+    return (
+
+      <Routes>
+      <Route path="/403" element={<ThemeErrorScreen/>} />
+        <Route
+          path="/*"
+          element={
+            <ThemeLoadingScreen/>
+          }
+        />
+      </Routes>
+      )
   }
 
 

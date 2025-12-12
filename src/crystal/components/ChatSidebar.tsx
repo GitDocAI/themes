@@ -2,6 +2,8 @@ import { useState, useRef, useEffect } from 'react'
 import { SearchModal } from './SearchModal'
 import { FindPagePathByName } from '../../services/navigationService'
 import { aiStreamService,type ChatContext } from '../../services/agentService'
+import Markdown from 'react-markdown';
+const viteMode = import.meta.env.VITE_MODE || "production";
 
 interface Message {
   id: string
@@ -46,6 +48,7 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }
+
 
   const handleSearchResult=(page:string,headingId?:string,tab?:string,version?:string)=>{
     const pagePath =FindPagePathByName(page,tab,version)
@@ -112,28 +115,27 @@ const handleSendMessage = async () => {
   setInputValue("");
   setIsTyping(true);
 
-  if(contexts.find(c=>c.type=="intention" && c.content=="update" )){
+  if(viteMode!="production"){
+      aiStreamService.editWithAI(
+        question,
+        contexts.filter(c=>c.type!=="intention"),
+        (data) => {
+          setMessages((prev)=>{
+            setIsTyping(false);
+            return prev.map(msg =>
+              msg.id === botMessageId
+                ? { ...msg, text: msg.text + data.answer_chunk }
+                : msg
+            )
+            }
+          );
 
-  aiStreamService.editWithAI(
-    question,
-    contexts.filter(c=>c.type!=="intention"),
-    (data) => {
-      setMessages((prev)=>{
-        setIsTyping(false);
-        return prev.map(msg =>
-          msg.id === botMessageId
-            ? { ...msg, text: msg.text + data.answer_chunk }
-            : msg
-        )
+        },
+
+        () => {
+          setIsTyping(false);
         }
       );
-
-    },
-
-    () => {
-      setIsTyping(false);
-    }
-  );
 
   }else{
   aiStreamService.askToAI(
@@ -358,7 +360,9 @@ const handleSendMessage = async () => {
                   wordWrap: 'break-word'
                 }}
               >
-                {message.text}
+                <Markdown>
+                    {message.text}
+                </Markdown>
               </div>
               <span
                 style={{

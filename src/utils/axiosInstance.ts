@@ -56,7 +56,9 @@ axiosInstance.interceptors.response.use(
     const refreshToken = getRefreshToken()
 
     // If the error is 401 Unauthorized and not a refresh token request itself
-    if (error.response?.status === 401 && originalRequest && originalRequest.url !== '/refresh-token') {
+    if (error.response?.status === 401 && originalRequest && originalRequest.url !== '/refresh-token'
+      && viteMode=="production"
+    ) {
       if (isRefreshing) {
         // If a token refresh is already in progress, add the original request to the queue
         return new Promise((resolve, reject) => {

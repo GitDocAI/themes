@@ -1,3 +1,4 @@
+import { fetchWithAuth } from '../utils/fetchWithAuth'
 import {buildAxiosConfig} from './searchService'
 
 export interface ChatContext {
@@ -21,6 +22,7 @@ class AIStreamService {
 
   constructor() {}
 
+
   async askToAI(
     question:string,
     context:ChatContext[],
@@ -37,7 +39,7 @@ class AIStreamService {
     onData: (msg: AIStreamResponse) => void,
     onFinished: () => void
   ){
-    await this.stream('/ai/edit',{question,context},onData,onFinished)
+    await this.stream('/ai/edit',{prompt:question,content:"",context},onData,onFinished)
   }
 
   async stream(
@@ -52,12 +54,15 @@ class AIStreamService {
 
     const cfg = await buildAxiosConfig(url, body);
 
-    const response = await fetch(cfg.baseURL + cfg.url, {
-      method: cfg.method,
-      headers: cfg.headers,
+    const response = await fetchWithAuth(cfg.baseURL + cfg.url,{
+      method: 'POST',
+      headers: {
+          ...(cfg.headers || {}),
+          "Content-Type": "application/json",
+        },
       body: JSON.stringify(body),
       signal: this.controller.signal
-    });
+    })
 
     if (!response.ok) {
       onData({

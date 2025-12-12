@@ -4,6 +4,7 @@
  */
 
 import axiosInstance from '../utils/axiosInstance'
+import { fetchWithAuth } from '../utils/fetchWithAuth';
 
 
 export interface SearchHit {
@@ -40,7 +41,8 @@ class SearchService {
 
    const body:any = {query,limit:maxResults}
    const cfg = await buildAxiosConfig("/search",body);
-    const response = await fetch(cfg.baseURL + cfg.url, {
+
+    const response = await fetchWithAuth(cfg.baseURL + cfg.url,{
       method: cfg.method,
       headers: cfg.headers,
       body: JSON.stringify(body),

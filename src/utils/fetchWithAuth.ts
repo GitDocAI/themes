@@ -3,7 +3,10 @@
  * Provides helpers for making authenticated requests in multi-tenant mode
  */
 
+const viteMode = import.meta.env.VITE_MODE || 'production';
+import type { AxiosResponse } from 'axios'
 import { tenantContext } from '../services/tenantContext'
+import axiosInstance, { clearTokens, getRefreshToken, setTokens } from './axiosInstance'
 
 /**
  * Get authentication headers for tenant requests
@@ -42,7 +45,8 @@ export function getBackendUrl(): string {
  */
 export async function fetchWithAuth(
   url: string,
-  options: RequestInit = {}
+  options: RequestInit = {},
+  retrying?:boolean
 ): Promise<Response> {
   const headers = getAuthHeaders(options.headers)
 
@@ -52,18 +56,30 @@ export async function fetchWithAuth(
   })
 
   // Handle token expiration
-  if (response.status === 401) {
+  if (response.status === 401 && !url.includes('/refresh-token') && !retrying) {
     console.error('[fetchWithAuth] Unauthorized - token may be expired')
+    if(viteMode=="production"){
+      const refreshToken = getRefreshToken()
+      return await axiosInstance.post(`${axiosInstance.defaults.baseURL}/refresh`, { refreshToken })
+          .then((res: AxiosResponse) => {
+            const { accessToken, refreshToken: newRefreshToken } = res.data
+            setTokens(accessToken, newRefreshToken)
+            return fetchWithAuth(url,options,true)
+          })
+          .catch((_err: any) => {
+            clearTokens()
+            if(viteMode !== 'production'){
+              window.location.href = '/403'
+            }else{
+              window.location.href = '/login' // Redirect to login on refresh failure
+            }
+          return new Response()
+          })
+    }
 
     // Notify parent window about token expiration
     if (window.parent !== window) {
-      window.parent.postMessage(
-        {
-          type: 'TOKEN_EXPIRED',
-          tenantId: tenantContext.isInitialized() ? tenantContext.getTenantId() : null
-        },
-        '*' // In production, specify exact origin
-      )
+
     }
 
     throw new Error('Authentication token expired. Please refresh.')
@@ -71,6 +87,7 @@ export async function fetchWithAuth(
 
   return response
 }
+
 
 /**
  * Check if currently in multi-tenant mode
