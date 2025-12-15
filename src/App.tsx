@@ -1,5 +1,4 @@
-import { Routes, Route, Navigate } from "react-router-dom";
-import { getAccessToken } from "./utils/axiosInstance";
+import { Routes, Route } from "react-router-dom";
 import { Suspense, useEffect, useState } from "react";
 import { configLoader } from "./services/configLoader";
 import ThemeLoadingScreen from "./commonPages/LoadingFalllback";
@@ -9,9 +8,6 @@ import { themeImports } from "./themeImports";
 export default function App() {
   const [theme, setTheme] = useState<string|null>(null);
   const [loadingError, setLoadingError] = useState<boolean>(false);
-
-  const viteMode = import.meta.env.VITE_MODE || "production";
-  const isAuth = viteMode !== "production" || getAccessToken() !== null;
 
   useEffect(() => {
     configLoader.getThemeName().then((t:string) => setTheme(t))
@@ -72,18 +68,16 @@ export default function App() {
         }
       />
       <Route path="/403" element={<Forbidden />} />
-      {isAuth ? (
         <Route
           path="/*"
           element={
-          <Suspense fallback={<><ThemeLoadingScreen/></>}>
+          <Suspense fallback={<>
+              <ThemeLoadingScreen/></>}>
               <Documentation />
             </Suspense>
           }
         />
-      ) : (
-        <Route path="/*" element={<Navigate to="/login" replace />} />
-      )}
+      )
     </Routes>
   );
 }
