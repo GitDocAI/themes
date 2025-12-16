@@ -162,7 +162,6 @@ const handleSendMessage = async () => {
     question,
     contexts.filter(c=>c.type!=="intention"),
     chatResume,
-    todoList,
     (data) => {
       setMessages((prev)=>{
         setIsTyping(false);

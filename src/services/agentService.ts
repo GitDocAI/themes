@@ -28,11 +28,10 @@ class AIStreamService {
     question:string,
     context:ChatContext[],
     chat_resume:string,
-    todo_list:string,
     onData: (msg: AIStreamResponse) => void,
     onFinished: () => void
   ){
-    await this.stream('/ai/answer',{question,context,chat_resume,todo_list},onData,onFinished)
+    await this.stream('/ai/answer',{question,context,chat_resume},onData,onFinished)
   }
 
 
