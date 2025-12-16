@@ -14,6 +14,7 @@ export interface ChatContext {
 export interface AIStreamResponse {
   chunk_index:number;
   answer_chunk:string;
+  message_type:"chat_resume"|"text"|"tool_call";
   is_final: boolean;
 }
 
@@ -36,10 +37,12 @@ class AIStreamService {
   async editWithAI(
     question:string,
     context:ChatContext[],
+    chat_resume:string,
+    todo_list:string,
     onData: (msg: AIStreamResponse) => void,
     onFinished: () => void
   ){
-    await this.stream('/ai/edit',{prompt:question,content:"",context},onData,onFinished)
+    await this.stream('/ai/edit',{edit_prompt:question,content:"",context,chat_resume,todo_list},onData,onFinished)
   }
 
   async stream(
@@ -68,7 +71,8 @@ class AIStreamService {
       onData({
         chunk_index:-1,
         answer_chunk:"there was an error responding your request",
-        is_final:true
+        is_final:true,
+        message_type:"text"
       });
       onFinished();
       return;
@@ -113,7 +117,8 @@ class AIStreamService {
       onData({
         chunk_index:-1,
         answer_chunk:"there was an error responding your request",
-        is_final:true
+        is_final:true,
+        message_type:"text"
       });
     }
 

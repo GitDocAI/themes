@@ -26,6 +26,8 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false)
   const [showSearchModal,setShowSearchModal] = useState<boolean>(false)
+  const [chatResume,setChatResume] = useState<string>("")
+  const [todoList,_setTodoList] = useState<string>("")
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
@@ -119,7 +121,15 @@ const handleSendMessage = async () => {
       aiStreamService.editWithAI(
         question,
         contexts.filter(c=>c.type!=="intention"),
+        chatResume,
+        todoList,
         (data) => {
+
+          if(data.message_type=="chat_resume"){
+            setChatResume(data.answer_chunk)
+            return
+          }
+
           setMessages((prev)=>{
             setIsTyping(false);
             return prev.map(msg =>
