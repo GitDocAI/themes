@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { configLoader } from '../../services/configLoader'
+import { ContentService } from '../../services/contentService'
 
 export const useTheme = () => {
   const [theme, setTheme] = useState<'light' | 'dark'>('light')
@@ -59,11 +60,26 @@ export const useTheme = () => {
     }
   }
 
-  const updateFavicon = (faviconPath: string) => {
+  const updateFavicon = async (faviconPath: string) => {
     const link: HTMLLinkElement = document.querySelector("link[rel~='icon']") || document.createElement('link')
     link.type = 'image/svg+xml'
     link.rel = 'icon'
-    link.href = faviconPath
+
+    // Use ContentService for internal paths (same as logo)
+    if (faviconPath && !faviconPath.startsWith('http') && !faviconPath.startsWith('blob:') && !faviconPath.startsWith('data:')) {
+      try {
+        const objectUrl = await ContentService.downloadFile(faviconPath)
+        if (objectUrl) {
+          link.href = objectUrl
+        }
+      } catch (error) {
+        console.error(`[useTheme] Failed to download favicon from ${faviconPath}`, error)
+        link.href = faviconPath
+      }
+    } else {
+      link.href = faviconPath
+    }
+
     if (!document.querySelector("link[rel~='icon']")) {
       document.head.appendChild(link)
     }
