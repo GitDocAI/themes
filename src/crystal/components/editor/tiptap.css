@@ -287,6 +287,24 @@ body[style*="background-color: rgb(255, 255, 255)"] .tiptap-editor a.custom-link
   outline: none;
 }
 
+/* Neutralize hljs classes inside info blocks - they should not be there */
+.info-block-content [class*="hljs-"],
+.info-block-content .hljs-title,
+.info-block-content .hljs-string,
+.info-block-content .hljs-function,
+.info-block-content .hljs-params,
+.info-block-content .hljs-keyword,
+.info-block-content .hljs-comment,
+.info-block-content .hljs-number,
+.info-block-content .hljs-literal,
+.info-block-content .hljs-variable,
+.info-block-content .hljs-built_in {
+  color: inherit !important;
+  background: none !important;
+  font-style: inherit !important;
+  font-weight: inherit !important;
+}
+
 .info-block-content p {
   margin: 0 0 0.75rem 0;
   font-size: 15px;

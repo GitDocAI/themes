@@ -436,6 +436,13 @@ class MDXParserService {
       case 'Label':
         return this.convertLabelComponent(node)
 
+      case 'CheckList':
+        return this.convertCheckListComponent(node)
+
+      case 'CheckItem':
+        // CheckItems are handled by CheckList
+        return null
+
       default:
         console.warn(`[MDXParser] Unknown component: ${componentName}`)
         // Return a fallback paragraph instead of null to prevent page breaking
@@ -1024,6 +1031,59 @@ class MDXParserService {
         color: attrs.color || '#3b82f6',
         size: attrs.size || 'md'
       }
+    }
+  }
+
+  /**
+   * Convert CheckList component to taskList
+   * <CheckList>
+   *   <CheckItem variant="do">Checked item</CheckItem>
+   *   <CheckItem variant="dont">Unchecked item</CheckItem>
+   *   <CheckItem>Default unchecked</CheckItem>
+   * </CheckList>
+   */
+  private convertCheckListComponent(node: MdxNode): TipTapNode {
+    const taskItems: TipTapNode[] = []
+
+    if (node.children) {
+      for (const child of node.children) {
+        if (child.name === 'CheckItem') {
+          const attrs = this.extractAttributes(child)
+          // variant="do" means checked, "dont" or no variant means unchecked
+          const checked = attrs.variant === 'do'
+          const text = this.extractTextContent(child).trim()
+
+          taskItems.push({
+            type: 'taskItem',
+            attrs: { checked },
+            content: [
+              {
+                type: 'paragraph',
+                content: text ? [{ type: 'text', text }] : []
+              }
+            ]
+          })
+        }
+      }
+    }
+
+    // Ensure at least one item exists
+    if (taskItems.length === 0) {
+      taskItems.push({
+        type: 'taskItem',
+        attrs: { checked: false },
+        content: [
+          {
+            type: 'paragraph',
+            content: [{ type: 'text', text: ' ' }]
+          }
+        ]
+      })
+    }
+
+    return {
+      type: 'taskList',
+      content: taskItems
     }
   }
 

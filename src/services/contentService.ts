@@ -142,16 +142,34 @@ export class ContentService {
     }
   }
 
+  private static getMimeType(path: string): string {
+    const ext = path.split('.').pop()?.toLowerCase()
+    const mimeTypes: Record<string, string> = {
+      'svg': 'image/svg+xml',
+      'png': 'image/png',
+      'jpg': 'image/jpeg',
+      'jpeg': 'image/jpeg',
+      'gif': 'image/gif',
+      'webp': 'image/webp',
+      'ico': 'image/x-icon',
+      'pdf': 'application/pdf',
+    }
+    return mimeTypes[ext || ''] || 'application/octet-stream'
+  }
+
   static async downloadFile(path:string): Promise<any> {
     const url = '/content/api/v1/filesystem/download'
 
     try {
       const response = await axiosInstance.post(url, {path},{responseType:'blob'})
-      const imageBlob = response.data;
+      const originalBlob = response.data;
+      // Re-create blob with correct MIME type based on file extension
+      const mimeType = this.getMimeType(path)
+      const imageBlob = new Blob([originalBlob], { type: mimeType })
       const objectUrl = URL.createObjectURL(imageBlob);
       return objectUrl
     } catch (error) {
-      throw new Error(`Failed to upload file: ${error}`)
+      throw new Error(`Failed to download file: ${error}`)
     }
   }
 }
