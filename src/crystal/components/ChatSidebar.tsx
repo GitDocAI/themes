@@ -141,6 +141,10 @@ const handleSendMessage = async () => {
   aiStreamService.askToAI(
     question,
     contexts.filter(c=>c.type!=="intention"),
+<<<<<<< HEAD
+=======
+    chatResume,
+>>>>>>> c90c3558 (fix[crystal](chat): added function handling)
     (data) => {
       setMessages((prev)=>{
         setIsTyping(false);
