@@ -27,7 +27,8 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
   const [isOpen, setIsOpen] = useState(false)
   const [showSearchModal,setShowSearchModal] = useState<boolean>(false)
   const [chatResume,setChatResume] = useState<string>("")
-  const [todoList,_setTodoList] = useState<string>("")
+  const [todoList,setTodoList] = useState<string>("")
+  const [toolResponses, setToolResponses] = useState<string>("")
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
@@ -113,6 +114,11 @@ const handleSendMessage = async () => {
     }
   ]);
 
+  // Clear previous todo list and tool responses for a fresh interaction
+  setTodoList("");
+  setToolResponses("");
+
+
   const question = inputValue;
   setInputValue("");
   setIsTyping(true);
@@ -123,11 +129,15 @@ const handleSendMessage = async () => {
         contexts.filter(c=>c.type!=="intention"),
         chatResume,
         todoList,
+        toolResponses, // This will now be passed as tool_results
         (data) => {
 
           if(data.message_type=="chat_resume"){
             setChatResume(data.answer_chunk)
             return
+          } else if (data.message_type=="tool_call") {
+            handleToolCall(data.answer_chunk);
+            return;
           }
 
           setMessages((prev)=>{
@@ -151,10 +161,8 @@ const handleSendMessage = async () => {
   aiStreamService.askToAI(
     question,
     contexts.filter(c=>c.type!=="intention"),
-<<<<<<< HEAD
-=======
     chatResume,
->>>>>>> c90c3558 (fix[crystal](chat): added function handling)
+    todoList,
     (data) => {
       setMessages((prev)=>{
         setIsTyping(false);
@@ -185,6 +193,40 @@ const handleSendMessage = async () => {
 
   const handleAddContext = () => {
       setShowSearchModal(true)
+  }
+
+  const handleToolCall = (toolCallString: string) => {
+    try {
+      const toolCall = JSON.parse(toolCallString);
+      if (toolCall.function && toolCall.function.name === "create_todo") {
+        const { title, description, task_number } = toolCall.function.parameters;
+        // Assuming todoList is a markdown string that we append to
+        setTodoList(prev => {
+          const newTodoItem = `${task_number}. ${title}: ${description || 'No description.'}\n`;
+          return prev ? prev + newTodoItem : newTodoItem;
+        });
+      } else if (toolCall.function && toolCall.function.name === "update_status") {
+        const { id, status, note } = toolCall.function.parameters;
+        // Assuming todoList is a markdown string that we update
+        setTodoList(prev => {
+          if (!prev) return "";
+          const lines = prev.split('\n');
+          const updatedLines = lines.map(line => {
+            if (line.startsWith(`${id}.`)) {
+              return `${id}. ${line.substring(String(id).length + 2).split(':')[0]}: Status: ${status}${note ? ` (${note})` : ''}`;
+            }
+            return line;
+          });
+          return updatedLines.join('\n');
+        });
+      } else {
+        // For other tool calls, display them in toolResponses
+        setToolResponses(prev => prev ? prev + `\n${toolCallString}` : toolCallString);
+      }
+    } catch (error) {
+      console.error("Error parsing tool call string:", error);
+      setToolResponses(prev => prev ? prev + `\nError parsing tool call: ${toolCallString}` : `Error parsing tool call: ${toolCallString}`);
+    }
   }
 
   const handleRemoveContext = (id: string) => {
@@ -436,6 +478,36 @@ const handleSendMessage = async () => {
 
           <div ref={messagesEndRef} />
         </div>
+
+        {/* Todo List and Tool Responses Section */}
+        {(todoList || toolResponses) && (
+          <div
+            style={{
+              padding: '12px 24px',
+              borderTop: `1px solid ${theme === 'light' ? '#e5e7eb' : '#374151'}`,
+              backgroundColor: theme === 'light' ? '#f9fafb' : '#111827',
+              maxHeight: '200px',
+              overflowY: 'auto'
+            }}
+          >
+            {todoList && (
+              <div style={{ marginBottom: '16px' }}>
+                <h3 style={{ color: theme === 'light' ? '#111827' : '#f9fafb', marginTop: 0, marginBottom: '8px' }}>
+                  Todo List
+                </h3>
+                <Markdown>{todoList}</Markdown>
+              </div>
+            )}
+            {toolResponses && (
+              <div>
+                <h3 style={{ color: theme === 'light' ? '#111827' : '#f9fafb', marginTop: 0, marginBottom: '8px' }}>
+                  Tool Responses
+                </h3>
+                <Markdown>{toolResponses}</Markdown>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Context Section */}
         {visibleContexts.length > 0 && (

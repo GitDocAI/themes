@@ -27,10 +27,12 @@ class AIStreamService {
   async askToAI(
     question:string,
     context:ChatContext[],
+    chat_resume:string,
+    todo_list:string,
     onData: (msg: AIStreamResponse) => void,
     onFinished: () => void
   ){
-    await this.stream('/ai/answer',{question,context},onData,onFinished)
+    await this.stream('/ai/answer',{question,context,chat_resume,todo_list},onData,onFinished)
   }
 
 
@@ -39,10 +41,11 @@ class AIStreamService {
     context:ChatContext[],
     chat_resume:string,
     todo_list:string,
+    tool_results:string,
     onData: (msg: AIStreamResponse) => void,
     onFinished: () => void
   ){
-    await this.stream('/ai/edit',{edit_prompt:question,content:"",context,chat_resume,todo_list},onData,onFinished)
+    await this.stream('/ai/edit',{edit_prompt:question,content:"",context,chat_resume,todo_list,tool_results},onData,onFinished)
   }
 
   async stream(

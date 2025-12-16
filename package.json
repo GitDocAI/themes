@@ -52,6 +52,7 @@
     "tailwindcss": "^4.1.17",
     "tippy.js": "^6.3.7",
     "unified": "^11.0.5",
+    "vite-plugin-radar": "^0.10.1",
     "zod": "^4.1.12"
   },
   "devDependencies": {
