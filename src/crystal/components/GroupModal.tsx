@@ -3,7 +3,7 @@ import { useState } from 'react'
 interface GroupModalProps {
   theme: 'light' | 'dark'
   onClose: () => void
-  onConfirm: (groupName: string) => Promise<void>
+  onConfirm: (groupName: string) => Promise<any>
 }
 
 export const GroupModal: React.FC<GroupModalProps> = ({

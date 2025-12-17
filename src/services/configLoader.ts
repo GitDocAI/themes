@@ -22,6 +22,7 @@ export interface Version {
 export interface Navigation {
   versions?: Version[]
   tabs?: Tab[]
+  items?:NavigationItem[]
 }
 
 export interface GitDocAIConfig {

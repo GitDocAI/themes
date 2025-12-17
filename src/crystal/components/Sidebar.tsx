@@ -16,6 +16,7 @@ interface SidebarProps {
   isDevMode?: boolean
   currentVersion?: string
   currentTab?: string
+  onToolResult?: (result: { [key: string]: any }) => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -26,7 +27,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onNavigate,
   isDevMode = false,
   currentVersion = '',
-  currentTab = ''
+  currentTab = '',
+  onToolResult
 }) => {
   const [isOpen, setIsOpen] = useState(false)
   const [openDropdowns, setOpenDropdowns] = useState<Set<string>>(new Set())
@@ -153,17 +155,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   // Save edited page title
   const handleSavePageTitle = async () => {
-    if (!editingPagePath) return
-
+    if (!editingPagePath) return;
+    let result;
     try {
-      // Fetch current config
       const config = await configLoader.loadConfig()
-
-      // Find the page and its group to calculate new path
       let groupTitle = ''
       let newPagePath = editingPagePath
 
-      // Use helper to access tab items (works for both versions and direct tabs)
       const items = getTabItems(config)
       if (items) {
         for (const group of items) {
@@ -171,10 +169,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             const pageIndex = group.children.findIndex((p: any) => p.page === editingPagePath)
             if (pageIndex !== -1) {
               groupTitle = group.title
-              // Calculate new page path based on new title
               newPagePath = generatePagePath(groupTitle, editingPageTitle)
-
-              // Update title and path in config
               group.children[pageIndex].title = editingPageTitle
               group.children[pageIndex].page = newPagePath
               break
@@ -183,26 +178,27 @@ export const Sidebar: React.FC<SidebarProps> = ({
         }
       }
 
-      // If the path changed, rename the file on the backend
       if (editingPagePath !== newPagePath) {
         await ContentService.renameFile(editingPagePath, newPagePath)
       }
 
-      // Save config with updated title and path
       await ContentService.saveConfig(config)
-
-      // Update config in memory instead of reloading
       configLoader.updateConfig(config)
       setEditingPagePath(null)
       setEditingPageTitle('')
 
-      // If current path is the edited page, update it
       if (currentPath === editingPagePath && onNavigate) {
         onNavigate(newPagePath)
       }
-    } catch (error) {
+      result = { success: true, oldPath: editingPagePath, newPath: newPagePath, newTitle: editingPageTitle };
+    } catch (error: any) {
       console.error('[Sidebar] Error saving page title:', error)
+      result = { success: false, error: error.message };
     }
+    if (onToolResult) {
+        onToolResult({ handleSavePageTitle: result });
+    }
+    return result;
   }
 
   // Handle page delete click
@@ -215,13 +211,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   // Delete page
   const handleDeletePage = async () => {
-    if (!deletingItemPath) return
-
+    if (!deletingItemPath) return;
+    let result;
     try {
-      // Fetch current config
       const config = await configLoader.loadConfig()
-
-      // Find and remove the page using helper
       const items = getTabItems(config)
       if (items) {
         for (const group of items) {
@@ -234,34 +227,32 @@ export const Sidebar: React.FC<SidebarProps> = ({
           }
         }
       }
-
-      // Save config
       await ContentService.saveConfig(config)
       ContentService.removeItem(deletingItemPath)
-
-      // Update config in memory instead of reloading
       configLoader.updateConfig(config)
-    } catch (error) {
+      result = { success: true, deletedPath: deletingItemPath };
+    } catch (error: any) {
       console.error('[Sidebar] Error deleting page:', error)
+      result = { success: false, error: error.message };
     }
+    if (onToolResult) {
+        onToolResult({ handleDeletePage: result });
+    }
+    return result;
   }
 
   // Add new page to group
   const handleAddNewPage = async (pageName: string) => {
-    if (!pageModalGroupTitle) return
-
+    if (!pageModalGroupTitle) return;
+    let result;
     const newPagePath = generatePagePath(pageModalGroupTitle, pageName)
 
     try {
-      // Fetch current config
       const config = await configLoader.loadConfig()
-
-      // Validate that page doesn't already exist in this group using helper
       const items = getTabItems(config)
       if (items) {
         for (const group of items) {
           if (group.title === pageModalGroupTitle && group.children) {
-            // Check if page with same name already exists
             const existingPage = group.children.find((p: any) => p.title === pageName)
             if (existingPage) {
               throw new Error(`A page named "${pageName}" already exists in this group`)
@@ -277,11 +268,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           }
         }
       }
-
-      // Save config
       await ContentService.saveConfig(config)
-
-      // Create the JSON file with initial TipTap content structure
       const initialContent = {
         content: {
           type: 'doc',
@@ -308,14 +295,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
           ]
         }
       }
-
       await ContentService.saveContent(newPagePath, JSON.stringify(initialContent.content, null, 2))
-
-      // Update config in memory instead of reloading
       configLoader.updateConfig(config)
-    } catch (error) {
+      result = { success: true, path: newPagePath };
+    } catch (error: any) {
       console.error('[Sidebar] Error adding new page:', error)
+      result = { success: false, error: error.message };
     }
+    if (onToolResult) {
+        onToolResult({ handleAddNewPage: result });
+    }
+    return result;
   }
 
   // Handle group title edit (double-click)
@@ -328,13 +318,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   // Save edited group title
   const handleSaveGroupTitle = async () => {
-    if (!editingGroupTitle) return
-
+    if (!editingGroupTitle) return;
+    let result;
     try {
-      // Fetch current config
       const config = await configLoader.loadConfig()
-
-      // Find and update the group title using helper
       const items = getTabItems(config)
       if (items) {
         for (const group of items) {
@@ -344,17 +331,19 @@ export const Sidebar: React.FC<SidebarProps> = ({
           }
         }
       }
-
-      // Save config
       await ContentService.saveConfig(config)
-
-      // Update config in memory instead of reloading
       configLoader.updateConfig(config)
       setEditingGroupTitle(null)
       setEditingGroupNewTitle('')
-    } catch (error) {
+      result = { success: true, oldTitle: editingGroupTitle, newTitle: editingGroupNewTitle };
+    } catch (error: any) {
       console.error('[Sidebar] Error saving group title:', error)
+      result = { success: false, error: error.message };
     }
+    if (onToolResult) {
+        onToolResult({ handleSaveGroupTitle: result });
+    }
+    return result;
   }
 
   // Handle group delete click
@@ -367,13 +356,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   // Delete group
   const handleDeleteGroup = async () => {
-    if (!deletingGroupTitle) return
-
+    if (!deletingGroupTitle) return;
+    let result;
     try {
-      // Fetch current config
       const config = await configLoader.loadConfig()
-
-      // Find and remove the group using helper
       const items = getTabItems(config)
       if (items) {
         const groupIndex = items.findIndex((g: any) => g.title === deletingGroupTitle)
@@ -381,32 +367,30 @@ export const Sidebar: React.FC<SidebarProps> = ({
           items.splice(groupIndex, 1)
         }
       }
-
-      // Save config
       await ContentService.saveConfig(config)
-
-      // Update config in memory instead of reloading
       configLoader.updateConfig(config)
-    } catch (error) {
+      result = { success: true, deletedGroup: deletingGroupTitle };
+    } catch (error: any) {
       console.error('[Sidebar] Error deleting group:', error)
+      result = { success: false, error: error.message };
     }
+    if (onToolResult) {
+        onToolResult({ handleDeleteGroup: result });
+    }
+    return result;
   }
 
   // Add new group
   const handleAddNewGroup = async (groupName: string) => {
+    let result;
     try {
-      // Fetch current config
       const config = await configLoader.loadConfig()
-
-      // Validate that group doesn't already exist using helper
       const items = getTabItems(config)
       if (items) {
-        // Check if group with same name already exists
         const existingGroup = items.find((g: any) => g.title === groupName)
         if (existingGroup) {
           throw new Error(`A group named "${groupName}" already exists in this tab`)
         }
-
         const newGroup = {
           title: groupName,
           type: 'group',
@@ -414,15 +398,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
         }
         items.push(newGroup)
       }
-
-      // Save config
       await ContentService.saveConfig(config)
-
-      // Update config in memory instead of reloading
       configLoader.updateConfig(config)
-    } catch (error) {
+      result = { success: true, groupName: groupName };
+    } catch (error: any) {
       console.error('[Sidebar] Error adding new group:', error)
+      result = { success: false, error: error.message };
     }
+    if (onToolResult) {
+        onToolResult({ handleAddNewGroup: result });
+    }
+    return result;
   }
 
   // Drag and drop handlers for groups
@@ -440,32 +426,28 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   const handleGroupDrop = async (e: React.DragEvent, dropIndex: number) => {
     e.preventDefault()
-
-    if (!isDevMode || !isAPIReferenceTab() === false || draggedGroupIndex === null || draggedGroupIndex === dropIndex) return
-
+    if (!isDevMode || !isAPIReferenceTab() === false || draggedGroupIndex === null || draggedGroupIndex === dropIndex) return;
+    let result;
     try {
-      // Fetch current config
       const config = await configLoader.loadConfig()
-
-      // Reorder groups using helper
       const items = getTabItems(config)
       if (items) {
         const [draggedGroup] = items.splice(draggedGroupIndex, 1)
         items.splice(dropIndex, 0, draggedGroup)
       }
-
-      // Save config
       await ContentService.saveConfig(config)
-
-      // Reset drag states first, before updating config
       setDraggedGroupIndex(null)
-
-      // Update config in memory instead of reloading
       configLoader.updateConfig(config)
-    } catch (error) {
+      result = { success: true, fromIndex: draggedGroupIndex, toIndex: dropIndex };
+    } catch (error: any) {
       console.error('[Sidebar] Error reordering groups:', error)
       setDraggedGroupIndex(null)
+      result = { success: false, error: error.message };
     }
+    if (onToolResult) {
+        onToolResult({ handleGroupDrop: result });
+    }
+    return result;
   }
 
   // Drag and drop handlers for pages within a group
@@ -484,17 +466,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   const handlePageDrop = async (e: React.DragEvent, dropPagePath: string, dropGroupTitle: string) => {
     e.preventDefault()
-
-    if (!isDevMode || isAPIReferenceTab() || !draggedPagePath || !draggedPageGroupTitle || draggedPagePath === dropPagePath) return
-
+    if (!isDevMode || isAPIReferenceTab() || !draggedPagePath || !draggedPageGroupTitle || draggedPagePath === dropPagePath) return;
+    let result;
     try {
-      // Fetch current config
       const config = await configLoader.loadConfig()
-
-      // Reorder pages within the same group using helper
       const items = getTabItems(config)
       if (items) {
-        // Only allow reordering within the same group
         if (draggedPageGroupTitle === dropGroupTitle) {
           for (const group of items) {
             if (group.title === draggedPageGroupTitle && group.children) {
@@ -504,27 +481,27 @@ export const Sidebar: React.FC<SidebarProps> = ({
               if (draggedIndex !== -1 && dropIndex !== -1) {
                 const [draggedPage] = group.children.splice(draggedIndex, 1)
                 group.children.splice(dropIndex, 0, draggedPage)
+                result = { success: true, page: draggedPagePath, fromIndex: draggedIndex, toIndex: dropIndex };
               }
               break
             }
           }
         }
       }
-
-      // Save config
       await ContentService.saveConfig(config)
-
-      // Reset drag states first, before updating config
       setDraggedPagePath(null)
       setDraggedPageGroupTitle(null)
-
-      // Update config in memory instead of reloading
       configLoader.updateConfig(config)
-    } catch (error) {
+    } catch (error: any) {
       console.error('[Sidebar] Error reordering pages:', error)
       setDraggedPagePath(null)
       setDraggedPageGroupTitle(null)
+      result = { success: false, error: error.message };
     }
+    if (onToolResult) {
+        onToolResult({ handlePageDrop: result });
+    }
+    return result;
   }
 
   const renderNestedItem = (item: NavigationItem, depth: number = 0, parentGroupTitle: string = ''): ReactElement | null => {

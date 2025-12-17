@@ -1,19 +1,20 @@
-interface DeleteConfirmModalProps {
+interface ConfirmationModalProps {
   theme: 'light' | 'dark'
   onClose: () => void
   onConfirm: () => Promise<any>
-  itemName: string
-  itemType?: 'version' | 'tab' | 'page' | 'group'
+  title: string
+  actionName: string
+  children: React.ReactNode
 }
 
-export const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
+export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   theme,
   onClose,
   onConfirm,
-  itemName,
-  itemType = 'version'
+  title,
+  actionName,
+  children
 }) => {
-  const capitalizedType = itemType.charAt(0).toUpperCase() + itemType.slice(1)
   const handleConfirm = async () => {
     await onConfirm()
     onClose()
@@ -77,33 +78,13 @@ export const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
               color: theme === 'light' ? '#111827' : '#f9fafb',
             }}
           >
-            Delete {capitalizedType}
+            {title}
           </h2>
         </div>
 
         {/* Content */}
         <div style={{ marginBottom: '24px' }}>
-          <p style={{
-            margin: 0,
-            fontSize: '14px',
-            color: theme === 'light' ? '#374151' : '#d1d5db',
-            lineHeight: '1.6'
-          }}>
-            Are you sure you want to delete {itemType} <strong style={{ color: theme === 'light' ? '#111827' : '#f9fafb' }}>{itemName}</strong>?
-          </p>
-          <p style={{
-            margin: '12px 0 0 0',
-            fontSize: '14px',
-            color: theme === 'light' ? '#6b7280' : '#9ca3af',
-            lineHeight: '1.6'
-          }}>
-            This action cannot be undone. {
-              itemType === 'version' ? 'All content associated with this version will be permanently removed.' :
-              itemType === 'tab' ? 'This tab will be permanently removed.' :
-              itemType === 'group' ? 'This group and all its pages will be permanently removed.' :
-              'This page will be permanently removed.'
-            }
-          </p>
+          {children}
         </div>
 
         {/* Action Buttons */}
@@ -150,8 +131,8 @@ export const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
               e.currentTarget.style.backgroundColor = '#ef4444'
             }}
           >
-            <i className="pi pi-trash"></i>
-            Delete {capitalizedType}
+            <i className="pi pi-check"></i>
+            {actionName}
           </button>
         </div>
       </div>

@@ -3,6 +3,8 @@ import { SearchModal } from './SearchModal'
 import { FindPagePathByName } from '../../services/navigationService'
 import { aiStreamService,type ChatContext } from '../../services/agentService'
 import Markdown from 'react-markdown';
+import { ConfirmationModal } from './ConfirmationModal'
+import { toolExecutor } from '../../services/toolExecutorService'
 const viteMode = import.meta.env.VITE_MODE || "production";
 
 interface Message {
@@ -28,7 +30,10 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
   const [showSearchModal,setShowSearchModal] = useState<boolean>(false)
   const [chatResume,setChatResume] = useState<string>("")
   const [todoList,setTodoList] = useState<string>("")
-  const [toolResponses, setToolResponses] = useState<string>("")
+  const [toolResults, setToolResults] = useState<{ [key: string]: any }>({});
+  const [approvalRequest, setApprovalRequest] = useState<any>(null)
+  const [alwaysApprove, _setAlwaysApprove] = useState<boolean>(false)
+  const [showConfirmationModal, setShowConfirmationModal] = useState<boolean>(false)
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
@@ -116,7 +121,11 @@ const handleSendMessage = async () => {
 
   // Clear previous todo list and tool responses for a fresh interaction
   setTodoList("");
-  setToolResponses("");
+    const result = new Map<string,string>()
+    Object.keys(toolResults).forEach((key)=>{
+      result.set(key,JSON.stringify(toolResults[key]))
+    })
+  setToolResults({});
 
 
   const question = inputValue;
@@ -129,7 +138,7 @@ const handleSendMessage = async () => {
         contexts.filter(c=>c.type!=="intention"),
         chatResume,
         todoList,
-        toolResponses, // This will now be passed as tool_results
+        result,
         (data) => {
 
           if(data.message_type=="chat_resume"){
@@ -194,38 +203,83 @@ const handleSendMessage = async () => {
       setShowSearchModal(true)
   }
 
-  const handleToolCall = (toolCallString: string) => {
+
+  const handleToolCall = async (toolCallString: string) => {
     try {
       const toolCall = JSON.parse(toolCallString);
-      if (toolCall.function && toolCall.function.name === "create_todo") {
-        const { title, description, task_number } = toolCall.function.parameters;
-        // Assuming todoList is a markdown string that we append to
-        setTodoList(prev => {
-          const newTodoItem = `${task_number}. ${title}: ${description || 'No description.'}\n`;
-          return prev ? prev + newTodoItem : newTodoItem;
-        });
-      } else if (toolCall.function && toolCall.function.name === "update_status") {
-        const { id, status, note } = toolCall.function.parameters;
-        // Assuming todoList is a markdown string that we update
-        setTodoList(prev => {
-          if (!prev) return "";
-          const lines = prev.split('\n');
-          const updatedLines = lines.map(line => {
-            if (line.startsWith(`${id}.`)) {
-              return `${id}. ${line.substring(String(id).length + 2).split(':')[0]}: Status: ${status}${note ? ` (${note})` : ''}`;
-            }
-            return line;
-          });
-          return updatedLines.join('\n');
-        });
+      const { name } = toolCall.function;
+
+      const toolsRequiringConfirmation = ['create_version', 'create_tab', 'create_grouper', 'create_page', 'remove_item', 'replace_in_file'];
+
+      if (toolsRequiringConfirmation.includes(name) && !alwaysApprove) {
+        setApprovalRequest(toolCall);
+        setShowConfirmationModal(true);
       } else {
-        // For other tool calls, display them in toolResponses
-        setToolResponses(prev => prev ? prev + `\n${toolCallString}` : toolCallString);
+        await executeTool(toolCall);
       }
     } catch (error) {
       console.error("Error parsing tool call string:", error);
-      setToolResponses(prev => prev ? prev + `\nError parsing tool call: ${toolCallString}` : `Error parsing tool call: ${toolCallString}`);
     }
+  }
+
+  const executeTool = async (toolCall: any) => {
+    const { name, parameters } = toolCall.function;
+    console.log(`Agent generated query: ${name}`, parameters);
+
+    if (name === "create_todo") {
+      const { title, description, task_number } = parameters;
+      setTodoList(prev => {
+        const newTodoItem = `${task_number}. ${title}: ${description || 'No description.'}\n`;
+        return prev ? prev + newTodoItem : newTodoItem;
+      });
+      return;
+    }
+
+    if (name === "update_status") {
+      const { id, status, note } = parameters;
+      setTodoList(prev => {
+        if (!prev) return "";
+        const lines = prev.split('\n');
+        const updatedLines = lines.map(line => {
+          if (line.startsWith(`${id}.`)) {
+            return `${id}. ${line.substring(String(id).length + 2).split(':')[0]}: Status: ${status}${note ? ` (${note})` : ''}`;
+          }
+          return line;
+        });
+        return updatedLines.join('\n');
+      });
+      return;
+    }
+
+    if(name === 'open_page' || name === 'see_page'){
+        const pagePath = FindPagePathByName(parameters.url)
+        if(pagePath){
+            const context:ChatContext ={
+                id: `${pagePath}-${Date.now()}`,
+                type:  'file' ,
+                fileName: pagePath,
+            }
+            onUpdateContext([...contexts,context])
+        }
+        return;
+    }
+
+    const result = await toolExecutor.execute(name, parameters);
+    console.log(`Tool response: ${JSON.stringify(result)}`);
+    if (result && result.results) {
+        setToolResults(prevResults => ({
+          ...prevResults,
+          [name]: result.results
+        }));
+    }
+  }
+
+  const handleConfirmation = async (confirm: boolean) => {
+    if (confirm && approvalRequest) {
+      await executeTool(approvalRequest);
+    }
+    setApprovalRequest(null);
+    setShowConfirmationModal(false);
   }
 
   const handleRemoveContext = (id: string) => {
@@ -478,8 +532,8 @@ const handleSendMessage = async () => {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Todo List and Tool Responses Section */}
-        {(todoList || toolResponses) && (
+        {/* Todo List Section */}
+        {todoList && (
           <div
             style={{
               padding: '12px 24px',
@@ -489,22 +543,12 @@ const handleSendMessage = async () => {
               overflowY: 'auto'
             }}
           >
-            {todoList && (
-              <div style={{ marginBottom: '16px' }}>
-                <h3 style={{ color: theme === 'light' ? '#111827' : '#f9fafb', marginTop: 0, marginBottom: '8px' }}>
-                  Todo List
-                </h3>
-                <Markdown>{todoList}</Markdown>
-              </div>
-            )}
-            {toolResponses && (
-              <div>
-                <h3 style={{ color: theme === 'light' ? '#111827' : '#f9fafb', marginTop: 0, marginBottom: '8px' }}>
-                  Tool Responses
-                </h3>
-                <Markdown>{toolResponses}</Markdown>
-              </div>
-            )}
+            <div style={{ marginBottom: '16px' }}>
+              <h3 style={{ color: theme === 'light' ? '#111827' : '#f9fafb', marginTop: 0, marginBottom: '8px' }}>
+                Todo List
+              </h3>
+              <Markdown>{todoList}</Markdown>
+            </div>
           </div>
         )}
 
@@ -613,32 +657,46 @@ const handleSendMessage = async () => {
             >
               +
             </button>
-            <textarea
-              ref={inputRef}
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder=""
-              style={{
-                flex: 1,
-                padding: '12px 16px',
-                backgroundColor: theme === 'light' ? '#ffffff' : '#374151',
-                border: `1px solid ${theme === 'light' ? '#d1d5db' : '#4b5563'}`,
-                borderRadius: '24px',
-                color: theme === 'light' ? '#374151' : '#e5e7eb',
-                fontSize: '14px',
-                outline: 'none',
-                transition: 'border-color 0.2s'
-              }}
-              max-rows={3}
-              rows={1}
-              onFocus={(e) => {
-                e.currentTarget.style.borderColor = theme === 'light' ? '#3b82f6' : '#6366f1'
-              }}
-              onBlur={(e) => {
-                e.currentTarget.style.borderColor = theme === 'light' ? '#d1d5db' : '#4b5563'
-              }}
-            ></textarea>
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+              <textarea
+                ref={inputRef}
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder=""
+                style={{
+                  flex: 1,
+                  padding: '12px 16px',
+                  backgroundColor: theme === 'light' ? '#ffffff' : '#374151',
+                  border: `1px solid ${theme === 'light' ? '#d1d5db' : '#4b5563'}`,
+                  borderRadius: '24px',
+                  color: theme === 'light' ? '#374151' : '#e5e7eb',
+                  fontSize: '14px',
+                  outline: 'none',
+                  transition: 'border-color 0.2s'
+                }}
+                max-rows={3}
+                rows={1}
+                onFocus={(e) => {
+                  e.currentTarget.style.borderColor = theme === 'light' ? '#3b82f6' : '#6366f1'
+                }}
+                onBlur={(e) => {
+                  e.currentTarget.style.borderColor = theme === 'light' ? '#d1d5db' : '#4b5563'
+                }}
+              ></textarea>
+              {/* <div style={{ display: 'flex', alignItems: 'center', paddingLeft: '16px', paddingTop: '8px' }}> */}
+              {/*   <input */}
+              {/*     type="checkbox" */}
+              {/*     id="alwaysApprove" */}
+              {/*     checked={alwaysApprove} */}
+              {/*     onChange={(e) => setAlwaysApprove(e.target.checked)} */}
+              {/*     style={{ marginRight: '8px' }} */}
+              {/*   /> */}
+              {/*   <label htmlFor="alwaysApprove" style={{ color: theme === 'light' ? '#374151' : '#e5e7eb', fontSize: '12px' }}> */}
+              {/*     Always approve */}
+              {/*   </label> */}
+              {/* </div> */}
+            </div>
             <button
               onClick={handleSendMessage}
               disabled={!inputValue.trim()}
@@ -701,7 +759,18 @@ const handleSendMessage = async () => {
         theme={theme}
       />
 
-
+      {showConfirmationModal && approvalRequest && (
+        <ConfirmationModal
+          theme={theme}
+          onClose={() => handleConfirmation(false)}
+          onConfirm={() => handleConfirmation(true)}
+          title={`Confirm ${approvalRequest.function.name}`}
+          actionName={`Confirm`}
+        >
+          <p>Are you sure you want to execute the following action?</p>
+          <pre>{JSON.stringify(approvalRequest.function.parameters, null, 2)}</pre>
+        </ConfirmationModal>
+      )}
     </>
 
   )

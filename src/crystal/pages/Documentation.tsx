@@ -34,7 +34,7 @@ function Documentation() {
   const isDevEnvironment = viteMode === 'dev' // true only in dev mode (allows uploads)
   const [isDevMode, setIsDevMode] = useState<boolean>(!isProductionMode) // Enabled by default in dev/preview, disabled in production
   const [isSettingsSidebarOpen, setIsSettingsSidebarOpen] = useState<boolean>(false)
-  const [error] = useState<string | null>(null)
+  const [error, _setError] = useState<string | null>(null)
   const [currentVersion, setCurrentVersion] = useState<string>('')
   const [currentTab, setCurrentTab] = useState<string>('')
   const [tabs, setTabs] = useState<Tab[]>([])
@@ -136,6 +136,20 @@ function Documentation() {
       }
     }
   }, [updateTrigger, currentVersion, theme])
+
+  // const handleToolResult = (toolResult: { [key: string]: any }) => {
+  //   const toolName = Object.keys(toolResult)[0];
+  //   const result = toolResult[toolName];
+  //
+  //   const newContext: ChatContext = {
+  //       id: `tool-${toolName}-${Date.now()}`,
+  //       type: 'tool_result',
+  //       content: JSON.stringify(result),
+  //       fileName: toolName
+  //   };
+  //
+  //   setAiContexts(prev => [...prev, newContext]);
+  // }
 
   if (!isConfigLoaded) {
     return (

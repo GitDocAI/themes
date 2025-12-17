@@ -4,7 +4,7 @@ interface PageModalProps {
   theme: 'light' | 'dark'
   groupTitle: string
   onClose: () => void
-  onConfirm: (pageName: string) => Promise<void>
+  onConfirm: (pageName: string) => Promise<any>
 }
 
 export const PageModal: React.FC<PageModalProps> = ({
