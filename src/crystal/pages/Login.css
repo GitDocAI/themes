@@ -56,3 +56,9 @@
 .login-btn:hover {
   background-color: #0056b3;
 }
+
+.error-message {
+  color: red;
+  margin-bottom: 15px;
+  text-align: center;
+}

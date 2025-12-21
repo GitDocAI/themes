@@ -1,21 +1,30 @@
 import { useState } from 'react';
-import './Login.css'; // Importamos los estilos
+import './Login.css';
+import authService from '../../services/authService';
 
 const Login = () => {
-  // Estado para guardar los valores de los inputs
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  // Función que se ejecuta al enviar el formulario
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault(); // Evita que la página se recargue
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
 
-    // Aquí iría tu lógica de conexión a la API (backend)
-    if (email === '' || password === '') {
-      alert('Please complete all fields');
-    } else {
-      console.log('Data sent:', { email, password });
-      alert('Login sent! Check the console.');
+    if (email.trim() === '' || password.trim() === '') {
+      setError('Please complete all fields');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await authService.login(email, password);
+      console.log('Login successful!');
+    } catch (err: any) {
+      setError(err.message || 'Login failed. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -24,7 +33,7 @@ const Login = () => {
       <div className="login-card">
         <h2>Login</h2>
         <form onSubmit={handleSubmit}>
-
+          {error && <p className="error-message">{error}</p>}
           <div className="form-group">
             <label htmlFor="email">Email</label>
             <input
@@ -33,6 +42,7 @@ const Login = () => {
               placeholder="example@email.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              disabled={loading}
             />
           </div>
 
@@ -44,13 +54,13 @@ const Login = () => {
               placeholder="********"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              disabled={loading}
             />
           </div>
 
-          <button type="submit" className="login-btn">
-            Log In
+          <button type="submit" className="login-btn" disabled={loading}>
+            {loading ? 'Logging In...' : 'Log In'}
           </button>
-
         </form>
       </div>
     </div>

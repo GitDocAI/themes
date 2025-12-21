@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { SearchModal } from './SearchModal'
 import { FindPagePathByName } from '../../services/navigationService'
-import { aiStreamService,type ChatContext } from '../../services/agentService'
+import { aiStreamService,type ChatContext, type AIStreamResponse } from '../../services/agentService'
 import Markdown from 'react-markdown';
 import { ConfirmationModal } from './ConfirmationModal'
 import { toolExecutor } from '../../services/toolExecutorService'
@@ -95,6 +95,61 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
     }
   }, [externalContexts])
 
+  const handleStreamData = (data: AIStreamResponse, botMessageId: string) => {
+    if (data.message_type === "chat_resume") {
+        setChatResume(data.answer_chunk as string);
+        return;
+    } else if (data.message_type === "tool_call") {
+        handleToolCall(data.answer_chunk);
+        return;
+    }
+
+    setMessages((prev) => {
+        setIsTyping(false);
+        return prev.map(msg =>
+            msg.id === botMessageId
+                ? { ...msg, text: msg.text + (data.answer_chunk as string) }
+                : msg
+        );
+    });
+  };
+
+  const sendToolResultToAI = async (toolName: string, _toolResult: any, allToolResults: any, currentTodoList: string) => {
+    const botMessageId = (Date.now() + 1).toString();
+
+    setMessages(prev => [
+      ...prev,
+      {
+        id: botMessageId,
+        text: "",
+        sender: "bot",
+        timestamp: new Date()
+      }
+    ]);
+
+    const result = new Map<string, string>();
+    Object.keys(allToolResults).forEach((key) => {
+      result.set(key, allToolResults[key]);
+    });
+
+    setIsTyping(true);
+    aiStreamService.editWithAI(
+      "",
+      contexts.filter(c => c.type !== "intention"),
+      `${chatResume} the function ${toolName} was called `,
+      currentTodoList,
+      result,
+      (data) => handleStreamData(data, botMessageId),
+      () => {
+        setIsTyping(false);
+        const updatedToolResults = { ...allToolResults };
+        delete updatedToolResults[toolName];
+        setToolResults(updatedToolResults);
+      }
+    );
+  };
+
+
 const handleSendMessage = async () => {
   if (!inputValue.trim()) return;
 
@@ -119,13 +174,10 @@ const handleSendMessage = async () => {
     }
   ]);
 
-  // Clear previous todo list and tool responses for a fresh interaction
-  setTodoList("");
-    const result = new Map<string,string>()
-    Object.keys(toolResults).forEach((key)=>{
-      result.set(key,JSON.stringify(toolResults[key]))
-    })
-  setToolResults({});
+  const result = new Map<string,string>()
+  Object.keys(toolResults).forEach((key)=>{
+    result.set(key,JSON.stringify(toolResults[key]))
+  })
 
 
   const question = inputValue;
@@ -139,28 +191,7 @@ const handleSendMessage = async () => {
         chatResume,
         todoList,
         result,
-        (data) => {
-
-          if(data.message_type=="chat_resume"){
-            setChatResume(data.answer_chunk)
-            return
-          } else if (data.message_type=="tool_call") {
-            handleToolCall(data.answer_chunk);
-            return;
-          }
-
-          setMessages((prev)=>{
-            setIsTyping(false);
-            return prev.map(msg =>
-              msg.id === botMessageId
-                ? { ...msg, text: msg.text + data.answer_chunk }
-                : msg
-            )
-            }
-          );
-
-        },
-
+        (data) => handleStreamData(data, botMessageId),
         () => {
           setIsTyping(false);
         }
@@ -176,7 +207,7 @@ const handleSendMessage = async () => {
         setIsTyping(false);
         return prev.map(msg =>
           msg.id === botMessageId
-            ? { ...msg, text: msg.text + data.answer_chunk }
+            ? { ...msg, text: msg.text + (data.answer_chunk as string) }
             : msg
         )
         }
@@ -204,10 +235,25 @@ const handleSendMessage = async () => {
   }
 
 
-  const handleToolCall = async (toolCallString: string) => {
+  const handleToolCall = async (toolCallData: any) => {
     try {
-      const toolCall = JSON.parse(toolCallString);
-      const { name } = toolCall.function;
+      const toolCall = toolCallData.tool_call;
+      if (!toolCall) {
+        console.error("Invalid tool call format:", toolCallData);
+        return;
+      }
+
+      // Parse arguments if they are a string
+      if (toolCall.arguments && typeof toolCall.arguments === 'string') {
+        try {
+          toolCall.arguments = JSON.parse(toolCall.arguments);
+        } catch (error) {
+          console.error("Failed to parse tool call arguments:", error);
+          return; // Stop execution if arguments are invalid JSON
+        }
+      }
+
+      const { name } = toolCall;
 
       const toolsRequiringConfirmation = ['create_version', 'create_tab', 'create_grouper', 'create_page', 'remove_item', 'replace_in_file'];
 
@@ -218,59 +264,38 @@ const handleSendMessage = async () => {
         await executeTool(toolCall);
       }
     } catch (error) {
-      console.error("Error parsing tool call string:", error);
+      console.error("Error processing tool call:", error);
     }
   }
 
   const executeTool = async (toolCall: any) => {
-    const { name, parameters } = toolCall.function;
+    const { name, arguments: parameters } = toolCall;
     console.log(`Agent generated query: ${name}`, parameters);
 
-    if (name === "create_todo") {
-      const { title, description, task_number } = parameters;
-      setTodoList(prev => {
-        const newTodoItem = `${task_number}. ${title}: ${description || 'No description.'}\n`;
-        return prev ? prev + newTodoItem : newTodoItem;
-      });
-      return;
-    }
+    const pendingToolResults = { ...toolResults, [name]: null };
+    setToolResults(pendingToolResults);
 
-    if (name === "update_status") {
-      const { id, status, note } = parameters;
-      setTodoList(prev => {
-        if (!prev) return "";
-        const lines = prev.split('\n');
-        const updatedLines = lines.map(line => {
-          if (line.startsWith(`${id}.`)) {
-            return `${id}. ${line.substring(String(id).length + 2).split(':')[0]}: Status: ${status}${note ? ` (${note})` : ''}`;
-          }
-          return line;
-        });
-        return updatedLines.join('\n');
-      });
-      return;
-    }
+    const uiCallbacks = {
+      currentTodoList: todoList,
+      onUpdateContext: (newContext: ChatContext) => {
+        onUpdateContext([...contexts, newContext]);
+      }
+    };
 
-    if(name === 'open_page' || name === 'see_page'){
-        const pagePath = FindPagePathByName(parameters.url)
-        if(pagePath){
-            const context:ChatContext ={
-                id: `${pagePath}-${Date.now()}`,
-                type:  'file' ,
-                fileName: pagePath,
-            }
-            onUpdateContext([...contexts,context])
-        }
-        return;
-    }
-
-    const result = await toolExecutor.execute(name, parameters);
+    const result = await toolExecutor.execute(name, parameters, uiCallbacks);
     console.log(`Tool response: ${JSON.stringify(result)}`);
+
     if (result && result.results) {
-        setToolResults(prevResults => ({
-          ...prevResults,
-          [name]: result.results
-        }));
+        const newToolResults = { ...pendingToolResults, [name]: result.results };
+
+        let finalTodoList = todoList;
+        if (result.results.newTodoList) {
+            finalTodoList = result.results.newTodoList;
+            setTodoList(finalTodoList);
+        }
+
+        setToolResults(newToolResults);
+        sendToolResultToAI(name, result.results, newToolResults, finalTodoList);
     }
   }
 
@@ -764,11 +789,11 @@ const handleSendMessage = async () => {
           theme={theme}
           onClose={() => handleConfirmation(false)}
           onConfirm={() => handleConfirmation(true)}
-          title={`Confirm ${approvalRequest.function.name}`}
+          title={`Confirm ${approvalRequest.name}`}
           actionName={`Confirm`}
         >
           <p>Are you sure you want to execute the following action?</p>
-          <pre>{JSON.stringify(approvalRequest.function.parameters, null, 2)}</pre>
+          <pre>{JSON.stringify(approvalRequest.arguments, null, 2)}</pre>
         </ConfirmationModal>
       )}
     </>
