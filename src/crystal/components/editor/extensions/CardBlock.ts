@@ -5,7 +5,7 @@ import { CardNodeView } from '../node-views/CardNodeView'
 export const CardBlock = Node.create({
   name: 'cardBlock',
   group: 'block',
-  atom: true,
+  content: 'block+',
   draggable: true,
 
   addAttributes() {

@@ -1,84 +1,98 @@
 import { Routes, Route } from "react-router-dom";
 import { Suspense, useEffect, useState } from "react";
-import { configLoader } from "./services/configLoader";
+import { configLoader, type GitDocAIConfig } from "./services/configLoader";
 import ThemeLoadingScreen from "./commonPages/LoadingFalllback";
 import ThemeErrorScreen from "./commonPages/ErrorFallback";
 import { themeImports } from "./themeImports";
 
 export default function App() {
-  const [theme, setTheme] = useState<string|null>(null);
+  const [config, setConfig] = useState<GitDocAIConfig | null>(null);
+  const [theme, setTheme] = useState<string | null>(null);
   const [loadingError, setLoadingError] = useState<boolean>(false);
 
   useEffect(() => {
-    configLoader.getThemeName().then((t:string) => setTheme(t))
-    .catch((_e:any)=>setLoadingError(true))
-    ;
+    // Load config first - this gives us theme, colors, logos, etc.
+    configLoader.loadConfig()
+      .then((loadedConfig: GitDocAIConfig) => {
+        setConfig(loadedConfig);
+        // Get theme from config, default to 'crystal'
+        setTheme(loadedConfig.theme || 'crystal');
+      })
+      .catch((_e: any) => {
+        console.error('Failed to load config:', _e);
+        setLoadingError(true);
+      });
   }, []);
 
-
-  if(loadingError){
+  if (loadingError) {
     return (
-
       <Routes>
-      <Route path="/403" element={<ThemeErrorScreen/>} />
+        <Route path="/403" element={<ThemeErrorScreen />} />
         <Route
           path="/*"
-          element={
-              <ThemeErrorScreen/>
-          }
+          element={<ThemeErrorScreen />}
         />
       </Routes>
-    )
+    );
   }
 
-  if (!theme) {
+  if (!theme || !config) {
     return (
-
       <Routes>
-      <Route path="/403" element={<ThemeErrorScreen/>} />
+        <Route path="/403" element={<ThemeErrorScreen />} />
         <Route
           path="/*"
-          element={
-            <ThemeLoadingScreen/>
-          }
+          element={<ThemeLoadingScreen />}
         />
       </Routes>
-      )
+    );
   }
 
-
-  const {Documentation,SetPassword,Forbidden,Login}=themeImports(theme)!
+  const { Documentation, SetPassword, ResetPassword, Forbidden, Login, ForgotPassword } = themeImports(theme)!;
 
   return (
     <Routes>
       <Route
-        path="/set-password/:invitation_token"
+        path="/auth/set-password"
         element={
-          <Suspense fallback={<><ThemeLoadingScreen/></>}>
-            <SetPassword />
+          <Suspense fallback={<ThemeLoadingScreen />}>
+            <SetPassword config={config} />
           </Suspense>
         }
       />
       <Route
-        path="/login"
+        path="/auth/login"
         element={
-          <Suspense fallback={<><ThemeLoadingScreen/></>}>
-            <Login />
+          <Suspense fallback={<ThemeLoadingScreen />}>
+            <Login config={config} />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/auth/forgot-password"
+        element={
+          <Suspense fallback={<ThemeLoadingScreen />}>
+            <ForgotPassword config={config} />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/auth/reset-password"
+        element={
+          <Suspense fallback={<ThemeLoadingScreen />}>
+            <ResetPassword config={config} />
           </Suspense>
         }
       />
       <Route path="/403" element={<Forbidden />} />
-        <Route
-          path="/*"
-          element={
-          <Suspense fallback={<>
-              <ThemeLoadingScreen/></>}>
-              <Documentation />
-            </Suspense>
-          }
-        />
-      )
+      <Route
+        path="/*"
+        element={
+          <Suspense fallback={<ThemeLoadingScreen />}>
+            <Documentation />
+          </Suspense>
+        }
+      />
     </Routes>
   );
 }
-

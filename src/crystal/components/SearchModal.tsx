@@ -47,14 +47,9 @@ export const SearchModal: React.FC<SearchModalProps> = ({
   const [results, setResults] = useState<SearchHit[]>([])
   const [isSearching, setIsSearching] = useState(false)
   const [selectedIndex, setSelectedIndex] = useState(0)
-  const [isMac, setIsMac] = useState<boolean | null>(null)
 
   const inputRef = useRef<HTMLInputElement>(null)
   const resultsRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    setIsMac(navigator.userAgent.toUpperCase().includes('MAC'))
-  }, [])
 
   useEffect(() => {
     setTimeout(() => inputRef.current?.focus(), 100)
@@ -67,37 +62,44 @@ export const SearchModal: React.FC<SearchModalProps> = ({
 
   }, [visible])
 
-
-  useEffect(() => {
-    const performSearch = async () => {
-      if (!query.trim()) {
-        setResults([])
-        return
-      }
-
-      setIsSearching(true)
+  const performSearch = async () => {
+    if (!query.trim()) {
       setResults([])
-      try {
-        const saved:any[] =[]
-        await searchService.search(query, 20, (response: SearchResponse) => {
-          setSelectedIndex(0)
-          saved.push(...response.hits)
-          setTimeout(()=>setResults(saved),0)
-        },()=>{
-          setTimeout(()=>{},0)
-          setIsSearching(false)
-          })
-      } catch (err) {
-        console.error('Search error:', err)
-        setIsSearching(false)
-      }
+      return
     }
-    const timer = setTimeout(performSearch, 120)
-    return () => clearTimeout(timer)
-  }, [query])
+
+    setIsSearching(true)
+    setResults([])
+    try {
+      const saved: any[] = []
+      await searchService.search(query, 20, (response: SearchResponse) => {
+        setSelectedIndex(0)
+        saved.push(...response.hits)
+        setTimeout(() => setResults(saved), 0)
+      }, () => {
+        setTimeout(() => {}, 0)
+        setIsSearching(false)
+      })
+    } catch (err) {
+      console.error('Search error:', err)
+      setIsSearching(false)
+    }
+  }
 
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      // If there are results and one is selected, navigate to it
+      if (results.length > 0 && results[selectedIndex]) {
+        handleResultClick(results[selectedIndex])
+      } else {
+        // Otherwise, perform search
+        performSearch()
+      }
+      return
+    }
+
     if (results.length === 0) return
 
     if (e.key === 'ArrowDown') {
@@ -106,9 +108,6 @@ export const SearchModal: React.FC<SearchModalProps> = ({
     } else if (e.key === 'ArrowUp') {
       e.preventDefault()
       setSelectedIndex(prev => Math.max(prev - 1, 0))
-    } else if (e.key === 'Enter') {
-      e.preventDefault()
-      if (results[selectedIndex]) handleResultClick(results[selectedIndex])
     }
   }
 
@@ -165,11 +164,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({
 
         {/* Input */}
         <div className="search-input-container">
-          {isSearching ?
-          <i className="pi  pi-spin pi-spinner " ></i>
-            :
           <i className="pi pi-search search-input-icon" />
-          }
           <input
             ref={inputRef}
             value={query}
@@ -178,9 +173,18 @@ export const SearchModal: React.FC<SearchModalProps> = ({
             placeholder="Search documentation..."
             className="search-input-field"
           />
-          {isMac !== null && (
-            <kbd className="search-kbd">{isMac ? '⌘K' : 'Ctrl+K'}</kbd>
-          )}
+          <button
+            className="search-button"
+            onClick={performSearch}
+            disabled={isSearching || !query.trim()}
+            title="Search"
+          >
+            {isSearching ? (
+              <i className="pi pi-spin pi-spinner" />
+            ) : (
+              <i className="pi pi-arrow-right" />
+            )}
+          </button>
         </div>
 
 

@@ -135,8 +135,8 @@ export const InfoBlockNodeView = ({ node, editor, getPos }: NodeViewProps) => {
             border: `1px solid ${typeConfig.borderColor}`,
             padding: '1rem',
             backgroundColor: typeConfig.bgColor,
+            color: theme === 'light' ? '#1f2937' : '#f9fafb',
           }}
-          className="dark:text-white text-black"
         >
           <i
             className={typeConfig.icon}

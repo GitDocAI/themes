@@ -5,6 +5,9 @@ import { VersionSwitcher } from './VersionSwitcher'
 import { LogoEditor } from './LogoEditor'
 import { Image } from './ui/Image'
 import { ContentService } from '../../services/contentService'
+import { ProfileMenu } from './ProfileMenu'
+import { ProfileModal } from './ProfileModal'
+import authService from '../../services/authService'
 
 interface NavbarProps {
   theme: 'light' | 'dark'
@@ -19,6 +22,8 @@ interface NavbarProps {
 export const Navbar: React.FC<NavbarProps> = ({ theme, onThemeChange, onVersionChange, currentVersion, isDevMode = false, allowUpload = false, onSearchClick = () => {} }) => {
   const { updateTrigger } = useConfig()
   const [logo, setLogo] = useState('')
+  const [logoLoaded, setLogoLoaded] = useState(false)
+  const [logoError, setLogoError] = useState(false)
   const [siteName, setSiteName] = useState('')
   const [navItems, setNavItems] = useState<Array<{ type: string; label: string; reference: string }>>([])
   const [editingItemIndex, setEditingItemIndex] = useState<number | null>(null)
@@ -42,11 +47,23 @@ export const Navbar: React.FC<NavbarProps> = ({ theme, onThemeChange, onVersionC
     buttonBg: '',
     buttonHover: ''
   })
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [showProfileModal, setShowProfileModal] = useState(false)
+  const [userRefreshKey, setUserRefreshKey] = useState(0)
+
+  // Check if user is authenticated
+  useEffect(() => {
+    setIsAuthenticated(authService.isAuthenticated())
+  }, [])
 
   useEffect(() => {
     const config = configLoader.getConfig()
     if (config) {
-      setLogo(configLoader.getLogo(theme))
+      const newLogo = configLoader.getLogo(theme)
+      setLogo(newLogo)
+      // Reset logo states when logo path changes
+      setLogoLoaded(false)
+      setLogoError(false)
       setSiteName(configLoader.getName())
       setNavItems(configLoader.getNavbarItems())
       setVersions(configLoader.getVersions())
@@ -251,17 +268,21 @@ export const Navbar: React.FC<NavbarProps> = ({ theme, onThemeChange, onVersionC
       <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: '6px' }}>
           <div style={{ display: 'inline-block' }}>
-            {logo ? (
+            {logo && !logoError && (
               <Image
                 src={logo}
                 alt={siteName}
                 style={{ height: '32px', width: 'auto', display: 'block' }}
+                onLoadSuccess={() => setLogoLoaded(true)}
+                onLoadError={() => setLogoError(true)}
               />
-            ) : (
+            )}
+            {(!logo || logoError || !logoLoaded) && (
               <span style={{
                 fontSize: '1.25rem',
                 fontWeight: '600',
-                color: colors.text
+                color: colors.text,
+                display: logoLoaded && !logoError ? 'none' : 'inline'
               }}>
                 {siteName}
               </span>
@@ -675,6 +696,21 @@ export const Navbar: React.FC<NavbarProps> = ({ theme, onThemeChange, onVersionC
         >
           <i className={theme === 'light' ? 'pi pi-moon' : 'pi pi-sun'}></i>
         </button>
+
+        {/* Profile Menu - Only show when authenticated */}
+        {isAuthenticated && (
+          <ProfileMenu
+            theme={theme}
+            colors={{
+              text: colors.text,
+              secondaryText: colors.secondaryText,
+              border: colors.border,
+              hoverBg: colors.hoverBg,
+            }}
+            onProfileClick={() => setShowProfileModal(true)}
+            refreshKey={userRefreshKey}
+          />
+        )}
       </div>
       </div>
 
@@ -686,6 +722,15 @@ export const Navbar: React.FC<NavbarProps> = ({ theme, onThemeChange, onVersionC
           onClose={() => setShowLogoEditor(false)}
         />
       )}
+
+      {/* Profile Modal */}
+      <ProfileModal
+        visible={showProfileModal}
+        onHide={() => setShowProfileModal(false)}
+        theme={theme}
+        primaryColor={colors.primary}
+        onUserUpdate={() => setUserRefreshKey(k => k + 1)}
+      />
 
       {/* Navbar Item Editor Modal */}
       {editingItemIndex !== null && (

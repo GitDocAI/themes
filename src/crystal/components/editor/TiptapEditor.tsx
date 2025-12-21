@@ -104,6 +104,7 @@ export const TiptapEditor: React.FC<TiptapEditorProps> = ({ content, theme, onUp
     ],
     content: content,
     editable: editable,
+    immediatelyRender: false, // Prevents flushSync warning with React 18+
     editorProps: {
       attributes: {
         class: `tiptap-editor ${theme === 'dark' ? 'dark-theme' : ''}`,

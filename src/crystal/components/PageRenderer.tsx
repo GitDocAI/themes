@@ -60,7 +60,6 @@ export const PageRenderer: React.FC<PageRendererProps> = ({ pageData, theme, onS
   // Reset content when page changes
   useEffect(() => {
     const newContent = pageData.content || convertBlocksToTiptap(pageData.blocks || [])
-    console.log('[PageRenderer] Loading content:', JSON.stringify(newContent, null, 2))
     setContent(newContent)
     contentRef.current = newContent
     setHasChanges(false)

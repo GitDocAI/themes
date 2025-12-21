@@ -69,7 +69,6 @@ class TenantContext {
       token: newToken
     }
 
-    console.log('[TenantContext] Token updated for tenant:', this.config.tenantId)
     this.notifyListeners()
   }
 
@@ -129,7 +128,6 @@ class TenantContext {
    */
   clear(): void {
     this.config = null
-    console.log('[TenantContext] Cleared')
   }
 }
 

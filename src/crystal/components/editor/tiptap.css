@@ -80,11 +80,49 @@
   margin: 1rem 0;
 }
 
+.tiptap-editor ul {
+  list-style-type: disc;
+}
+
+.tiptap-editor ol {
+  list-style-type: decimal;
+}
+
+/* Nested lists */
+.tiptap-editor ul ul {
+  list-style-type: circle;
+}
+
+.tiptap-editor ul ul ul {
+  list-style-type: square;
+}
+
 .tiptap-editor ul li,
 .tiptap-editor ol li {
   line-height: 1.8;
   margin-bottom: 0.5rem;
   padding-left: 0.5rem;
+  display: list-item;
+}
+
+/* Larger and darker bullets/numbers */
+.tiptap-editor ul li::marker {
+  font-size: 1.2em;
+  color: var(--text-color, #374151);
+}
+
+.tiptap-editor ol li::marker {
+  font-size: 1.1em;
+  font-weight: 600;
+  color: var(--text-color, #374151);
+}
+
+/* Dark mode adjustments */
+body[style*="background-color: rgb(13"] .tiptap-editor ul li::marker,
+body[style*="background-color: rgb(13"] .tiptap-editor ol li::marker,
+.dark .tiptap-editor ul li::marker,
+.dark .tiptap-editor ol li::marker {
+  color: #e5e7eb;
 }
 
 /* Task list styles */

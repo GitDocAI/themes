@@ -172,6 +172,7 @@ export class ContentService {
       throw new Error(`Failed to download file: ${error}`)
     }
   }
+
 }
 
 export const contentService = new ContentService()

@@ -293,11 +293,11 @@ export const InfoNodeView = ({ node, updateAttributes, editor, getPos }: NodeVie
             <i className={typeConfig.icon} style={{ fontSize: '24px', color: typeConfig.color, marginTop: '2px' }} />
             <div style={{ flex: 1 }}>
               {title && (
-                <h4 style={{ margin: '0 0 8px 0', fontSize: '16px', fontWeight: '600' }} className="dark:text-white text-black">
+                <h4 style={{ margin: '0 0 8px 0', fontSize: '16px', fontWeight: '600', color: theme === 'light' ? '#1f2937' : '#f9fafb' }}>
                   {title}
                 </h4>
               )}
-              <p style={{ margin: 0, fontSize: '14px', lineHeight: '1.6' }} className="dark:text-white text-black">
+              <p style={{ margin: 0, fontSize: '14px', lineHeight: '1.6', color: theme === 'light' ? '#1f2937' : '#f9fafb' }}>
                 {content || 'No content'}
               </p>
             </div>

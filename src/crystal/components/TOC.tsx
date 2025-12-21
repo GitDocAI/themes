@@ -34,6 +34,11 @@ export const TOC: React.FC<TOCProps> = ({ theme, currentPath }) => {
 
   // Extract headings from the document
   useEffect(() => {
+    let timeoutId: number | null = null
+    let observer: MutationObserver | null = null
+    let retryCount = 0
+    const maxRetries = 20 // Try for up to 2 seconds (20 * 100ms)
+
     const extractHeadings = () => {
       const headingElements = document.querySelectorAll('.tiptap-editor h1, .tiptap-editor h2, .tiptap-editor h3')
 
@@ -74,29 +79,43 @@ export const TOC: React.FC<TOCProps> = ({ theme, currentPath }) => {
       setHeadings(extractedHeadings)
     }
 
-    // Initial extraction with a slight delay to ensure DOM is ready
-    const timeoutId = setTimeout(() => {
-      extractHeadings()
-    }, 100)
+    const setupObserverAndExtract = () => {
+      const editorElement = document.querySelector('.tiptap-editor')
 
-    // Re-extract when content changes (using MutationObserver)
-    const observer = new MutationObserver(() => {
-      extractHeadings()
-    })
+      if (editorElement) {
+        // Editor exists, extract headings and set up observer
+        extractHeadings()
 
-    const editorElement = document.querySelector('.tiptap-editor')
+        // Re-extract when content changes (using MutationObserver)
+        observer = new MutationObserver(() => {
+          extractHeadings()
+        })
 
-    if (editorElement) {
-      observer.observe(editorElement, {
-        childList: true,
-        subtree: true,
-        characterData: true,
-      })
+        observer.observe(editorElement, {
+          childList: true,
+          subtree: true,
+          characterData: true,
+        })
+      } else if (retryCount < maxRetries) {
+        // Editor doesn't exist yet, retry after a delay
+        retryCount++
+        timeoutId = window.setTimeout(setupObserverAndExtract, 100)
+      }
     }
 
+    // Clear headings first when path changes
+    setHeadings([])
+
+    // Start trying to find the editor and extract headings
+    timeoutId = window.setTimeout(setupObserverAndExtract, 50)
+
     return () => {
-      clearTimeout(timeoutId)
-      observer.disconnect()
+      if (timeoutId) {
+        clearTimeout(timeoutId)
+      }
+      if (observer) {
+        observer.disconnect()
+      }
     }
   }, [currentPath]) // Re-run when currentPath changes
 

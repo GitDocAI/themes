@@ -355,9 +355,6 @@ class MDXParserService {
    * Convert image node
    */
   private convertImage(node: MdxNode): TipTapNode {
-
-    console.log(node)
-
     return {
       type: 'imageBlock',
       attrs: {
@@ -1045,25 +1042,38 @@ class MDXParserService {
   private convertCheckListComponent(node: MdxNode): TipTapNode {
     const taskItems: TipTapNode[] = []
 
-    if (node.children) {
-      for (const child of node.children) {
+    // Helper function to find CheckItem nodes recursively
+    const findCheckItems = (children: MdxNode[]): MdxNode[] => {
+      const items: MdxNode[] = []
+      for (const child of children) {
         if (child.name === 'CheckItem') {
-          const attrs = this.extractAttributes(child)
-          // variant="do" means checked, "dont" or no variant means unchecked
-          const checked = attrs.variant === 'do'
-          const text = this.extractTextContent(child).trim()
-
-          taskItems.push({
-            type: 'taskItem',
-            attrs: { checked },
-            content: [
-              {
-                type: 'paragraph',
-                content: text ? [{ type: 'text', text }] : []
-              }
-            ]
-          })
+          items.push(child)
+        } else if (child.children) {
+          items.push(...findCheckItems(child.children))
         }
+      }
+      return items
+    }
+
+    if (node.children) {
+      const checkItems = findCheckItems(node.children)
+
+      for (const checkItem of checkItems) {
+        const attrs = this.extractAttributes(checkItem)
+        // variant="do" means checked, "dont" or no variant means unchecked
+        const checked = attrs.variant === 'do'
+        const text = this.extractTextContent(checkItem).trim()
+
+        taskItems.push({
+          type: 'taskItem',
+          attrs: { checked },
+          content: [
+            {
+              type: 'paragraph',
+              content: text ? [{ type: 'text', text }] : []
+            }
+          ]
+        })
       }
     }
 

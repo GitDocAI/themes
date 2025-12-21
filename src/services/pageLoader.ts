@@ -94,7 +94,6 @@ class PageLoader {
     this.cache.delete(jsonPath)
     this.cache.delete(mdxPath)
 
-    console.log(`[PageLoader] Cache invalidated for: ${pagePath}`)
   }
 
   /**

@@ -12,6 +12,7 @@ import { PrevNextNavigation } from '../components/PrevNextNavigation'
 import { SearchModal } from '../components/SearchModal'
 import { configLoader } from '../../services/configLoader'
 import { FindPagePathByName, navigationService } from '../../services/navigationService'
+import { pageLoader } from '../../services/pageLoader'
 import type { Tab } from '../../services/configLoader'
 import type { NavigationDropdown, NavigationGroup, NavigationItem, NavigationPage } from '../../types/navigation'
 import { useTheme } from '../hooks/useTheme'
@@ -43,6 +44,7 @@ function Documentation() {
   const [currentPath, setCurrentPath] = useState<string>('')
   const [showSearchModal, setShowSearchModal] = useState<boolean>(false)
   const [aiContexts,setAiContexts] =useState<ChatContext[]>([])
+  const [isContentAccessible, setIsContentAccessible] = useState<boolean>(false)
 
   // Use custom hook to detect RightPanel content
   const rightPanelContent = useRightPanelContent(currentPath)
@@ -100,6 +102,27 @@ function Documentation() {
     }
   }, [isConfigLoaded, theme])
 
+  // Verify content access before rendering the layout
+  // This prevents the layout from flashing before a 401 redirect
+  useEffect(() => {
+    if (isConfigLoaded && currentPath && !isContentAccessible) {
+      // Try to load the page content to verify access
+      pageLoader.loadPage(currentPath)
+        .then(() => {
+          // Content is accessible, allow layout to render
+          setIsContentAccessible(true)
+        })
+        .catch((err) => {
+          // If 401, axios interceptor will redirect to login
+          // For other errors, still allow layout to render (error will show in PageViewer)
+          if (err?.response?.status !== 401) {
+            setIsContentAccessible(true)
+          }
+          // If 401, keep isContentAccessible as false and let interceptor handle redirect
+        })
+    }
+  }, [isConfigLoaded, currentPath, isContentAccessible])
+
   // Update sidebar items when version or tab changes
   useEffect(() => {
     if (tabs.length > 0 && currentTab) {
@@ -151,7 +174,9 @@ function Documentation() {
   //   setAiContexts(prev => [...prev, newContext]);
   // }
 
-  if (!isConfigLoaded) {
+  // Show loading until config is loaded AND content access is verified
+  // This prevents the layout from flashing before a 401 redirect to login
+  if (!isConfigLoaded || !isContentAccessible) {
     return (
       <div style={{
         display: 'flex',
