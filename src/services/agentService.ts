@@ -11,9 +11,16 @@ export interface ChatContext {
 
 
 
+export interface ToolCall {
+  tool_call: {
+    name: string;
+    arguments: Record<string, any>;
+  };
+}
+
 export interface AIStreamResponse {
   chunk_index:number;
-  answer_chunk:string;
+  answer_chunk:string | ToolCall;
   message_type:"chat_resume"|"text"|"tool_call";
   is_final: boolean;
 }
@@ -40,11 +47,11 @@ class AIStreamService {
     context:ChatContext[],
     chat_resume:string,
     todo_list:string,
-    results:Map<string,string>,
+    results:Map<string,any>,
     onData: (msg: AIStreamResponse) => void,
     onFinished: () => void
   ){
-    await this.stream('/ai/edit',{edit_prompt:question,content:"",context,chat_resume,todo_list,results},onData,onFinished)
+    await this.stream('/ai/edit',{edit_prompt:question,content:"",context,chat_resume,todo_list,results:Object.fromEntries(results)},onData,onFinished)
   }
 
   async stream(
@@ -54,7 +61,6 @@ class AIStreamService {
     onFinished: () => void
   ) {
     // Cancel previous session
-    if (this.controller) this.controller.abort();
     this.controller = new AbortController();
 
     const cfg = await buildAxiosConfig(url, body);
@@ -123,8 +129,7 @@ class AIStreamService {
         message_type:"text"
       });
     }
-
-    onFinished();
+      onFinished();
   }
 
   cancel() {

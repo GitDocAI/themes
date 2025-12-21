@@ -1,4 +1,3 @@
-
 import { configLoader as ConfigLoader, type Version } from './configLoader'
 import type { NavigationItem } from '../types/navigation'
 import { ContentService } from './contentService'
@@ -7,10 +6,13 @@ import { pageLoader } from './pageLoader'
 import axiosInstance from '../utils/axiosInstance'
 
 const { loadConfig, updateConfig } = ConfigLoader
-const { search } = searchService
+
+import { type ChatContext } from './agentService'
+import { FindPagePathByName } from './navigationService'
+
 
 export const toolExecutor = {
-  async execute(toolName: string, args: any): Promise<any> {
+  async execute(toolName: string, args: any, uiCallbacks?: any): Promise<any> {
     switch (toolName) {
       case 'create_version': {
         const config = await loadConfig()
@@ -300,21 +302,86 @@ export const toolExecutor = {
       case 'search': {
         const { query, max_hits } = args
         let results:SearchHit[] =[]
-        await search(query,max_hits,(result:SearchResponse)=>{
+        await new Promise((resolve:any)=> searchService.search(query,max_hits,(result:SearchResponse)=>{
           results = [...results,...result.hits]
         },()=>{
-        })
-       return { results: { search_results: JSON.stringify(results.slice(0, max_hits)) } }
+            resolve()
+        }))
+        console.log(results)
+       return { results: { search_results: results.slice(0, max_hits) } }
+      }
+      case 'create_todo': {
+        const { title, description } = args;
+        let { task_number } = args;
+        const { currentTodoList } = uiCallbacks;
+
+        if (!task_number) {
+            if (currentTodoList && currentTodoList.trim() !== '') {
+                const lines = currentTodoList.trim().split('\n');
+                const lastLine = lines[lines.length - 1];
+                const match = lastLine.match(/^(\d+)\./);
+                if (match) {
+                    task_number = parseInt(match[1], 10) + 1;
+                } else {
+                    task_number = 1;
+                }
+            } else {
+                task_number = 1;
+            }
+        }
+
+        const newTodoItem = `${task_number}. ${title}: ${description || 'No description.'}\n`;
+        const newTodoList = currentTodoList ? currentTodoList + newTodoItem : newTodoItem;
+        return { results: { success: 'true', newTodoList } };
+      }
+      case 'update_status': {
+        const { id, status, note } = args;
+        const { currentTodoList } = uiCallbacks;
+        if (!currentTodoList) return { results: { success: 'false', error: "Todolist not provided"} };
+        const lines = currentTodoList.split('\n');
+        const updatedLines = lines.map((line: string) => {
+          if (line.startsWith(`${id}.`)) {
+            return `${id}. ${line.substring(String(id).length + 2).split(':')[0]}: Status: ${status}${note ? ` (${note})` : ''}`;
+          }
+          return line;
+        });
+        const newTodoList = updatedLines.join('\n');
+        return { results: { success: 'true', newTodoList } };
+      }
+      case 'open_page':
+      case 'see_page': {
+        if (uiCallbacks && uiCallbacks.onUpdateContext) {
+          const pagePath = FindPagePathByName(args.url);
+          if (pagePath) {
+            const context: ChatContext = {
+              id: `${pagePath}-${Date.now()}`,
+              type: 'file',
+              fileName: pagePath,
+            };
+            uiCallbacks.onUpdateContext(context);
+          }
+        }
+        return { results: { success: 'true' } };
+      }
+      case 'replace_configuration': {
+        const { page, key, value } = args;
+        // This is a placeholder.
+        // The actual implementation would depend on how configuration is stored.
+        console.warn(`Tool "replace_configuration" is not fully implemented. Page: ${page}, Key: ${key}, Value: ${value}`);
+        return { results: { success: 'true', note: 'partially implemented' } };
+      }
+      case 'highlight_text': {
+        const { page, text, color } = args;
+        // This is a placeholder.
+        // This would likely involve updating the tiptap content of a page.
+        console.warn(`Tool "highlight_text" is not fully implemented. Page: ${page}, Text: ${text}, Color: ${color}`);
+        return { results: { success: 'true', note: 'not implemented' } };
       }
       default:
         return { results: { error: `Tool ${toolName} not found` } }
     }
   },
 }
-
-
-
-
 
 const addNewPage = async (tab:string,version:string,groupTitle:string,pageName: string) => {
     if (!groupTitle) return
