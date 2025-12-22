@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef, type ReactNode } from 'react'
 import { Dialog } from 'primereact/dialog'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 import { searchService, type SearchHit, type SearchResponse } from '../../services/searchService'
 import './SearchModal.css'
 
@@ -9,33 +11,6 @@ interface SearchModalProps {
   onNavigate: (path: string, headingId?: string,tab?:string,version?:string) => void
   theme: 'light' | 'dark'
 }
-
-function highlightSearchTerms(text: string, query: string): ReactNode {
-  if (!query.trim()) return <span>{text}</span>
-
-  const searchTerms = query
-    .toLowerCase()
-    .split(/\s+/)
-    .filter(Boolean)
-    .map(term => term.replace(/[^a-z0-9]/gi, ''))
-
-  if (searchTerms.length === 0) return <span>{text}</span>
-
-  const regex = new RegExp(`\\b(${searchTerms.join('|')})\\b`, 'gi')
-  const parts = text.split(regex)
-
-  return (
-    <span>
-      {parts.map((part, index) => {
-        const isMatch = searchTerms.some(t => t.toLowerCase() === part.toLowerCase())
-        return isMatch
-          ? <span key={index} className="search-highlight">{part}</span>
-          : <span key={index}>{part}</span>
-      })}
-    </span>
-  )
-}
-
 
 export const SearchModal: React.FC<SearchModalProps> = ({
   visible,
@@ -47,6 +22,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({
   const [results, setResults] = useState<SearchHit[]>([])
   const [isSearching, setIsSearching] = useState(false)
   const [selectedIndex, setSelectedIndex] = useState(0)
+  const [hasSearched, setHasSearched] = useState(false)
 
   const inputRef = useRef<HTMLInputElement>(null)
   const resultsRef = useRef<HTMLDivElement>(null)
@@ -58,6 +34,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({
       setQuery('')
       setResults([])
       setSelectedIndex(0)
+      setHasSearched(false)
     }
 
   }, [visible])
@@ -70,12 +47,15 @@ export const SearchModal: React.FC<SearchModalProps> = ({
 
     setIsSearching(true)
     setResults([])
+    setHasSearched(true)
     try {
       const saved: any[] = []
       await searchService.search(query, 20, (response: SearchResponse) => {
         setSelectedIndex(0)
         saved.push(...response.hits)
-        setTimeout(() => setResults(saved), 0)
+        // Sort by score descending (highest score first)
+        const sorted = [...saved].sort((a, b) => (b.score || 0) - (a.score || 0))
+        setTimeout(() => setResults(sorted), 0)
       }, () => {
         setTimeout(() => {}, 0)
         setIsSearching(false)
@@ -130,7 +110,9 @@ export const SearchModal: React.FC<SearchModalProps> = ({
 
 
   const formatBreadcrumb = (hit: SearchHit): ReactNode => {
-    const parts = [hit.version, hit.tab, hit.group].filter(Boolean)
+    // Filter out 'default' version as it's the implicit version when no versions exist
+    const version = hit.version?.toLowerCase() === 'default' ? null : hit.version
+    const parts = [version, hit.tab, hit.group].filter(Boolean)
 
     return (
       <span className="search-breadcrumb">
@@ -192,7 +174,15 @@ export const SearchModal: React.FC<SearchModalProps> = ({
         {!query.trim() && (
           <div className="search-empty">
             <i className="pi pi-search" style={{ fontSize: '2rem', opacity: 0.3 }} />
-            <p className="search-empty-text">Start typing to search across all documentation</p>
+            <p className="search-empty-text">Type your search and press Enter</p>
+          </div>
+        )}
+
+        {/* Has query but hasn't searched yet */}
+        {query.trim() && !hasSearched && !isSearching && results.length === 0 && (
+          <div className="search-empty">
+            <i className="pi pi-arrow-right" style={{ fontSize: '2rem', opacity: 0.3 }} />
+            <p className="search-empty-text">Press Enter or click the button to search</p>
           </div>
         )}
 
@@ -214,8 +204,10 @@ export const SearchModal: React.FC<SearchModalProps> = ({
                   </div>
                 </div>
 
-                <div className="search-result-content">
-                  {highlightSearchTerms(hit.content_snippet, query)}
+                <div className="search-result-content search-markdown-content">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    {hit.content_snippet}
+                  </ReactMarkdown>
                 </div>
 
               </div>
@@ -225,7 +217,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({
 
 
         {/* No results */}
-        {query.trim() && results.length === 0 && !isSearching && (
+        {query.trim() && results.length === 0 && !isSearching && hasSearched && (
           <div className="search-empty">
             <i className="pi pi-search" style={{ fontSize: '2rem', opacity: 0.3 }} />
             <p className="search-empty-text">No results found for "{query}"</p>

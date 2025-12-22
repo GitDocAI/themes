@@ -11,6 +11,7 @@ import { RightPanel } from '../components/RightPanel'
 import { PrevNextNavigation } from '../components/PrevNextNavigation'
 import { SearchModal } from '../components/SearchModal'
 import { configLoader, type AISearchConfig } from '../../services/configLoader'
+import { openApiLoader } from '../../services/openApiLoader'
 import { FindPagePathByName, navigationService } from '../../services/navigationService'
 import { pageLoader } from '../../services/pageLoader'
 import type { Tab } from '../../services/configLoader'
@@ -48,6 +49,7 @@ function Documentation() {
   const [isContentAccessible, setIsContentAccessible] = useState<boolean>(false)
   const [aiSearchConfig, setAISearchConfig] = useState<AISearchConfig | undefined>(undefined)
   const [isAISearchSidebarOpen, setIsAISearchSidebarOpen] = useState<boolean>(false)
+  const [currentOpenApiSpec, setCurrentOpenApiSpec] = useState<string | undefined>(undefined)
 
   // Use custom hook to detect RightPanel content
   const rightPanelContent = useRightPanelContent(currentPath)
@@ -92,9 +94,15 @@ function Documentation() {
         const loadedTabs = configLoader.getTabs(navState.version)
         setTabs(loadedTabs)
 
-        // Set tab
+        // Set tab and check for OpenAPI spec
         if (navState.tab) {
           setCurrentTab(navState.tab)
+
+          // Check if this tab has an OpenAPI reference
+          const tabObj = loadedTabs.find(t => t.tab === navState.tab)
+          if (tabObj?.api_reference) {
+            setCurrentOpenApiSpec(tabObj.api_reference)
+          }
         }
 
         // Set page
@@ -110,6 +118,12 @@ function Documentation() {
   // This prevents the layout from flashing before a 401 redirect
   useEffect(() => {
     if (isConfigLoaded && currentPath && !isContentAccessible) {
+      // Skip verification for OpenAPI paths - they are loaded differently
+      if (currentPath.includes('api_reference')) {
+        setIsContentAccessible(true)
+        return
+      }
+
       // Try to load the page content to verify access
       pageLoader.loadPage(currentPath)
         .then(() => {
@@ -129,14 +143,46 @@ function Documentation() {
 
   // Update sidebar items when version or tab changes
   useEffect(() => {
-    if (tabs.length > 0 && currentTab) {
-      const currentTabObj = tabs.find(t => t.tab === currentTab)
-      if (currentTabObj && currentTabObj.items) {
-        setSidebarItems(currentTabObj.items)
-      } else {
-        setSidebarItems([])
+    const loadSidebarItems = async () => {
+      if (tabs.length > 0 && currentTab) {
+        const currentTabObj = tabs.find(t => t.tab === currentTab)
+
+        // Check if this tab has an OpenAPI reference
+        if (currentTabObj?.api_reference) {
+          console.log('[Documentation] Loading OpenAPI spec:', currentTabObj.api_reference)
+          setCurrentOpenApiSpec(currentTabObj.api_reference)
+
+          // Load the OpenAPI spec
+          const parsed = await openApiLoader.loadSpec(currentTabObj.api_reference)
+          if (parsed) {
+            // Get navigation items from the parsed spec
+            const navItems = openApiLoader.getNavigationItems(currentTabObj.api_reference)
+            setSidebarItems(navItems)
+
+            // If no current path, set to first endpoint
+            if (!currentPath && parsed.endpoints.length > 0) {
+              const firstEndpoint = parsed.navigation[0]
+              if (firstEndpoint?.type === 'group' && firstEndpoint.children?.[0]) {
+                setCurrentPath(firstEndpoint.children[0].page || '')
+              } else if (firstEndpoint?.page) {
+                setCurrentPath(firstEndpoint.page)
+              }
+            }
+          } else {
+            setSidebarItems([])
+          }
+        } else if (currentTabObj?.items) {
+          // Regular tab with static items
+          setCurrentOpenApiSpec(undefined)
+          setSidebarItems(currentTabObj.items)
+        } else {
+          setCurrentOpenApiSpec(undefined)
+          setSidebarItems([])
+        }
       }
     }
+
+    loadSidebarItems()
   }, [currentTab, tabs])
 
   // Update document title when page changes
@@ -251,8 +297,7 @@ function Documentation() {
 
   }
 
-  const handleTabChange = (tabName: string) => {
-
+  const handleTabChange = async (tabName: string) => {
     // Use navigation service to change tab
     const newState = navigationService.changeTab(tabName, currentVersion)
 
@@ -260,21 +305,45 @@ function Documentation() {
       setCurrentTab(newState.tab)
     }
 
-    // Update sidebar items when tab changes
+    // Check if this tab has an OpenAPI reference
     const currentTabObj = tabs.find(t => t.tab === tabName)
-    if (currentTabObj && currentTabObj.items) {
+
+    if (currentTabObj?.api_reference) {
+      // OpenAPI tab - load spec and generate navigation
+      setCurrentOpenApiSpec(currentTabObj.api_reference)
+
+      const parsed = await openApiLoader.loadSpec(currentTabObj.api_reference)
+      if (parsed) {
+        const navItems = openApiLoader.getNavigationItems(currentTabObj.api_reference)
+        setSidebarItems(navItems)
+
+        // Set first endpoint as current path
+        if (parsed.navigation.length > 0) {
+          const firstGroup = parsed.navigation[0]
+          if (firstGroup.type === 'group' && firstGroup.children?.[0]?.page) {
+            setCurrentPath(firstGroup.children[0].page)
+            navigationService.navigateTo(firstGroup.children[0].page, currentVersion, tabName)
+          } else if (firstGroup.page) {
+            setCurrentPath(firstGroup.page)
+            navigationService.navigateTo(firstGroup.page, currentVersion, tabName)
+          }
+        }
+      } else {
+        setSidebarItems([])
+      }
+    } else if (currentTabObj?.items) {
+      // Regular tab with static items
+      setCurrentOpenApiSpec(undefined)
       setSidebarItems(currentTabObj.items)
+
+      // Use navigation service's page
+      if (newState.page) {
+        setCurrentPath(newState.page)
+      }
     } else {
+      setCurrentOpenApiSpec(undefined)
       setSidebarItems([])
     }
-
-    // Always update the path, even if empty
-    if (newState.page) {
-      setCurrentPath(newState.page)
-    } else {
-      console.warn('[App] No page found for tab:', tabName)
-    }
-
   }
 
   const handleNavigate = (path: string, headingId?: string) => {
@@ -315,15 +384,17 @@ function Documentation() {
     return null
   }
   const handleSearchNavigate=(pageName:string,headingId?:string,tab?:string,version?:string)=>{
-    let path =FindPagePathByName(pageName,tab,version)||'/'
-    if(version){
-      handleVersionChange(version)
+    // Filter out 'default' version as it's the implicit version when no versions exist
+    const actualVersion = version?.toLowerCase() === 'default' ? undefined : version
+    let path = FindPagePathByName(pageName, tab, actualVersion) || '/'
+    if(actualVersion){
+      handleVersionChange(actualVersion)
     }
     if(tab){
       handleTabChange(tab)
     }
 
-    navigationService.navigateTo(path, version, tab)
+    navigationService.navigateTo(path, actualVersion, tab)
     setCurrentPath(path)
 
     if (headingId) {
@@ -501,7 +572,7 @@ function Documentation() {
         }}>
           {/* Page Viewer */}
           <div style={{ flex: '1 0 auto' }}>
-            <PageViewer key={currentPath} pagePath={currentPath} theme={theme} isDevMode={isProductionMode ? false : isDevMode} allowUpload={isDevEnvironment} />
+            <PageViewer key={currentPath} pagePath={currentPath} theme={theme} isDevMode={isProductionMode ? false : isDevMode} allowUpload={isDevEnvironment} openApiSpec={currentOpenApiSpec} />
           </div>
 
           {/* Prev/Next Navigation */}

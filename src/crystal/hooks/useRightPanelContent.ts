@@ -11,6 +11,12 @@ export const useRightPanelContent = (currentPath: string) => {
         return
       }
 
+      // Skip for API reference pages - they don't have RightPanel content
+      if (currentPath.includes('api_reference')) {
+        setRightPanelContent([])
+        return
+      }
+
       try {
         const pageData = await pageLoader.loadPage(currentPath)
         if (!pageData) {

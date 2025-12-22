@@ -3,6 +3,7 @@ import { pageLoader, type PageData } from '../../services/pageLoader'
 import { PageRenderer } from './PageRenderer'
 import { ContentService } from '../../services/contentService'
 import { apiReferenceLoader } from '../../services/apiReferenceLoader'
+import { openApiLoader } from '../../services/openApiLoader'
 import { isApiReferencePath } from '../../utils/apiReferenceUtils'
 import { ApiReference } from './ApiReference'
 import type { ApiReferenceProps } from '../../types/ApiReference'
@@ -12,9 +13,10 @@ interface PageViewerProps {
   theme: 'light' | 'dark'
   isDevMode?: boolean
   allowUpload?: boolean
+  openApiSpec?: string // Path to OpenAPI spec file if this is an OpenAPI tab
 }
 
-export const PageViewer: React.FC<PageViewerProps> = ({ pagePath, theme, isDevMode = false, allowUpload = false }) => {
+export const PageViewer: React.FC<PageViewerProps> = ({ pagePath, theme, isDevMode = false, allowUpload = false, openApiSpec }) => {
   const [pageData, setPageData] = useState<PageData | null>(null)
   const [apiReferenceData, setApiReferenceData] = useState<ApiReferenceProps | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -35,8 +37,27 @@ export const PageViewer: React.FC<PageViewerProps> = ({ pagePath, theme, isDevMo
         setIsVisible(false)
         setError(null)
 
-        // Check if this is an API reference page
-        if (isApiReferencePath(pagePath)) {
+        // Check if we have an OpenAPI spec to load from
+        if (openApiSpec) {
+          // Make sure spec is loaded
+          if (!openApiLoader.isSpecLoaded(openApiSpec)) {
+            await openApiLoader.loadSpec(openApiSpec)
+          }
+
+          // Get endpoint from the spec
+          const endpoint = openApiLoader.getEndpoint(openApiSpec, pagePath)
+
+          if (endpoint) {
+            setApiReferenceData(endpoint)
+            setPageData(null)
+            requestAnimationFrame(() => setIsVisible(true))
+          } else {
+            setError('API endpoint not found')
+            setApiReferenceData(null)
+            setPageData(null)
+          }
+        } else if (isApiReferencePath(pagePath)) {
+          // Check if this is an API reference page (legacy JSON file approach)
           const apiData = await apiReferenceLoader.loadApiReference(pagePath)
 
           if (!apiData) {
@@ -74,7 +95,7 @@ export const PageViewer: React.FC<PageViewerProps> = ({ pagePath, theme, isDevMo
     }
 
     loadPage()
-  }, [pagePath])
+  }, [pagePath, openApiSpec])
 
   if (error) {
     return (

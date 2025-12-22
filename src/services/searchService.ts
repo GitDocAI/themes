@@ -42,12 +42,16 @@ class SearchService {
    const body:any = {query,limit:maxResults}
    const cfg = await buildAxiosConfig("/search",body);
 
+   console.log('[Search] Making request to:', cfg.baseURL + cfg.url)
+   console.log('[Search] Body:', body)
+
     const response = await fetchWithAuth(cfg.baseURL + cfg.url,{
       method: cfg.method,
       headers: cfg.headers,
       body: JSON.stringify(body),
       signal: this.controller.signal
     });
+    console.log('[Search] Response status:', response.status)
     const reader = response.body!.getReader();
     const decoder = new TextDecoder();
     let buffer:string|undefined = "";
@@ -68,7 +72,9 @@ class SearchService {
             continue
           }
 
+          console.log('[Search] Line:', line)
           const parsed = JSON.parse(line.startsWith('data:')?line.replace('data:',''):line)
+          console.log('[Search] Parsed:', parsed)
           if ( Object.keys(parsed).includes("score")){
               onData({
                   success: true,
@@ -84,6 +90,7 @@ class SearchService {
               });
           }
           }catch(err:any){
+            console.log('[Search] Error parsing:', err)
             onData({
                 success: false,
                 hits: [],

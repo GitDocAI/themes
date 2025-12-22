@@ -11,6 +11,7 @@ import type { NavigationItem } from '../types/navigation'
 export interface Tab {
   tab: string
   items?: NavigationItem[]
+  api_reference?: string // Path to OpenAPI/Swagger JSON file (e.g., "/api_reference/openapi.json")
 }
 
 export interface Version {
@@ -441,6 +442,32 @@ class ConfigLoader {
    */
   getAISearchConfig(): AISearchConfig | undefined {
     return this.config?.ai_search
+  }
+
+  /**
+   * Check if a tab has an OpenAPI reference
+   */
+  isOpenAPITab(tabName: string, version?: string): boolean {
+    const tabs = this.getTabs(version)
+    const tab = tabs.find(t => t.tab === tabName)
+    return !!tab?.api_reference
+  }
+
+  /**
+   * Get OpenAPI file path for a tab
+   */
+  getOpenAPIPath(tabName: string, version?: string): string | undefined {
+    const tabs = this.getTabs(version)
+    const tab = tabs.find(t => t.tab === tabName)
+    return tab?.api_reference
+  }
+
+  /**
+   * Get tab by name
+   */
+  getTab(tabName: string, version?: string): Tab | undefined {
+    const tabs = this.getTabs(version)
+    return tabs.find(t => t.tab === tabName)
   }
 }
 

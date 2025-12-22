@@ -8,9 +8,10 @@ export interface NavigationOpenAPI {
   type: 'openapi' | 'swagger'
   title: string
   page: string
-  method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH'
+  method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH'
   reference?: string
   path?: string
+  specPath?: string // Path to the OpenAPI spec file (for dynamically loaded endpoints)
 }
 
 export interface NavigationDropdown {

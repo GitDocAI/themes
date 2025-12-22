@@ -34,6 +34,50 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const [openDropdowns, setOpenDropdowns] = useState<Set<string>>(new Set())
   const [isMobile, setIsMobile] = useState(false)
 
+  // Resize states
+  const MIN_WIDTH = 150
+  const MAX_WIDTH = 450
+  const DEFAULT_WIDTH = 280
+  const [sidebarWidth, setSidebarWidth] = useState(() => {
+    const saved = localStorage.getItem('sidebar-width')
+    return saved ? Math.min(Math.max(parseInt(saved, 10), MIN_WIDTH), MAX_WIDTH) : DEFAULT_WIDTH
+  })
+  const [isResizing, setIsResizing] = useState(false)
+
+  // Persist sidebar width
+  useEffect(() => {
+    localStorage.setItem('sidebar-width', String(sidebarWidth))
+  }, [sidebarWidth])
+
+  // Handle resize drag
+  const handleResizeMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+
+    const startX = e.clientX
+    const startWidth = sidebarWidth
+
+    const handleMouseMove = (moveEvent: MouseEvent) => {
+      const delta = moveEvent.clientX - startX
+      const newWidth = Math.min(Math.max(startWidth + delta, MIN_WIDTH), MAX_WIDTH)
+      setSidebarWidth(newWidth)
+    }
+
+    const handleMouseUp = () => {
+      document.body.style.cursor = ''
+      document.body.style.userSelect = ''
+      document.removeEventListener('mousemove', handleMouseMove)
+      document.removeEventListener('mouseup', handleMouseUp)
+      setIsResizing(false)
+    }
+
+    document.body.style.cursor = 'col-resize'
+    document.body.style.userSelect = 'none'
+    document.addEventListener('mousemove', handleMouseMove)
+    document.addEventListener('mouseup', handleMouseUp)
+    setIsResizing(true)
+  }
+
   // Dev mode states
   const [editingPagePath, setEditingPagePath] = useState<string | null>(null)
   const [editingPageTitle, setEditingPageTitle] = useState('')
@@ -640,7 +684,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 </div>
               )}
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', paddingLeft: '0' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', paddingLeft: '0', minWidth: 0 }}>
               {item.children?.map(child => renderNestedItem(child, 1, item.title))}
 
               {/* Add New Page button - Only in Dev Mode */}
@@ -862,7 +906,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   transition: 'all 0.2s',
                   boxShadow: isActive ? `0 2px 8px rgba(${primaryRgb}, 0.15)` : 'none',
                   cursor: 'pointer',
-                  textAlign: 'left'
+                  textAlign: 'left',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
                 }}
                 onMouseEnter={(e) => {
                   if (!isActive) {
@@ -928,21 +975,29 @@ export const Sidebar: React.FC<SidebarProps> = ({
               }
             }}
           >
-            <span
-              style={{
-                padding: '5px 12px',
-                borderRadius: '8px',
-                fontSize: '12px',
-                fontWeight: 'bold',
-                color: '#ffffff',
-                background: methodColors[item.method] || methodColors.GET,
-                boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                flexShrink: 0
-              }}
-            >
-              {item.method}
-            </span>
-            <span style={{ flexGrow: 1, minWidth: 0 }}>{item.title}</span>
+            {item.method && (
+              <span
+                style={{
+                  padding: '5px 12px',
+                  borderRadius: '8px',
+                  fontSize: '12px',
+                  fontWeight: 'bold',
+                  color: '#ffffff',
+                  background: methodColors[item.method] || methodColors.GET,
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                  flexShrink: 0
+                }}
+              >
+                {item.method}
+              </span>
+            )}
+            <span style={{
+              flexGrow: 1,
+              minWidth: 0,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}>{item.title}</span>
           </a>
         )
       }
@@ -981,31 +1036,38 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </button>
       )}
 
-      {/* Sidebar */}
-      <aside
+      {/* Sidebar Container */}
+      <div
         style={{
           position: isMobile ? 'fixed' : 'sticky',
           top: isMobile ? '0' : 'var(--sidebar-top, 128px)',
           left: isMobile && !isOpen ? '-100%' : '0',
           height: isMobile ? '100vh' : 'calc(100vh - var(--sidebar-top, 128px))',
-          width: '280px',
-          minWidth: '280px',
-          maxWidth: '280px',
-          overflowY: 'auto',
-          padding: '0px 16px 24px 0px',
+          width: isMobile ? '280px' : `${sidebarWidth}px`,
+          minWidth: isMobile ? '280px' : `${MIN_WIDTH}px`,
+          maxWidth: isMobile ? '280px' : `${MAX_WIDTH}px`,
           flexShrink: 0,
           zIndex: isMobile ? 1100 : 10,
           transition: isMobile ? 'left 0.3s ease-in-out' : 'none',
-          borderRight: `1px solid ${theme === 'light' ? '#e5e7eb' : '#374151'}`,
           backgroundColor: isMobile
             ? (theme === 'light' ? '#ffffff' : '#111827')
             : 'transparent',
           backdropFilter: isMobile ? 'blur(8px)' : 'none',
           alignSelf: 'flex-start',
-          willChange: 'position',
+          display: 'flex',
         }}
       >
-        {/* Mobile close button */}
+        {/* Sidebar Content */}
+        <aside
+          style={{
+            flex: 1,
+            overflowY: 'auto',
+            overflowX: 'hidden',
+            padding: '0px 16px 24px 0px',
+            minWidth: 0,
+          }}
+        >
+          {/* Mobile close button */}
         {isMobile && (
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '16px' }}>
             <button
@@ -1023,7 +1085,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
         )}
 
-        <nav style={{ display: 'flex', flexDirection: 'column', gap: '4px', paddingTop: '16px' }}>
+        <nav style={{ display: 'flex', flexDirection: 'column', gap: '4px', paddingTop: '16px', minWidth: 0 }}>
           {items.map(item => renderNestedItem(item, 0))}
 
           {/* Add New Group button - Only in Dev Mode and when there's a tab */}
@@ -1062,6 +1124,42 @@ export const Sidebar: React.FC<SidebarProps> = ({
           )}
         </nav>
       </aside>
+
+        {/* Resize Handle - Only on desktop */}
+        {!isMobile && (
+          <div
+            onMouseDown={handleResizeMouseDown}
+            style={{
+              width: '8px',
+              cursor: 'col-resize',
+              backgroundColor: isResizing ? `rgba(${primaryRgb}, 0.1)` : 'transparent',
+              borderRight: isResizing
+                ? `2px solid ${primaryColor}`
+                : `2px solid transparent`,
+              transition: 'background-color 0.2s, border-color 0.2s',
+              flexShrink: 0,
+              marginLeft: '4px',
+              marginRight: '-4px',
+            }}
+            onMouseEnter={(e) => {
+              if (!isResizing) {
+                e.currentTarget.style.borderRightColor = theme === 'light'
+                  ? 'rgba(0,0,0,0.3)'
+                  : 'rgba(255,255,255,0.3)'
+                e.currentTarget.style.backgroundColor = theme === 'light'
+                  ? 'rgba(0,0,0,0.05)'
+                  : 'rgba(255,255,255,0.05)'
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!isResizing) {
+                e.currentTarget.style.borderRightColor = 'transparent'
+                e.currentTarget.style.backgroundColor = 'transparent'
+              }
+            }}
+          />
+        )}
+      </div>
 
       {/* Mobile overlay */}
       {isMobile && isOpen && (
