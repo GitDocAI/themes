@@ -25,6 +25,15 @@ export interface Navigation {
   items?:NavigationItem[]
 }
 
+export interface AISearchConfig {
+  placeholder?: string
+  welcomeMessage?: string
+  suggestedQuestions?: string[]
+  triggerLabel?: string
+  chatTitle?: string
+  chatIcon?: string
+}
+
 export interface GitDocAIConfig {
   name?: string
   description?: string
@@ -62,6 +71,7 @@ export interface GitDocAIConfig {
     reference: string
   }>
   navigation?: Navigation
+  ai_search?: AISearchConfig
 }
 
 class ConfigLoader {
@@ -424,6 +434,13 @@ class ConfigLoader {
     const hasGlobalTabs = (this.config?.navigation?.tabs?.length || 0) > 0
     const hasVersionTabs = this.config?.navigation?.versions?.some(v => (v.tabs?.length || 0) > 0) || false
     return hasGlobalTabs || hasVersionTabs
+  }
+
+  /**
+   * Get AI Search configuration
+   */
+  getAISearchConfig(): AISearchConfig | undefined {
+    return this.config?.ai_search
   }
 }
 

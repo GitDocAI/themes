@@ -10,7 +10,7 @@ import { TOC } from '../components/TOC'
 import { RightPanel } from '../components/RightPanel'
 import { PrevNextNavigation } from '../components/PrevNextNavigation'
 import { SearchModal } from '../components/SearchModal'
-import { configLoader } from '../../services/configLoader'
+import { configLoader, type AISearchConfig } from '../../services/configLoader'
 import { FindPagePathByName, navigationService } from '../../services/navigationService'
 import { pageLoader } from '../../services/pageLoader'
 import type { Tab } from '../../services/configLoader'
@@ -24,6 +24,7 @@ import 'primeicons/primeicons.css'
 import './Theme.css'
 import OptionsSidebar from '../components/OptionsSidebar'
 import { ChatSidebar } from '../components/ChatSidebar'
+import { AISearchSidebar } from '../components/AISearchSidebar'
 import TextSelectionContextMenu from '../components/ContextMenu'
 import {type ChatContext} from '../../services/agentService'
 function Documentation() {
@@ -45,6 +46,8 @@ function Documentation() {
   const [showSearchModal, setShowSearchModal] = useState<boolean>(false)
   const [aiContexts,setAiContexts] =useState<ChatContext[]>([])
   const [isContentAccessible, setIsContentAccessible] = useState<boolean>(false)
+  const [aiSearchConfig, setAISearchConfig] = useState<AISearchConfig | undefined>(undefined)
+  const [isAISearchSidebarOpen, setIsAISearchSidebarOpen] = useState<boolean>(false)
 
   // Use custom hook to detect RightPanel content
   const rightPanelContent = useRightPanelContent(currentPath)
@@ -75,6 +78,7 @@ function Documentation() {
       const config = configLoader.getConfig()
       if (config) {
         setPrimaryColor(configLoader.getPrimaryColor(theme))
+        setAISearchConfig(configLoader.getAISearchConfig())
 
         // Initialize navigation state
         const navState = navigationService.initialize()
@@ -428,6 +432,7 @@ function Documentation() {
           isDevMode={isProductionMode ? false : isDevMode}
           allowUpload={isDevEnvironment}
           onSearchClick={() => setShowSearchModal(true)}
+          onAISearchClick={() => setIsAISearchSidebarOpen(true)}
         />
         {tabs.length > 0 && (
           <TabBar
@@ -549,6 +554,17 @@ function Documentation() {
         onNavigate={ handleSearchNavigate}
         theme={theme}
       />
+
+      {/* AI Search Sidebar */}
+      {aiSearchConfig && (
+        <AISearchSidebar
+          config={aiSearchConfig}
+          theme={theme}
+          primaryColor={primaryColor}
+          isOpen={isAISearchSidebarOpen}
+          onClose={() => setIsAISearchSidebarOpen(false)}
+        />
+      )}
     </TextSelectionContextMenu>
   )
 }

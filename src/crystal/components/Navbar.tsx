@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { configLoader, type Version } from '../../services/configLoader'
+import { configLoader, type Version, type AISearchConfig } from '../../services/configLoader'
 import { useConfig } from '../hooks/useConfig'
 import { VersionSwitcher } from './VersionSwitcher'
 import { LogoEditor } from './LogoEditor'
@@ -7,6 +7,7 @@ import { Image } from './ui/Image'
 import { ContentService } from '../../services/contentService'
 import { ProfileMenu } from './ProfileMenu'
 import { ProfileModal } from './ProfileModal'
+import { AISearchButton } from './AISearchButton'
 import authService from '../../services/authService'
 
 interface NavbarProps {
@@ -17,11 +18,13 @@ interface NavbarProps {
   isDevMode?: boolean
   allowUpload?: boolean
   onSearchClick?: () => void
+  onAISearchClick?: () => void
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ theme, onThemeChange, onVersionChange, currentVersion, isDevMode = false, allowUpload = false, onSearchClick = () => {} }) => {
+export const Navbar: React.FC<NavbarProps> = ({ theme, onThemeChange, onVersionChange, currentVersion, isDevMode = false, allowUpload = false, onSearchClick = () => {}, onAISearchClick }) => {
   const { updateTrigger } = useConfig()
   const [logo, setLogo] = useState('')
+  const [aiSearchConfig, setAISearchConfig] = useState<AISearchConfig | undefined>(undefined)
   const [logoLoaded, setLogoLoaded] = useState(false)
   const [logoError, setLogoError] = useState(false)
   const [siteName, setSiteName] = useState('')
@@ -68,6 +71,7 @@ export const Navbar: React.FC<NavbarProps> = ({ theme, onThemeChange, onVersionC
       setNavItems(configLoader.getNavbarItems())
       setVersions(configLoader.getVersions())
       setHasVersions(configLoader.hasVersions())
+      setAISearchConfig(configLoader.getAISearchConfig())
       setColors({
         primary: configLoader.getPrimaryColor(theme),
         background: configLoader.getBackgroundColor(theme),
@@ -668,6 +672,16 @@ export const Navbar: React.FC<NavbarProps> = ({ theme, onThemeChange, onVersionC
           }
           return null
         })}
+
+        {/* AI Search Button */}
+        {aiSearchConfig && (
+          <AISearchButton
+            config={aiSearchConfig}
+            theme={theme}
+            primaryColor={colors.primary}
+            onClick={onAISearchClick}
+          />
+        )}
 
         {/* Theme Toggle Button */}
         <button
