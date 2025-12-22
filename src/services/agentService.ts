@@ -47,11 +47,11 @@ class AIStreamService {
     context:ChatContext[],
     chat_resume:string,
     todo_list:string,
-    results:Map<string,any>,
+    results:any,
     onData: (msg: AIStreamResponse) => void,
     onFinished: () => void
   ){
-    await this.stream('/ai/edit',{edit_prompt:question,content:"",context,chat_resume,todo_list,results:Object.fromEntries(results)},onData,onFinished)
+    await this.stream('/ai/edit',{edit_prompt:question,content:"",context,chat_resume,todo_list,results},onData,onFinished)
   }
 
   async stream(
