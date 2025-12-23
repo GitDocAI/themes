@@ -1,7 +1,12 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { configLoader } from '../../services/configLoader'
 import { useConfig } from '../hooks/useConfig'
 import { ContentService } from '../../services/contentService'
+
+const SIDEBAR_WIDTH_KEY = 'settings_sidebar_width'
+const MIN_WIDTH = 350
+const MAX_WIDTH = 600
+const DEFAULT_WIDTH = 450
 
 interface SettingsSidebarProps {
   theme: 'light' | 'dark'
@@ -54,6 +59,50 @@ export const SettingsSidebar: React.FC<SettingsSidebarProps> = ({
   const faviconInputRef = useRef<HTMLInputElement>(null)
   const [faviconUploading, setFaviconUploading] = useState(false)
   const [bannerEnabled, setBannerEnabled] = useState(false)
+  const [sidebarWidth, setSidebarWidth] = useState(() => {
+    const saved = localStorage.getItem(SIDEBAR_WIDTH_KEY)
+    return saved ? parseInt(saved, 10) : DEFAULT_WIDTH
+  })
+  const [isResizing, setIsResizing] = useState(false)
+  const sidebarRef = useRef<HTMLDivElement>(null)
+
+  // Resize handlers
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault()
+    setIsResizing(true)
+  }, [])
+
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    if (!isResizing) return
+
+    const newWidth = window.innerWidth - e.clientX
+    const clampedWidth = Math.max(MIN_WIDTH, Math.min(MAX_WIDTH, newWidth))
+    setSidebarWidth(clampedWidth)
+  }, [isResizing])
+
+  const handleMouseUp = useCallback(() => {
+    if (isResizing) {
+      setIsResizing(false)
+      localStorage.setItem(SIDEBAR_WIDTH_KEY, sidebarWidth.toString())
+    }
+  }, [isResizing, sidebarWidth])
+
+  // Add/remove mouse event listeners for resize
+  useEffect(() => {
+    if (isResizing) {
+      document.addEventListener('mousemove', handleMouseMove)
+      document.addEventListener('mouseup', handleMouseUp)
+      document.body.style.cursor = 'ew-resize'
+      document.body.style.userSelect = 'none'
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove)
+      document.removeEventListener('mouseup', handleMouseUp)
+      document.body.style.cursor = ''
+      document.body.style.userSelect = ''
+    }
+  }, [isResizing, handleMouseMove, handleMouseUp])
 
   // Load current config on mount and when config changes
   useEffect(() => {
@@ -286,22 +335,48 @@ export const SettingsSidebar: React.FC<SettingsSidebarProps> = ({
 
       {/* Settings Sidebar */}
       <div
+        ref={sidebarRef}
         style={{
           position: 'fixed',
           top: 0,
-          right: isOpen ? 0 : '-450px',
-          width: '450px',
+          right: isOpen ? 0 : `-${sidebarWidth}px`,
+          width: `${sidebarWidth}px`,
           height: '100vh',
           backgroundColor: theme === 'light' ? '#ffffff' : '#1f2937',
           borderLeft: `1px solid ${theme === 'light' ? '#e5e7eb' : '#374151'}`,
           boxShadow: isOpen ? '-4px 0 12px rgba(0,0,0,0.1)' : 'none',
-          transition: 'right 0.3s ease',
+          transition: isResizing ? 'none' : 'right 0.3s ease',
           zIndex: 9998,
           display: 'flex',
           flexDirection: 'column',
           overflow: 'hidden'
         }}
       >
+        {/* Resize Handle */}
+        <div
+          onMouseDown={handleMouseDown}
+          style={{
+            position: 'absolute',
+            left: 0,
+            top: 0,
+            width: '6px',
+            height: '100%',
+            cursor: 'ew-resize',
+            backgroundColor: isResizing ? (theme === 'light' ? '#3b82f6' : '#8b5cf6') : 'transparent',
+            transition: 'background-color 0.2s ease',
+            zIndex: 10,
+          }}
+          onMouseEnter={(e) => {
+            if (!isResizing) {
+              e.currentTarget.style.backgroundColor = theme === 'light' ? 'rgba(59, 130, 246, 0.4)' : 'rgba(139, 92, 246, 0.4)'
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (!isResizing) {
+              e.currentTarget.style.backgroundColor = 'transparent'
+            }
+          }}
+        />
         {/* Header */}
         <div
           style={{

@@ -134,7 +134,13 @@ class NavigationService {
   updateURL(state: NavigationState): void {
     if (!state.page) return
     // Use the page path directly in the URL (without .mdx)
-    const cleanPath = state.page.replace(/\.mdx$/, '')
+    let cleanPath = state.page.replace(/\.mdx$/, '')
+    // Remove any double slashes (except after protocol) to avoid URL being interpreted as absolute
+    cleanPath = cleanPath.replace(/\/+/g, '/')
+    // Ensure path starts with / to avoid being interpreted as absolute URL
+    if (!cleanPath.startsWith('/')) {
+      cleanPath = '/' + cleanPath
+    }
     // Store version and tab in localStorage for context, but don't show in URL
     window.history.replaceState({ ...state }, '', cleanPath)
   }

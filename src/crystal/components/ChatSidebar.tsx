@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { SearchModal } from './SearchModal'
 import { FindPagePathByName } from '../../services/navigationService'
 import { aiStreamService,type ChatContext, type AIStreamResponse } from '../../services/agentService'
@@ -6,6 +6,11 @@ import Markdown from 'react-markdown';
 import { ConfirmationModal } from './ConfirmationModal'
 import { toolExecutor } from '../../services/toolExecutorService'
 const viteMode = import.meta.env.VITE_MODE || "production";
+
+const SIDEBAR_WIDTH_KEY = 'chat_sidebar_width'
+const MIN_WIDTH = 350
+const MAX_WIDTH = 700
+const DEFAULT_WIDTH = 450
 
 interface Message {
   id: string
@@ -41,7 +46,7 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      text: "Hey! 👋 How can I help you today?",
+      text: "Hey! 👋 I'm your AI editing assistant. I can help you create, modify, and organize your documentation in real-time. Just tell me what you'd like to change!",
       sender: 'bot',
       timestamp: new Date()
     }
@@ -51,6 +56,50 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
   const [isTyping, setIsTyping] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
+  const sidebarRef = useRef<HTMLDivElement>(null)
+  const [sidebarWidth, setSidebarWidth] = useState(() => {
+    const saved = localStorage.getItem(SIDEBAR_WIDTH_KEY)
+    return saved ? parseInt(saved, 10) : DEFAULT_WIDTH
+  })
+  const [isResizing, setIsResizing] = useState(false)
+
+  // Resize handlers
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault()
+    setIsResizing(true)
+  }, [])
+
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    if (!isResizing) return
+
+    const newWidth = window.innerWidth - e.clientX
+    const clampedWidth = Math.max(MIN_WIDTH, Math.min(MAX_WIDTH, newWidth))
+    setSidebarWidth(clampedWidth)
+  }, [isResizing])
+
+  const handleMouseUp = useCallback(() => {
+    if (isResizing) {
+      setIsResizing(false)
+      localStorage.setItem(SIDEBAR_WIDTH_KEY, sidebarWidth.toString())
+    }
+  }, [isResizing, sidebarWidth])
+
+  // Add/remove mouse event listeners for resize
+  useEffect(() => {
+    if (isResizing) {
+      document.addEventListener('mousemove', handleMouseMove)
+      document.addEventListener('mouseup', handleMouseUp)
+      document.body.style.cursor = 'ew-resize'
+      document.body.style.userSelect = 'none'
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove)
+      document.removeEventListener('mouseup', handleMouseUp)
+      document.body.style.cursor = ''
+      document.body.style.userSelect = ''
+    }
+  }, [isResizing, handleMouseMove, handleMouseUp])
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -362,7 +411,7 @@ const handleSendMessage = async () => {
             ? '0 4px 12px rgba(59, 130, 246, 0.4)'
             : '0 4px 12px rgba(99, 102, 241, 0.4)'
         }}
-        title="AI Assistant"
+        title="AI Editor - Edit documentation in real-time"
       >
         {isOpen ? (
           <i className="pi pi-times" style={{ fontSize: '16px' }}></i>
@@ -403,22 +452,63 @@ const handleSendMessage = async () => {
 
       {/* Chat Sidebar */}
       <div
+        ref={sidebarRef}
         style={{
           position: 'fixed',
           top: 0,
-          right: isOpen ? 0 : '-450px',
-          width: '450px',
+          right: isOpen ? 0 : `-${sidebarWidth}px`,
+          width: `${sidebarWidth}px`,
           height: '100vh',
           backgroundColor: theme === 'light' ? '#ffffff' : '#1f2937',
           borderLeft: `1px solid ${theme === 'light' ? '#e5e7eb' : '#374151'}`,
           boxShadow: isOpen ? '-4px 0 12px rgba(0,0,0,0.1)' : 'none',
-          transition: 'right 0.3s ease',
+          transition: isResizing ? 'none' : 'right 0.3s ease',
           zIndex: 9998,
           display: 'flex',
           flexDirection: 'column',
           overflow: 'hidden'
         }}
       >
+        {/* Resize Handle */}
+        <div
+          onMouseDown={handleMouseDown}
+          style={{
+            position: 'absolute',
+            left: '-4px',
+            top: 0,
+            width: '12px',
+            height: '100%',
+            cursor: 'ew-resize',
+            backgroundColor: 'transparent',
+            zIndex: 10000,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+          onMouseEnter={(e) => {
+            const indicator = e.currentTarget.querySelector('.resize-indicator') as HTMLElement
+            if (indicator && !isResizing) {
+              indicator.style.backgroundColor = theme === 'light' ? 'rgba(59, 130, 246, 0.6)' : 'rgba(99, 102, 241, 0.6)'
+            }
+          }}
+          onMouseLeave={(e) => {
+            const indicator = e.currentTarget.querySelector('.resize-indicator') as HTMLElement
+            if (indicator && !isResizing) {
+              indicator.style.backgroundColor = 'transparent'
+            }
+          }}
+        >
+          <div
+            className="resize-indicator"
+            style={{
+              width: '4px',
+              height: '100%',
+              backgroundColor: isResizing ? (theme === 'light' ? '#3b82f6' : '#6366f1') : 'transparent',
+              transition: 'background-color 0.2s ease',
+              borderRadius: '2px',
+            }}
+          />
+        </div>
         {/* Header */}
         <div
           style={{
@@ -498,7 +588,7 @@ const handleSendMessage = async () => {
                 color: '#ffffff',
                 letterSpacing: '-0.3px'
               }}>
-                AI Assistant
+                AI Editor
               </h2>
               <p style={{
                 margin: '2px 0 0 0',
@@ -515,7 +605,7 @@ const handleSendMessage = async () => {
                   backgroundColor: '#22c55e',
                   display: 'inline-block'
                 }}></span>
-                Ready to help
+                Edit docs in real-time
               </p>
             </div>
           </div>

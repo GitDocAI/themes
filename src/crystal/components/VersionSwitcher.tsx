@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { VersionModal } from './VersionModal'
 import { DeleteConfirmModal } from './DeleteConfirmModal'
 import { configLoader } from '../../services/configLoader'
@@ -31,6 +32,7 @@ export const VersionSwitcher: React.FC<VersionSwitcherProps> = ({
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [editingVersion, setEditingVersion] = useState<string | null>(null)
   const [deletingVersion, setDeletingVersion] = useState<string | null>(null)
+  const [isRenaming, setIsRenaming] = useState(false)
   const [draggedVersionIndex, setDraggedVersionIndex] = useState<number | null>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
@@ -69,13 +71,14 @@ export const VersionSwitcher: React.FC<VersionSwitcherProps> = ({
     setIsOpen(!isOpen)
   }
 
-  const normalizeName=(name: string): string=> {
-    name = name.toLowerCase().replace(/ /g, "-");
-    const reg = /[^a-z0-9\-._]+/g;
-    return name.replace(reg, "");
-  }
+  // Sanitize function - must match the one used in Sidebar/TabBar for consistency
+  const sanitize = (str: string) => str.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '')
+
+  // Sanitize for version names - allows dots for semantic versioning (v1.0.0)
+  const sanitizeVersion = (str: string) => str.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_.]/g, '')
 
   const handleAddVersion = async (versionName: string) => {
+    setIsRenaming(true)
     try {
       // Fetch current config
       const config = await configLoader.loadConfig()
@@ -84,62 +87,162 @@ export const VersionSwitcher: React.FC<VersionSwitcherProps> = ({
       if (!config.navigation) {
         config.navigation = { versions: [] }
       }
+
+      const hasExistingVersions = config.navigation.versions && config.navigation.versions.length > 0
+      const hasExistingTabs = config.navigation.tabs && config.navigation.tabs.length > 0
+
       if (!config.navigation.versions) {
         config.navigation.versions = []
       }
 
-      // Create new version entry with empty tabs
-      const newVersion = {
-        version: versionName,
-        tabs: []
+      // Create folder for the new version
+      const versionFolderPath = `/${sanitizeVersion(versionName)}`
+
+      try {
+        await ContentService.createEntryFolder(versionFolderPath)
+      } catch (folderError) {
+        console.warn(`[VersionSwitcher] Could not create version folder:`, folderError)
       }
 
-      const path =`${!currentVersion?"":`/${normalizeName(currentVersion)}`}}`;
-      ContentService.createEntryFolder(path)
+      // If no versions exist but there are tabs, migrate them to the new version
+      if (!hasExistingVersions && hasExistingTabs && config.navigation.tabs) {
+        // Clone tabs to avoid mutation issues
+        const existingTabs = JSON.parse(JSON.stringify(config.navigation.tabs))
 
-      config.navigation.versions.push(newVersion)
+        // Move files for each tab and update paths
+        for (const tab of existingTabs) {
+          const tabName = tab.tab
+          const oldTabFolderPath = `/${sanitize(tabName)}`
+          const newTabFolderPath = `/${sanitizeVersion(versionName)}/${sanitize(tabName)}`
+
+          // Move the tab folder to the new version folder
+          try {
+            await ContentService.renameFile(oldTabFolderPath, newTabFolderPath, 'folder')
+          } catch (moveError) {
+            console.warn(`[VersionSwitcher] Could not move tab folder ${oldTabFolderPath}:`, moveError)
+          }
+
+          // Update all page paths within this tab
+          if (tab.items) {
+            for (const group of tab.items) {
+              const groupItem = group as any
+              if (groupItem.children) {
+                for (const page of groupItem.children) {
+                  if (page.page) {
+                    // Update path: prepend version to the path
+                    page.page = `/${sanitizeVersion(versionName)}${page.page}`
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        // Create new version with migrated tabs
+        const newVersion = {
+          version: versionName,
+          tabs: existingTabs
+        }
+
+        config.navigation.versions.push(newVersion)
+
+        // Remove the old tabs array since we're now using versions
+        delete config.navigation.tabs
+
+      } else {
+        // Create new empty version (normal behavior when versions already exist)
+        const newVersion = {
+          version: versionName,
+          tabs: [] as any[]
+        }
+        config.navigation.versions.push(newVersion)
+      }
 
       // Save config
       await ContentService.saveConfig(config)
 
       // Update config in memory instead of reloading
       configLoader.updateConfig(config)
+
+      // Switch to the new version
+      if (onVersionChange) {
+        onVersionChange(versionName)
+      }
     } catch (error) {
       console.error('[VersionSwitcher] Error adding version:', error)
       throw error
+    } finally {
+      setIsRenaming(false)
     }
   }
 
   const handleEditVersion = async (newVersionName: string) => {
     if (!editingVersion) return
 
+    setIsRenaming(true)
     try {
       // Fetch current config
       const config = await configLoader.loadConfig()
 
-      // Find and update version name in navigation.versions
+      // Calculate old and new folder paths
+      const oldFolderPath = `/${sanitizeVersion(editingVersion)}`
+      const newFolderPath = `/${sanitizeVersion(newVersionName)}`
+
+      // Move the entire version folder if paths are different
+      if (oldFolderPath !== newFolderPath) {
+        await ContentService.renameFile(oldFolderPath, newFolderPath, 'folder')
+      }
+
+      // Find and update version name and all page paths in navigation.versions
       if (config.navigation?.versions) {
         const versionIndex = config.navigation.versions.findIndex(
           (v: Version) => v.version === editingVersion
         )
 
         if (versionIndex !== -1) {
-          config.navigation.versions[versionIndex].version = newVersionName
+          const versionConfig = config.navigation.versions[versionIndex]
+          versionConfig.version = newVersionName
+
+          // Update all page paths within all tabs and groups
+          if (versionConfig.tabs) {
+            for (const tab of versionConfig.tabs) {
+              if (tab.items) {
+                for (const group of tab.items) {
+                  const groupItem = group as any
+                  if (groupItem.children) {
+                    for (const page of groupItem.children) {
+                      if (page.page) {
+                        // Replace old version name with new version name in path
+                        page.page = page.page.replace(
+                          `/${sanitizeVersion(editingVersion)}/`,
+                          `/${sanitizeVersion(newVersionName)}/`
+                        )
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
         }
       }
 
-      const old_path =`${!currentVersion?"":`/${normalizeName(currentVersion)}`}}`;
-      const new_path =`${!newVersionName?"":`/${normalizeName(newVersionName)}`}}`;
-      ContentService.renameFile(old_path,new_path,"folder")
       // Save config
       await ContentService.saveConfig(config)
 
       // Update config in memory instead of reloading
       configLoader.updateConfig(config)
       setEditingVersion(null)
+
+      // If current version was renamed, update to new name
+      if (editingVersion === selectedVersion && onVersionChange) {
+        onVersionChange(newVersionName)
+      }
     } catch (error) {
       console.error('[VersionSwitcher] Error editing version:', error)
       throw error
+    } finally {
+      setIsRenaming(false)
     }
   }
 
@@ -157,7 +260,7 @@ export const VersionSwitcher: React.FC<VersionSwitcherProps> = ({
         )
       }
 
-      const path =`${!currentVersion?"":`/${normalizeName(currentVersion)}`}}`;
+      const path =`${!currentVersion?"":`/${sanitize(currentVersion)}`}}`;
       ContentService.removeItem(path)
       // Save config
       await ContentService.saveConfig(config)
@@ -523,6 +626,57 @@ export const VersionSwitcher: React.FC<VersionSwitcherProps> = ({
           itemName={deletingVersion}
           itemType="version"
         />
+      )}
+
+      {/* Loading Overlay */}
+      {isRenaming && createPortal(
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 10000,
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: theme === 'light' ? '#ffffff' : '#1f2937',
+              padding: '24px 32px',
+              borderRadius: '12px',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '16px',
+              boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)',
+            }}
+          >
+            <div
+              style={{
+                width: '40px',
+                height: '40px',
+                border: `3px solid ${theme === 'light' ? '#e5e7eb' : '#374151'}`,
+                borderTopColor: '#3b82f6',
+                borderRadius: '50%',
+                animation: 'spin 1s linear infinite',
+              }}
+            />
+            <span style={{ color: theme === 'light' ? '#374151' : '#d1d5db', fontSize: '14px' }}>
+              Renaming files...
+            </span>
+          </div>
+          <style>{`
+            @keyframes spin {
+              to { transform: rotate(360deg); }
+            }
+          `}</style>
+        </div>,
+        document.body
       )}
     </div>
   )

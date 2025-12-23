@@ -34,6 +34,7 @@ export const TabBar: React.FC<TabBarProps> = ({
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [deletingTabIndex, setDeletingTabIndex] = useState<number | null>(null)
   const [deletingTabName, setDeletingTabName] = useState<string>('')
+  const [isRenaming, setIsRenaming] = useState(false)
 
   useEffect(() => {
     // Get background color from config
@@ -70,20 +71,90 @@ export const TabBar: React.FC<TabBarProps> = ({
     return normalized === 'api reference'
   }
 
-  const handleSaveTabName = async () => {
-    if (editingTabIndex === null || !currentVersion) return
+  // Helper function to sanitize strings for paths
+  const sanitize = (str: string) => str.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '')
 
+  // Helper function to generate page path
+  const generatePagePath = (tabName: string, groupTitle: string, pageTitle: string): string => {
+    const parts = [currentVersion, sanitize(tabName), sanitize(groupTitle), sanitize(pageTitle)]
+      .filter(part => part && part.length > 0)
+    return `/${parts.join('/')}.mdx`
+  }
+
+  // Helper function to generate tab folder path
+  const generateTabFolderPath = (tabName: string): string => {
+    const parts = [currentVersion, sanitize(tabName)]
+      .filter(part => part && part.length > 0)
+    return `/${parts.join('/')}`
+  }
+
+  const handleSaveTabName = async () => {
+    if (editingTabIndex === null) return
+
+    setIsRenaming(true)
     try {
       // Fetch current config
       const config = await configLoader.loadConfig()
-      // Find the version and update the tab name
-      if (config.navigation?.versions) {
+      const oldTabName = tabs[editingTabIndex]?.tab
+
+      // Calculate old and new folder paths
+      const oldFolderPath = oldTabName ? generateTabFolderPath(oldTabName) : null
+      const newFolderPath = generateTabFolderPath(editingTabName)
+
+      // Move the entire tab folder if paths are different
+      if (oldFolderPath && oldFolderPath !== newFolderPath) {
+        await ContentService.renameFile(oldFolderPath, newFolderPath, 'folder')
+      }
+
+      // Find the version and update the tab name and page paths in config
+      if (config.navigation?.versions && currentVersion) {
         const versionIndex = config.navigation.versions.findIndex(
           (v: any) => v.version === currentVersion
         )
 
         if (versionIndex !== -1 && config.navigation.versions[versionIndex].tabs && config.navigation.versions[versionIndex].tabs[editingTabIndex]) {
-          config.navigation.versions[versionIndex].tabs[editingTabIndex].tab = editingTabName
+          const tab = config.navigation.versions[versionIndex].tabs[editingTabIndex]
+
+          // Update page paths in config
+          if (tab.items) {
+            for (const group of tab.items) {
+              const groupItem = group as any
+              if (groupItem.children) {
+                for (const page of groupItem.children) {
+                  if (page.page && page.title && groupItem.title) {
+                    const newPath = generatePagePath(editingTabName, groupItem.title, page.title)
+                    page.page = newPath
+                  }
+                }
+              }
+            }
+          }
+
+          // Update tab name
+          tab.tab = editingTabName
+        }
+      } else if (config.navigation?.tabs) {
+        // Handle direct tabs structure (no versions)
+        if (config.navigation.tabs[editingTabIndex]) {
+          const tab = config.navigation.tabs[editingTabIndex]
+
+          // Update page paths in config
+          if (tab.items) {
+            for (const group of tab.items) {
+              const groupItem = group as any
+              if (groupItem.children) {
+                for (const page of groupItem.children) {
+                  if (page.page && page.title && groupItem.title) {
+                    const newPath = generatePagePath(editingTabName, groupItem.title, page.title)
+                    page.page = newPath
+                  }
+                }
+              }
+            }
+          }
+
+          // Update tab name
+          tab.tab = editingTabName
         }
       }
 
@@ -94,8 +165,15 @@ export const TabBar: React.FC<TabBarProps> = ({
       configLoader.updateConfig(config)
       setEditingTabIndex(null)
       setEditingTabName('')
+
+      // If current tab was renamed, update to new name
+      if (oldTabName === selectedTab && onTabChange) {
+        onTabChange(editingTabName)
+      }
     } catch (error) {
       console.error('[TabBar] Error saving tab name:', error)
+    } finally {
+      setIsRenaming(false)
     }
   }
 
@@ -152,9 +230,6 @@ export const TabBar: React.FC<TabBarProps> = ({
 
 
   const handleAddNewTab = async () => {
-
-
-
     const newTab = {
       tab: `New Tab`,
       items: []
@@ -171,26 +246,26 @@ export const TabBar: React.FC<TabBarProps> = ({
           (v: any) => v.version === currentVersion
         )
         if (versionIndex !== -1 && config.navigation.versions[versionIndex].tabs) {
-          if(config.navigation.versions[versionIndex].tabs.length>=0){
+          if(config.navigation.versions[versionIndex].tabs.length >= 0){
             newTab.tab += ` ${config.navigation.versions[versionIndex].tabs.length}`
           }
           config.navigation.versions[versionIndex].tabs.push(newTab)
         }
-      }else{
-
+      } else {
           if(!config.navigation!.tabs){
             config.navigation!.tabs=[]
           }
-          if(config.navigation.tabs.length>=0){
+          if(config.navigation.tabs.length >= 0){
             newTab.tab += ` ${config.navigation.tabs.length}`
           }
         config.navigation?.tabs?.push(newTab)
       }
 
-      // Save config
+      // Create folder for the new tab
+      const path = generateTabFolderPath(newTab.tab)
+      await ContentService.createEntryFolder(path)
 
-      const path =`${!currentVersion?"":`/${normalizeName(currentVersion)}`}/${normalizeName(deletingTabName)}`;
-      ContentService.createEntryFolder(path)
+      // Save config
       await ContentService.saveConfig(config)
       // Update config in memory instead of reloading
       configLoader.updateConfig(config)
@@ -619,6 +694,57 @@ export const TabBar: React.FC<TabBarProps> = ({
         itemName={deletingTabName}
         itemType="tab"
       />,
+      document.body
+    )}
+
+    {/* Loading Overlay */}
+    {isRenaming && createPortal(
+      <div
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 10000,
+        }}
+      >
+        <div
+          style={{
+            backgroundColor: theme === 'light' ? '#ffffff' : '#1f2937',
+            padding: '24px 32px',
+            borderRadius: '12px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '16px',
+            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)',
+          }}
+        >
+          <div
+            style={{
+              width: '40px',
+              height: '40px',
+              border: `3px solid ${theme === 'light' ? '#e5e7eb' : '#374151'}`,
+              borderTopColor: primaryColor,
+              borderRadius: '50%',
+              animation: 'spin 1s linear infinite',
+            }}
+          />
+          <span style={{ color: theme === 'light' ? '#374151' : '#d1d5db', fontSize: '14px' }}>
+            Renaming files...
+          </span>
+        </div>
+        <style>{`
+          @keyframes spin {
+            to { transform: rotate(360deg); }
+          }
+        `}</style>
+      </div>,
       document.body
     )}
     </>

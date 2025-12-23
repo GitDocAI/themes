@@ -27,7 +27,7 @@ export const Navbar: React.FC<NavbarProps> = ({ theme, onThemeChange, onVersionC
   const isProductionMode = viteMode === 'production'
   const [logo, setLogo] = useState('')
   const [aiSearchConfig, setAISearchConfig] = useState<AISearchConfig | undefined>(undefined)
-  const [logoLoaded, setLogoLoaded] = useState(false)
+  const [_logoLoaded, setLogoLoaded] = useState(false)
   const [logoError, setLogoError] = useState(false)
   const [siteName, setSiteName] = useState('')
   const [navItems, setNavItems] = useState<Array<{ type: string; label: string; reference: string }>>([])
@@ -367,8 +367,8 @@ export const Navbar: React.FC<NavbarProps> = ({ theme, onThemeChange, onVersionC
           )}
         </div>
 
-        {/* Version Switcher - only show if versions are configured */}
-        {hasVersions && (
+        {/* Version Switcher - show if versions are configured OR in dev mode */}
+        {(hasVersions || isDevMode) && (
           <VersionSwitcher
             versions={versions}
             currentVersion={currentVersion}

@@ -88,6 +88,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const [draggedGroupIndex, setDraggedGroupIndex] = useState<number | null>(null)
   const [draggedPagePath, setDraggedPagePath] = useState<string | null>(null)
   const [draggedPageGroupTitle, setDraggedPageGroupTitle] = useState<string | null>(null)
+  const [dragOverPageIndex, setDragOverPageIndex] = useState<{ groupTitle: string; index: number } | null>(null)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [deletingItemType, setDeletingItemType] = useState<'page' | 'group'>('page')
   const [deletingItemName, setDeletingItemName] = useState('')
@@ -96,6 +97,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const [showPageModal, setShowPageModal] = useState(false)
   const [pageModalGroupTitle, setPageModalGroupTitle] = useState('')
   const [showGroupModal, setShowGroupModal] = useState(false)
+  const [isRenaming, setIsRenaming] = useState(false)
 
   // Check if current tab is API Reference
   const isAPIReferenceTab = (): boolean => {
@@ -183,10 +185,21 @@ export const Sidebar: React.FC<SidebarProps> = ({
     return null
   }
 
+  // Helper function to sanitize strings for paths
+  const sanitize = (str: string) => str.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '')
+
   // Helper function to generate page path
   const generatePagePath = (groupTitle: string, pageTitle: string): string => {
-    const sanitize = (str: string) => str.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '')
-    return `/${currentVersion}/${sanitize(currentTab)}/${sanitize(groupTitle)}/${sanitize(pageTitle)}.mdx`
+    const parts = [currentVersion, sanitize(currentTab), sanitize(groupTitle), sanitize(pageTitle)]
+      .filter(part => part && part.length > 0)
+    return `/${parts.join('/')}.mdx`
+  }
+
+  // Helper function to generate group folder path
+  const generateGroupFolderPath = (groupTitle: string): string => {
+    const parts = [currentVersion, sanitize(currentTab), sanitize(groupTitle)]
+      .filter(part => part && part.length > 0)
+    return `/${parts.join('/')}`
   }
 
   // Handle page title edit (double-click)
@@ -364,25 +377,71 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const handleSaveGroupTitle = async () => {
     if (!editingGroupTitle) return;
     let result;
+    const oldGroupTitle = editingGroupTitle
+
+    setIsRenaming(true)
     try {
       const config = await configLoader.loadConfig()
       const items = getTabItems(config)
+      let shouldNavigate = false
+      let newCurrentPath = ''
+
+      // Calculate old and new folder paths
+      const oldFolderPath = generateGroupFolderPath(oldGroupTitle)
+      const newFolderPath = generateGroupFolderPath(editingGroupNewTitle)
+
+      // Move the entire folder if paths are different
+      if (oldFolderPath !== newFolderPath) {
+        await ContentService.renameFile(oldFolderPath, newFolderPath, 'folder')
+      }
+
+      // Update config with new paths
       if (items) {
         for (const group of items) {
           if (group.title === editingGroupTitle) {
+            // Update group title
             group.title = editingGroupNewTitle
+
+            // Update page paths in config
+            if (group.children) {
+              for (const page of group.children) {
+                if (page.page && page.title) {
+                  const oldPath = page.page
+                  const newPath = generatePagePath(editingGroupNewTitle, page.title)
+
+                  if (oldPath !== newPath) {
+                    page.page = newPath
+
+                    // Check if we need to navigate to new path
+                    if (currentPath === oldPath) {
+                      shouldNavigate = true
+                      newCurrentPath = newPath
+                    }
+                  }
+                }
+              }
+            }
             break
           }
         }
       }
+
       await ContentService.saveConfig(config)
       configLoader.updateConfig(config)
       setEditingGroupTitle(null)
       setEditingGroupNewTitle('')
-      result = { success: true, oldTitle: editingGroupTitle, newTitle: editingGroupNewTitle };
+
+      // Navigate to new path if current page was renamed
+      if (shouldNavigate && onNavigate) {
+        onNavigate(newCurrentPath)
+      }
+
+      result = { success: true, oldTitle: oldGroupTitle, newTitle: editingGroupNewTitle, oldFolder: oldFolderPath, newFolder: newFolderPath };
     } catch (error: any) {
       console.error('[Sidebar] Error saving group title:', error)
       result = { success: false, error: error.message };
+    } finally {
+      setIsRenaming(false)
     }
     if (onToolResult) {
         onToolResult({ handleSaveGroupTitle: result });
@@ -442,6 +501,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
         }
         items.push(newGroup)
       }
+
+      // Create folder for the new group
+      const folderPath = generateGroupFolderPath(groupName)
+      await ContentService.createEntryFolder(folderPath)
+
       await ContentService.saveConfig(config)
       configLoader.updateConfig(config)
       result = { success: true, groupName: groupName };
@@ -502,10 +566,27 @@ export const Sidebar: React.FC<SidebarProps> = ({
     }
   }
 
-  const handlePageDragOver = (e: React.DragEvent) => {
-    if (isDevMode && !isAPIReferenceTab()) {
+  const handlePageDragOver = (e: React.DragEvent, pageIndex: number, groupTitle: string) => {
+    if (isDevMode && !isAPIReferenceTab() && draggedPagePath && draggedPageGroupTitle === groupTitle) {
       e.preventDefault()
+      const rect = e.currentTarget.getBoundingClientRect()
+      const midPoint = rect.top + rect.height / 2
+      const insertIndex = e.clientY < midPoint ? pageIndex : pageIndex + 1
+
+      if (!dragOverPageIndex || dragOverPageIndex.groupTitle !== groupTitle || dragOverPageIndex.index !== insertIndex) {
+        setDragOverPageIndex({ groupTitle, index: insertIndex })
+      }
     }
+  }
+
+  const handlePageDragLeave = () => {
+    setDragOverPageIndex(null)
+  }
+
+  const handlePageDragEnd = () => {
+    setDraggedPagePath(null)
+    setDraggedPageGroupTitle(null)
+    setDragOverPageIndex(null)
   }
 
   const handlePageDrop = async (e: React.DragEvent, dropPagePath: string, dropGroupTitle: string) => {
@@ -535,11 +616,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
       await ContentService.saveConfig(config)
       setDraggedPagePath(null)
       setDraggedPageGroupTitle(null)
+      setDragOverPageIndex(null)
       configLoader.updateConfig(config)
     } catch (error: any) {
       console.error('[Sidebar] Error reordering pages:', error)
       setDraggedPagePath(null)
       setDraggedPageGroupTitle(null)
+      setDragOverPageIndex(null)
       result = { success: false, error: error.message };
     }
     if (onToolResult) {
@@ -684,8 +767,46 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 </div>
               )}
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', paddingLeft: '0', minWidth: 0 }}>
-              {item.children?.map((child, idx) => renderNestedItem(child, 1, item.title, idx))}
+            <div
+              style={{ display: 'flex', flexDirection: 'column', gap: '4px', paddingLeft: '0', minWidth: 0 }}
+              onDragLeave={(e) => {
+                // Only clear if leaving the container entirely
+                if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+                  setDragOverPageIndex(null)
+                }
+              }}
+            >
+              {item.children?.map((child, idx) => (
+                <div key={`page-wrapper-${idx}`}>
+                  {/* Drop indicator before this item */}
+                  {dragOverPageIndex?.groupTitle === item.title && dragOverPageIndex?.index === idx && (
+                    <div
+                      style={{
+                        height: '2px',
+                        backgroundColor: primaryColor,
+                        margin: '4px 16px',
+                        borderRadius: '1px',
+                        boxShadow: `0 0 4px ${primaryColor}`,
+                      }}
+                    />
+                  )}
+                  {renderNestedItem(child, 1, item.title, idx)}
+                  {/* Drop indicator after the last item */}
+                  {dragOverPageIndex?.groupTitle === item.title &&
+                   dragOverPageIndex?.index === idx + 1 &&
+                   idx === (item.children?.length || 0) - 1 && (
+                    <div
+                      style={{
+                        height: '2px',
+                        backgroundColor: primaryColor,
+                        margin: '4px 16px',
+                        borderRadius: '1px',
+                        boxShadow: `0 0 4px ${primaryColor}`,
+                      }}
+                    />
+                  )}
+                </div>
+              ))}
 
               {/* Add New Page button - Only in Dev Mode */}
               {isDevMode && !isAPIReferenceTab() && (
@@ -783,12 +904,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
             key={item.page + item.title}
             draggable={isDevMode && !isAPIReferenceTab() && !isEditingThis}
             onDragStart={() => handlePageDragStart(item.page || '', parentGroupTitle)}
-            onDragOver={handlePageDragOver}
+            onDragOver={(e) => handlePageDragOver(e, itemIndex, parentGroupTitle)}
+            onDragLeave={handlePageDragLeave}
             onDrop={(e) => handlePageDrop(e, item.page || '', parentGroupTitle)}
-            onDragEnd={() => {
-              setDraggedPagePath(null)
-              setDraggedPageGroupTitle(null)
-            }}
+            onDragEnd={handlePageDragEnd}
             style={{
               position: 'relative',
               display: 'flex',
@@ -1216,6 +1335,57 @@ export const Sidebar: React.FC<SidebarProps> = ({
           onClose={() => setShowGroupModal(false)}
           onConfirm={handleAddNewGroup}
         />,
+        document.body
+      )}
+
+      {/* Loading Overlay */}
+      {isRenaming && createPortal(
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 10000,
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: theme === 'light' ? '#ffffff' : '#1f2937',
+              padding: '24px 32px',
+              borderRadius: '12px',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '16px',
+              boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)',
+            }}
+          >
+            <div
+              style={{
+                width: '40px',
+                height: '40px',
+                border: `3px solid ${theme === 'light' ? '#e5e7eb' : '#374151'}`,
+                borderTopColor: primaryColor,
+                borderRadius: '50%',
+                animation: 'spin 1s linear infinite',
+              }}
+            />
+            <span style={{ color: theme === 'light' ? '#374151' : '#d1d5db', fontSize: '14px' }}>
+              Renaming files...
+            </span>
+          </div>
+          <style>{`
+            @keyframes spin {
+              to { transform: rotate(360deg); }
+            }
+          `}</style>
+        </div>,
         document.body
       )}
     </>
