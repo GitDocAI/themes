@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import type { AISearchConfig } from '../../services/configLoader'
+import { configLoader } from '../../services/configLoader'
 import { ContentService } from '../../services/contentService'
 import aiSearchService, { type ChatMessage } from '../../services/aiSearchService'
 
@@ -11,6 +12,7 @@ interface AISearchSidebarProps {
   primaryColor: string
   isOpen: boolean
   onClose: () => void
+  isDevMode?: boolean
 }
 
 const DEFAULT_TITLE = 'AI Assistant'
@@ -26,7 +28,8 @@ export const AISearchSidebar: React.FC<AISearchSidebarProps> = ({
   theme,
   primaryColor,
   isOpen,
-  onClose
+  onClose,
+  isDevMode = false
 }) => {
   const [inputValue, setInputValue] = useState('')
   const [messages, setMessages] = useState<ChatMessage[]>([])
@@ -44,11 +47,56 @@ export const AISearchSidebar: React.FC<AISearchSidebarProps> = ({
   const inputRef = useRef<HTMLInputElement>(null)
   const abortFnRef = useRef<(() => void) | null>(null)
   const sidebarRef = useRef<HTMLDivElement>(null)
+  const welcomeTextareaRef = useRef<HTMLTextAreaElement>(null)
+  const questionInputRef = useRef<HTMLInputElement>(null)
+  const localQuestionsRef = useRef<string[]>([])
 
-  const title = config.chatTitle || DEFAULT_TITLE
-  const welcomeMessage = config.welcomeMessage || DEFAULT_WELCOME
-  const placeholder = config.placeholder || DEFAULT_PLACEHOLDER
-  const suggestedQuestions = config.suggestedQuestions || []
+  // Editable states for dev mode
+  const [editingTitle, setEditingTitle] = useState(false)
+  const [editingWelcome, setEditingWelcome] = useState(false)
+  const [editingPlaceholder, setEditingPlaceholder] = useState(false)
+  const [editingQuestionIndex, setEditingQuestionIndex] = useState<number | null>(null)
+  const [localTitle, setLocalTitle] = useState(config.chatTitle || '')
+  const [localWelcome, setLocalWelcome] = useState(config.welcomeMessage || '')
+  const [localPlaceholder, setLocalPlaceholder] = useState(config.placeholder || '')
+  const [localQuestions, setLocalQuestions] = useState<string[]>(config.suggestedQuestions || [])
+
+  // Keep ref in sync with state for use in event handlers
+  localQuestionsRef.current = localQuestions
+
+  // For display: show default if empty. For editing: show actual value (can be empty)
+  const title = isDevMode ? (localTitle || DEFAULT_TITLE) : (config.chatTitle || DEFAULT_TITLE)
+  const welcomeMessage = isDevMode ? (localWelcome || DEFAULT_WELCOME) : (config.welcomeMessage || DEFAULT_WELCOME)
+  const placeholder = isDevMode ? (localPlaceholder || DEFAULT_PLACEHOLDER) : (config.placeholder || DEFAULT_PLACEHOLDER)
+  const suggestedQuestions = isDevMode ? localQuestions : (config.suggestedQuestions || [])
+
+  // Sync local state with config when it changes
+  useEffect(() => {
+    setLocalTitle(config.chatTitle || '')
+    setLocalWelcome(config.welcomeMessage || '')
+    setLocalPlaceholder(config.placeholder || '')
+    setLocalQuestions(config.suggestedQuestions || [])
+  }, [config])
+
+  // Save function for AI Search settings
+  const saveAISearchConfig = async (updates: Partial<AISearchConfig>) => {
+    try {
+      const currentConfig = await configLoader.loadConfig()
+      const updatedConfig = {
+        ...currentConfig,
+        aiSearch: {
+          ...currentConfig.aiSearch,
+          ...updates
+        }
+      }
+      await ContentService.saveConfig(updatedConfig)
+      setTimeout(async () => {
+        await configLoader.reloadConfig()
+      }, 300)
+    } catch (error) {
+      console.error('Error saving AI Search config:', error)
+    }
+  }
 
   // Load chat icon
   useEffect(() => {
@@ -111,6 +159,24 @@ export const AISearchSidebar: React.FC<AISearchSidebarProps> = ({
       setTimeout(() => inputRef.current?.focus(), 300)
     }
   }, [isOpen])
+
+  // Position cursor at end when editing welcome message
+  useEffect(() => {
+    if (editingWelcome && welcomeTextareaRef.current) {
+      const textarea = welcomeTextareaRef.current
+      const length = textarea.value.length
+      textarea.setSelectionRange(length, length)
+    }
+  }, [editingWelcome])
+
+  // Position cursor at end when editing suggested question
+  useEffect(() => {
+    if (editingQuestionIndex !== null && questionInputRef.current) {
+      const input = questionInputRef.current
+      const length = input.value.length
+      input.setSelectionRange(length, length)
+    }
+  }, [editingQuestionIndex])
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -387,19 +453,78 @@ export const AISearchSidebar: React.FC<AISearchSidebarProps> = ({
             </div>
 
             {/* Title */}
-            <div>
-              <h2
-                style={{
-                  margin: 0,
-                  fontSize: '1.1rem',
-                  fontWeight: 600,
-                  color: colors.text,
-                }}
-              >
-                {title}
-              </h2>
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              {isDevMode && editingTitle ? (
+                <input
+                  type="text"
+                  value={localTitle}
+                  onChange={(e) => setLocalTitle(e.target.value)}
+                  onBlur={() => {
+                    setEditingTitle(false)
+                    if (localTitle !== config.chatTitle) {
+                      saveAISearchConfig({ chatTitle: localTitle })
+                    }
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      setEditingTitle(false)
+                      if (localTitle !== config.chatTitle) {
+                        saveAISearchConfig({ chatTitle: localTitle })
+                      }
+                    }
+                    if (e.key === 'Escape') {
+                      setLocalTitle(config.chatTitle || '')
+                      setEditingTitle(false)
+                    }
+                  }}
+                  autoFocus
+                  size={Math.max(localTitle.length || DEFAULT_TITLE.length, 10)}
+                  style={{
+                    display: 'inline-block',
+                    margin: 0,
+                    fontSize: '1.1rem',
+                    fontWeight: 600,
+                    color: colors.text,
+                    background: 'transparent',
+                    border: `1px dashed ${primaryColor}`,
+                    borderRadius: '4px',
+                    padding: '2px 6px',
+                    outline: 'none',
+                    width: 'auto',
+                  }}
+                />
+              ) : (
+                <h2
+                  onClick={() => isDevMode && setEditingTitle(true)}
+                  style={{
+                    display: 'block',
+                    margin: 0,
+                    fontSize: '1.1rem',
+                    fontWeight: 600,
+                    color: colors.text,
+                    cursor: isDevMode ? 'pointer' : 'default',
+                    border: isDevMode ? `1px dashed ${colors.border}` : 'none',
+                    borderRadius: '4px',
+                    padding: isDevMode ? '2px 6px' : 0,
+                    transition: 'all 0.2s ease',
+                  }}
+                  onMouseEnter={(e) => {
+                    if (isDevMode) {
+                      e.currentTarget.style.borderColor = primaryColor
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (isDevMode) {
+                      e.currentTarget.style.borderColor = colors.border
+                    }
+                  }}
+                >
+                  {title}
+                </h2>
+              )}
               <span
                 style={{
+                  display: 'block',
                   fontSize: '0.75rem',
                   color: colors.secondaryText,
                 }}
@@ -507,7 +632,13 @@ export const AISearchSidebar: React.FC<AISearchSidebarProps> = ({
 
               {/* Message Bubble */}
               <div
+                onClick={() => {
+                  if (isDevMode && message.id === 'welcome' && !editingWelcome) {
+                    setEditingWelcome(true)
+                  }
+                }}
                 style={{
+                  width: isDevMode && message.id === 'welcome' ? '95%' : 'auto',
                   maxWidth: message.role === 'user' ? '85%' : '95%',
                   padding: message.role === 'user' ? '10px 14px' : '10px 12px',
                   borderRadius: message.role === 'user'
@@ -524,13 +655,61 @@ export const AISearchSidebar: React.FC<AISearchSidebarProps> = ({
                     : 'none',
                   whiteSpace: message.role === 'user' ? 'pre-wrap' : 'normal',
                   wordBreak: 'break-word',
+                  cursor: isDevMode && message.id === 'welcome' ? 'pointer' : 'default',
+                  border: isDevMode && message.id === 'welcome' ? `1px dashed ${colors.border}` : 'none',
+                  transition: 'all 0.2s ease',
+                }}
+                onMouseEnter={(e) => {
+                  if (isDevMode && message.id === 'welcome') {
+                    e.currentTarget.style.borderColor = primaryColor
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (isDevMode && message.id === 'welcome') {
+                    e.currentTarget.style.borderColor = colors.border
+                  }
                 }}
               >
-                {message.content ? (
+                {/* Editable welcome message in dev mode */}
+                {isDevMode && message.id === 'welcome' && editingWelcome ? (
+                  <textarea
+                    ref={welcomeTextareaRef}
+                    value={localWelcome}
+                    onChange={(e) => setLocalWelcome(e.target.value)}
+                    onBlur={() => {
+                      setEditingWelcome(false)
+                      if (localWelcome !== config.welcomeMessage) {
+                        saveAISearchConfig({ welcomeMessage: localWelcome })
+                      }
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Escape') {
+                        setLocalWelcome(config.welcomeMessage || '')
+                        setEditingWelcome(false)
+                      }
+                    }}
+                    autoFocus
+                    style={{
+                      width: '100%',
+                      minHeight: '60px',
+                      padding: 0,
+                      margin: 0,
+                      fontSize: 'inherit',
+                      color: 'inherit',
+                      background: 'transparent',
+                      border: 'none',
+                      outline: 'none',
+                      resize: 'vertical',
+                      fontFamily: 'inherit',
+                      lineHeight: 'inherit',
+                      boxSizing: 'border-box',
+                    }}
+                  />
+                ) : message.content ? (
                   message.role === 'assistant' ? (
                     <div className="ai-markdown-content">
                       <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                        {message.content}
+                        {message.id === 'welcome' && isDevMode ? localWelcome : message.content}
                       </ReactMarkdown>
                       {streamingMessageId === message.id && (
                         <span
@@ -568,7 +747,7 @@ export const AISearchSidebar: React.FC<AISearchSidebarProps> = ({
         </div>
 
         {/* Suggested Questions */}
-        {suggestedQuestions.length > 0 && messages.length <= 1 && !isLoading && (
+        {((suggestedQuestions.length > 0 && messages.length <= 1 && !isLoading) || isDevMode) && (
           <div
             style={{
               padding: '0 20px 12px 20px',
@@ -596,39 +775,199 @@ export const AISearchSidebar: React.FC<AISearchSidebarProps> = ({
               }}
             >
               {suggestedQuestions.map((question, index) => (
-                <button
+                <div
                   key={index}
-                  onClick={() => handleSuggestedQuestionClick(question)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    position: 'relative',
+                  }}
+                >
+                  {isDevMode && editingQuestionIndex === index ? (
+                    <div style={{ position: 'relative', display: 'inline-block' }}>
+                      {/* Hidden span to measure text width */}
+                      <span
+                        style={{
+                          visibility: 'hidden',
+                          whiteSpace: 'pre',
+                          padding: '8px 14px',
+                          paddingRight: '32px',
+                          fontSize: '0.8rem',
+                          fontWeight: 500,
+                          border: '1px solid transparent',
+                          display: 'inline-block',
+                        }}
+                      >
+                        {localQuestions[index] || ' '}
+                      </span>
+                      <input
+                        ref={questionInputRef}
+                        type="text"
+                        value={localQuestions[index]}
+                        onChange={(e) => {
+                          const newQuestions = [...localQuestions]
+                          newQuestions[index] = e.target.value
+                          localQuestionsRef.current = newQuestions
+                          setLocalQuestions(newQuestions)
+                        }}
+                        onBlur={() => {
+                          setEditingQuestionIndex(null)
+                          saveAISearchConfig({ suggestedQuestions: localQuestionsRef.current })
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            setEditingQuestionIndex(null)
+                            saveAISearchConfig({ suggestedQuestions: localQuestionsRef.current })
+                          }
+                          if (e.key === 'Escape') {
+                            setLocalQuestions(config.suggestedQuestions || [])
+                            setEditingQuestionIndex(null)
+                          }
+                        }}
+                        autoFocus
+                        style={{
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          width: '100%',
+                          padding: '8px 14px',
+                          paddingRight: '32px',
+                          backgroundColor: colors.suggestionBg,
+                          border: `1px dashed ${primaryColor}`,
+                          borderRadius: '20px',
+                          color: primaryColor,
+                          fontSize: '0.8rem',
+                          fontWeight: 500,
+                          outline: 'none',
+                          boxSizing: 'border-box',
+                        }}
+                      />
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => {
+                        if (isDevMode) {
+                          setEditingQuestionIndex(index)
+                        } else {
+                          handleSuggestedQuestionClick(question)
+                        }
+                      }}
+                      style={{
+                        padding: '8px 14px',
+                        paddingRight: isDevMode ? '32px' : '14px',
+                        backgroundColor: colors.suggestionBg,
+                        borderWidth: '1px',
+                        borderStyle: isDevMode ? 'dashed' : 'solid',
+                        borderColor: isDevMode ? colors.border : colors.suggestionBorder,
+                        borderRadius: '20px',
+                        color: primaryColor,
+                        fontSize: '0.8rem',
+                        fontWeight: 500,
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = colors.suggestionHoverBg
+                        if (!isDevMode) {
+                          e.currentTarget.style.transform = 'translateY(-1px)'
+                        }
+                        if (isDevMode) {
+                          e.currentTarget.style.borderColor = primaryColor
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = colors.suggestionBg
+                        e.currentTarget.style.transform = 'translateY(0)'
+                        if (isDevMode) {
+                          e.currentTarget.style.borderColor = colors.border
+                        }
+                      }}
+                    >
+                      {question}
+                    </button>
+                  )}
+                  {/* Delete button for dev mode */}
+                  {isDevMode && editingQuestionIndex !== index && (
+                    <button
+                      onClick={() => {
+                        const newQuestions = localQuestions.filter((_, i) => i !== index)
+                        setLocalQuestions(newQuestions)
+                        saveAISearchConfig({ suggestedQuestions: newQuestions })
+                      }}
+                      style={{
+                        position: 'absolute',
+                        right: '6px',
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        width: '18px',
+                        height: '18px',
+                        borderRadius: '50%',
+                        border: 'none',
+                        backgroundColor: 'rgba(239, 68, 68, 0.8)',
+                        color: '#ffffff',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '10px',
+                        padding: 0,
+                      }}
+                      title="Delete question"
+                    >
+                      <i className="pi pi-times" style={{ fontSize: '8px' }} />
+                    </button>
+                  )}
+                </div>
+              ))}
+              {/* Add new question button */}
+              {isDevMode && (
+                <button
+                  onClick={() => {
+                    const newQuestions = [...localQuestions, 'New question?']
+                    setLocalQuestions(newQuestions)
+                    saveAISearchConfig({ suggestedQuestions: newQuestions })
+                    setTimeout(() => {
+                      setEditingQuestionIndex(newQuestions.length - 1)
+                    }, 100)
+                  }}
                   style={{
                     padding: '8px 14px',
-                    backgroundColor: colors.suggestionBg,
-                    border: `1px solid ${colors.suggestionBorder}`,
+                    backgroundColor: 'transparent',
+                    border: `1px dashed ${primaryColor}`,
                     borderRadius: '20px',
                     color: primaryColor,
                     fontSize: '0.8rem',
                     fontWeight: 500,
                     cursor: 'pointer',
                     transition: 'all 0.2s ease',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = colors.suggestionHoverBg
-                    e.currentTarget.style.transform = 'translateY(-1px)'
+                    e.currentTarget.style.backgroundColor = `${primaryColor}10`
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = colors.suggestionBg
-                    e.currentTarget.style.transform = 'translateY(0)'
+                    e.currentTarget.style.backgroundColor = 'transparent'
                   }}
                 >
-                  {question}
+                  <i className="pi pi-plus" style={{ fontSize: '10px' }} />
+                  Add
                 </button>
-              ))}
+              )}
             </div>
           </div>
         )}
 
         {/* Input Area */}
         <form
-          onSubmit={handleSubmit}
+          onSubmit={(e) => {
+            e.preventDefault()
+            if (!isDevMode) {
+              handleSubmit(e)
+            }
+          }}
           style={{
             padding: '16px 20px',
             borderTop: `1px solid ${colors.border}`,
@@ -643,29 +982,83 @@ export const AISearchSidebar: React.FC<AISearchSidebarProps> = ({
               backgroundColor: colors.inputBg,
               borderRadius: '12px',
               padding: '4px 4px 4px 16px',
-              border: `1px solid ${colors.border}`,
+              borderWidth: '1px',
+              borderStyle: isDevMode ? 'dashed' : 'solid',
+              borderColor: isDevMode && editingPlaceholder ? primaryColor : colors.border,
               transition: 'border-color 0.2s ease',
             }}
+            onClick={() => {
+              if (isDevMode && !editingPlaceholder) {
+                setEditingPlaceholder(true)
+              }
+            }}
           >
-            <input
-              ref={inputRef}
-              type="text"
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              placeholder={placeholder}
-              disabled={isLoading}
-              style={{
-                flex: 1,
-                border: 'none',
-                background: 'transparent',
-                color: colors.text,
-                fontSize: '0.95rem',
-                outline: 'none',
-                padding: '10px 0',
-                opacity: isLoading ? 0.5 : 1,
-              }}
-            />
-            {isLoading ? (
+            {isDevMode && editingPlaceholder ? (
+              <input
+                type="text"
+                value={localPlaceholder}
+                onChange={(e) => setLocalPlaceholder(e.target.value)}
+                onClick={(e) => e.stopPropagation()}
+                onBlur={() => {
+                  setEditingPlaceholder(false)
+                  if (localPlaceholder !== config.placeholder) {
+                    saveAISearchConfig({ placeholder: localPlaceholder })
+                  }
+                }}
+                onKeyDown={(e) => {
+                  e.stopPropagation()
+                  if (e.key === 'Enter') {
+                    e.preventDefault()
+                    setEditingPlaceholder(false)
+                    if (localPlaceholder !== config.placeholder) {
+                      saveAISearchConfig({ placeholder: localPlaceholder })
+                    }
+                  }
+                  if (e.key === 'Escape') {
+                    setLocalPlaceholder(config.placeholder || '')
+                    setEditingPlaceholder(false)
+                  }
+                }}
+                autoFocus
+                placeholder="Enter placeholder text..."
+                style={{
+                  flex: 1,
+                  border: 'none',
+                  background: 'transparent',
+                  color: colors.text,
+                  fontSize: '0.95rem',
+                  outline: 'none',
+                  padding: '10px 0',
+                }}
+              />
+            ) : (
+              <input
+                ref={inputRef}
+                type="text"
+                value={isDevMode ? '' : inputValue}
+                onChange={(e) => !isDevMode && setInputValue(e.target.value)}
+                onClick={() => {
+                  if (isDevMode && !editingPlaceholder) {
+                    setEditingPlaceholder(true)
+                  }
+                }}
+                placeholder={placeholder}
+                disabled={isLoading}
+                readOnly={isDevMode}
+                style={{
+                  flex: 1,
+                  border: 'none',
+                  background: 'transparent',
+                  color: colors.text,
+                  fontSize: '0.95rem',
+                  outline: 'none',
+                  padding: '10px 0',
+                  opacity: isLoading ? 0.5 : 1,
+                  cursor: isDevMode ? 'pointer' : 'text',
+                }}
+              />
+            )}
+            {isLoading && !isDevMode ? (
               <button
                 type="button"
                 onClick={handleStopStreaming}
@@ -690,23 +1083,27 @@ export const AISearchSidebar: React.FC<AISearchSidebarProps> = ({
             ) : (
               <button
                 type="submit"
-                disabled={!inputValue.trim()}
+                disabled={isDevMode || !inputValue.trim()}
                 style={{
                   width: '40px',
                   height: '40px',
                   borderRadius: '10px',
                   border: 'none',
-                  background: inputValue.trim()
-                    ? `linear-gradient(135deg, ${primaryColor} 0%, ${primaryColor}dd 100%)`
-                    : colors.border,
-                  color: inputValue.trim() ? '#ffffff' : colors.secondaryText,
-                  cursor: inputValue.trim() ? 'pointer' : 'not-allowed',
+                  background: isDevMode
+                    ? colors.border
+                    : inputValue.trim()
+                      ? `linear-gradient(135deg, ${primaryColor} 0%, ${primaryColor}dd 100%)`
+                      : colors.border,
+                  color: isDevMode ? colors.secondaryText : (inputValue.trim() ? '#ffffff' : colors.secondaryText),
+                  cursor: isDevMode ? 'not-allowed' : (inputValue.trim() ? 'pointer' : 'not-allowed'),
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   transition: 'all 0.2s ease',
                   flexShrink: 0,
+                  opacity: isDevMode ? 0.5 : 1,
                 }}
+                title={isDevMode ? 'Disabled in edit mode' : 'Send message'}
               >
                 <i className="pi pi-send" style={{ fontSize: '1rem' }} />
               </button>

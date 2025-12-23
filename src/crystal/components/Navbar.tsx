@@ -23,6 +23,8 @@ interface NavbarProps {
 
 export const Navbar: React.FC<NavbarProps> = ({ theme, onThemeChange, onVersionChange, currentVersion, isDevMode = false, allowUpload = false, onSearchClick = () => {}, onAISearchClick }) => {
   const { updateTrigger } = useConfig()
+  const viteMode = import.meta.env.VITE_MODE || 'production'
+  const isProductionMode = viteMode === 'production'
   const [logo, setLogo] = useState('')
   const [aiSearchConfig, setAISearchConfig] = useState<AISearchConfig | undefined>(undefined)
   const [logoLoaded, setLogoLoaded] = useState(false)
@@ -54,10 +56,26 @@ export const Navbar: React.FC<NavbarProps> = ({ theme, onThemeChange, onVersionC
   const [showProfileModal, setShowProfileModal] = useState(false)
   const [userRefreshKey, setUserRefreshKey] = useState(0)
 
-  // Check if user is authenticated
+  // Check if user is authenticated (only in production mode)
   useEffect(() => {
+    // Only check authentication in production mode
+    if (!isProductionMode) {
+      setIsAuthenticated(false)
+      return
+    }
     setIsAuthenticated(authService.isAuthenticated())
-  }, [])
+  }, [isProductionMode])
+
+  // Helper to normalize external URLs
+  const normalizeUrl = (url: string): string => {
+    if (!url) return '#'
+    // If it already has a protocol, return as-is
+    if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('/') || url.startsWith('#')) {
+      return url
+    }
+    // Otherwise, prepend https://
+    return `https://${url}`
+  }
 
   useEffect(() => {
     const config = configLoader.getConfig()
@@ -272,7 +290,7 @@ export const Navbar: React.FC<NavbarProps> = ({ theme, onThemeChange, onVersionC
       <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: '6px' }}>
           <div style={{ display: 'inline-block' }}>
-            {logo && !logoError && (
+            {logo && !logoError ? (
               <Image
                 src={logo}
                 alt={siteName}
@@ -280,13 +298,11 @@ export const Navbar: React.FC<NavbarProps> = ({ theme, onThemeChange, onVersionC
                 onLoadSuccess={() => setLogoLoaded(true)}
                 onLoadError={() => setLogoError(true)}
               />
-            )}
-            {(!logo || logoError || !logoLoaded) && (
+            ) : (
               <span style={{
                 fontSize: '1.25rem',
                 fontWeight: '600',
-                color: colors.text,
-                display: logoLoaded && !logoError ? 'none' : 'inline'
+                color: colors.text
               }}>
                 {siteName}
               </span>
@@ -452,6 +468,16 @@ export const Navbar: React.FC<NavbarProps> = ({ theme, onThemeChange, onVersionC
           </button>
         )}
 
+        {/* AI Search Button */}
+        {aiSearchConfig && (
+          <AISearchButton
+            config={aiSearchConfig}
+            theme={theme}
+            primaryColor={colors.primary}
+            onClick={onAISearchClick}
+          />
+        )}
+
         {/* Navbar Items */}
         {navItems.map((item, index) => {
           if (item.type === 'link') {
@@ -513,7 +539,7 @@ export const Navbar: React.FC<NavbarProps> = ({ theme, onThemeChange, onVersionC
                 )}
 
                 <a
-                  href={item.reference}
+                  href={normalizeUrl(item.reference)}
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={(e) => {
@@ -626,7 +652,7 @@ export const Navbar: React.FC<NavbarProps> = ({ theme, onThemeChange, onVersionC
                 )}
 
                 <a
-                  href={item.reference}
+                  href={normalizeUrl(item.reference)}
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={(e) => {
@@ -672,16 +698,6 @@ export const Navbar: React.FC<NavbarProps> = ({ theme, onThemeChange, onVersionC
           }
           return null
         })}
-
-        {/* AI Search Button */}
-        {aiSearchConfig && (
-          <AISearchButton
-            config={aiSearchConfig}
-            theme={theme}
-            primaryColor={colors.primary}
-            onClick={onAISearchClick}
-          />
-        )}
 
         {/* Theme Toggle Button */}
         <button

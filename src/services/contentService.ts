@@ -91,7 +91,7 @@ export class ContentService {
         await axiosInstance.post(url, {
           path: '/gitdocai.config.json',
           type:'file',
-          content:JSON.stringify(config)
+          content: JSON.stringify(config, null, 2)
       }, {
           headers: { 'Content-Type': 'application/json' },
         })

@@ -125,9 +125,11 @@ axiosInstance.interceptors.response.use(
       })
     }
 
-     if (error.response?.status === 401&& viteMode!="production" && originalRequest?.url !== '/theme'
-    ) {
-       window.location.href = '/403'
+    // Redirect to /403 on 401 in dev mode, but only if not already on /403
+    if (error.response?.status === 401 && viteMode !== "production" && originalRequest?.url !== '/theme') {
+      if (window.location.pathname !== '/403') {
+        window.location.href = '/403'
+      }
     }
 
     return Promise.reject(error)

@@ -1,9 +1,12 @@
 import { Routes, Route } from "react-router-dom";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useState, lazy } from "react";
 import { configLoader, type GitDocAIConfig } from "./services/configLoader";
 import ThemeLoadingScreen from "./commonPages/LoadingFalllback";
 import ThemeErrorScreen from "./commonPages/ErrorFallback";
 import { themeImports } from "./themeImports";
+
+// Import Forbidden directly for use when config fails to load
+const ForbiddenPage = lazy(() => import("./crystal/pages/403"));
 
 export default function App() {
   const [config, setConfig] = useState<GitDocAIConfig | null>(null);
@@ -11,6 +14,12 @@ export default function App() {
   const [loadingError, setLoadingError] = useState<boolean>(false);
 
   useEffect(() => {
+    // Skip loading config if we're on the /403 page
+    if (window.location.pathname === '/403') {
+      setLoadingError(true);
+      return;
+    }
+
     // Load config first - this gives us theme, colors, logos, etc.
     configLoader.loadConfig()
       .then((loadedConfig: GitDocAIConfig) => {
@@ -27,7 +36,11 @@ export default function App() {
   if (loadingError) {
     return (
       <Routes>
-        <Route path="/403" element={<ThemeErrorScreen />} />
+        <Route path="/403" element={
+          <Suspense fallback={<ThemeLoadingScreen />}>
+            <ForbiddenPage />
+          </Suspense>
+        } />
         <Route
           path="/*"
           element={<ThemeErrorScreen />}
@@ -39,7 +52,11 @@ export default function App() {
   if (!theme || !config) {
     return (
       <Routes>
-        <Route path="/403" element={<ThemeErrorScreen />} />
+        <Route path="/403" element={
+          <Suspense fallback={<ThemeLoadingScreen />}>
+            <ForbiddenPage />
+          </Suspense>
+        } />
         <Route
           path="/*"
           element={<ThemeLoadingScreen />}

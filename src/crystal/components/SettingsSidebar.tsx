@@ -10,6 +10,7 @@ interface SettingsSidebarProps {
   isOpen: boolean
   onToggle: () => void
   allowUpload?: boolean
+  buttonVisible?: boolean
 }
 
 interface GlobalConfig {
@@ -41,7 +42,8 @@ export const SettingsSidebar: React.FC<SettingsSidebarProps> = ({
   onDevModeToggle,
   isOpen,
   onToggle,
-  allowUpload = false
+  allowUpload = false,
+  buttonVisible = true
 }) => {
   const { updateTrigger } = useConfig()
   const [config, setConfig] = useState<GlobalConfig>({})
@@ -206,56 +208,81 @@ export const SettingsSidebar: React.FC<SettingsSidebarProps> = ({
   return (
     <>
       {/* Floating Settings Button */}
+      {buttonVisible && (
       <button
         onClick={onToggle}
         style={{
-          bottom: '24px',
-          right: '24px',
-          width: '56px',
-          height: '56px',
-          background: theme === 'light' ? '#1f293799' : '#ffffff99' ,
-          color: theme === 'light' ? '#ffffff' : '#1f2937',
+          width: '44px',
+          height: '44px',
+          borderRadius: '12px',
+          background: isOpen
+            ? (theme === 'light' ? '#6b7280' : '#9ca3af')
+            : (theme === 'light'
+              ? 'linear-gradient(135deg, rgba(107, 114, 128, 0.9) 0%, rgba(75, 85, 99, 0.9) 100%)'
+              : 'linear-gradient(135deg, rgba(156, 163, 175, 0.9) 0%, rgba(107, 114, 128, 0.9) 100%)'),
+          color: '#ffffff',
           border: 'none',
           cursor: 'pointer',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+          boxShadow: theme === 'light'
+            ? '0 4px 12px rgba(107, 114, 128, 0.4)'
+            : '0 4px 12px rgba(156, 163, 175, 0.3)',
           zIndex: 9999,
-          transition: 'all 0.3s ease',
-          fontSize: '24px',
+          transition: 'all 0.2s ease',
+          backdropFilter: 'blur(8px)',
           userSelect: 'none',
           WebkitUserSelect: 'none',
           MozUserSelect: 'none',
           msUserSelect: 'none'
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.transform = 'scale(1.1)'
-          e.currentTarget.style.boxShadow = '0 6px 20px rgba(0,0,0,0.4)'
+          e.currentTarget.style.transform = 'translateY(-2px)'
+          e.currentTarget.style.boxShadow = theme === 'light'
+            ? '0 8px 20px rgba(107, 114, 128, 0.5)'
+            : '0 8px 20px rgba(156, 163, 175, 0.4)'
         }}
         onMouseLeave={(e) => {
-          e.currentTarget.style.transform = 'scale(1)'
-          e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.3)'
+          e.currentTarget.style.transform = 'translateY(0)'
+          e.currentTarget.style.boxShadow = theme === 'light'
+            ? '0 4px 12px rgba(107, 114, 128, 0.4)'
+            : '0 4px 12px rgba(156, 163, 175, 0.3)'
         }}
         title="Settings"
       >
         <i
-          className="pi pi-cog"
+          className={isOpen ? "pi pi-times" : "pi pi-cog"}
           style={{
-            animation: 'spin 3s linear infinite'
+            fontSize: isOpen ? '16px' : '18px',
+            animation: isOpen ? 'none' : 'spin 4s linear infinite'
           }}
         ></i>
         <style>{`
           @keyframes spin {
-            from {
-              transform: rotate(0deg);
-            }
-            to {
-              transform: rotate(360deg);
-            }
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
           }
         `}</style>
       </button>
+      )}
+
+      {/* Overlay/Backdrop */}
+      {isOpen && (
+        <div
+          onClick={onToggle}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.3)',
+            zIndex: 9997,
+            transition: 'opacity 0.3s ease'
+          }}
+        />
+      )}
 
       {/* Settings Sidebar */}
       <div

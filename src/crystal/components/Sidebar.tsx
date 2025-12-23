@@ -548,7 +548,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     return result;
   }
 
-  const renderNestedItem = (item: NavigationItem, depth: number = 0, parentGroupTitle: string = ''): ReactElement | null => {
+  const renderNestedItem = (item: NavigationItem, depth: number = 0, parentGroupTitle: string = '', itemIndex: number = 0): ReactElement | null => {
     const paddingLeft = depth * 16
 
     switch (item.type) {
@@ -559,7 +559,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
         return (
           <div
-            key={item.title}
+            key={`group-${item.title}-${itemIndex}`}
             draggable={isDevMode && !isAPIReferenceTab() && !isEditingGroup}
             onDragStart={() => handleGroupDragStart(groupIndex)}
             onDragOver={handleGroupDragOver}
@@ -685,7 +685,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               )}
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', paddingLeft: '0', minWidth: 0 }}>
-              {item.children?.map(child => renderNestedItem(child, 1, item.title))}
+              {item.children?.map((child, idx) => renderNestedItem(child, 1, item.title, idx))}
 
               {/* Add New Page button - Only in Dev Mode */}
               {isDevMode && !isAPIReferenceTab() && (
@@ -731,7 +731,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       case 'dropdown': {
         const isDropdownOpen = openDropdowns.has(item.title)
         return (
-          <div key={item.title} style={{ paddingLeft: `${paddingLeft}px` }}>
+          <div key={`dropdown-${item.title}-${itemIndex}`} style={{ paddingLeft: `${paddingLeft}px` }}>
             <button
               onClick={() => toggleDropdown(item.title)}
               style={{
@@ -766,7 +766,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </button>
             {isDropdownOpen && (
               <div style={{ marginTop: '8px', paddingLeft: '16px', borderLeft: `2px solid rgba(${primaryRgb}, 0.2)`, marginLeft: '12px' }}>
-                {item.children?.map(child => renderNestedItem(child, 1))}
+                {item.children?.map((child, idx) => renderNestedItem(child, 1, '', idx))}
               </div>
             )}
           </div>
@@ -1086,7 +1086,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         )}
 
         <nav style={{ display: 'flex', flexDirection: 'column', gap: '4px', paddingTop: '16px', minWidth: 0 }}>
-          {items.map(item => renderNestedItem(item, 0))}
+          {items.map((item, idx) => renderNestedItem(item, 0, '', idx))}
 
           {/* Add New Group button - Only in Dev Mode and when there's a tab */}
           {isDevMode && !isAPIReferenceTab() && currentTab && (

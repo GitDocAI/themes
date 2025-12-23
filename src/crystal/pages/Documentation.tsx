@@ -37,6 +37,7 @@ function Documentation() {
   const isDevEnvironment = viteMode === 'dev' // true only in dev mode (allows uploads)
   const [isDevMode, setIsDevMode] = useState<boolean>(!isProductionMode) // Enabled by default in dev/preview, disabled in production
   const [isSettingsSidebarOpen, setIsSettingsSidebarOpen] = useState<boolean>(false)
+  const [isChatSidebarOpen, setIsChatSidebarOpen] = useState<boolean>(false)
   const [error, _setError] = useState<string | null>(null)
   const [currentVersion, setCurrentVersion] = useState<string>('')
   const [currentTab, setCurrentTab] = useState<string>('')
@@ -490,7 +491,7 @@ function Documentation() {
       {/* Main content wrapper that shifts when sidebar is open */}
       <div
         style={{
-          marginRight: isSettingsSidebarOpen ? '450px' : '0',
+          marginRight: (isSettingsSidebarOpen || isChatSidebarOpen) ? '450px' : '0',
           transition: 'margin-right 0.3s ease'
         }}
       >
@@ -521,7 +522,13 @@ function Documentation() {
           !isProductionMode  &&
           <OptionsSidebar theme={theme}>
 
-            <ChatSidebar externalContexts={aiContexts} onUpdateContext={(ctx)=>setAiContexts(ctx)} />
+            <ChatSidebar
+              theme={theme}
+              externalContexts={aiContexts}
+              onUpdateContext={(ctx)=>setAiContexts(ctx)}
+              onOpenChange={setIsChatSidebarOpen}
+              buttonVisible={!isSettingsSidebarOpen && !isChatSidebarOpen}
+            />
 
             <SettingsSidebar
               theme={theme}
@@ -530,6 +537,7 @@ function Documentation() {
               isOpen={isSettingsSidebarOpen}
               onToggle={toggleSettingsSidebar}
               allowUpload={isDevEnvironment}
+              buttonVisible={!isSettingsSidebarOpen && !isChatSidebarOpen}
             />
           </OptionsSidebar>
         )}
@@ -634,6 +642,7 @@ function Documentation() {
           primaryColor={primaryColor}
           isOpen={isAISearchSidebarOpen}
           onClose={() => setIsAISearchSidebarOpen(false)}
+          isDevMode={!isProductionMode && isDevMode}
         />
       )}
     </TextSelectionContextMenu>

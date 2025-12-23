@@ -72,7 +72,7 @@ export interface GitDocAIConfig {
     reference: string
   }>
   navigation?: Navigation
-  ai_search?: AISearchConfig
+  aiSearch?: AISearchConfig
 }
 
 class ConfigLoader {
@@ -441,7 +441,7 @@ class ConfigLoader {
    * Get AI Search configuration
    */
   getAISearchConfig(): AISearchConfig | undefined {
-    return this.config?.ai_search
+    return this.config?.aiSearch
   }
 
   /**

@@ -19,12 +19,16 @@ interface ChatSidebarProps {
   theme?: 'light' | 'dark'
   externalContexts?: ChatContext[]
   onUpdateContext:(ctx:ChatContext[])=>void
+  onOpenChange?: (isOpen: boolean) => void
+  buttonVisible?: boolean
 }
 
 export const ChatSidebar: React.FC<ChatSidebarProps> = ({
   theme = 'light',
   externalContexts = [],
-  onUpdateContext
+  onUpdateContext,
+  onOpenChange,
+  buttonVisible = true
 }) => {
   const [isOpen, setIsOpen] = useState(false)
   const [showSearchModal,setShowSearchModal] = useState<boolean>(false)
@@ -37,12 +41,7 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      text: (() => {
-        const hour = new Date().getHours()
-        if (hour < 12 && hour > 6) return '¡Good Morning! How can i help?'
-        if (hour < 18 && hour > 12) return '¡Good Afternoon! What will be now?'
-        return '¡Good Night! May i be usefull?'
-      })(),
+      text: "Hey! 👋 How can I help you today?",
       sender: 'bot',
       timestamp: new Date()
     }
@@ -79,7 +78,8 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
     if (isOpen) {
       inputRef.current?.focus()
     }
-  }, [isOpen])
+    onOpenChange?.(isOpen)
+  }, [isOpen, onOpenChange])
 
 
   useEffect(()=>{
@@ -223,7 +223,7 @@ const handleSendMessage = async () => {
 
 };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
       handleSendMessage()
@@ -326,37 +326,82 @@ const handleSendMessage = async () => {
   return (
     <>
       {/* Floating Chat Button */}
+      {buttonVisible && (
       <button
         onClick={() => setIsOpen(!isOpen)}
         style={{
-          bottom: '24px',
-          right: '24px',
-          width: '56px',
-          height: '56px',
-          background: theme === 'light' ? '#1f293799' : '#ffffff99',
-          color: theme === 'light' ? '#ffffff' : '#1f2937',
+          width: '44px',
+          height: '44px',
+          borderRadius: '12px',
+          background: isOpen
+            ? (theme === 'light' ? '#3b82f6' : '#6366f1')
+            : (theme === 'light'
+              ? 'linear-gradient(135deg, rgba(59, 130, 246, 0.9) 0%, rgba(37, 99, 235, 0.9) 100%)'
+              : 'linear-gradient(135deg, rgba(99, 102, 241, 0.9) 0%, rgba(79, 70, 229, 0.9) 100%)'),
+          color: '#ffffff',
           border: 'none',
           cursor: 'pointer',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+          boxShadow: theme === 'light'
+            ? '0 4px 12px rgba(59, 130, 246, 0.4)'
+            : '0 4px 12px rgba(99, 102, 241, 0.4)',
           zIndex: 9999,
-          transition: 'all 0.3s ease',
-          fontSize: '24px'
+          transition: 'all 0.2s ease',
+          fontSize: '18px',
+          backdropFilter: 'blur(8px)',
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.transform = 'scale(1.1)'
-          e.currentTarget.style.boxShadow = '0 6px 20px rgba(0,0,0,0.4)'
+          e.currentTarget.style.transform = 'translateY(-2px)'
+          e.currentTarget.style.boxShadow = theme === 'light'
+            ? '0 8px 20px rgba(59, 130, 246, 0.5)'
+            : '0 8px 20px rgba(99, 102, 241, 0.5)'
         }}
         onMouseLeave={(e) => {
-          e.currentTarget.style.transform = 'scale(1)'
-          e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.3)'
+          e.currentTarget.style.transform = 'translateY(0)'
+          e.currentTarget.style.boxShadow = theme === 'light'
+            ? '0 4px 12px rgba(59, 130, 246, 0.4)'
+            : '0 4px 12px rgba(99, 102, 241, 0.4)'
         }}
-        title="Chat"
+        title="AI Assistant"
       >
-        {isOpen ? '✕' : '💬'}
+        {isOpen ? (
+          <i className="pi pi-times" style={{ fontSize: '16px' }}></i>
+        ) : (
+          <i
+            className="pi pi-comments"
+            style={{
+              fontSize: '18px',
+              animation: 'pulse-icon 2s ease-in-out infinite'
+            }}
+          ></i>
+        )}
+        <style>{`
+          @keyframes pulse-icon {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.85; }
+          }
+        `}</style>
       </button>
+      )}
+
+      {/* Overlay/Backdrop */}
+      {isOpen && (
+        <div
+          onClick={() => setIsOpen(false)}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.3)',
+            zIndex: 9997,
+            transition: 'opacity 0.3s ease'
+          }}
+        />
+      )}
 
       {/* Chat Sidebar */}
       <div
@@ -380,70 +425,130 @@ const handleSendMessage = async () => {
         <div
           style={{
             padding: '20px 24px',
-            borderBottom: `1px solid ${theme === 'light' ? '#e5e7eb' : '#374151'}`,
+            background: theme === 'light'
+              ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+              : 'linear-gradient(135deg, #4c1d95 0%, #5b21b6 50%, #6d28d9 100%)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            backgroundColor: theme === 'light' ? '#f9fafb' : '#111827'
+            position: 'relative',
+            overflow: 'hidden'
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div
-              style={{
-                width: '40px',
-                height: '40px',
-                borderRadius: '50%',
-                backgroundColor: theme === 'light' ? '#3b82f6' : '#6366f1',
+          {/* Decorative circles */}
+          <div style={{
+            position: 'absolute',
+            top: '-20px',
+            right: '-20px',
+            width: '100px',
+            height: '100px',
+            borderRadius: '50%',
+            background: 'rgba(255,255,255,0.1)',
+            pointerEvents: 'none'
+          }} />
+          <div style={{
+            position: 'absolute',
+            bottom: '-30px',
+            left: '30%',
+            width: '60px',
+            height: '60px',
+            borderRadius: '50%',
+            background: 'rgba(255,255,255,0.08)',
+            pointerEvents: 'none'
+          }} />
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px', zIndex: 1 }}>
+            {/* AI Avatar with pulse */}
+            <div style={{ position: 'relative' }}>
+              <div
+                style={{
+                  width: '48px',
+                  height: '48px',
+                  borderRadius: '14px',
+                  background: 'rgba(255,255,255,0.2)',
+                  backdropFilter: 'blur(10px)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  border: '2px solid rgba(255,255,255,0.3)',
+                  boxShadow: '0 4px 15px rgba(0,0,0,0.2)'
+                }}
+              >
+                <i className="pi pi-sparkles" style={{ fontSize: '22px', color: '#ffffff' }}></i>
+              </div>
+              {/* Online indicator */}
+              <div
+                style={{
+                  position: 'absolute',
+                  bottom: '-2px',
+                  right: '-2px',
+                  width: '14px',
+                  height: '14px',
+                  borderRadius: '50%',
+                  backgroundColor: '#22c55e',
+                  border: '2px solid white',
+                  animation: 'pulse-green 2s infinite'
+                }}
+              />
+            </div>
+
+            <div>
+              <h2 style={{
+                margin: 0,
+                fontSize: '18px',
+                fontWeight: '700',
+                color: '#ffffff',
+                letterSpacing: '-0.3px'
+              }}>
+                AI Assistant
+              </h2>
+              <p style={{
+                margin: '2px 0 0 0',
+                fontSize: '12px',
+                color: 'rgba(255,255,255,0.8)',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center',
-                color: 'white',
-                fontSize: '20px'
-              }}
-            >
-              🤖
-            </div>
-            <div>
-              <h2
-                style={{
-                  margin: 0,
-                  fontSize: '18px',
-                  fontWeight: '600',
-                  color: theme === 'light' ? '#111827' : '#f9fafb'
-                }}
-              >
-                Chat with ai
-              </h2>
-              <p
-                style={{
-                  margin: 0,
-                  fontSize: '12px',
-                  color: theme === 'light' ? '#6b7280' : '#9ca3af'
-                }}
-              >
-                online
+                gap: '4px'
+              }}>
+                <span style={{
+                  width: '6px',
+                  height: '6px',
+                  borderRadius: '50%',
+                  backgroundColor: '#22c55e',
+                  display: 'inline-block'
+                }}></span>
+                Ready to help
               </p>
             </div>
           </div>
+
           <button
             onClick={() => setIsOpen(false)}
             style={{
-              background: 'transparent',
+              background: 'rgba(255,255,255,0.15)',
               border: 'none',
               cursor: 'pointer',
-              color: theme === 'light' ? '#6b7280' : '#9ca3af',
-              fontSize: '24px',
-              padding: '4px',
-              transition: 'color 0.2s'
+              color: '#ffffff',
+              fontSize: '16px',
+              padding: '8px',
+              borderRadius: '10px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'all 0.2s ease',
+              backdropFilter: 'blur(10px)',
+              zIndex: 1
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.color = theme === 'light' ? '#111827' : '#f9fafb'
+              e.currentTarget.style.background = 'rgba(255,255,255,0.25)'
+              e.currentTarget.style.transform = 'scale(1.05)'
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.color = theme === 'light' ? '#6b7280' : '#9ca3af'
+              e.currentTarget.style.background = 'rgba(255,255,255,0.15)'
+              e.currentTarget.style.transform = 'scale(1)'
             }}
           >
-            ✕
+            <i className="pi pi-times"></i>
           </button>
         </div>
 
@@ -687,7 +792,7 @@ const handleSendMessage = async () => {
                 ref={inputRef}
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
-                onKeyPress={handleKeyPress}
+                onKeyDown={handleKeyDown}
                 placeholder=""
                 style={{
                   flex: 1,
@@ -773,6 +878,14 @@ const handleSendMessage = async () => {
           }
           30% {
             transform: translateY(-8px);
+          }
+        }
+        @keyframes pulse-green {
+          0%, 100% {
+            box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+          }
+          50% {
+            box-shadow: 0 0 0 6px rgba(34, 197, 94, 0);
           }
         }
       `}</style>
