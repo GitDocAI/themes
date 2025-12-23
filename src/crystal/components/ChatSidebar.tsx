@@ -114,7 +114,7 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
     });
   };
 
-  const sendToolResultToAI = async (toolName: string, _toolResult: any, allToolResults: any, currentTodoList: string) => {
+  const sendToolResultToAI = async (toolName: string, _toolResult: any,id:string, allToolResults: any, currentTodoList: string) => {
     const botMessageId = (Date.now() + 1).toString();
 
     setMessages(prev => [
@@ -127,16 +127,14 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
       }
     ]);
 
-    const result = new Map<string, string>();
-    Object.keys(allToolResults).forEach((key) => {
-      result.set(key, allToolResults[key]);
-    });
+    const result = {...allToolResults}
+    result[toolName]={id,response:_toolResult}
 
     setIsTyping(true);
     aiStreamService.editWithAI(
       "",
       contexts.filter(c => c.type !== "intention"),
-      `${chatResume} the function ${toolName} was called `,
+      `${chatResume}`,
       currentTodoList,
       result,
       (data) => handleStreamData(data, botMessageId),
@@ -269,7 +267,7 @@ const handleSendMessage = async () => {
   }
 
   const executeTool = async (toolCall: any) => {
-    const { name, arguments: parameters } = toolCall;
+    const { name, arguments: parameters,id } = toolCall;
     console.log(`Agent generated query: ${name}`, parameters);
 
     const pendingToolResults = { ...toolResults, [name]: null };
@@ -295,7 +293,7 @@ const handleSendMessage = async () => {
         }
 
         setToolResults(newToolResults);
-        sendToolResultToAI(name, result.results, newToolResults, finalTodoList);
+        sendToolResultToAI(name, result.results,id, newToolResults, finalTodoList);
     }
   }
 
