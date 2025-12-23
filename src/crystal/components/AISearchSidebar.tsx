@@ -709,7 +709,7 @@ export const AISearchSidebar: React.FC<AISearchSidebarProps> = ({
                   message.role === 'assistant' ? (
                     <div className="ai-markdown-content">
                       <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                        {message.id === 'welcome' && isDevMode ? localWelcome : message.content}
+                        {message.id === 'welcome' && isDevMode ? welcomeMessage : message.content}
                       </ReactMarkdown>
                       {streamingMessageId === message.id && (
                         <span

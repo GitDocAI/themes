@@ -115,20 +115,27 @@ const EditorToolbarComponent = forwardRef<EditorToolbarRef, EditorToolbarProps>(
     editor
       .chain()
       .focus()
-   .insertContent({
-            type: 'cardBlock',
-            attrs: {
-              id: `card-${Date.now()}`,
-              title: 'New Card',
-              icon: 'pi pi-star',
-              href: '',
-              content:'asas'
-            },
-          }).run()
-
-
-
-
+      .insertContent({
+        type: 'cardBlock',
+        attrs: {
+          id: `card-${Date.now()}`,
+          title: 'New Card',
+          icon: 'pi pi-star',
+          href: '',
+        },
+        content: [
+          {
+            type: 'paragraph',
+            content: [
+              {
+                type: 'text',
+                text: 'Card content goes here...',
+              },
+            ],
+          },
+        ],
+      })
+      .run()
     setShowInsertDropdown(false)
   }
 

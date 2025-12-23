@@ -137,6 +137,10 @@ class MDXSerializerService {
         return '  ' // Two spaces = hard break in markdown
 
       case 'infoBlock':
+      case 'tipBlock':
+      case 'noteBlock':
+      case 'warningBlock':
+      case 'dangerBlock':
         return this.serializeInfoBlock(node)
 
       case 'cardBlock':
@@ -416,7 +420,15 @@ class MDXSerializerService {
    * Serialize info block (Tip, Info, Note, Warning, Danger)
    */
   private serializeInfoBlock(node: TipTapNode): string {
-    const type = node.attrs?.type || 'info'
+    // Determine type from node.type name or attrs.type
+    let type = node.attrs?.type || 'info'
+
+    // Extract type from node name if it's a specific block type
+    if (node.type === 'tipBlock') type = 'tip'
+    else if (node.type === 'noteBlock') type = 'note'
+    else if (node.type === 'warningBlock') type = 'warning'
+    else if (node.type === 'dangerBlock') type = 'danger'
+
     const content = node.content || []
 
     // Map internal type to MDX component name

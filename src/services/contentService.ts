@@ -56,8 +56,6 @@ export class ContentService {
     // Invalidate cache after successful save
     pageLoader.invalidateCache(docId)
     apiReferenceLoader.invalidateCache(docId)
-
-    console.log(`[ContentService] Content saved and cache invalidated for: ${docId}`)
   }
 
 
@@ -78,8 +76,6 @@ export class ContentService {
     }catch(error){
       throw new Error(`Failed to save content: ${error}`)
     }
-
-    console.log(`[ContentService] Content saved and cache invalidated for: ${docId}`)
   }
 
   /**
@@ -100,7 +96,6 @@ export class ContentService {
     }
     // Reload config after successful save to invalidate cache
     await configLoader.reloadConfig()
-    console.log('[ContentService] Configuration saved and cache reloaded')
   }
 
   /**

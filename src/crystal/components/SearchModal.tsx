@@ -10,13 +10,15 @@ interface SearchModalProps {
   onHide: () => void
   onNavigate: (path: string, headingId?: string,tab?:string,version?:string) => void
   theme: 'light' | 'dark'
+  isDevMode?: boolean
 }
 
 export const SearchModal: React.FC<SearchModalProps> = ({
   visible,
   onHide,
   onNavigate,
-  theme
+  theme,
+  isDevMode = false
 }) => {
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<SearchHit[]>([])
@@ -150,16 +152,19 @@ export const SearchModal: React.FC<SearchModalProps> = ({
           <input
             ref={inputRef}
             value={query}
-            onChange={e => setQuery(e.target.value)}
-            onKeyDown={handleKeyDown}
+            onChange={e => !isDevMode && setQuery(e.target.value)}
+            onKeyDown={!isDevMode ? handleKeyDown : undefined}
             placeholder="Search documentation..."
             className="search-input-field"
+            readOnly={isDevMode}
+            style={isDevMode ? { cursor: 'default' } : undefined}
           />
           <button
             className="search-button"
-            onClick={performSearch}
-            disabled={isSearching || !query.trim()}
-            title="Search"
+            onClick={!isDevMode ? performSearch : undefined}
+            disabled={isDevMode || isSearching || !query.trim()}
+            title={isDevMode ? "Disabled in preview mode" : "Search"}
+            style={isDevMode ? { cursor: 'not-allowed', opacity: 0.5 } : undefined}
           >
             {isSearching ? (
               <i className="pi pi-spin pi-spinner" />
@@ -170,8 +175,70 @@ export const SearchModal: React.FC<SearchModalProps> = ({
         </div>
 
 
-        {/* Empty initial */}
-        {!query.trim() && (
+        {/* Empty initial - Dev mode shows example results */}
+        {!query.trim() && isDevMode && (
+          <div className="search-results-container" style={{ opacity: 0.7 }}>
+            <div style={{
+              padding: '8px 16px',
+              fontSize: '0.75rem',
+              fontWeight: 600,
+              textTransform: 'uppercase',
+              letterSpacing: '0.5px',
+              opacity: 0.6,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}>
+              <i className="pi pi-eye" style={{ fontSize: '0.7rem' }}></i>
+              Example Results Preview
+            </div>
+            {/* Example result 1 */}
+            <div className="search-result">
+              <div className="search-result-header">
+                <i className="pi pi-file-o search-result-icon"></i>
+                <div className="search-result-breadcrumb">
+                  <span>Documentation</span>
+                  <i className="pi pi-angle-double-right mx-1.5" style={{ fontSize: '0.7rem', opacity: 0.6 }}></i>
+                  <span>Getting Started</span>
+                </div>
+              </div>
+              <div className="search-result-content search-markdown-content">
+                <p>Welcome to the documentation. This guide will help you get started with the <strong>installation</strong> and basic configuration...</p>
+              </div>
+            </div>
+            {/* Example result 2 */}
+            <div className="search-result">
+              <div className="search-result-header">
+                <i className="pi pi-file-o search-result-icon"></i>
+                <div className="search-result-breadcrumb">
+                  <span>API Reference</span>
+                  <i className="pi pi-angle-double-right mx-1.5" style={{ fontSize: '0.7rem', opacity: 0.6 }}></i>
+                  <span>Authentication</span>
+                </div>
+              </div>
+              <div className="search-result-content search-markdown-content">
+                <p>Learn how to authenticate your API requests using <strong>API keys</strong> or OAuth tokens...</p>
+              </div>
+            </div>
+            {/* Example result 3 */}
+            <div className="search-result">
+              <div className="search-result-header">
+                <i className="pi pi-file-o search-result-icon"></i>
+                <div className="search-result-breadcrumb">
+                  <span>Guides</span>
+                  <i className="pi pi-angle-double-right mx-1.5" style={{ fontSize: '0.7rem', opacity: 0.6 }}></i>
+                  <span>Best Practices</span>
+                </div>
+              </div>
+              <div className="search-result-content search-markdown-content">
+                <p>Follow these <strong>best practices</strong> to ensure optimal performance and security in your implementation...</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Empty initial - Production mode */}
+        {!query.trim() && !isDevMode && (
           <div className="search-empty">
             <i className="pi pi-search" style={{ fontSize: '2rem', opacity: 0.3 }} />
             <p className="search-empty-text">Type your search and press Enter</p>

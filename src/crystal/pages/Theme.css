@@ -4,6 +4,39 @@
   padding: 0;
 }
 
+/* Text selection styles */
+::selection {
+  background-color: #3b82f6;
+  color: #ffffff;
+}
+
+::-moz-selection {
+  background-color: #3b82f6;
+  color: #ffffff;
+}
+
+/* Dark mode selection - ensure text is visible */
+[data-theme="dark"] ::selection {
+  background-color: #3b82f6;
+  color: #ffffff;
+}
+
+[data-theme="dark"] ::-moz-selection {
+  background-color: #3b82f6;
+  color: #ffffff;
+}
+
+/* Light mode selection */
+[data-theme="light"] ::selection {
+  background-color: #3b82f6;
+  color: #ffffff;
+}
+
+[data-theme="light"] ::-moz-selection {
+  background-color: #3b82f6;
+  color: #ffffff;
+}
+
 .logo {
   height: 6em;
   padding: 1.5em;

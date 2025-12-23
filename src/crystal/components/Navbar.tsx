@@ -37,6 +37,7 @@ export const Navbar: React.FC<NavbarProps> = ({ theme, onThemeChange, onVersionC
   const [editingType, setEditingType] = useState<'link' | 'button'>('link')
   const [hoveredItemIndex, setHoveredItemIndex] = useState<number | null>(null)
   const [draggedItemIndex, setDraggedItemIndex] = useState<number | null>(null)
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [versions, setVersions] = useState<Version[]>([])
   const [hasVersions, setHasVersions] = useState(false)
@@ -223,16 +224,34 @@ export const Navbar: React.FC<NavbarProps> = ({ theme, onThemeChange, onVersionC
     }
   }
 
-  const handleDragOver = (e: React.DragEvent, _index: number) => {
-    if (isDevMode) {
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    if (isDevMode && draggedItemIndex !== null) {
       e.preventDefault()
+      if (dragOverIndex !== index) {
+        setDragOverIndex(index)
+      }
     }
+  }
+
+  const handleDragLeave = () => {
+    // Small delay to prevent flickering when moving between elements
+    setTimeout(() => {
+      setDragOverIndex(null)
+    }, 50)
+  }
+
+  const handleDragEnd = () => {
+    setDraggedItemIndex(null)
+    setDragOverIndex(null)
   }
 
   const handleDrop = async (e: React.DragEvent, dropIndex: number) => {
     e.preventDefault()
 
-    if (!isDevMode || draggedItemIndex === null || draggedItemIndex === dropIndex) return
+    if (!isDevMode || draggedItemIndex === null || draggedItemIndex === dropIndex) {
+      setDragOverIndex(null)
+      return
+    }
 
     try {
       // Fetch current config
@@ -256,9 +275,11 @@ export const Navbar: React.FC<NavbarProps> = ({ theme, onThemeChange, onVersionC
       configLoader.updateConfig(config)
       setNavItems(updatedNavItems)
       setDraggedItemIndex(null)
+      setDragOverIndex(null)
     } catch (error) {
       console.error('[Navbar] Error reordering navbar items:', error)
       setDraggedItemIndex(null)
+      setDragOverIndex(null)
     }
   }
 
@@ -480,6 +501,36 @@ export const Navbar: React.FC<NavbarProps> = ({ theme, onThemeChange, onVersionC
 
         {/* Navbar Items */}
         {navItems.map((item, index) => {
+          const showLeftIndicator = dragOverIndex === index && draggedItemIndex !== null && draggedItemIndex !== index && draggedItemIndex > index
+          const showRightIndicator = dragOverIndex === index && draggedItemIndex !== null && draggedItemIndex !== index && draggedItemIndex < index
+
+          // Drop indicator component - shows on left or right based on drag direction
+          const DropIndicator = ({ position }: { position: 'left' | 'right' }) => {
+            const shouldShow = position === 'left' ? showLeftIndicator : showRightIndicator
+            if (!shouldShow) return null
+
+            return (
+              <div style={{
+                position: 'absolute',
+                [position]: '-8px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                display: 'flex',
+                alignItems: 'center',
+                zIndex: 20,
+              }}>
+                {/* Vertical line */}
+                <div style={{
+                  width: '3px',
+                  height: '32px',
+                  backgroundColor: colors.primary,
+                  borderRadius: '2px',
+                  boxShadow: `0 0 8px ${colors.primary}`,
+                }} />
+              </div>
+            )
+          }
+
           if (item.type === 'link') {
             return (
               <div
@@ -487,18 +538,23 @@ export const Navbar: React.FC<NavbarProps> = ({ theme, onThemeChange, onVersionC
                 draggable={isDevMode}
                 onDragStart={() => handleDragStart(index)}
                 onDragOver={(e) => handleDragOver(e, index)}
+                onDragLeave={handleDragLeave}
+                onDragEnd={handleDragEnd}
                 onDrop={(e) => handleDrop(e, index)}
                 style={{
                   position: 'relative',
                   display: 'inline-block',
                   cursor: isDevMode ? 'move' : 'default',
-                  opacity: draggedItemIndex === index ? 0.5 : 1
+                  opacity: draggedItemIndex === index ? 0.3 : 1,
                 }}
                 onMouseEnter={() => setHoveredItemIndex(index)}
                 onMouseLeave={() => setHoveredItemIndex(null)}
               >
+                {/* Drop indicators */}
+                <DropIndicator position="left" />
+                <DropIndicator position="right" />
                 {/* Delete button - Only in Dev Mode */}
-                {isDevMode && hoveredItemIndex === index && (
+                {isDevMode && hoveredItemIndex === index && draggedItemIndex === null && (
                   <button
                     onClick={(e) => {
                       e.preventDefault()
@@ -600,18 +656,24 @@ export const Navbar: React.FC<NavbarProps> = ({ theme, onThemeChange, onVersionC
                 draggable={isDevMode}
                 onDragStart={() => handleDragStart(index)}
                 onDragOver={(e) => handleDragOver(e, index)}
+                onDragLeave={handleDragLeave}
+                onDragEnd={handleDragEnd}
                 onDrop={(e) => handleDrop(e, index)}
                 style={{
                   position: 'relative',
                   display: 'inline-block',
                   cursor: isDevMode ? 'move' : 'default',
-                  opacity: draggedItemIndex === index ? 0.5 : 1
+                  opacity: draggedItemIndex === index ? 0.5 : 1,
+                  transition: 'opacity 0.2s ease',
                 }}
                 onMouseEnter={() => setHoveredItemIndex(index)}
                 onMouseLeave={() => setHoveredItemIndex(null)}
               >
+                {/* Drop indicators */}
+                <DropIndicator position="left" />
+                <DropIndicator position="right" />
                 {/* Delete button - Only in Dev Mode */}
-                {isDevMode && hoveredItemIndex === index && (
+                {isDevMode && hoveredItemIndex === index && draggedItemIndex === null && (
                   <button
                     onClick={(e) => {
                       e.preventDefault()

@@ -55,6 +55,17 @@ export const CardBlock = Node.create({
               id: `card-${Date.now()}`,
               ...attributes,
             },
+            content: [
+              {
+                type: 'paragraph',
+                content: [
+                  {
+                    type: 'text',
+                    text: 'Card content goes here...',
+                  },
+                ],
+              },
+            ],
           })
         },
     } as any

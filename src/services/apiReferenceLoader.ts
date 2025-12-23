@@ -96,8 +96,6 @@ class ApiReferenceLoader {
     this.cache.delete(pagePath)
     this.cache.delete(jsonPath)
     this.cache.delete(mdxPath)
-
-    console.log(`[ApiReferenceLoader] Cache invalidated for: ${pagePath}`)
   }
 
   /**

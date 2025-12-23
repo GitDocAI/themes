@@ -630,8 +630,9 @@ function Documentation() {
       <SearchModal
         visible={showSearchModal}
         onHide={() => setShowSearchModal(false)}
-        onNavigate={ handleSearchNavigate}
+        onNavigate={handleSearchNavigate}
         theme={theme}
+        isDevMode={!isProductionMode && isDevMode}
       />
 
       {/* AI Search Sidebar */}
