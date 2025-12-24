@@ -48,10 +48,21 @@ class AIStreamService {
     chat_resume:string,
     todo_list:string,
     results:any,
+    currentLocation: { version: string; tab: string; group: string },
     onData: (msg: AIStreamResponse) => void,
     onFinished: () => void
   ){
-    await this.stream('/ai/edit',{edit_prompt:question,content:"",context,chat_resume,todo_list,results},onData,onFinished)
+    await this.stream('/ai/edit',{
+      edit_prompt: question,
+      content: "",
+      context,
+      chat_resume,
+      todo_list,
+      results,
+      current_version: currentLocation.version,
+      current_tab: currentLocation.tab,
+      current_group: currentLocation.group
+    },onData,onFinished)
   }
 
   async stream(
@@ -61,6 +72,9 @@ class AIStreamService {
     onFinished: () => void
   ) {
     // Cancel previous session
+    if (this.controller) {
+      this.controller.abort();
+    }
     this.controller = new AbortController();
 
     const cfg = await buildAxiosConfig(url, body);
@@ -108,14 +122,31 @@ class AIStreamService {
           if (line.startsWith("data:")) {
             const payload = line.replace("data:", "").trim();
 
-            try{
-            const realMessage:AIStreamResponse = JSON.parse(payload)
-            onData(realMessage);
-            if (realMessage.is_final){
+            try {
+              const realMessage:AIStreamResponse = JSON.parse(payload)
+              onData(realMessage);
+              if (realMessage.is_final){
+                onFinished();
+              }
+            } catch(err) {
+              // Server sent a non-JSON error message, display it to the user
+              console.log("[Chat Error]: ", err)
+
+              let errorMessage = payload || "An error occurred while processing your request";
+
+              // Check for AI generation limit error
+              if (payload && payload.includes("AI generation limit reached")) {
+                errorMessage = "⚠️ **AI generation limit reached**\n\nYou've reached your plan's AI usage limit. [Upgrade your plan](https://dashboard.dev.gitdocs.ai/profile/plans) to continue using AI features.";
+              }
+
+              onData({
+                chunk_index: -1,
+                answer_chunk: errorMessage,
+                is_final: true,
+                message_type: "text"
+              });
               onFinished();
-            }
-            }catch(err){
-              console.log("[Chat Error]: ",err)
+              return;
             }
 
           }

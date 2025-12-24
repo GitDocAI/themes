@@ -51,6 +51,7 @@ function Documentation() {
   const [aiSearchConfig, setAISearchConfig] = useState<AISearchConfig | undefined>(undefined)
   const [isAISearchSidebarOpen, setIsAISearchSidebarOpen] = useState<boolean>(false)
   const [currentOpenApiSpec, setCurrentOpenApiSpec] = useState<string | undefined>(undefined)
+  const [pageRefreshKey, setPageRefreshKey] = useState<number>(0)
 
   // Use custom hook to detect RightPanel content
   const rightPanelContent = useRightPanelContent(currentPath)
@@ -449,40 +450,18 @@ function Documentation() {
     }
 
     setAiContexts(prevAiContexts => {
-      const fileContextExists = prevAiContexts.some(
-        context => context.type === 'file' && context.fileName === currentFileName
+      // Remove any existing text and file contexts (replace with new selection)
+      const filteredContexts = prevAiContexts.filter(
+        context => context.type !== 'text' && context.type !== 'file' && context.type !== 'intention'
       );
 
-      const textContextExists = prevAiContexts.some(
-        context => context.type === 'text' && context.content === contextText && context.fileName === currentFileName
-      );
-
-      const newAiContexts = [...prevAiContexts];
-
-      if (!fileContextExists) {
-        newAiContexts.push(currentFileContext);
-      }
-
-      if (!textContextExists) {
-        newAiContexts.push(textContext);
-      }
-
-      // Handle intention context
-      const intentionIndex = newAiContexts.findIndex(context => context.type === 'intention');
-      if (intentionIndex !== -1) {
-        // Update existing intention context (if needed, based on 'intention' parameter)
-        // For now, we're just keeping one, so no update needed in this example
-      } else {
-        newAiContexts.push(intentionContext);
-      }
-
-      // Ensure only one intention context exists
-      const intentionContexts = newAiContexts.filter(context => context.type === 'intention');
-      if (intentionContexts.length > 1) {
-        newAiContexts.splice(newAiContexts.indexOf(intentionContexts[1]), 1); // Remove the second intention context
-      }
-
-      return newAiContexts;
+      // Add the new contexts
+      return [
+        ...filteredContexts,
+        currentFileContext,
+        textContext,
+        intentionContext
+      ];
     });
   }
 
@@ -527,7 +506,11 @@ function Documentation() {
               externalContexts={aiContexts}
               onUpdateContext={(ctx)=>setAiContexts(ctx)}
               onOpenChange={setIsChatSidebarOpen}
+              onContentChange={() => setPageRefreshKey(prev => prev + 1)}
+              onOpenSettings={() => setIsSettingsSidebarOpen(true)}
               buttonVisible={!isSettingsSidebarOpen && !isChatSidebarOpen}
+              currentVersion={currentVersion}
+              currentTab={currentTab}
             />
 
             <SettingsSidebar
@@ -579,8 +562,8 @@ function Documentation() {
           minHeight: 'calc(100vh - var(--navbar-height, 64px) - var(--tabbar-height, 64px) - 40px)',
         }}>
           {/* Page Viewer */}
-          <div style={{ flex: '1 0 auto' }}>
-            <PageViewer key={currentPath} pagePath={currentPath} theme={theme} isDevMode={isProductionMode ? false : isDevMode} allowUpload={isDevEnvironment} openApiSpec={currentOpenApiSpec} />
+          <div id="page-content-area" style={{ flex: '1 0 auto' }}>
+            <PageViewer key={`${currentPath}-${pageRefreshKey}`} pagePath={currentPath} theme={theme} isDevMode={isProductionMode ? false : isDevMode} allowUpload={isDevEnvironment} openApiSpec={currentOpenApiSpec} />
           </div>
 
           {/* Prev/Next Navigation */}

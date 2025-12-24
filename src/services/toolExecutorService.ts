@@ -5,7 +5,8 @@ import { searchService, type SearchHit, type SearchResponse } from './searchServ
 import { pageLoader } from './pageLoader'
 import axiosInstance from '../utils/axiosInstance'
 
-const { loadConfig, updateConfig } = ConfigLoader
+const loadConfig = ConfigLoader.loadConfig.bind(ConfigLoader)
+const updateConfig = ConfigLoader.updateConfig.bind(ConfigLoader)
 
 import { type ChatContext } from './agentService'
 import { FindPagePathByName } from './navigationService'
@@ -172,70 +173,45 @@ export const toolExecutor = {
           })
       }
       case 'remove_item': {
-        const config = await loadConfig()
-        const { entity_type, identifiers } = args
-        let itemPath: string | null = null
+        const { entity_type } = args;
 
-        if (!config.navigation) {
-          return { results: { error: 'Navigation not configured.' } }
-        }
+        const entityTypes: Record<string, string> = {
+          'version': 'deleting versions',
+          'tab': 'deleting tabs',
+          'group': 'deleting groups',
+          'dropdown': 'deleting dropdowns',
+          'page': 'deleting pages'
+        };
 
-        if (entity_type === 'version') {
-          const versionName = identifiers[0]
-          if (config.navigation.versions) {
-            config.navigation.versions = config.navigation.versions.filter(
-              (v) => v.version !== versionName
-            )
+        const operationDescription = entityTypes[entity_type] || 'deleting items';
+
+        const message = `**${operationDescription.charAt(0).toUpperCase() + operationDescription.slice(1)} via AI is not available yet.**
+
+This feature is coming soon! Currently, the following structural operations cannot be performed through AI:
+• Renaming or deleting versions
+• Renaming or deleting tabs
+• Renaming or deleting groups
+• Renaming or deleting pages
+
+**You can perform these operations manually using the sidebar.** Double-click on any item to rename it, or hover and click the delete button to remove it.`;
+
+        return {
+          results: {
+            success: 'false',
+            not_supported: true,
+            message,
+            operation: 'remove_item',
+            entity_type
           }
-        } else if (entity_type === 'tab') {
-          const tabName =
-            identifiers.length > 1 ? identifiers[1] : identifiers[0]
-          const versionName = identifiers.length > 1 ? identifiers[0] : null
-
-          if (versionName && config.navigation.versions) {
-            const version = config.navigation.versions.find(
-              (v) => v.version === versionName
-            )
-            if (version && version.tabs) {
-              version.tabs = version.tabs.filter((t) => t.tab !== tabName)
-            }
-          } else if (!versionName && config.navigation.tabs) {
-            config.navigation.tabs = config.navigation.tabs.filter(
-              (t) => t.tab !== tabName
-            )
-          }
-        } else if (entity_type === 'group' || entity_type === 'dropdown') {
-          return { results: { error: 'Removing groups is not fully implemented yet.' } }
-        } else if (entity_type === 'page') {
-          itemPath = identifiers[identifiers.length - 1] // Assuming last identifier is the path
-          const tabName = identifiers[1]
-          const versionName = identifiers[0]
-
-          const items = getTabItems(config, versionName, tabName)
-          if (items) {
-            for (const group of items) {
-              if (group.children) {
-                const pageIndex = group.children.findIndex(
-                  (p: any) => p.page === itemPath
-                )
-                if (pageIndex !== -1) {
-                  group.children.splice(pageIndex, 1)
-                  break
-                }
-              }
-            }
-          }
-        }
-
-        await ContentService.saveConfig(config)
-        if (itemPath) {
-          await ContentService.removeItem(itemPath)
-        }
-        updateConfig(config)
-        return { results: { success: 'true' } }
+        };
       }
       case 'replace_in_file': {
-        const { page, to_replace_text, new_text } = args
+        let { page, to_replace_text, new_text } = args
+
+        // Ensure the file path has .mdx extension
+        if (!page.endsWith('.mdx')) {
+          page = `${page}.mdx`
+        }
 
         try {
           if (page.endsWith('.mdx')) {
@@ -377,6 +353,91 @@ export const toolExecutor = {
         console.warn(`Tool "highlight_text" is not fully implemented. Page: ${page}, Text: ${text}, Color: ${color}`);
         return { results: { success: 'true', note: 'not implemented' } };
       }
+      case 'edit_global_config': {
+        const { config_type } = args;
+
+        const configTypes: Record<string, string> = {
+          'navbar': 'navbar items and navigation links',
+          'footer': 'footer content and links',
+          'colors': 'theme colors',
+          'background': 'background colors and images',
+          'fonts': 'typography settings',
+          'seo': 'SEO metadata',
+          'analytics': 'analytics configuration',
+          'social': 'social media links',
+          'branding': 'branding settings',
+          'logo': 'logo',
+          'favicon': 'favicon',
+          'banner': 'banner',
+          'general': 'general configuration'
+        };
+
+        const configDescription = configTypes[config_type] || config_type || 'global configuration';
+
+        const message = `**Editing ${configDescription} via AI is not available yet.**
+
+This feature is coming soon! Currently, the following global settings cannot be edited through AI:
+• Navbar items and navigation links
+• Footer content
+• Colors and background
+• Logo, favicon, and banner
+• SEO and analytics
+
+**You can edit these settings manually using the Settings panel.**
+
+[[OPEN_SETTINGS]]`;
+
+        return {
+          results: {
+            success: 'false',
+            not_supported: true,
+            has_action: true,
+            action_type: 'open_settings',
+            message,
+            config_type: config_type
+          }
+        };
+      }
+      case 'rename_version':
+      case 'rename_tab':
+      case 'rename_group':
+      case 'rename_page':
+      case 'remove_group':
+      case 'remove_version':
+      case 'remove_tab':
+      case 'remove_page': {
+        const operationTypes: Record<string, string> = {
+          'rename_version': 'renaming versions',
+          'rename_tab': 'renaming tabs',
+          'rename_group': 'renaming groups',
+          'rename_page': 'renaming pages',
+          'remove_group': 'deleting groups',
+          'remove_version': 'deleting versions',
+          'remove_tab': 'deleting tabs',
+          'remove_page': 'deleting pages'
+        };
+
+        const operationDescription = operationTypes[toolName] || 'this operation';
+
+        const message = `**${operationDescription.charAt(0).toUpperCase() + operationDescription.slice(1)} via AI is not available yet.**
+
+This feature is coming soon! Currently, the following structural operations cannot be performed through AI:
+• Renaming or deleting versions
+• Renaming or deleting tabs
+• Renaming or deleting groups
+• Renaming or deleting pages
+
+**You can perform these operations manually using the sidebar.** Double-click on any item to rename it, or hover and click the delete button to remove it.`;
+
+        return {
+          results: {
+            success: 'false',
+            not_supported: true,
+            message,
+            operation: toolName
+          }
+        };
+      }
       default:
         return { results: { error: `Tool ${toolName} not found` } }
     }
@@ -421,6 +482,7 @@ const addNewPage = async (tab:string,version:string,groupTitle:string,pageName: 
             {
               type: 'heading',
               attrs: { level: 1 },
+              
               content: [
                 {
                   type: 'text',

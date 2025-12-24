@@ -1,11 +1,19 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
-import { SearchModal } from './SearchModal'
-import { FindPagePathByName } from '../../services/navigationService'
 import { aiStreamService,type ChatContext, type AIStreamResponse } from '../../services/agentService'
 import Markdown from 'react-markdown';
 import { ConfirmationModal } from './ConfirmationModal'
+import { EditPreviewModal } from './EditPreviewModal'
+import { CreateGrouperModal } from './CreateGrouperModal'
+import { CreatePageModal } from './CreatePageModal'
+import { CreateVersionModal } from './CreateVersionModal'
+import { CreateTabModal } from './CreateTabModal'
 import { toolExecutor } from '../../services/toolExecutorService'
-const viteMode = import.meta.env.VITE_MODE || "production";
+
+interface PendingEdit {
+  originalText: string
+  newText: string
+  fileName: string
+}
 
 const SIDEBAR_WIDTH_KEY = 'chat_sidebar_width'
 const MIN_WIDTH = 350
@@ -25,7 +33,12 @@ interface ChatSidebarProps {
   externalContexts?: ChatContext[]
   onUpdateContext:(ctx:ChatContext[])=>void
   onOpenChange?: (isOpen: boolean) => void
+  onContentChange?: () => void
+  onOpenSettings?: () => void
   buttonVisible?: boolean
+  currentVersion?: string
+  currentTab?: string
+  currentGroup?: string
 }
 
 export const ChatSidebar: React.FC<ChatSidebarProps> = ({
@@ -33,16 +46,43 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
   externalContexts = [],
   onUpdateContext,
   onOpenChange,
-  buttonVisible = true
+  onContentChange,
+  onOpenSettings,
+  buttonVisible = true,
+  currentVersion = '',
+  currentTab = '',
+  currentGroup = ''
 }) => {
   const [isOpen, setIsOpen] = useState(false)
-  const [showSearchModal,setShowSearchModal] = useState<boolean>(false)
   const [chatResume,setChatResume] = useState<string>("")
   const [todoList,setTodoList] = useState<string>("")
   const [toolResults, setToolResults] = useState<{ [key: string]: any }>({});
   const [approvalRequest, setApprovalRequest] = useState<any>(null)
+  const [isProcessingNotSupported, setIsProcessingNotSupported] = useState(false)
   const [alwaysApprove, _setAlwaysApprove] = useState<boolean>(false)
   const [showConfirmationModal, setShowConfirmationModal] = useState<boolean>(false)
+  const [pendingEdit, setPendingEdit] = useState<PendingEdit | null>(null)
+  const [showEditPreview, setShowEditPreview] = useState<boolean>(false)
+  const [showCreateGrouperModal, setShowCreateGrouperModal] = useState<boolean>(false)
+  const [pendingGrouper, setPendingGrouper] = useState<{
+    group_name: string
+    parent_version: string
+    parent_tab: string
+  } | null>(null)
+  const [showCreatePageModal, setShowCreatePageModal] = useState<boolean>(false)
+  const [pendingPage, setPendingPage] = useState<{
+    page_name: string
+    parent_version: string
+    parent_tab: string
+    parent_group: string
+  } | null>(null)
+  const [showCreateVersionModal, setShowCreateVersionModal] = useState<boolean>(false)
+  const [pendingVersion, setPendingVersion] = useState<string | null>(null)
+  const [showCreateTabModal, setShowCreateTabModal] = useState<boolean>(false)
+  const [pendingTab, setPendingTab] = useState<{
+    tab_name: string
+    parent_version: string
+  } | null>(null)
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
@@ -106,19 +146,6 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
   }
 
 
-  const handleSearchResult=(page:string,headingId?:string,tab?:string,version?:string)=>{
-    const pagePath =FindPagePathByName(page,tab,version)
-    if(pagePath){
-      const context:ChatContext ={
-          id: `${pagePath}-${Date.now()}`,
-          type:  'file' ,
-          fileName: pagePath,
-          headingId:headingId
-      }
-      onUpdateContext([...contexts,context])
-    }
-  }
-
   useEffect(() => {
     scrollToBottom()
   }, [messages])
@@ -153,14 +180,12 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
         return;
     }
 
-    setMessages((prev) => {
-        setIsTyping(false);
-        return prev.map(msg =>
-            msg.id === botMessageId
-                ? { ...msg, text: msg.text + (data.answer_chunk as string) }
-                : msg
-        );
-    });
+    setIsTyping(false);
+    setMessages((prev) => prev.map(msg =>
+        msg.id === botMessageId
+            ? { ...msg, text: msg.text + (data.answer_chunk as string) }
+            : msg
+    ));
   };
 
   const sendToolResultToAI = async (toolName: string, _toolResult: any,id:string, allToolResults: any, currentTodoList: string) => {
@@ -186,6 +211,7 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
       `${chatResume}`,
       currentTodoList,
       result,
+      { version: currentVersion, tab: currentTab, group: currentGroup },
       (data) => handleStreamData(data, botMessageId),
       () => {
         setIsTyping(false);
@@ -226,48 +252,24 @@ const handleSendMessage = async () => {
     result.set(key,JSON.stringify(toolResults[key]))
   })
 
-
   const question = inputValue;
   setInputValue("");
   setIsTyping(true);
 
-  if(viteMode!="production"){
-      aiStreamService.editWithAI(
-        question,
-        contexts.filter(c=>c.type!=="intention"),
-        chatResume,
-        todoList,
-        result,
-        (data) => handleStreamData(data, botMessageId),
-        () => {
-          setIsTyping(false);
-        }
-      );
+  const locationContext = { version: currentVersion, tab: currentTab, group: currentGroup };
 
-  }else{
-  aiStreamService.askToAI(
+  aiStreamService.editWithAI(
     question,
     contexts.filter(c=>c.type!=="intention"),
     chatResume,
-    (data) => {
-      setMessages((prev)=>{
-        setIsTyping(false);
-        return prev.map(msg =>
-          msg.id === botMessageId
-            ? { ...msg, text: msg.text + (data.answer_chunk as string) }
-            : msg
-        )
-        }
-      );
-
-    },
-
+    todoList,
+    result,
+    locationContext,
+    (data) => handleStreamData(data, botMessageId),
     () => {
       setIsTyping(false);
     }
   );
-    }
-
 };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -277,13 +279,257 @@ const handleSendMessage = async () => {
     }
   }
 
-  const handleAddContext = () => {
-      setShowSearchModal(true)
+
+  const handleClearHistory = () => {
+    setMessages([
+      {
+        id: '1',
+        text: "Hey! 👋 I'm your AI editing assistant. I can help you create, modify, and organize your documentation in real-time. Just tell me what you'd like to change!",
+        sender: 'bot',
+        timestamp: new Date()
+      }
+    ])
+    setChatResume("")
+    setTodoList("")
+    setToolResults({})
+    setContexts([])
+    onUpdateContext([])
   }
 
+  const handleApplyEdit = async () => {
+    if (!pendingEdit || !approvalRequest) return
+
+    try {
+      // Execute replace_in_file directly without sending result back to AI
+      const result = await toolExecutor.execute('replace_in_file', approvalRequest.arguments)
+
+      if (result?.results?.success === 'true') {
+        // Clear the text context after applying
+        const updatedContexts = contexts.filter(c => c.type !== "text")
+        setContexts(updatedContexts)
+        onUpdateContext(updatedContexts)
+
+        // Trigger content refresh
+        onContentChange?.()
+
+        // Add success message
+        setMessages(prev => [
+          ...prev,
+          {
+            id: Date.now().toString(),
+            text: "✅ Edit applied successfully!",
+            sender: 'bot',
+            timestamp: new Date()
+          }
+        ])
+      } else {
+        throw new Error(result?.results?.error || 'Unknown error')
+      }
+    } catch (error: any) {
+      console.error('Failed to apply edit:', error)
+      setMessages(prev => [
+        ...prev,
+        {
+          id: Date.now().toString(),
+          text: `❌ Failed to apply the edit: ${error.message || 'Please try again.'}`,
+          sender: 'bot',
+          timestamp: new Date()
+        }
+      ])
+    }
+
+    setPendingEdit(null)
+    setApprovalRequest(null)
+    setShowEditPreview(false)
+  }
+
+  const handleDiscardEdit = () => {
+    setPendingEdit(null)
+    setApprovalRequest(null)
+    setShowEditPreview(false)
+  }
+
+  const handleCreateGrouper = async (data: { group_name: string; group_type: string; parent_version: string; parent_tab: string }) => {
+    try {
+      const result = await toolExecutor.execute('create_grouper', data)
+
+      if (result?.results?.success === 'true') {
+        // Trigger content refresh
+        onContentChange?.()
+
+        setMessages(prev => [
+          ...prev,
+          {
+            id: Date.now().toString(),
+            text: `✅ Group "${data.group_name}" created successfully!`,
+            sender: 'bot',
+            timestamp: new Date()
+          }
+        ])
+      } else {
+        throw new Error(result?.results?.error || 'Unknown error')
+      }
+    } catch (error: any) {
+      console.error('Failed to create group:', error)
+      setMessages(prev => [
+        ...prev,
+        {
+          id: Date.now().toString(),
+          text: `❌ Failed to create group: ${error.message || 'Please try again.'}`,
+          sender: 'bot',
+          timestamp: new Date()
+        }
+      ])
+    }
+
+    setPendingGrouper(null)
+    setApprovalRequest(null)
+    setShowCreateGrouperModal(false)
+  }
+
+  const handleCancelCreateGrouper = () => {
+    setPendingGrouper(null)
+    setApprovalRequest(null)
+    setShowCreateGrouperModal(false)
+  }
+
+  const handleCreatePage = async (data: { page_name: string; parent_version: string; parent_tab: string; parent_group: string }) => {
+    try {
+      const result = await toolExecutor.execute('create_page', data)
+
+      if (result?.results?.success === 'true') {
+        // Trigger content refresh
+        onContentChange?.()
+
+        setMessages(prev => [
+          ...prev,
+          {
+            id: Date.now().toString(),
+            text: `Page "${data.page_name}" created successfully!`,
+            sender: 'bot',
+            timestamp: new Date()
+          }
+        ])
+      } else {
+        throw new Error(result?.results?.error || 'Unknown error')
+      }
+    } catch (error: any) {
+      console.error('Failed to create page:', error)
+      setMessages(prev => [
+        ...prev,
+        {
+          id: Date.now().toString(),
+          text: `Failed to create page: ${error.message || 'Please try again.'}`,
+          sender: 'bot',
+          timestamp: new Date()
+        }
+      ])
+    }
+
+    setPendingPage(null)
+    setApprovalRequest(null)
+    setShowCreatePageModal(false)
+  }
+
+  const handleCancelCreatePage = () => {
+    setPendingPage(null)
+    setApprovalRequest(null)
+    setShowCreatePageModal(false)
+  }
+
+  const handleCreateVersion = async (data: { version: string }) => {
+    try {
+      const result = await toolExecutor.execute('create_version', data)
+
+      if (result?.results?.success === 'true') {
+        onContentChange?.()
+
+        setMessages(prev => [
+          ...prev,
+          {
+            id: Date.now().toString(),
+            text: `Version "${data.version}" created successfully!`,
+            sender: 'bot',
+            timestamp: new Date()
+          }
+        ])
+      } else {
+        throw new Error(result?.results?.error || 'Unknown error')
+      }
+    } catch (error: any) {
+      console.error('Failed to create version:', error)
+      setMessages(prev => [
+        ...prev,
+        {
+          id: Date.now().toString(),
+          text: `Failed to create version: ${error.message || 'Please try again.'}`,
+          sender: 'bot',
+          timestamp: new Date()
+        }
+      ])
+    }
+
+    setPendingVersion(null)
+    setApprovalRequest(null)
+    setShowCreateVersionModal(false)
+  }
+
+  const handleCancelCreateVersion = () => {
+    setPendingVersion(null)
+    setApprovalRequest(null)
+    setShowCreateVersionModal(false)
+  }
+
+  const handleCreateTab = async (data: { tab_name: string; parent_version: string }) => {
+    try {
+      const result = await toolExecutor.execute('create_tab', data)
+
+      if (result?.results?.success === 'true') {
+        onContentChange?.()
+
+        setMessages(prev => [
+          ...prev,
+          {
+            id: Date.now().toString(),
+            text: `Tab "${data.tab_name}" created successfully!`,
+            sender: 'bot',
+            timestamp: new Date()
+          }
+        ])
+      } else {
+        throw new Error(result?.results?.error || 'Unknown error')
+      }
+    } catch (error: any) {
+      console.error('Failed to create tab:', error)
+      setMessages(prev => [
+        ...prev,
+        {
+          id: Date.now().toString(),
+          text: `Failed to create tab: ${error.message || 'Please try again.'}`,
+          sender: 'bot',
+          timestamp: new Date()
+        }
+      ])
+    }
+
+    setPendingTab(null)
+    setApprovalRequest(null)
+    setShowCreateTabModal(false)
+  }
+
+  const handleCancelCreateTab = () => {
+    setPendingTab(null)
+    setApprovalRequest(null)
+    setShowCreateTabModal(false)
+  }
 
   const handleToolCall = async (toolCallData: any) => {
     try {
+      // Ignore additional tool calls if there's already one pending or if a not-supported operation was processed
+      if (approvalRequest || isProcessingNotSupported) {
+        return;
+      }
+
       const toolCall = toolCallData.tool_call;
       if (!toolCall) {
         console.error("Invalid tool call format:", toolCallData);
@@ -300,16 +546,66 @@ const handleSendMessage = async () => {
         }
       }
 
-      const { name } = toolCall;
+      const { name, arguments: args } = toolCall;
 
-      const toolsRequiringConfirmation = ['create_version', 'create_tab', 'create_grouper', 'create_page', 'remove_item', 'replace_in_file'];
-
-      if (toolsRequiringConfirmation.includes(name) && !alwaysApprove) {
+      // For replace_in_file, show the EditPreviewModal
+      if (name === 'replace_in_file' && !alwaysApprove) {
+        setPendingEdit({
+          originalText: args.to_replace_text,
+          newText: args.new_text,
+          fileName: args.page
+        });
         setApprovalRequest(toolCall);
-        setShowConfirmationModal(true);
-      } else {
-        await executeTool(toolCall);
+        setShowEditPreview(true);
+        return;
       }
+
+      // For create_grouper, show the CreateGrouperModal
+      if (name === 'create_grouper' && !alwaysApprove) {
+        setPendingGrouper({
+          group_name: args.group_name,
+          parent_version: args.parent_version || currentVersion,
+          parent_tab: args.parent_tab || currentTab
+        });
+        setApprovalRequest(toolCall);
+        setShowCreateGrouperModal(true);
+        return;
+      }
+
+      // For create_page, show the CreatePageModal
+      if (name === 'create_page' && !alwaysApprove) {
+        setPendingPage({
+          page_name: args.page_name,
+          parent_version: args.parent_version || currentVersion,
+          parent_tab: args.parent_tab || currentTab,
+          parent_group: args.parent_group || ''
+        });
+        setApprovalRequest(toolCall);
+        setShowCreatePageModal(true);
+        return;
+      }
+
+      // For create_version, show the CreateVersionModal
+      if (name === 'create_version' && !alwaysApprove) {
+        setPendingVersion(args.version);
+        setApprovalRequest(toolCall);
+        setShowCreateVersionModal(true);
+        return;
+      }
+
+      // For create_tab, show the CreateTabModal
+      if (name === 'create_tab' && !alwaysApprove) {
+        setPendingTab({
+          tab_name: args.tab_name,
+          parent_version: args.parent_version || currentVersion
+        });
+        setApprovalRequest(toolCall);
+        setShowCreateTabModal(true);
+        return;
+      }
+
+      // Execute tool directly - not_supported tools will handle their own response
+      await executeTool(toolCall);
     } catch (error) {
       console.error("Error processing tool call:", error);
     }
@@ -333,6 +629,40 @@ const handleSendMessage = async () => {
     console.log(`Tool response: ${JSON.stringify(result)}`);
 
     if (result && result.results) {
+        // Handle not_supported responses - show message to user and block further tool calls
+        if (result.results.not_supported) {
+          setIsProcessingNotSupported(true);
+
+          // Process message - remove the [[OPEN_SETTINGS]] marker (will be rendered as button)
+          let messageText = result.results.message || 'This feature is not available yet.';
+          const hasSettingsAction = messageText.includes('[[OPEN_SETTINGS]]');
+          messageText = messageText.replace('[[OPEN_SETTINGS]]', '');
+
+          // Add a system message to inform the user
+          const notSupportedMessage: Message = {
+            id: `not-supported-${Date.now()}`,
+            text: messageText.trim(),
+            sender: 'bot',
+            timestamp: new Date()
+          };
+          setMessages(prev => [...prev, notSupportedMessage]);
+
+          // If has settings action, add a special action message
+          if (hasSettingsAction) {
+            const actionMessage: Message = {
+              id: `action-settings-${Date.now()}`,
+              text: '[[ACTION:OPEN_SETTINGS]]',
+              sender: 'bot',
+              timestamp: new Date()
+            };
+            setMessages(prev => [...prev, actionMessage]);
+          }
+
+          // Reset the flag after a short delay to allow new conversations
+          setTimeout(() => setIsProcessingNotSupported(false), 1000);
+          return;
+        }
+
         const newToolResults = { ...pendingToolResults, [name]: result.results };
 
         let finalTodoList = todoList;
@@ -355,10 +685,9 @@ const handleSendMessage = async () => {
   }
 
   const handleRemoveContext = (id: string) => {
-    setContexts(prev => prev.filter(ctx => {
-      return ctx.id !== id
-    }))
-    onUpdateContext(contexts)
+    const filteredContexts = contexts.filter(ctx => ctx.id !== id)
+    setContexts(filteredContexts)
+    onUpdateContext(filteredContexts)
   }
 
   const formatTime = (date: Date) => {
@@ -581,15 +910,29 @@ const handleSendMessage = async () => {
             </div>
 
             <div>
-              <h2 style={{
-                margin: 0,
-                fontSize: '18px',
-                fontWeight: '700',
-                color: '#ffffff',
-                letterSpacing: '-0.3px'
-              }}>
-                AI Editor
-              </h2>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <h2 style={{
+                  margin: 0,
+                  fontSize: '18px',
+                  fontWeight: '700',
+                  color: '#ffffff',
+                  letterSpacing: '-0.3px'
+                }}>
+                  AI Editor
+                </h2>
+                <span style={{
+                  padding: '2px 8px',
+                  fontSize: '10px',
+                  fontWeight: '600',
+                  backgroundColor: 'rgba(251, 191, 36, 0.9)',
+                  color: '#78350f',
+                  borderRadius: '4px',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.5px'
+                }}>
+                  Beta
+                </span>
+              </div>
               <p style={{
                 margin: '2px 0 0 0',
                 fontSize: '12px',
@@ -610,34 +953,64 @@ const handleSendMessage = async () => {
             </div>
           </div>
 
-          <button
-            onClick={() => setIsOpen(false)}
-            style={{
-              background: 'rgba(255,255,255,0.15)',
-              border: 'none',
-              cursor: 'pointer',
-              color: '#ffffff',
-              fontSize: '16px',
-              padding: '8px',
-              borderRadius: '10px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              transition: 'all 0.2s ease',
-              backdropFilter: 'blur(10px)',
-              zIndex: 1
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = 'rgba(255,255,255,0.25)'
-              e.currentTarget.style.transform = 'scale(1.05)'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'rgba(255,255,255,0.15)'
-              e.currentTarget.style.transform = 'scale(1)'
-            }}
-          >
-            <i className="pi pi-times"></i>
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', zIndex: 1 }}>
+            <button
+              onClick={handleClearHistory}
+              style={{
+                background: 'rgba(255,255,255,0.15)',
+                border: 'none',
+                cursor: 'pointer',
+                color: '#ffffff',
+                fontSize: '14px',
+                padding: '8px',
+                borderRadius: '10px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'all 0.2s ease',
+                backdropFilter: 'blur(10px)',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'rgba(255,255,255,0.25)'
+                e.currentTarget.style.transform = 'scale(1.05)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'rgba(255,255,255,0.15)'
+                e.currentTarget.style.transform = 'scale(1)'
+              }}
+              title="Clear chat history"
+            >
+              <i className="pi pi-trash"></i>
+            </button>
+            <button
+              onClick={() => setIsOpen(false)}
+              style={{
+                background: 'rgba(255,255,255,0.15)',
+                border: 'none',
+                cursor: 'pointer',
+                color: '#ffffff',
+                fontSize: '16px',
+                padding: '8px',
+                borderRadius: '10px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'all 0.2s ease',
+                backdropFilter: 'blur(10px)',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'rgba(255,255,255,0.25)'
+                e.currentTarget.style.transform = 'scale(1.05)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'rgba(255,255,255,0.15)'
+                e.currentTarget.style.transform = 'scale(1)'
+              }}
+              title="Close"
+            >
+              <i className="pi pi-times"></i>
+            </button>
+          </div>
         </div>
 
         {/* Messages Container */}
@@ -652,7 +1025,64 @@ const handleSendMessage = async () => {
             backgroundColor: theme === 'light' ? '#ffffff' : '#1f2937'
           }}
         >
-          {messages.filter(message=>message.sender!="bot"||message.text!="").map((message) => (
+          {messages.filter(message=>message.sender!="bot"||message.text!="").map((message) => {
+            // Special handling for action buttons
+            if (message.text === '[[ACTION:OPEN_SETTINGS]]') {
+              return (
+                <div
+                  key={message.id}
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'flex-start',
+                    gap: '4px'
+                  }}
+                >
+                  <button
+                    onClick={() => {
+                      setIsOpen(false);
+                      if (onOpenSettings) {
+                        onOpenSettings();
+                      }
+                    }}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      padding: '12px 20px',
+                      backgroundColor: theme === 'light' ? '#3b82f6' : '#6366f1',
+                      color: '#ffffff',
+                      border: 'none',
+                      borderRadius: '12px',
+                      cursor: 'pointer',
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      transition: 'all 0.2s',
+                      boxShadow: theme === 'light'
+                        ? '0 2px 8px rgba(59, 130, 246, 0.3)'
+                        : '0 2px 8px rgba(99, 102, 241, 0.3)'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'translateY(-2px)';
+                      e.currentTarget.style.boxShadow = theme === 'light'
+                        ? '0 4px 12px rgba(59, 130, 246, 0.4)'
+                        : '0 4px 12px rgba(99, 102, 241, 0.4)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.boxShadow = theme === 'light'
+                        ? '0 2px 8px rgba(59, 130, 246, 0.3)'
+                        : '0 2px 8px rgba(99, 102, 241, 0.3)';
+                    }}
+                  >
+                    <i className="pi pi-cog" style={{ fontSize: '16px' }}></i>
+                    Open Settings
+                  </button>
+                </div>
+              );
+            }
+
+            return (
             <div
               key={message.id}
               style={{
@@ -663,6 +1093,7 @@ const handleSendMessage = async () => {
               }}
             >
               <div
+                className="chat-message-content"
                 style={{
                   maxWidth: '75%',
                   padding: '12px 16px',
@@ -702,7 +1133,8 @@ const handleSendMessage = async () => {
                 {formatTime(message.timestamp)}
               </span>
             </div>
-          ))}
+          );
+          })}
 
           {/* Typing Indicator */}
           {isTyping && (
@@ -846,54 +1278,40 @@ const handleSendMessage = async () => {
               alignItems: 'flex-end'
             }}
           >
-            <button
-              onClick={handleAddContext}
-              style={{
-                width: '44px',
-                height: '44px',
-                borderRadius: '50%',
-                backgroundColor: theme === 'light' ? '#e5e7eb' : '#4b5563',
-                color: theme === 'light' ? '#374151' : '#e5e7eb',
-                border: 'none',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '20px',
-                transition: 'all 0.2s',
-                flexShrink: 0
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = theme === 'light' ? '#d1d5db' : '#6b7280'
-                e.currentTarget.style.transform = 'scale(1.05)'
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = theme === 'light' ? '#e5e7eb' : '#4b5563'
-                e.currentTarget.style.transform = 'scale(1)'
-              }}
-              title="Agregar contexto"
-            >
-              +
-            </button>
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
               <textarea
                 ref={inputRef}
                 value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
+                onChange={(e) => {
+                  setInputValue(e.target.value)
+                  // Auto-resize textarea
+                  const textarea = e.target
+                  textarea.style.height = 'auto'
+                  const maxHeight = 264 // ~12 lines (22px per line)
+                  if (textarea.scrollHeight <= maxHeight) {
+                    textarea.style.height = `${textarea.scrollHeight}px`
+                    textarea.style.overflowY = 'hidden'
+                  } else {
+                    textarea.style.height = `${maxHeight}px`
+                    textarea.style.overflowY = 'auto'
+                  }
+                }}
                 onKeyDown={handleKeyDown}
-                placeholder=""
+                placeholder="Ask AI to edit your docs..."
                 style={{
-                  flex: 1,
                   padding: '12px 16px',
                   backgroundColor: theme === 'light' ? '#ffffff' : '#374151',
                   border: `1px solid ${theme === 'light' ? '#d1d5db' : '#4b5563'}`,
-                  borderRadius: '24px',
+                  borderRadius: '16px',
                   color: theme === 'light' ? '#374151' : '#e5e7eb',
                   fontSize: '14px',
                   outline: 'none',
-                  transition: 'border-color 0.2s'
+                  transition: 'border-color 0.2s',
+                  resize: 'none',
+                  height: '44px',
+                  lineHeight: '22px',
+                  overflowY: 'hidden'
                 }}
-                max-rows={3}
                 rows={1}
                 onFocus={(e) => {
                   e.currentTarget.style.borderColor = theme === 'light' ? '#3b82f6' : '#6366f1'
@@ -958,7 +1376,7 @@ const handleSendMessage = async () => {
         </div>
       </div>
 
-      {/* Animations */}
+      {/* Animations and Chat Styles */}
       <style>{`
         @keyframes bounce {
           0%, 60%, 100% {
@@ -976,14 +1394,35 @@ const handleSendMessage = async () => {
             box-shadow: 0 0 0 6px rgba(34, 197, 94, 0);
           }
         }
+        .chat-message-content h1,
+        .chat-message-content h2,
+        .chat-message-content h3,
+        .chat-message-content h4,
+        .chat-message-content h5,
+        .chat-message-content h6 {
+          font-size: 14px !important;
+          font-weight: 600 !important;
+          margin: 8px 0 !important;
+        }
+        .chat-message-content p {
+          margin: 4px 0 !important;
+        }
+        .chat-message-content pre {
+          font-size: 12px !important;
+          padding: 8px !important;
+          border-radius: 6px !important;
+          overflow-x: auto !important;
+          background: rgba(0,0,0,0.1) !important;
+        }
+        .chat-message-content code {
+          font-size: 12px !important;
+        }
+        .chat-message-content hr {
+          margin: 8px 0 !important;
+          border: none !important;
+          border-top: 1px solid rgba(128,128,128,0.3) !important;
+        }
       `}</style>
-
-      <SearchModal
-        visible={showSearchModal}
-        onHide={() => setShowSearchModal(false)}
-        onNavigate={handleSearchResult}
-        theme={theme}
-      />
 
       {showConfirmationModal && approvalRequest && (
         <ConfirmationModal
@@ -996,6 +1435,59 @@ const handleSendMessage = async () => {
           <p>Are you sure you want to execute the following action?</p>
           <pre>{JSON.stringify(approvalRequest.arguments, null, 2)}</pre>
         </ConfirmationModal>
+      )}
+
+      {showEditPreview && pendingEdit && (
+        <EditPreviewModal
+          theme={theme}
+          originalText={pendingEdit.originalText}
+          newText={pendingEdit.newText}
+          fileName={pendingEdit.fileName}
+          onClose={handleDiscardEdit}
+          onApply={handleApplyEdit}
+        />
+      )}
+
+      {showCreateGrouperModal && pendingGrouper && (
+        <CreateGrouperModal
+          theme={theme}
+          groupName={pendingGrouper.group_name}
+          initialVersion={pendingGrouper.parent_version}
+          initialTab={pendingGrouper.parent_tab}
+          onClose={handleCancelCreateGrouper}
+          onConfirm={handleCreateGrouper}
+        />
+      )}
+
+      {showCreatePageModal && pendingPage && (
+        <CreatePageModal
+          theme={theme}
+          pageName={pendingPage.page_name}
+          initialVersion={pendingPage.parent_version}
+          initialTab={pendingPage.parent_tab}
+          initialGroup={pendingPage.parent_group}
+          onClose={handleCancelCreatePage}
+          onConfirm={handleCreatePage}
+        />
+      )}
+
+      {showCreateVersionModal && pendingVersion && (
+        <CreateVersionModal
+          theme={theme}
+          versionName={pendingVersion}
+          onClose={handleCancelCreateVersion}
+          onConfirm={handleCreateVersion}
+        />
+      )}
+
+      {showCreateTabModal && pendingTab && (
+        <CreateTabModal
+          theme={theme}
+          tabName={pendingTab.tab_name}
+          initialVersion={pendingTab.parent_version}
+          onClose={handleCancelCreateTab}
+          onConfirm={handleCreateTab}
+        />
       )}
     </>
 
