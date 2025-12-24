@@ -10,7 +10,7 @@ import { TOC } from '../components/TOC'
 import { RightPanel } from '../components/RightPanel'
 import { PrevNextNavigation } from '../components/PrevNextNavigation'
 import { SearchModal } from '../components/SearchModal'
-import { configLoader, type AISearchConfig } from '../../services/configLoader'
+import { configLoader, type AISearchConfig, type Version } from '../../services/configLoader'
 import { openApiLoader } from '../../services/openApiLoader'
 import { FindPagePathByName, navigationService } from '../../services/navigationService'
 import { pageLoader } from '../../services/pageLoader'
@@ -52,6 +52,18 @@ function Documentation() {
   const [isAISearchSidebarOpen, setIsAISearchSidebarOpen] = useState<boolean>(false)
   const [currentOpenApiSpec, setCurrentOpenApiSpec] = useState<string | undefined>(undefined)
   const [pageRefreshKey, setPageRefreshKey] = useState<number>(0)
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState<boolean>(false)
+  const [versions, setVersions] = useState<Version[]>([])
+  const [isMobile, setIsMobile] = useState<boolean>(() => window.innerWidth < 1024)
+
+  // Detect mobile/tablet screen
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 1024)
+    }
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   // Use custom hook to detect RightPanel content
   const rightPanelContent = useRightPanelContent(currentPath)
@@ -83,6 +95,7 @@ function Documentation() {
       if (config) {
         setPrimaryColor(configLoader.getPrimaryColor(theme))
         setAISearchConfig(configLoader.getAISearchConfig())
+        setVersions(configLoader.getVersions())
 
         // Initialize navigation state
         const navState = navigationService.initialize()
@@ -425,6 +438,64 @@ function Documentation() {
     setIsDevMode(prev => !prev)
   }
 
+  // Find current group and page names for mobile breadcrumb
+  const getCurrentGroupAndPage = (): { groupName: string | undefined, pageName: string | undefined } => {
+    if (!currentPath || sidebarItems.length === 0) {
+      return { groupName: undefined, pageName: undefined }
+    }
+
+    // Helper to compare paths (normalize both for comparison)
+    const pathsMatch = (pagePath: string, targetPath: string): boolean => {
+      if (!pagePath || !targetPath) return false
+      // Normalize paths: remove leading/trailing slashes
+      const normalize = (p: string) => p.replace(/^\/+|\/+$/g, '').toLowerCase()
+      const normalizedPagePath = normalize(pagePath)
+      const normalizedTargetPath = normalize(targetPath)
+
+      // Direct match
+      if (normalizedPagePath === normalizedTargetPath) return true
+
+      // Check if pagePath ends with targetPath (handles version prefix)
+      // e.g., "v10.9.5/documentation/intro/page.mdx" ends with "documentation/intro/page.mdx"
+      if (normalizedPagePath.endsWith(normalizedTargetPath)) return true
+
+      return false
+    }
+
+    for (const item of sidebarItems) {
+      if ((item.type === 'group' || item.type === 'dropdown') && item.children) {
+        for (const child of item.children) {
+          if (child.type === 'page') {
+            const pagePath = (child as NavigationPage).page
+            if (pathsMatch(pagePath, currentPath)) {
+              return { groupName: item.title, pageName: child.title }
+            }
+          }
+          // Check nested children (dropdowns inside groups)
+          if ((child.type === 'group' || child.type === 'dropdown') && child.children) {
+            for (const nestedChild of child.children) {
+              if (nestedChild.type === 'page') {
+                const pagePath = (nestedChild as NavigationPage).page
+                if (pathsMatch(pagePath, currentPath)) {
+                  return { groupName: child.title, pageName: nestedChild.title }
+                }
+              }
+            }
+          }
+        }
+      } else if (item.type === 'page') {
+        const pagePath = (item as NavigationPage).page
+        if (pathsMatch(pagePath, currentPath)) {
+          return { groupName: undefined, pageName: item.title }
+        }
+      }
+    }
+
+    return { groupName: undefined, pageName: undefined }
+  }
+
+  const { groupName: currentGroup, pageName: currentPage } = getCurrentGroupAndPage()
+
   const toggleSettingsSidebar = () => {
     setIsSettingsSidebarOpen(prev => !prev)
   }
@@ -494,6 +565,9 @@ function Documentation() {
             primaryColor={primaryColor}
             isDevMode={isProductionMode ? false : isDevMode}
             currentVersion={currentVersion}
+            currentGroup={currentGroup}
+            currentPage={currentPage}
+            onMobileMenuClick={() => setIsMobileSidebarOpen(true)}
           />
         )}
 
@@ -547,6 +621,13 @@ function Documentation() {
           isDevMode={isProductionMode ? false : isDevMode}
           currentVersion={currentVersion}
           currentTab={currentTab}
+          isMobileOpen={isMobileSidebarOpen}
+          onMobileClose={() => setIsMobileSidebarOpen(false)}
+          onThemeChange={toggleTheme}
+          versions={versions}
+          onVersionChange={handleVersionChange}
+          tabs={tabs}
+          onTabChange={handleTabChange}
         />
 
         {/* Main content */}
@@ -554,10 +635,10 @@ function Documentation() {
           flex: '1 1 auto',
           display: 'flex',
           flexDirection: 'column',
-          paddingLeft: '20px',
-          paddingRight: '20px',
-          paddingTop: '40px',
-          marginLeft: '15px',
+          paddingLeft: isMobile ? '4px' : '20px',
+          paddingRight: isMobile ? '4px' : '20px',
+          paddingTop: isMobile ? '20px' : '40px',
+          marginLeft: isMobile ? '0' : '15px',
           minWidth: 0,
           minHeight: 'calc(100vh - var(--navbar-height, 64px) - var(--tabbar-height, 64px) - 40px)',
         }}>

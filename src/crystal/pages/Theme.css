@@ -4,6 +4,34 @@
   padding: 0;
 }
 
+/* Remove orange focus outline from interactive elements */
+button:focus,
+button:focus-visible,
+a:focus,
+a:focus-visible,
+input:focus,
+input:focus-visible,
+select:focus,
+select:focus-visible,
+textarea:focus,
+textarea:focus-visible,
+[tabindex]:focus,
+[tabindex]:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* PrimeReact specific focus overrides */
+.p-component:focus,
+.p-inputtext:focus,
+.p-button:focus,
+.p-dropdown:focus,
+.p-checkbox:focus,
+.p-radiobutton:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
 /* Text selection styles */
 ::selection {
   background-color: #3b82f6;

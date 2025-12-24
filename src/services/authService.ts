@@ -175,6 +175,11 @@ class AuthService{
   }
 
   isAuthenticated(): boolean {
+    const viteMode = import.meta.env.VITE_MODE || 'production'
+    // Only check authentication in production mode
+    if (viteMode !== 'production') {
+      return false
+    }
     return !!getAccessToken()
   }
 }

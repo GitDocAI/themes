@@ -14,6 +14,9 @@ interface TabBarProps {
   primaryColor: string
   isDevMode?: boolean
   currentVersion?: string
+  currentGroup?: string
+  currentPage?: string
+  onMobileMenuClick?: () => void
 }
 
 export const TabBar: React.FC<TabBarProps> = ({
@@ -23,10 +26,23 @@ export const TabBar: React.FC<TabBarProps> = ({
   theme,
   primaryColor,
   isDevMode = false,
-  currentVersion
+  currentVersion,
+  currentGroup = '',
+  currentPage = '',
+  onMobileMenuClick
 }) => {
   const [selectedTab, setSelectedTab] = useState(activeTab || tabs[0]?.tab || '')
   const [bgColor, setBgColor] = useState('')
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 1024)
+
+  // Detect mobile/tablet screen
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 1024)
+    }
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
   const [editingTabIndex, setEditingTabIndex] = useState<number | null>(null)
   const [editingTabName, setEditingTabName] = useState('')
   const [hoveredTabIndex, setHoveredTabIndex] = useState<number | null>(null)
@@ -448,6 +464,94 @@ export const TabBar: React.FC<TabBarProps> = ({
       )
     }
     return null
+  }
+
+  // Mobile breadcrumb view
+  if (isMobile) {
+    return (
+      <div
+        style={{
+          position: 'sticky',
+          top: '52px', // Height of mobile navbar
+          zIndex: 900,
+          width: '100%',
+          margin: '0',
+          backgroundColor: bgColor ? hexToRgba(bgColor, 0.95) : 'rgba(255, 255, 255, 0.95)',
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
+          padding: '10px 0',
+          borderBottom: `1px solid ${theme === 'light' ? '#e5e7eb' : '#374151'}`
+        }}
+      >
+        <div
+          style={{
+            width: '100%',
+            maxWidth: '1525px',
+            margin: '0 auto',
+            padding: '0 16px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            fontSize: '14px',
+            color: theme === 'light' ? '#6b7280' : '#9ca3af',
+            overflow: 'hidden'
+          }}
+        >
+          {/* Hamburger menu icon */}
+          <button
+            onClick={onMobileMenuClick}
+            style={{
+              background: 'none',
+              border: 'none',
+              padding: '8px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: theme === 'light' ? '#374151' : '#d1d5db',
+              flexShrink: 0
+            }}
+          >
+            <i className="pi pi-bars" style={{ fontSize: '18px' }}></i>
+          </button>
+
+          {/* Breadcrumb */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', overflow: 'hidden', flex: 1 }}>
+            {/* Group name */}
+            {currentGroup && (
+            <>
+              <span style={{
+                fontWeight: '500',
+                color: theme === 'light' ? '#374151' : '#d1d5db',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                maxWidth: '40%'
+              }}>
+                {currentGroup}
+              </span>
+              <i className="pi pi-chevron-right" style={{
+                fontSize: '10px',
+                flexShrink: 0,
+                color: theme === 'light' ? '#9ca3af' : '#6b7280'
+              }}></i>
+            </>
+          )}
+          {/* Page name */}
+          <span style={{
+            fontWeight: '600',
+            color: primaryColor,
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            flex: 1
+          }}>
+            {currentPage || 'Page'}
+          </span>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (

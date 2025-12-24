@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { configLoader, type Version, type AISearchConfig } from '../../services/configLoader'
 import { useConfig } from '../hooks/useConfig'
 import { VersionSwitcher } from './VersionSwitcher'
@@ -8,7 +9,7 @@ import { ContentService } from '../../services/contentService'
 import { ProfileMenu } from './ProfileMenu'
 import { ProfileModal } from './ProfileModal'
 import { AISearchButton } from './AISearchButton'
-import authService from '../../services/authService'
+import authService, { type User } from '../../services/authService'
 
 interface NavbarProps {
   theme: 'light' | 'dark'
@@ -22,9 +23,28 @@ interface NavbarProps {
 }
 
 export const Navbar: React.FC<NavbarProps> = ({ theme, onThemeChange, onVersionChange, currentVersion, isDevMode = false, allowUpload = false, onSearchClick = () => {}, onAISearchClick }) => {
+  const navigate = useNavigate()
   const { updateTrigger } = useConfig()
   const viteMode = import.meta.env.VITE_MODE || 'production'
   const isProductionMode = viteMode === 'production'
+
+  // Get initials for profile fallback
+  const getInitials = (name: string | undefined) => {
+    if (!name) return '?'
+    return name
+      .split(' ')
+      .map(n => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2)
+  }
+
+  // Handle sign out
+  const handleMobileSignOut = async () => {
+    setMobileMenuOpen(false)
+    await authService.logout()
+    navigate('/auth/login')
+  }
   const [logo, setLogo] = useState('')
   const [aiSearchConfig, setAISearchConfig] = useState<AISearchConfig | undefined>(undefined)
   const [_logoLoaded, setLogoLoaded] = useState(false)
@@ -56,6 +76,19 @@ export const Navbar: React.FC<NavbarProps> = ({ theme, onThemeChange, onVersionC
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [showProfileModal, setShowProfileModal] = useState(false)
   const [userRefreshKey, setUserRefreshKey] = useState(0)
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 1024)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [mobileUser, setMobileUser] = useState<User | null>(null)
+  const [mobileProfileImage, setMobileProfileImage] = useState<string | null>(null)
+
+  // Detect mobile/tablet screen
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 1024)
+    }
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   // Check if user is authenticated (only in production mode)
   useEffect(() => {
@@ -64,8 +97,26 @@ export const Navbar: React.FC<NavbarProps> = ({ theme, onThemeChange, onVersionC
       setIsAuthenticated(false)
       return
     }
-    setIsAuthenticated(authService.isAuthenticated())
-  }, [isProductionMode])
+    const isAuth = authService.isAuthenticated()
+    setIsAuthenticated(isAuth)
+
+    // Load user data for mobile menu
+    if (isAuth) {
+      const loadUserData = async () => {
+        try {
+          const userData = await authService.getUser()
+          setMobileUser(userData)
+          const imageDataUrl = await authService.getProfileImageDataUrl()
+          if (imageDataUrl) {
+            setMobileProfileImage(imageDataUrl)
+          }
+        } catch (err) {
+          console.error('Failed to load user for mobile menu:', err)
+        }
+      }
+      loadUserData()
+    }
+  }, [isProductionMode, userRefreshKey])
 
   // Helper to normalize external URLs
   const normalizeUrl = (url: string): string => {
@@ -292,7 +343,7 @@ export const Navbar: React.FC<NavbarProps> = ({ theme, onThemeChange, onVersionC
       zIndex: 1000,
       width: '100%',
       margin: '0',
-      padding: '8px 0',
+      padding: '12px 0',
       backgroundColor: colors.navbarBackground,
       borderBottom: `1px solid ${colors.primary}`,
       boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
@@ -302,36 +353,38 @@ export const Navbar: React.FC<NavbarProps> = ({ theme, onThemeChange, onVersionC
         width: '100%',
         maxWidth: '1550px',
         margin: '0 auto',
-        padding: '0 20px',
+        padding: isMobile ? '0 12px' : '0 20px',
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'space-between'
+        justifyContent: 'space-between',
+        gap: isMobile ? '8px' : '0'
       }}>
       {/* Logo, Site Name, and Version Switcher */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '8px' : '16px', flexShrink: 0 }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: '6px' }}>
           <div style={{ display: 'inline-block' }}>
             {logo && !logoError ? (
               <Image
                 src={logo}
                 alt={siteName}
-                style={{ height: '32px', width: 'auto', display: 'block' }}
+                style={{ height: isMobile ? '36px' : '32px', width: 'auto', display: 'block' }}
                 onLoadSuccess={() => setLogoLoaded(true)}
                 onLoadError={() => setLogoError(true)}
               />
             ) : (
               <span style={{
-                fontSize: '1.25rem',
+                fontSize: isMobile ? '1.1rem' : '1.25rem',
                 fontWeight: '600',
-                color: colors.text
+                color: colors.text,
+                whiteSpace: 'nowrap'
               }}>
                 {siteName}
               </span>
             )}
           </div>
 
-          {/* Edit Logo Button - Only in Dev Mode */}
-          {isDevMode && (
+          {/* Edit Logo Button - Only in Dev Mode (hide on mobile) */}
+          {isDevMode && !isMobile && (
             <button
               onClick={() => setShowLogoEditor(true)}
               style={{
@@ -367,8 +420,8 @@ export const Navbar: React.FC<NavbarProps> = ({ theme, onThemeChange, onVersionC
           )}
         </div>
 
-        {/* Version Switcher - show if versions are configured OR in dev mode */}
-        {(hasVersions || isDevMode) && (
+        {/* Version Switcher - show if versions are configured OR in dev mode (hide on mobile) */}
+        {(hasVersions || isDevMode) && !isMobile && (
           <VersionSwitcher
             versions={versions}
             currentVersion={currentVersion}
@@ -379,82 +432,104 @@ export const Navbar: React.FC<NavbarProps> = ({ theme, onThemeChange, onVersionC
         )}
       </div>
 
-      {/* Search Bar */}
-      <div style={{
-        flex: 1,
-        maxWidth: '320px',
-        margin: '0 32px',
-        position: 'relative'
-      }}>
-        <i className="pi pi-search" style={{
-          position: 'absolute',
-          left: '16px',
-          top: '50%',
-          transform: 'translateY(-50%)',
-          fontSize: '14px',
-          zIndex: 1
-        }}></i>
-        <input
-          type="text"
-          placeholder="Search"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          onClick={() => {
-              onSearchClick?.()
-          }}
-          readOnly
-          style={{
-            width: '100%',
-            padding: '10px 80px 10px 40px',
-            backgroundColor: theme === 'light' ? 'rgba(249, 250, 251, 0.8)' : 'rgba(31, 41, 55, 0.8)',
-            border: `1px solid ${theme === 'light' ? 'rgba(229, 231, 235, 0.7)' : 'rgba(55, 65, 81, 0.7)'}`,
-            borderRadius: '12px',
-            color: colors.text,
-            fontSize: '14px',
-            outline: 'none',
-            transition: 'all 0.2s ease',
-            boxSizing: 'border-box',
-            backdropFilter: 'blur(8px)',
-            cursor:  'text'
-          }}
-          onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = colors.primary
-          }}
-          onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = theme === 'light' ? 'rgba(229, 231, 235, 0.7)' : 'rgba(55, 65, 81, 0.7)'
-          }}
-          onFocus={(e) => {
-              e.currentTarget.style.borderColor = colors.primary
-          }}
-          onBlur={(e) => {
-              e.currentTarget.style.borderColor = theme === 'light' ? 'rgba(229, 231, 235, 0.7)' : 'rgba(55, 65, 81, 0.7)'
-          }}
-        />
-        <kbd style={{
-          position: 'absolute',
-          right: '12px',
-          top: '50%',
-          transform: 'translateY(-50%)',
-          padding: '4px 8px',
-          backgroundColor: theme === 'light' ? '#f9fafb' : '#374151',
-          border: `1px solid ${theme === 'light' ? '#e5e7eb' : '#4b5563'}`,
-          borderRadius: '6px',
-          color: colors.secondaryText,
-          fontSize: '11px',
-          fontWeight: '600',
-          fontFamily: 'monospace',
-          lineHeight: '1'
+      {/* Search Bar - Hide on mobile, show search icon instead */}
+      {!isMobile ? (
+        <div style={{
+          flex: 1,
+          maxWidth: '320px',
+          margin: '0 32px',
+          position: 'relative'
         }}>
-          ⌘K
-        </kbd>
-
-        {/* Warning message when search is not available */}
-      </div>
+          <i className="pi pi-search" style={{
+            position: 'absolute',
+            left: '16px',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            fontSize: '14px',
+            zIndex: 1
+          }}></i>
+          <input
+            type="text"
+            placeholder="Search"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onClick={() => {
+                onSearchClick?.()
+            }}
+            readOnly
+            style={{
+              width: '100%',
+              padding: '10px 80px 10px 40px',
+              backgroundColor: theme === 'light' ? 'rgba(249, 250, 251, 0.8)' : 'rgba(31, 41, 55, 0.8)',
+              border: `1px solid ${theme === 'light' ? 'rgba(229, 231, 235, 0.7)' : 'rgba(55, 65, 81, 0.7)'}`,
+              borderRadius: '12px',
+              color: colors.text,
+              fontSize: '14px',
+              outline: 'none',
+              transition: 'all 0.2s ease',
+              boxSizing: 'border-box',
+              backdropFilter: 'blur(8px)',
+              cursor:  'text'
+            }}
+            onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = colors.primary
+            }}
+            onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = theme === 'light' ? 'rgba(229, 231, 235, 0.7)' : 'rgba(55, 65, 81, 0.7)'
+            }}
+            onFocus={(e) => {
+                e.currentTarget.style.borderColor = colors.primary
+            }}
+            onBlur={(e) => {
+                e.currentTarget.style.borderColor = theme === 'light' ? 'rgba(229, 231, 235, 0.7)' : 'rgba(55, 65, 81, 0.7)'
+            }}
+          />
+          <kbd style={{
+            position: 'absolute',
+            right: '12px',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            padding: '4px 8px',
+            backgroundColor: theme === 'light' ? '#f9fafb' : '#374151',
+            border: `1px solid ${theme === 'light' ? '#e5e7eb' : '#4b5563'}`,
+            borderRadius: '6px',
+            color: colors.secondaryText,
+            fontSize: '11px',
+            fontWeight: '600',
+            fontFamily: 'monospace',
+            lineHeight: '1'
+          }}>
+            ⌘K
+          </kbd>
+        </div>
+      ) : null}
 
       {/* Nav Items and Theme Toggle */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-        {/* Add Button - Only in Dev Mode and max 3 items */}
-        {isDevMode && navItems.length < 3 && (
+      <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '8px' : '16px' }}>
+        {/* Mobile Search Button */}
+        {isMobile && (
+          <button
+            onClick={onSearchClick}
+            style={{
+              padding: '8px',
+              backgroundColor: theme === 'light' ? '#f3f4f6' : '#374151',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: theme === 'light' ? '#6b7280' : '#9ca3af',
+              fontSize: '16px'
+            }}
+            title="Search"
+          >
+            <i className="pi pi-search"></i>
+          </button>
+        )}
+
+        {/* Add Button - Only in Dev Mode and max 3 items (hide on mobile) */}
+        {isDevMode && navItems.length < 3 && !isMobile && (
           <button
             onClick={handleAddNewItem}
             style={{
@@ -489,8 +564,8 @@ export const Navbar: React.FC<NavbarProps> = ({ theme, onThemeChange, onVersionC
           </button>
         )}
 
-        {/* AI Search Button */}
-        {aiSearchConfig && (
+        {/* AI Search Button (hide on mobile) */}
+        {aiSearchConfig && !isMobile && (
           <AISearchButton
             config={aiSearchConfig}
             theme={theme}
@@ -499,8 +574,8 @@ export const Navbar: React.FC<NavbarProps> = ({ theme, onThemeChange, onVersionC
           />
         )}
 
-        {/* Navbar Items */}
-        {navItems.map((item, index) => {
+        {/* Navbar Items (hide on mobile) */}
+        {!isMobile && navItems.map((item, index) => {
           const showLeftIndicator = dragOverIndex === index && draggedItemIndex !== null && draggedItemIndex !== index && draggedItemIndex > index
           const showRightIndicator = dragOverIndex === index && draggedItemIndex !== null && draggedItemIndex !== index && draggedItemIndex < index
 
@@ -761,36 +836,244 @@ export const Navbar: React.FC<NavbarProps> = ({ theme, onThemeChange, onVersionC
           return null
         })}
 
-        {/* Theme Toggle Button */}
-        <button
-          onClick={toggleTheme}
-          style={{
-            padding: '10px',
-            backgroundColor: theme === 'light' ? '#e5e7eb' : '#374151',
-            border: '1px solid transparent',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: theme === 'light' ? '#4b5563' : '#e5e7eb',
-            fontSize: '18px',
-            transition: 'border 0.2s',
-            marginRight: '0'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.border = `1px solid ${colors.primary}`
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.border = '1px solid transparent'
-          }}
-          title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
-        >
-          <i className={theme === 'light' ? 'pi pi-moon' : 'pi pi-sun'}></i>
-        </button>
+        {/* Theme Toggle Button (hide on mobile) */}
+        {!isMobile && (
+          <button
+            onClick={toggleTheme}
+            style={{
+              padding: '10px',
+              backgroundColor: theme === 'light' ? '#e5e7eb' : '#374151',
+              border: '1px solid transparent',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: theme === 'light' ? '#4b5563' : '#e5e7eb',
+              fontSize: '18px',
+              transition: 'border 0.2s',
+              marginRight: '0'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.border = `1px solid ${colors.primary}`
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.border = '1px solid transparent'
+            }}
+            title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+          >
+            <i className={theme === 'light' ? 'pi pi-moon' : 'pi pi-sun'}></i>
+          </button>
+        )}
 
-        {/* Profile Menu - Only show when authenticated */}
-        {isAuthenticated && (
+        {/* Mobile Menu Button (3 dots) */}
+        {isMobile && (
+          <div style={{ position: 'relative' }}>
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              style={{
+                padding: '8px 6px',
+                backgroundColor: mobileMenuOpen
+                  ? (theme === 'light' ? '#e5e7eb' : '#4b5563')
+                  : 'transparent',
+                border: 'none',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: theme === 'light' ? '#374151' : '#e5e7eb',
+                fontSize: '18px'
+              }}
+              title="Menu"
+            >
+              <i className="pi pi-ellipsis-v"></i>
+            </button>
+
+            {/* Mobile Dropdown Menu */}
+            {mobileMenuOpen && (
+              <>
+                {/* Backdrop */}
+                <div
+                  onClick={() => setMobileMenuOpen(false)}
+                  style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    zIndex: 998
+                  }}
+                />
+                {/* Menu */}
+                <div style={{
+                  position: 'absolute',
+                  top: '100%',
+                  right: 0,
+                  marginTop: '8px',
+                  backgroundColor: theme === 'light' ? '#ffffff' : '#1f2937',
+                  borderRadius: '12px',
+                  boxShadow: '0 10px 40px rgba(0, 0, 0, 0.15)',
+                  border: `1px solid ${theme === 'light' ? '#e5e7eb' : '#374151'}`,
+                  minWidth: '180px',
+                  padding: '8px',
+                  zIndex: 999
+                }}>
+                  {/* Navbar items */}
+                  {navItems.map((item, index) => (
+                    <a
+                      key={index}
+                      href={normalizeUrl(item.reference)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => setMobileMenuOpen(false)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px',
+                        padding: '10px 12px',
+                        color: theme === 'light' ? '#374151' : '#e5e7eb',
+                        textDecoration: 'none',
+                        fontSize: '14px',
+                        fontWeight: '500',
+                        borderRadius: '8px',
+                        transition: 'background-color 0.2s'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = theme === 'light' ? '#f3f4f6' : '#374151'
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = 'transparent'
+                      }}
+                    >
+                      <i className="pi pi-external-link" style={{ fontSize: '12px', color: theme === 'light' ? '#9ca3af' : '#6b7280' }}></i>
+                      {item.label}
+                    </a>
+                  ))}
+
+                  {/* Profile section in mobile menu */}
+                  {isAuthenticated && mobileUser && (
+                    <>
+                      <div style={{
+                        borderTop: `1px solid ${theme === 'light' ? '#e5e7eb' : '#374151'}`,
+                        marginTop: '8px',
+                        paddingTop: '8px'
+                      }}>
+                        {/* User info row */}
+                        <button
+                          onClick={() => {
+                            setShowProfileModal(true)
+                            setMobileMenuOpen(false)
+                          }}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '10px',
+                            padding: '10px 12px',
+                            color: theme === 'light' ? '#374151' : '#e5e7eb',
+                            backgroundColor: 'transparent',
+                            border: 'none',
+                            fontSize: '14px',
+                            fontWeight: '500',
+                            borderRadius: '8px',
+                            cursor: 'pointer',
+                            width: '100%',
+                            textAlign: 'left',
+                            transition: 'background-color 0.2s'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = theme === 'light' ? '#f3f4f6' : '#374151'
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = 'transparent'
+                          }}
+                        >
+                          {/* Profile photo */}
+                          <div style={{
+                            width: '28px',
+                            height: '28px',
+                            borderRadius: '6px',
+                            overflow: 'hidden',
+                            flexShrink: 0,
+                            backgroundColor: theme === 'light' ? '#e5e7eb' : '#4b5563',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}>
+                            {mobileProfileImage ? (
+                              <img
+                                src={mobileProfileImage}
+                                alt={mobileUser.name || 'Profile'}
+                                style={{
+                                  width: '100%',
+                                  height: '100%',
+                                  objectFit: 'cover'
+                                }}
+                              />
+                            ) : (
+                              <span style={{
+                                fontSize: '11px',
+                                fontWeight: 600,
+                                color: theme === 'light' ? '#6b7280' : '#d1d5db'
+                              }}>
+                                {getInitials(mobileUser.name)}
+                              </span>
+                            )}
+                          </div>
+                          <div style={{ overflow: 'hidden' }}>
+                            <div style={{
+                              fontWeight: 600,
+                              fontSize: '13px',
+                              color: theme === 'light' ? '#374151' : '#e5e7eb',
+                              whiteSpace: 'nowrap',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis'
+                            }}>
+                              {mobileUser.name || 'User'}
+                            </div>
+                          </div>
+                        </button>
+
+                        {/* Sign Out button */}
+                        <button
+                          onClick={handleMobileSignOut}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '10px',
+                            padding: '10px 12px',
+                            color: '#ef4444',
+                            backgroundColor: 'transparent',
+                            border: 'none',
+                            fontSize: '14px',
+                            fontWeight: '500',
+                            borderRadius: '8px',
+                            cursor: 'pointer',
+                            width: '100%',
+                            textAlign: 'left',
+                            transition: 'background-color 0.2s'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = theme === 'light' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(239, 68, 68, 0.15)'
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = 'transparent'
+                          }}
+                        >
+                          <i className="pi pi-sign-out" style={{ fontSize: '12px' }}></i>
+                          Sign Out
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </>
+            )}
+          </div>
+        )}
+
+        {/* Profile Menu - Only show when authenticated (hide on mobile) */}
+        {isAuthenticated && !isMobile && (
           <ProfileMenu
             theme={theme}
             colors={{
@@ -1046,6 +1329,40 @@ export const Navbar: React.FC<NavbarProps> = ({ theme, onThemeChange, onVersionC
             </div>
           </div>
         </div>
+      )}
+
+      {/* Floating AI Search Button - Mobile only */}
+      {isMobile && aiSearchConfig && onAISearchClick && (
+        <button
+          onClick={onAISearchClick}
+          style={{
+            position: 'fixed',
+            bottom: '20px',
+            right: '20px',
+            width: '44px',
+            height: '44px',
+            borderRadius: '50%',
+            backgroundColor: colors.primary,
+            border: 'none',
+            boxShadow: '0 3px 10px rgba(0, 0, 0, 0.25)',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+            transition: 'transform 0.2s, box-shadow 0.2s'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'scale(1.1)'
+            e.currentTarget.style.boxShadow = '0 5px 14px rgba(0, 0, 0, 0.35)'
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'scale(1)'
+            e.currentTarget.style.boxShadow = '0 3px 10px rgba(0, 0, 0, 0.25)'
+          }}
+        >
+          <i className="pi pi-sparkles" style={{ fontSize: '18px', color: '#ffffff' }}></i>
+        </button>
       )}
     </nav>
   )

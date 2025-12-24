@@ -43,6 +43,7 @@ export const AISearchSidebar: React.FC<AISearchSidebarProps> = ({
     return saved ? parseInt(saved, 10) : DEFAULT_WIDTH
   })
   const [isResizing, setIsResizing] = useState(false)
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 1024)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const abortFnRef = useRef<(() => void) | null>(null)
@@ -69,6 +70,15 @@ export const AISearchSidebar: React.FC<AISearchSidebarProps> = ({
   const welcomeMessage = isDevMode ? (localWelcome || DEFAULT_WELCOME) : (config.welcomeMessage || DEFAULT_WELCOME)
   const placeholder = isDevMode ? (localPlaceholder || DEFAULT_PLACEHOLDER) : (config.placeholder || DEFAULT_PLACEHOLDER)
   const suggestedQuestions = isDevMode ? localQuestions : (config.suggestedQuestions || [])
+
+  // Detect mobile/tablet screen
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 1024)
+    }
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   // Sync local state with config when it changes
   useEffect(() => {
@@ -366,11 +376,11 @@ export const AISearchSidebar: React.FC<AISearchSidebarProps> = ({
         style={{
           position: 'fixed',
           top: 0,
-          right: isOpen ? 0 : `-${sidebarWidth}px`,
-          width: `${sidebarWidth}px`,
+          right: isOpen ? 0 : (isMobile ? '-100%' : `-${sidebarWidth}px`),
+          width: isMobile ? '100%' : `${sidebarWidth}px`,
           height: '100vh',
           backgroundColor: colors.background,
-          borderLeft: `1px solid ${colors.border}`,
+          borderLeft: isMobile ? 'none' : `1px solid ${colors.border}`,
           boxShadow: isOpen ? '-8px 0 30px rgba(0, 0, 0, 0.15)' : 'none',
           zIndex: 9999,
           display: 'flex',
@@ -378,7 +388,8 @@ export const AISearchSidebar: React.FC<AISearchSidebarProps> = ({
           transition: isResizing ? 'none' : 'right 0.3s ease',
         }}
       >
-        {/* Resize Handle */}
+        {/* Resize Handle - Hide on mobile */}
+        {!isMobile && (
         <div
           onMouseDown={handleMouseDown}
           style={{
@@ -403,6 +414,8 @@ export const AISearchSidebar: React.FC<AISearchSidebarProps> = ({
             }
           }}
         />
+        )}
+
         {/* Header */}
         <div
           style={{

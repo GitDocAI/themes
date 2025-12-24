@@ -4,8 +4,10 @@ import type { NavigationItem } from '../../types/navigation'
 import { DeleteConfirmModal } from './DeleteConfirmModal'
 import { PageModal } from './PageModal'
 import { GroupModal } from './GroupModal'
-import { configLoader } from '../../services/configLoader'
+import { configLoader, type Version, type Tab } from '../../services/configLoader'
 import { ContentService } from '../../services/contentService'
+import { Image } from './ui/Image'
+import { VersionSwitcher } from './VersionSwitcher'
 
 interface SidebarProps {
   items: NavigationItem[]
@@ -17,6 +19,13 @@ interface SidebarProps {
   currentVersion?: string
   currentTab?: string
   onToolResult?: (result: { [key: string]: any }) => void;
+  isMobileOpen?: boolean
+  onMobileClose?: () => void
+  onThemeChange?: () => void
+  versions?: Version[]
+  onVersionChange?: (version: string) => void
+  tabs?: Tab[]
+  onTabChange?: (tabName: string) => void
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -28,11 +37,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
   isDevMode = false,
   currentVersion = '',
   currentTab = '',
-  onToolResult
+  onToolResult,
+  isMobileOpen = false,
+  onMobileClose,
+  onThemeChange,
+  versions = [],
+  onVersionChange,
+  tabs = [],
+  onTabChange
 }) => {
-  const [isOpen, setIsOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState(isMobileOpen)
   const [openDropdowns, setOpenDropdowns] = useState<Set<string>>(new Set())
-  const [isMobile, setIsMobile] = useState(false)
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 1024)
 
   // Resize states
   const MIN_WIDTH = 150
@@ -78,6 +94,19 @@ export const Sidebar: React.FC<SidebarProps> = ({
     setIsResizing(true)
   }
 
+  // Sync isOpen with external isMobileOpen prop
+  useEffect(() => {
+    setIsOpen(isMobileOpen)
+  }, [isMobileOpen])
+
+  // Handle closing mobile sidebar
+  const handleMobileClose = () => {
+    setIsOpen(false)
+    if (onMobileClose) {
+      onMobileClose()
+    }
+  }
+
   // Dev mode states
   const [editingPagePath, setEditingPagePath] = useState<string | null>(null)
   const [editingPageTitle, setEditingPageTitle] = useState('')
@@ -99,21 +128,61 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const [showGroupModal, setShowGroupModal] = useState(false)
   const [isRenaming, setIsRenaming] = useState(false)
 
+  // Mobile header states
+  const [logo, setLogo] = useState('')
+  const [logoError, setLogoError] = useState(false)
+  const [siteName, setSiteName] = useState('')
+  const [tabDropdownOpen, setTabDropdownOpen] = useState(false)
+
+  // Load logo and siteName for mobile header
+  useEffect(() => {
+    if (isMobile) {
+      const config = configLoader.getConfig()
+      if (config) {
+        setLogo(configLoader.getLogo(theme))
+        setSiteName(configLoader.getName())
+      }
+    }
+  }, [isMobile, theme])
+
+  // Close tab dropdown when clicking outside
+  useEffect(() => {
+    if (!tabDropdownOpen) return
+
+    const handleClickOutside = () => {
+      setTabDropdownOpen(false)
+    }
+
+    // Add slight delay to avoid closing immediately on the same click
+    const timer = setTimeout(() => {
+      document.addEventListener('click', handleClickOutside)
+    }, 0)
+
+    return () => {
+      clearTimeout(timer)
+      document.removeEventListener('click', handleClickOutside)
+    }
+  }, [tabDropdownOpen])
+
+  // Close tab dropdown when sidebar closes
+  useEffect(() => {
+    if (!isMobileOpen) {
+      setTabDropdownOpen(false)
+    }
+  }, [isMobileOpen])
+
   // Check if current tab is API Reference
   const isAPIReferenceTab = (): boolean => {
     const normalized = currentTab.toLowerCase()
     return normalized === 'api reference'
   }
 
-  // Detect mobile on mount and resize
+  // Detect mobile/tablet on mount and resize
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768)
+      setIsMobile(window.innerWidth < 1024)
     }
-
-    checkMobile()
     window.addEventListener('resize', checkMobile)
-
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
@@ -151,7 +220,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     }
     // Close mobile sidebar after navigation
     if (isMobile) {
-      setIsOpen(false)
+      handleMobileClose()
     }
   }
 
@@ -651,7 +720,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
             style={{
               marginBottom: '32px',
               cursor: isDevMode && !isAPIReferenceTab() && !isEditingGroup ? 'move' : 'default',
-              opacity: draggedGroupIndex === groupIndex ? 0.5 : 1
+              opacity: draggedGroupIndex === groupIndex ? 0.5 : 1,
+              width: isMobile ? '85%' : 'auto'
             }}
           >
             <div
@@ -913,7 +983,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
               display: 'flex',
               alignItems: 'center',
               cursor: isDevMode && !isAPIReferenceTab() && !isEditingThis ? 'move' : 'default',
-              opacity: draggedPagePath === item.page ? 0.5 : 1
+              opacity: draggedPagePath === item.page ? 0.5 : 1,
+              width: isMobile ? '80%' : 'auto'
             }}
             onMouseEnter={() => {
               if (isDevMode && !isAPIReferenceTab()) {
@@ -1128,33 +1199,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   return (
     <>
-      {/* Mobile toggle button */}
-      {isMobile && (
-        <button
-          onClick={() => setIsOpen(true)}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '8px',
-            position: 'fixed',
-            bottom: '20px',
-            right: '20px',
-            zIndex: 1000,
-            backgroundColor: primaryColor,
-            color: '#ffffff',
-            border: 'none',
-            borderRadius: '50%',
-            width: '56px',
-            height: '56px',
-            cursor: 'pointer',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
-          }}
-        >
-          <i className="pi pi-bars" style={{ fontSize: '20px' }} />
-        </button>
-      )}
-
       {/* Sidebar Container */}
       <div
         style={{
@@ -1162,9 +1206,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
           top: isMobile ? '0' : 'var(--sidebar-top, 128px)',
           left: isMobile && !isOpen ? '-100%' : '0',
           height: isMobile ? '100vh' : 'calc(100vh - var(--sidebar-top, 128px))',
-          width: isMobile ? '280px' : `${sidebarWidth}px`,
-          minWidth: isMobile ? '280px' : `${MIN_WIDTH}px`,
-          maxWidth: isMobile ? '280px' : `${MAX_WIDTH}px`,
+          width: isMobile ? '100%' : `${sidebarWidth}px`,
+          minWidth: isMobile ? '100%' : `${MIN_WIDTH}px`,
+          maxWidth: isMobile ? '100%' : `${MAX_WIDTH}px`,
           flexShrink: 0,
           zIndex: isMobile ? 1100 : 10,
           transition: isMobile ? 'left 0.3s ease-in-out' : 'none',
@@ -1186,25 +1230,168 @@ export const Sidebar: React.FC<SidebarProps> = ({
             minWidth: 0,
           }}
         >
-          {/* Mobile close button */}
+          {/* Mobile header with logo */}
         {isMobile && (
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '16px' }}>
-            <button
-              onClick={() => setIsOpen(false)}
-              style={{
-                padding: '8px',
-                background: 'transparent',
-                border: 'none',
-                cursor: 'pointer',
-                color: theme === 'light' ? '#6b7280' : '#9ca3af'
-              }}
-            >
-              <i className="pi pi-times" style={{ fontSize: '20px' }} />
-            </button>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            padding: '12px 16px',
+            borderBottom: `1px solid ${theme === 'light' ? '#e5e7eb' : '#374151'}`,
+            marginBottom: '8px'
+          }}>
+            {/* Logo and Version */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              {logo && !logoError ? (
+                <Image
+                  src={logo}
+                  alt={siteName}
+                  style={{ height: '36px', width: 'auto', display: 'block' }}
+                  onLoadError={() => setLogoError(true)}
+                />
+              ) : (
+                <span style={{
+                  fontSize: '1.1rem',
+                  fontWeight: '600',
+                  color: theme === 'light' ? '#111827' : '#f9fafb',
+                  whiteSpace: 'nowrap'
+                }}>
+                  {siteName}
+                </span>
+              )}
+
+              {/* Version Switcher */}
+              {versions.length > 0 && (
+                <VersionSwitcher
+                  versions={versions}
+                  currentVersion={currentVersion}
+                  onVersionChange={onVersionChange}
+                  theme={theme}
+                  isDevMode={false}
+                />
+              )}
+            </div>
+
+            {/* Right side: Theme toggle + Close button */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+              {/* Theme toggle button */}
+              {onThemeChange && (
+                <button
+                  onClick={onThemeChange}
+                  style={{
+                    padding: '8px',
+                    backgroundColor: theme === 'light' ? '#e5e7eb' : '#374151',
+                    border: 'none',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: theme === 'light' ? '#4b5563' : '#e5e7eb',
+                    fontSize: '16px',
+                  }}
+                  title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+                >
+                  <i className={theme === 'light' ? 'pi pi-moon' : 'pi pi-sun'}></i>
+                </button>
+              )}
+
+              {/* Close button */}
+              <button
+                onClick={handleMobileClose}
+                style={{
+                  padding: '8px',
+                  background: 'transparent',
+                  border: 'none',
+                  cursor: 'pointer',
+                  color: theme === 'light' ? '#6b7280' : '#9ca3af'
+                }}
+              >
+                <i className="pi pi-times" style={{ fontSize: '20px' }} />
+              </button>
+            </div>
           </div>
         )}
 
-        <nav style={{ display: 'flex', flexDirection: 'column', gap: '4px', paddingTop: '16px', minWidth: 0 }}>
+        {/* Tab selector - Mobile only */}
+        {isMobile && tabs.length > 1 && (
+          <div style={{
+            padding: '8px 16px 16px 16px',
+            position: 'relative',
+          }}>
+            <button
+              onClick={() => setTabDropdownOpen(!tabDropdownOpen)}
+              style={{
+                width: '80%',
+                padding: '8px 12px',
+                fontSize: '14px',
+                fontWeight: '500',
+                color: theme === 'light' ? '#374151' : '#d1d5db',
+                backgroundColor: theme === 'light' ? '#f9fafb' : '#1f2937',
+                border: `1px solid ${theme === 'light' ? '#e5e7eb' : '#374151'}`,
+                borderRadius: '8px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                textAlign: 'left',
+              }}
+            >
+              <span>{currentTab}</span>
+              <i
+                className={`pi ${tabDropdownOpen ? 'pi-chevron-up' : 'pi-chevron-down'}`}
+                style={{ fontSize: '12px', color: theme === 'light' ? '#6b7280' : '#9ca3af' }}
+              />
+            </button>
+
+            {/* Dropdown menu */}
+            {tabDropdownOpen && (
+              <div style={{
+                position: 'absolute',
+                top: '100%',
+                left: '16px',
+                width: '80%',
+                backgroundColor: theme === 'light' ? '#ffffff' : '#1f2937',
+                border: `1px solid ${theme === 'light' ? '#e5e7eb' : '#374151'}`,
+                borderRadius: '8px',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                zIndex: 1200,
+                overflow: 'hidden',
+                marginTop: '4px',
+              }}>
+                {tabs.map((tab) => (
+                  <button
+                    key={tab.tab}
+                    onClick={() => {
+                      onTabChange?.(tab.tab)
+                      setTabDropdownOpen(false)
+                    }}
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px',
+                      fontSize: '14px',
+                      fontWeight: tab.tab === currentTab ? '600' : '400',
+                      color: tab.tab === currentTab
+                        ? primaryColor
+                        : (theme === 'light' ? '#374151' : '#d1d5db'),
+                      backgroundColor: tab.tab === currentTab
+                        ? (theme === 'light' ? '#f3f4f6' : '#374151')
+                        : 'transparent',
+                      border: 'none',
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                      display: 'block',
+                    }}
+                  >
+                    {tab.tab}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        <nav style={{ display: 'flex', flexDirection: 'column', gap: '4px', paddingTop: (isMobile && tabs.length > 1) ? '0px' : '16px', paddingLeft: isMobile ? '16px' : '0px', minWidth: 0 }}>
           {items.map((item, idx) => renderNestedItem(item, 0, '', idx))}
 
           {/* Add New Group button - Only in Dev Mode and when there's a tab */}
@@ -1283,7 +1470,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* Mobile overlay */}
       {isMobile && isOpen && (
         <div
-          onClick={() => setIsOpen(false)}
+          onClick={handleMobileClose}
           style={{
             position: 'fixed',
             top: 0,

@@ -68,6 +68,33 @@
   margin-top: 0;
 }
 
+/* Mobile/tablet responsive headings */
+@media (max-width: 1024px) {
+  .tiptap-editor h1 {
+    font-size: 1.5rem;
+    margin-top: 1.25rem;
+    margin-bottom: 0.75rem;
+    padding-top: 1rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .tiptap-editor h2 {
+    font-size: 1.25rem;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+    padding-top: 0.75rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .tiptap-editor h3 {
+    font-size: 1.125rem;
+    margin-top: 0.875rem;
+    margin-bottom: 0.5rem;
+    padding-top: 0.5rem;
+    padding-bottom: 0.25rem;
+  }
+}
+
 .tiptap-editor p {
   font-size: 1rem;
   line-height: 1.8;
