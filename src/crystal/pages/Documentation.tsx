@@ -34,7 +34,7 @@ function Documentation() {
   useTextHighlight() // Enable search term highlighting from URL
   const viteMode = import.meta.env.VITE_MODE || 'production'
   const isProductionMode = viteMode === 'production'
-  const isDevEnvironment = viteMode === 'dev' // true only in dev mode (allows uploads)
+  const isDevEnvironment = viteMode !== 'production' // true only in dev mode (allows uploads)
   const [isDevMode, setIsDevMode] = useState<boolean>(!isProductionMode) // Enabled by default in dev/preview, disabled in production
   const [isSettingsSidebarOpen, setIsSettingsSidebarOpen] = useState<boolean>(false)
   const [isChatSidebarOpen, setIsChatSidebarOpen] = useState<boolean>(false)

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { configLoader } from '../../services/configLoader'
 import { useConfig } from '../hooks/useConfig'
+import { Image } from './ui/Image'
 import { ContentService } from '../../services/contentService'
 
 const SIDEBAR_WIDTH_KEY = 'settings_sidebar_width'
@@ -194,35 +195,10 @@ export const SettingsSidebar: React.FC<SettingsSidebarProps> = ({
     setFaviconUploading(true)
 
     try {
-      const reader = new FileReader()
-      reader.onload = async (event) => {
-        const base64Data = event.target?.result as string
-        const base64String = base64Data.split(',')[1]
-
-        const timestamp = Date.now()
-        const filename = `${timestamp}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`
-        const filePath = `assets/${filename}`
-
-
-        try {
-          await ContentService.saveContent(filePath,base64String)
-          setConfig(prev => ({ ...prev, favicon: `docs/content/assests/${filePath}` }))
-          setFaviconUploading(false)
-        } catch (err) {
-          console.error('Upload error:', err)
-          setSaveError('Failed to upload favicon')
-          setTimeout(() => setSaveError(null), 3000)
-          setFaviconUploading(false)
-        }
-      }
-
-      reader.onerror = () => {
-        setSaveError('Failed to read file')
-        setTimeout(() => setSaveError(null), 3000)
-        setFaviconUploading(false)
-      }
-
-      reader.readAsDataURL(file)
+      const result = await ContentService.uploadFile(file)
+      setConfig(prev => ({ ...prev, favicon: `${result.file_path}` }))
+      console.log(result)
+      setFaviconUploading(false)
     } catch (err) {
       console.error('File read error:', err)
       setSaveError('Failed to process file')
@@ -685,6 +661,11 @@ export const SettingsSidebar: React.FC<SettingsSidebarProps> = ({
                   onChange={handleFaviconUpload}
                   style={{ display: 'none' }}
                 />
+
+               <div className='w-full flex justify-center items-center min-h-16'>
+                <Image src={config.favicon||''} className='w-10 h-10  object-cover ml-auto'/>
+               </div>
+
                 <button
                   onClick={() => faviconInputRef.current?.click()}
                   disabled={faviconUploading}
