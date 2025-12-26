@@ -4,6 +4,7 @@ import { configLoader } from '../../services/configLoader'
 import type { Tab } from '../../services/configLoader'
 import { DeleteConfirmModal } from './DeleteConfirmModal'
 import {  ContentService } from '../../services/contentService'
+import { useConfig } from '../hooks/useConfig'
 
 
 interface TabBarProps {
@@ -35,6 +36,8 @@ export const TabBar: React.FC<TabBarProps> = ({
   const [bgColor, setBgColor] = useState('')
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 1024)
 
+  const { updateTrigger } = useConfig() // Subscribe to config changes
+
   // Detect mobile/tablet screen
   useEffect(() => {
     const checkMobile = () => {
@@ -56,7 +59,7 @@ export const TabBar: React.FC<TabBarProps> = ({
     // Get background color from config
     const backgroundColor = configLoader.getBackgroundColor(theme)
     setBgColor(backgroundColor)
-  }, [theme])
+  }, [theme,updateTrigger])
 
   useEffect(() => {
     if (activeTab) {

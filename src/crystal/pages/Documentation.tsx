@@ -43,6 +43,7 @@ function Documentation() {
   const [currentTab, setCurrentTab] = useState<string>('')
   const [tabs, setTabs] = useState<Tab[]>([])
   const [primaryColor, setPrimaryColor] = useState<string>('#3b82f6')
+  const [backgroundColor, setBackgroundColor] = useState<string>('#3b82f60a')
   const [sidebarItems, setSidebarItems] = useState<NavigationItem[]>([])
   const [currentPath, setCurrentPath] = useState<string>('')
   const [showSearchModal, setShowSearchModal] = useState<boolean>(false)
@@ -94,6 +95,7 @@ function Documentation() {
       const config = configLoader.getConfig()
       if (config) {
         setPrimaryColor(configLoader.getPrimaryColor(theme))
+        setBackgroundColor(configLoader.getBackgroundColor(theme))
         setAISearchConfig(configLoader.getAISearchConfig())
         setVersions(configLoader.getVersions())
 
@@ -218,6 +220,7 @@ function Documentation() {
       const config = configLoader.getConfig()
       if (config) {
         setPrimaryColor(configLoader.getPrimaryColor(theme))
+        setBackgroundColor(configLoader.getBackgroundColor(theme))
         const loadedTabs = configLoader.getTabs(currentVersion)
         setTabs(loadedTabs)
         // Don't update sidebarItems here - let the other useEffect handle it when tabs changes
@@ -248,7 +251,6 @@ function Documentation() {
         justifyContent: 'center',
         alignItems: 'center',
         height: '100vh',
-        backgroundColor: '#f9fafb'
       }}>
         <i className="pi pi-spin pi-spinner" style={{ fontSize: '2rem', color: '#3b82f6' }}></i>
       </div>
@@ -542,7 +544,8 @@ function Documentation() {
       <div
         style={{
           marginRight: (isSettingsSidebarOpen || isChatSidebarOpen) ? '450px' : '0',
-          transition: 'margin-right 0.3s ease'
+          transition: 'margin-right 0.3s ease',
+          backgroundColor:backgroundColor
         }}
       >
         <Banner theme={theme} />

@@ -8,6 +8,7 @@ import { configLoader, type Version, type Tab } from '../../services/configLoade
 import { ContentService } from '../../services/contentService'
 import { Image } from './ui/Image'
 import { VersionSwitcher } from './VersionSwitcher'
+import { useConfig } from '../hooks/useConfig'
 
 interface SidebarProps {
   items: NavigationItem[]
@@ -27,6 +28,7 @@ interface SidebarProps {
   tabs?: Tab[]
   onTabChange?: (tabName: string) => void
 }
+
 
 export const Sidebar: React.FC<SidebarProps> = ({
   items,
@@ -49,6 +51,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const [isOpen, setIsOpen] = useState(isMobileOpen)
   const [openDropdowns, setOpenDropdowns] = useState<Set<string>>(new Set())
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 1024)
+  const { updateTrigger } = useConfig()
 
   // Resize states
   const MIN_WIDTH = 150
@@ -143,7 +146,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
         setSiteName(configLoader.getName())
       }
     }
-  }, [isMobile, theme])
+  }, [isMobile, theme,updateTrigger])
+
+  useEffect(()=>{
+    console.log('asasas')
+  },[theme,updateTrigger])
 
   // Close tab dropdown when clicking outside
   useEffect(() => {
