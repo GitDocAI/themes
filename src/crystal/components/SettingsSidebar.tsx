@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { configLoader } from '../../services/configLoader'
 import { useConfig } from '../hooks/useConfig'
 import { Image } from './ui/Image'
