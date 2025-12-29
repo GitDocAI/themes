@@ -17,6 +17,8 @@ export const TOC: React.FC<TOCProps> = ({ theme, currentPath }) => {
   const activeRef = useRef<HTMLLIElement | null>(null)
   const isUserScrolling = useRef<boolean>(false)
   const scrollTimeoutRef = useRef<number | null>(null)
+  const isClickScrolling = useRef<boolean>(false)
+  const clickScrollTimeoutRef = useRef<number | null>(null)
   const [isLargeScreen, setIsLargeScreen] = useState(false)
 
   // Hide TOC on small screens
@@ -152,28 +154,56 @@ export const TOC: React.FC<TOCProps> = ({ theme, currentPath }) => {
 
     if (headingElements.length === 0) return
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visibleEntries = entries
-          .filter(entry => entry.isIntersecting)
-          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)
+    const calculateActiveHeading = () => {
+      const windowHeight = window.innerHeight
 
-        if (visibleEntries.length > 0) {
-          const topEntry = visibleEntries[0]
-          setActiveId(topEntry.target.id)
+      // Offset to account for navbar + tabbar + buffer
+      const offset = 150
+
+      // Find the heading that is closest to the top but has passed the offset threshold
+      // This means: find the last heading whose top is above or at the offset line
+      let activeHeading: HTMLElement | null = null
+
+      for (const element of headingElements) {
+        const rect = element.getBoundingClientRect()
+        // If this heading is at or above the offset threshold, it's a candidate
+        if (rect.top <= offset) {
+          activeHeading = element
+        } else {
+          // Once we find a heading below the threshold, stop
+          // The previous one (if any) is the active one
+          break
         }
-      },
-      {
-        rootMargin: '-150px 0% -70% 0%',
-        threshold: [0, 0.25, 0.5, 0.75, 1],
       }
-    )
 
-    headingElements.forEach(element => {
-      observer.observe(element)
-    })
+      // If no heading has passed the threshold yet, activate the first one
+      // only if we're close to the top of the page
+      if (!activeHeading && headingElements.length > 0) {
+        const firstRect = headingElements[0].getBoundingClientRect()
+        if (firstRect.top <= windowHeight * 0.5) {
+          activeHeading = headingElements[0]
+        }
+      }
 
-    return () => observer.disconnect()
+      if (activeHeading) {
+        setActiveId(activeHeading.id)
+      }
+    }
+
+    // Calculate on mount
+    calculateActiveHeading()
+
+    // Recalculate on scroll (but not during click-triggered scroll)
+    const handleScroll = () => {
+      if (isClickScrolling.current) return
+      calculateActiveHeading()
+    }
+
+    window.addEventListener('scroll', handleScroll, { passive: true })
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll)
+    }
   }, [headings])
 
   // Auto-scroll active item into view in TOC (not the main page)
@@ -212,6 +242,17 @@ export const TOC: React.FC<TOCProps> = ({ theme, currentPath }) => {
   const handleHeadingClick = (id: string) => {
     const element = document.getElementById(id)
     if (element) {
+      // Block scroll-based recalculation during the smooth scroll animation
+      isClickScrolling.current = true
+
+      // Clear any existing timeout
+      if (clickScrollTimeoutRef.current) {
+        clearTimeout(clickScrollTimeoutRef.current)
+      }
+
+      // Immediately set this heading as active when clicked
+      setActiveId(id)
+
       const navbarHeight = 64 // var(--navbar-height)
       const tabbarHeight = 64 // var(--tabbar-height)
       const offset = navbarHeight + tabbarHeight + 20 // Add 20px buffer
@@ -223,6 +264,11 @@ export const TOC: React.FC<TOCProps> = ({ theme, currentPath }) => {
         top: offsetPosition,
         behavior: 'smooth'
       })
+
+      // Unblock after scroll animation completes (typically ~500ms for smooth scroll)
+      clickScrollTimeoutRef.current = window.setTimeout(() => {
+        isClickScrolling.current = false
+      }, 600)
     }
   }
 

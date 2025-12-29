@@ -2,12 +2,49 @@ import { Node, mergeAttributes } from '@tiptap/core'
 import { ReactNodeViewRenderer } from '@tiptap/react'
 import { InfoBlockNodeView } from '../node-views/InfoBlockNodeView'
 
+// Helper function to create keyboard shortcuts that prevent deletion when content is empty
+const createBackspaceHandler = (nodeName: string) => {
+  return function(this: any) {
+    return {
+      Backspace: () => {
+        const { state } = this.editor
+        const { selection } = state
+        const { $from } = selection
+
+        for (let depth = $from.depth; depth > 0; depth--) {
+          const node = $from.node(depth)
+          if (node.type.name === nodeName) {
+            const nodeContent = node.content
+            const isEmpty = nodeContent.size === 0 ||
+              (nodeContent.childCount === 1 &&
+               nodeContent.firstChild?.type.name === 'paragraph' &&
+               nodeContent.firstChild?.content.size === 0)
+
+            if (isEmpty) {
+              const posInNode = $from.pos - $from.start(depth)
+              if (posInNode <= 1) {
+                return true
+              }
+            }
+            break
+          }
+        }
+
+        return false
+      },
+    }
+  }
+}
+
 export const InfoBlockExtension = Node.create({
   name: 'infoBlock',
   group: 'block',
   content: 'block+',
   draggable: true,
   defining: true,
+  isolating: true,
+
+  addKeyboardShortcuts: createBackspaceHandler('infoBlock'),
 
   addAttributes() {
     return {
@@ -65,6 +102,9 @@ export const NoteBlockExtension = Node.create({
   content: 'block+',
   draggable: true,
   defining: true,
+  isolating: true,
+
+  addKeyboardShortcuts: createBackspaceHandler('noteBlock'),
 
   addAttributes() {
     return {
@@ -122,6 +162,9 @@ export const TipBlockExtension = Node.create({
   content: 'block+',
   draggable: true,
   defining: true,
+  isolating: true,
+
+  addKeyboardShortcuts: createBackspaceHandler('tipBlock'),
 
   addAttributes() {
     return {
@@ -179,6 +222,9 @@ export const WarningBlockExtension = Node.create({
   content: 'block+',
   draggable: true,
   defining: true,
+  isolating: true,
+
+  addKeyboardShortcuts: createBackspaceHandler('warningBlock'),
 
   addAttributes() {
     return {
@@ -236,6 +282,9 @@ export const DangerBlockExtension = Node.create({
   content: 'block+',
   draggable: true,
   defining: true,
+  isolating: true,
+
+  addKeyboardShortcuts: createBackspaceHandler('dangerBlock'),
 
   addAttributes() {
     return {

@@ -1,6 +1,7 @@
 import { NodeViewWrapper, NodeViewContent } from '@tiptap/react'
 import type { NodeViewProps } from '@tiptap/react'
-import { useState, useEffect, useTransition } from 'react'
+import { useState, useEffect, useRef, useTransition } from 'react'
+import { createPortal } from 'react-dom'
 import { configLoader } from '../../../../services/configLoader'
 
 const ICON_CATEGORIES = {
@@ -40,14 +41,18 @@ const ICON_CATEGORIES = {
 
 export const CardNodeView = ({ node, updateAttributes, editor, getPos }: NodeViewProps) => {
   const [_, startTransition] = useTransition()
-  const [isEditing, setIsEditing] = useState(false)
+  const [isEditingTitle, setIsEditingTitle] = useState(false)
   const [title, setTitle] = useState(node.attrs.title || '')
   const [icon, setIcon] = useState(node.attrs.icon || '')
   const [iconAlign, setIconAlign] = useState<'left' | 'center' | 'right'>(node.attrs.iconAlign || 'left')
   const [href, setHref] = useState(node.attrs.href || '')
-  const [showIconPicker, setShowIconPicker] = useState(false)
+  const [showInlineIconPicker, setShowInlineIconPicker] = useState(false)
+  const [iconPickerPosition, setIconPickerPosition] = useState({ top: 0, left: 0 })
+  const inlineIconPickerRef = useRef<HTMLDivElement>(null)
+  const iconButtonRef = useRef<HTMLDivElement>(null)
   const [theme, setTheme] = useState<'light' | 'dark'>('dark')
   const [iconColor, setIconColor] = useState('#3b82f6')
+  const titleInputRef = useRef<HTMLInputElement>(null)
 
   // Detect theme from document and get icon color from config
   useEffect(() => {
@@ -78,6 +83,49 @@ export const CardNodeView = ({ node, updateAttributes, editor, getPos }: NodeVie
     return () => observer.disconnect()
   }, [])
 
+  // Focus title input when editing starts
+  useEffect(() => {
+    if (isEditingTitle && titleInputRef.current) {
+      titleInputRef.current.focus()
+      // Move cursor to end instead of selecting all
+      const length = titleInputRef.current.value.length
+      titleInputRef.current.setSelectionRange(length, length)
+    }
+  }, [isEditingTitle])
+
+  // Close inline icon picker when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (inlineIconPickerRef.current && !inlineIconPickerRef.current.contains(event.target as Node)) {
+        setShowInlineIconPicker(false)
+      }
+    }
+
+    if (showInlineIconPicker) {
+      document.addEventListener('mousedown', handleClickOutside)
+      return () => document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [showInlineIconPicker])
+
+  const handleInlineIconSelect = (selectedIcon: string) => {
+    setIcon(selectedIcon)
+    setShowInlineIconPicker(false)
+    startTransition(() => {
+      updateAttributes({ icon: selectedIcon })
+    })
+  }
+
+  const openInlineIconPicker = () => {
+    if (iconButtonRef.current) {
+      const rect = iconButtonRef.current.getBoundingClientRect()
+      setIconPickerPosition({
+        top: rect.bottom + window.scrollY + 8,
+        left: rect.left + window.scrollX,
+      })
+    }
+    setShowInlineIconPicker(true)
+  }
+
   const handleDelete = () => {
     if (getPos) {
       const pos = getPos()
@@ -87,334 +135,44 @@ export const CardNodeView = ({ node, updateAttributes, editor, getPos }: NodeVie
     }
   }
 
-  const handleSave = () => {
-    setIsEditing(false)
-    setShowIconPicker(false)
-
-    // Use startTransition to mark Tiptap updates as non-urgent transitions
-    // This prevents React 19's flushSync warnings by allowing interruption
+  const handleTitleSave = () => {
+    setIsEditingTitle(false)
     startTransition(() => {
-      updateAttributes({
-        title,
-        icon,
-        iconAlign,
-        href,
-      })
+      updateAttributes({ title })
     })
   }
 
-  const handleCancel = () => {
-    setTitle(node.attrs.title || '')
-    setIcon(node.attrs.icon || '')
-    setIconAlign(node.attrs.iconAlign || 'left')
-    setHref(node.attrs.href || '')
-    setIsEditing(false)
-    setShowIconPicker(false)
+  const handleTitleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleTitleSave()
+    } else if (e.key === 'Escape') {
+      setTitle(node.attrs.title || '')
+      setIsEditingTitle(false)
+    }
   }
 
-  const handleIconSelect = (selectedIcon: string) => {
-    setIcon(selectedIcon)
-    setShowIconPicker(false)
+  const handleIconAlignChange = (align: 'left' | 'center' | 'right') => {
+    setIconAlign(align)
+    startTransition(() => {
+      updateAttributes({ iconAlign: align })
+    })
+  }
+
+  const handleHrefChange = (newHref: string) => {
+    setHref(newHref)
+    startTransition(() => {
+      updateAttributes({ href: newHref })
+    })
+  }
+
+  const handleRemoveIcon = () => {
+    setIcon('')
+    startTransition(() => {
+      updateAttributes({ icon: '' })
+    })
   }
 
   const isEditable = editor.isEditable
-
-  if (isEditing) {
-    return (
-      <NodeViewWrapper className="card-node-view">
-        <div
-          style={{
-            margin: '1rem 0',
-            position: 'relative',
-          }}
-        >
-          {/* Delete button - top right corner */}
-          {isEditable && (
-            <button
-              onClick={handleDelete}
-              style={{
-                position: 'absolute',
-                top: '-8px',
-                right: '-8px',
-                width: '20px',
-                height: '20px',
-                borderRadius: '50%',
-                backgroundColor: theme === 'light' ? '#fee2e2' : '#7f1d1d',
-                border: `1px solid ${theme === 'light' ? '#fecaca' : '#991b1b'}`,
-                color: theme === 'light' ? '#ef4444' : '#fca5a5',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '10px',
-                transition: 'all 0.2s',
-                padding: 0,
-                zIndex: 10,
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = theme === 'light' ? '#fecaca' : '#991b1b'
-                e.currentTarget.style.transform = 'scale(1.1)'
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = theme === 'light' ? '#fee2e2' : '#7f1d1d'
-                e.currentTarget.style.transform = 'scale(1)'
-              }}
-              title="Delete card"
-            >
-              <i className="pi pi-times" style={{ fontSize: '10px' }}></i>
-            </button>
-          )}
-
-          <div
-            style={{
-              border: '2px solid #3b82f6',
-              borderRadius: '8px',
-              padding: '16px',
-              backgroundColor: theme === 'light' ? '#f9fafb' : '#1f2937',
-              maxHeight: '70vh',
-              overflowY: 'auto',
-            }}
-          >
-            {/* Title */}
-            <div style={{ marginBottom: '12px' }}>
-              <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px', fontWeight: '500', color: theme === 'light' ? '#374151' : '#e5e7eb' }}>
-                Title *
-              </label>
-              <input
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="Card title"
-                style={{
-                  width: '100%',
-                  padding: '8px',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '4px',
-                  fontSize: '14px',
-                  backgroundColor: theme === 'light' ? '#ffffff' : '#374151',
-                  color: theme === 'light' ? '#111827' : '#f3f4f6',
-                }}
-              />
-            </div>
-
-            {/* Content - Editable markdown area */}
-            <div style={{ marginBottom: '12px' }}>
-              <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px', fontWeight: '500', color: theme === 'light' ? '#374151' : '#e5e7eb' }}>
-                Content (supports markdown)
-              </label>
-              <div style={{
-                border: '1px solid #d1d5db',
-                borderRadius: '4px',
-                padding: '8px',
-                minHeight: '100px',
-                backgroundColor: theme === 'light' ? '#ffffff' : '#374151',
-                color: theme === 'light' ? '#111827' : '#f3f4f6',
-              }}>
-                <NodeViewContent />
-              </div>
-            </div>
-
-            {/* Icon Selector */}
-            <div style={{ marginBottom: '12px' }}>
-              <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px', fontWeight: '500', color: theme === 'light' ? '#374151' : '#e5e7eb' }}>
-                Icon (optional)
-              </label>
-              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                <button
-                  type="button"
-                  onClick={() => setShowIconPicker(!showIconPicker)}
-                  style={{
-                    padding: '8px 12px',
-                    backgroundColor: theme === 'light' ? '#ffffff' : '#374151',
-                    border: '1px solid #d1d5db',
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                    fontSize: '14px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    color: theme === 'light' ? '#111827' : '#f3f4f6',
-                  }}
-                >
-                  {icon ? <i className={icon} style={{ fontSize: '18px' }}></i> : <i className="pi pi-plus"></i>}
-                  <span>{icon ? 'Change Icon' : 'Select Icon'}</span>
-                </button>
-                {icon && (
-                  <button
-                    type="button"
-                    onClick={() => setIcon('')}
-                    style={{
-                      padding: '8px',
-                      backgroundColor: '#ef4444',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: 'pointer',
-                      fontSize: '14px',
-                    }}
-                  >
-                    <i className="pi pi-times"></i>
-                  </button>
-                )}
-              </div>
-
-              {/* Icon Picker Modal */}
-              {showIconPicker && (
-                <div
-                  style={{
-                    marginTop: '8px',
-                    border: '1px solid #d1d5db',
-                    borderRadius: '8px',
-                    padding: '12px',
-                    backgroundColor: theme === 'light' ? '#ffffff' : '#1f2937',
-                    maxHeight: '300px',
-                    overflowY: 'auto',
-                  }}
-                >
-                  {Object.entries(ICON_CATEGORIES).map(([category, icons]) => (
-                    <div key={category} style={{ marginBottom: '16px' }}>
-                      <h4 style={{ margin: '0 0 8px 0', fontSize: '13px', fontWeight: '600', color: theme === 'light' ? '#6b7280' : '#9ca3af' }}>
-                        {category}
-                      </h4>
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(60px, 1fr))', gap: '8px' }}>
-                        {icons.map(({ icon: iconClass, name }) => (
-                          <button
-                            key={iconClass}
-                            type="button"
-                            onClick={() => handleIconSelect(iconClass)}
-                            style={{
-                              padding: '12px',
-                              backgroundColor: icon === iconClass ? '#3b82f6' : (theme === 'light' ? '#f3f4f6' : '#374151'),
-                              border: icon === iconClass ? '2px solid #2563eb' : '1px solid #d1d5db',
-                              borderRadius: '6px',
-                              cursor: 'pointer',
-                              display: 'flex',
-                              flexDirection: 'column',
-                              alignItems: 'center',
-                              gap: '4px',
-                              transition: 'all 0.2s',
-                            }}
-                            onMouseEnter={(e) => {
-                              if (icon !== iconClass) {
-                                e.currentTarget.style.backgroundColor = theme === 'light' ? '#e5e7eb' : '#4b5563'
-                              }
-                            }}
-                            onMouseLeave={(e) => {
-                              if (icon !== iconClass) {
-                                e.currentTarget.style.backgroundColor = theme === 'light' ? '#f3f4f6' : '#374151'
-                              }
-                            }}
-                            title={name}
-                          >
-                            <i className={iconClass} style={{ fontSize: '20px', color: icon === iconClass ? '#ffffff' : (theme === 'light' ? '#111827' : '#f3f4f6') }}></i>
-                            <span style={{ fontSize: '9px', textAlign: 'center', color: icon === iconClass ? '#ffffff' : (theme === 'light' ? '#6b7280' : '#9ca3af') }}>
-                              {name}
-                            </span>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Icon Alignment */}
-            {icon && (
-              <div style={{ marginBottom: '12px' }}>
-                <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px', fontWeight: '500', color: theme === 'light' ? '#374151' : '#e5e7eb' }}>
-                  Icon Alignment
-                </label>
-                <div style={{ display: 'flex', gap: '8px' }}>
-                  {(['left', 'center', 'right'] as const).map((align) => (
-                    <button
-                      key={align}
-                      type="button"
-                      onClick={() => setIconAlign(align)}
-                      style={{
-                        flex: 1,
-                        padding: '8px',
-                        backgroundColor: iconAlign === align ? iconColor : (theme === 'light' ? '#f3f4f6' : '#374151'),
-                        color: iconAlign === align ? '#ffffff' : (theme === 'light' ? '#111827' : '#f3f4f6'),
-                        border: iconAlign === align ? `2px solid ${iconColor}` : '1px solid #d1d5db',
-                        borderRadius: '4px',
-                        cursor: 'pointer',
-                        fontSize: '14px',
-                        fontWeight: '500',
-                        textTransform: 'capitalize',
-                        transition: 'all 0.2s',
-                      }}
-                    >
-                      {align}
-                    </button>
-                  ))}
-                </div>
-                <p style={{ fontSize: '12px', color: theme === 'light' ? '#6b7280' : '#9ca3af', marginTop: '4px', marginBottom: 0 }}>
-                  Icon color is configured globally in gitdocai.config.json
-                </p>
-              </div>
-            )}
-
-            {/* Link */}
-            <div style={{ marginBottom: '12px' }}>
-              <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px', fontWeight: '500', color: theme === 'light' ? '#374151' : '#e5e7eb' }}>
-                Link URL (optional)
-              </label>
-              <input
-                type="text"
-                value={href}
-                onChange={(e) => setHref(e.target.value)}
-                placeholder="https://example.com"
-                style={{
-                  width: '100%',
-                  padding: '8px',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '4px',
-                  fontSize: '14px',
-                  backgroundColor: theme === 'light' ? '#ffffff' : '#374151',
-                  color: theme === 'light' ? '#111827' : '#f3f4f6',
-                }}
-              />
-            </div>
-
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <button
-                onClick={handleSave}
-                disabled={!title}
-                style={{
-                  padding: '8px 16px',
-                  backgroundColor: title ? '#10b981' : '#6b7280',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: title ? 'pointer' : 'not-allowed',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                }}
-              >
-                Save
-              </button>
-              <button
-                onClick={handleCancel}
-                style={{
-                  padding: '8px 16px',
-                  backgroundColor: '#6b7280',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                }}
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      </NodeViewWrapper>
-    )
-  }
 
   return (
     <NodeViewWrapper className="card-node-view">
@@ -461,88 +219,369 @@ export const CardNodeView = ({ node, updateAttributes, editor, getPos }: NodeVie
           </button>
         )}
 
+
         <div
-          onClick={() => {
-            if (isEditable) {
-              setIsEditing(true)
-            } else if (href) {
-              window.open(href, '_blank', 'noopener,noreferrer')
-            }
-          }}
           style={{
             position: 'relative',
             border: `1px solid ${theme === 'light' ? '#e5e7eb' : '#374151'}`,
             borderRadius: '8px',
             overflow: 'hidden',
-            cursor: isEditable ? 'pointer' : (href ? 'pointer' : 'default'),
+            cursor: !isEditable && href ? 'pointer' : 'default',
             transition: 'all 0.15s ease',
             backgroundColor: 'transparent',
             boxShadow: 'none',
             outline: 'none',
-            userSelect: 'none',
-            WebkitTapHighlightColor: 'transparent',
+          }}
+          onClick={() => {
+            if (!isEditable && href) {
+              window.open(href, '_blank', 'noopener,noreferrer')
+            }
           }}
           onMouseEnter={(e) => {
-            if (isEditable || href) {
-              e.currentTarget.style.borderColor = (!isEditable && href) ? iconColor : (theme === 'light' ? '#d1d5db' : '#4b5563')
+            if (!isEditable && href) {
+              e.currentTarget.style.borderColor = iconColor
               e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)'
-              // Show link indicator only in non-editable mode with href
-              if (!isEditable && href) {
-                const linkIndicator = e.currentTarget.querySelector('.link-indicator') as HTMLElement
-                if (linkIndicator) {
-                  linkIndicator.style.opacity = '1'
-                  linkIndicator.style.transform = 'scale(1)'
-                }
+              const linkIndicator = e.currentTarget.querySelector('.link-indicator') as HTMLElement
+              if (linkIndicator) {
+                linkIndicator.style.opacity = '1'
+                linkIndicator.style.transform = 'scale(1)'
               }
             }
           }}
           onMouseLeave={(e) => {
-            if (isEditable || href) {
+            if (!isEditable && href) {
               e.currentTarget.style.borderColor = theme === 'light' ? '#e5e7eb' : '#374151'
               e.currentTarget.style.boxShadow = 'none'
-              // Hide link indicator
-              if (!isEditable && href) {
-                const linkIndicator = e.currentTarget.querySelector('.link-indicator') as HTMLElement
-                if (linkIndicator) {
-                  linkIndicator.style.opacity = '0'
-                  linkIndicator.style.transform = 'scale(0.9)'
-                }
+              const linkIndicator = e.currentTarget.querySelector('.link-indicator') as HTMLElement
+              if (linkIndicator) {
+                linkIndicator.style.opacity = '0'
+                linkIndicator.style.transform = 'scale(0.9)'
               }
             }
           }}
         >
+          {/* Settings Header - Only in edit mode */}
+          {isEditable && (
+            <div
+              contentEditable={false}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: '12px',
+                padding: '8px 12px',
+                borderBottom: `1px solid ${theme === 'light' ? '#e5e7eb' : '#374151'}`,
+                backgroundColor: theme === 'light' ? '#f9fafb' : '#111827',
+              }}
+              onMouseDown={(e) => e.stopPropagation()}
+            >
+              {/* Icon Alignment */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <span style={{ fontSize: '11px', color: theme === 'light' ? '#6b7280' : '#9ca3af', marginRight: '4px' }}>
+                  Align:
+                </span>
+                {(['left', 'center', 'right'] as const).map((align) => (
+                  <button
+                    key={align}
+                    type="button"
+                    onClick={() => handleIconAlignChange(align)}
+                    style={{
+                      padding: '4px 8px',
+                      backgroundColor: iconAlign === align ? iconColor : 'transparent',
+                      color: iconAlign === align ? '#ffffff' : (theme === 'light' ? '#6b7280' : '#9ca3af'),
+                      border: iconAlign === align ? 'none' : `1px solid ${theme === 'light' ? '#d1d5db' : '#4b5563'}`,
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      fontSize: '11px',
+                      fontWeight: '500',
+                      transition: 'all 0.15s',
+                    }}
+                    title={`Align ${align}`}
+                  >
+                    <i className={`pi pi-align-${align}`} style={{ fontSize: '12px' }}></i>
+                  </button>
+                ))}
+              </div>
+
+              {/* Link URL Input */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flex: 1, maxWidth: '250px' }}>
+                <i className="pi pi-link" style={{ fontSize: '12px', color: theme === 'light' ? '#6b7280' : '#9ca3af' }}></i>
+                <input
+                  type="text"
+                  value={href}
+                  onChange={(e) => handleHrefChange(e.target.value)}
+                  placeholder="https://example.com"
+                  onClick={(e) => e.stopPropagation()}
+                  style={{
+                    flex: 1,
+                    padding: '4px 8px',
+                    border: `1px solid ${theme === 'light' ? '#d1d5db' : '#4b5563'}`,
+                    borderRadius: '4px',
+                    fontSize: '11px',
+                    backgroundColor: theme === 'light' ? '#ffffff' : '#1f2937',
+                    color: theme === 'light' ? '#111827' : '#f3f4f6',
+                    outline: 'none',
+                  }}
+                />
+              </div>
+            </div>
+          )}
+
           {/* Content Body */}
           <div style={{ padding: '1.5rem' }}>
             {/* Icon and Title Row */}
-            <div style={{
-              display: 'flex',
-              gap: '1rem',
-              alignItems: 'center',
-              marginBottom: '1rem',
-              justifyContent: iconAlign === 'center' ? 'center' : iconAlign === 'right' ? 'flex-end' : 'flex-start',
-              flexDirection: iconAlign === 'center' ? 'column' : iconAlign === 'right' ? 'row-reverse' : 'row',
-            }}>
-              {icon && (
-                <i className={icon} style={{ fontSize: '2.5rem', color: iconColor, transition: 'transform 0.3s ease' }} />
+            <div
+              contentEditable={false}
+              style={{
+                display: 'flex',
+                gap: '1rem',
+                alignItems: 'center',
+                marginBottom: '1rem',
+                justifyContent: iconAlign === 'center' ? 'center' : iconAlign === 'right' ? 'flex-end' : 'flex-start',
+                flexDirection: iconAlign === 'center' ? 'column' : iconAlign === 'right' ? 'row-reverse' : 'row',
+              }}
+            >
+              {/* Icon or placeholder */}
+              <div ref={iconButtonRef} style={{ position: 'relative' }}>
+                {icon ? (
+                  <div
+                    onMouseDown={(e) => {
+                      if (isEditable) {
+                        e.stopPropagation()
+                        e.preventDefault()
+                        if (showInlineIconPicker) {
+                          setShowInlineIconPicker(false)
+                        } else {
+                          openInlineIconPicker()
+                        }
+                      }
+                    }}
+                    style={{
+                      cursor: isEditable ? 'pointer' : 'default',
+                      padding: '4px',
+                      borderRadius: '8px',
+                      transition: 'background-color 0.15s',
+                    }}
+                    onMouseEnter={(e) => {
+                      if (isEditable) {
+                        e.currentTarget.style.backgroundColor = theme === 'light' ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.1)'
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (isEditable) {
+                        e.currentTarget.style.backgroundColor = 'transparent'
+                      }
+                    }}
+                    title={isEditable ? 'Click to change icon' : ''}
+                  >
+                    <i className={icon} style={{ fontSize: '2.5rem', color: iconColor, transition: 'transform 0.3s ease' }} />
+                  </div>
+                ) : isEditable ? (
+                  <div
+                    onMouseDown={(e) => {
+                      e.stopPropagation()
+                      e.preventDefault()
+                      if (showInlineIconPicker) {
+                        setShowInlineIconPicker(false)
+                      } else {
+                        openInlineIconPicker()
+                      }
+                    }}
+                    style={{
+                      width: '2.5rem',
+                      height: '2.5rem',
+                      borderRadius: '8px',
+                      border: `2px dashed ${theme === 'light' ? '#d1d5db' : '#4b5563'}`,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      cursor: 'pointer',
+                      transition: 'all 0.15s',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.borderColor = iconColor
+                      e.currentTarget.style.backgroundColor = theme === 'light' ? 'rgba(59,130,246,0.05)' : 'rgba(59,130,246,0.1)'
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.borderColor = theme === 'light' ? '#d1d5db' : '#4b5563'
+                      e.currentTarget.style.backgroundColor = 'transparent'
+                    }}
+                    title="Click to add icon"
+                  >
+                    <i className="pi pi-plus" style={{ fontSize: '1rem', color: theme === 'light' ? '#9ca3af' : '#6b7280' }} />
+                  </div>
+                ) : null}
+              </div>
+
+              {/* Inline Icon Picker - Portal */}
+              {showInlineIconPicker && isEditable && createPortal(
+                <div
+                  ref={inlineIconPickerRef}
+                  style={{
+                    position: 'absolute',
+                    top: iconPickerPosition.top,
+                    left: iconPickerPosition.left,
+                    zIndex: 10000,
+                    backgroundColor: theme === 'light' ? '#ffffff' : '#1f2937',
+                    border: `1px solid ${theme === 'light' ? '#e5e7eb' : '#374151'}`,
+                    borderRadius: '8px',
+                    padding: '12px',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                    minWidth: '280px',
+                    maxHeight: '300px',
+                    overflowY: 'auto',
+                  }}
+                  onMouseDown={(e) => e.stopPropagation()}
+                >
+                  {/* Remove icon button */}
+                  {icon && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        handleRemoveIcon()
+                        setShowInlineIconPicker(false)
+                      }}
+                      style={{
+                        width: '100%',
+                        padding: '8px',
+                        marginBottom: '12px',
+                        backgroundColor: theme === 'light' ? '#fef2f2' : '#450a0a',
+                        border: `1px solid ${theme === 'light' ? '#fecaca' : '#7f1d1d'}`,
+                        borderRadius: '6px',
+                        color: theme === 'light' ? '#dc2626' : '#fca5a5',
+                        cursor: 'pointer',
+                        fontSize: '12px',
+                        fontWeight: '500',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '6px',
+                      }}
+                    >
+                      <i className="pi pi-trash" style={{ fontSize: '12px' }}></i>
+                      Remove Icon
+                    </button>
+                  )}
+
+                  {Object.entries(ICON_CATEGORIES).map(([category, icons]) => (
+                    <div key={category} style={{ marginBottom: '10px' }}>
+                      <h4 style={{ margin: '0 0 6px 0', fontSize: '11px', fontWeight: '600', color: theme === 'light' ? '#6b7280' : '#9ca3af' }}>
+                        {category}
+                      </h4>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                        {icons.map(({ icon: iconClass, name }) => (
+                          <button
+                            key={iconClass}
+                            type="button"
+                            onClick={() => handleInlineIconSelect(iconClass)}
+                            style={{
+                              padding: '8px',
+                              backgroundColor: icon === iconClass ? iconColor : (theme === 'light' ? '#f3f4f6' : '#374151'),
+                              border: icon === iconClass ? `2px solid ${iconColor}` : `1px solid ${theme === 'light' ? '#e5e7eb' : '#4b5563'}`,
+                              borderRadius: '6px',
+                              cursor: 'pointer',
+                              transition: 'all 0.15s',
+                            }}
+                            title={name}
+                          >
+                            <i className={iconClass} style={{ fontSize: '18px', color: icon === iconClass ? '#ffffff' : (theme === 'light' ? '#111827' : '#f3f4f6') }}></i>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>,
+                document.body
               )}
-              <h3 style={{
-                margin: 0,
-                fontSize: '1.5rem',
-                fontWeight: '700',
-                color: theme === 'light' ? '#111827' : '#f3f4f6',
-                textAlign: iconAlign === 'center' ? 'center' : iconAlign === 'right' ? 'right' : 'left',
-              }}>
-                {title || 'Untitled Card'}
-              </h3>
+
+              {/* Inline Title Editing */}
+              {isEditable && isEditingTitle ? (
+                <input
+                  ref={titleInputRef}
+                  type="text"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  onBlur={handleTitleSave}
+                  onKeyDown={handleTitleKeyDown}
+                  onMouseDown={(e) => e.stopPropagation()}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    e.preventDefault()
+                  }}
+                  style={{
+                    margin: 0,
+                    fontSize: '1.5rem',
+                    fontWeight: '700',
+                    color: theme === 'light' ? '#111827' : '#f3f4f6',
+                    textAlign: iconAlign === 'center' ? 'center' : iconAlign === 'right' ? 'right' : 'left',
+                    backgroundColor: 'transparent',
+                    border: 'none',
+                    borderBottom: `2px solid ${iconColor}`,
+                    outline: 'none',
+                    flex: 1,
+                    minWidth: 0,
+                    padding: '2px 0',
+                  }}
+                  placeholder="Card title"
+                />
+              ) : (
+                <h3
+                  onMouseDown={(e) => {
+                    if (isEditable) {
+                      e.stopPropagation()
+                      e.preventDefault()
+                      setIsEditingTitle(true)
+                    }
+                  }}
+                  style={{
+                    margin: 0,
+                    fontSize: '1.5rem',
+                    fontWeight: '700',
+                    color: theme === 'light' ? '#111827' : '#f3f4f6',
+                    textAlign: iconAlign === 'center' ? 'center' : iconAlign === 'right' ? 'right' : 'left',
+                    cursor: isEditable ? 'text' : 'default',
+                    flex: 1,
+                    minWidth: 0,
+                    padding: '2px 0',
+                    borderBottom: isEditable ? `2px solid transparent` : 'none',
+                    transition: 'border-color 0.15s',
+                  }}
+                  onMouseEnter={(e) => {
+                    if (isEditable) {
+                      e.currentTarget.style.borderBottomColor = theme === 'light' ? '#e5e7eb' : '#374151'
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (isEditable) {
+                      e.currentTarget.style.borderBottomColor = 'transparent'
+                    }
+                  }}
+                  title={isEditable ? 'Click to edit title' : ''}
+                >
+                  {title || 'Untitled Card'}
+                </h3>
+              )}
             </div>
 
-            {/* Card Content */}
-            <div style={{ fontSize: '0.95rem', color: theme === 'light' ? '#475569' : '#cbd5e1', lineHeight: '1.6' }}>
+            {/* Card Content - Always editable inline */}
+            <div
+              style={{
+                fontSize: '0.95rem',
+                color: theme === 'light' ? '#475569' : '#cbd5e1',
+                lineHeight: '1.6',
+                cursor: isEditable ? 'text' : 'default',
+              }}
+              onClick={(e) => {
+                if (isEditable) {
+                  e.stopPropagation()
+                }
+              }}
+            >
               <NodeViewContent />
             </div>
           </div>
 
-          {/* Link indicator (same as Card component) */}
+          {/* Link indicator */}
           {href && (
             <div
               className="link-indicator"

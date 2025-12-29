@@ -499,7 +499,7 @@ export const Footer: React.FC<FooterProps> = ({ theme, isDevMode = false }) => {
               opacity: 0.6
             }}
           >
-            © {currentYear} all rights reserved
+            {siteName} © {currentYear} all rights reserved
           </small>
         </div>
       </div>

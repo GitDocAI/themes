@@ -7,6 +7,41 @@ export const CardBlock = Node.create({
   group: 'block',
   content: 'block+',
   draggable: true,
+  isolating: true,
+
+  addKeyboardShortcuts() {
+    return {
+      Backspace: () => {
+        const { state } = this.editor
+        const { selection } = state
+        const { $from } = selection
+
+        // Check if we're inside a cardBlock
+        for (let depth = $from.depth; depth > 0; depth--) {
+          const node = $from.node(depth)
+          if (node.type.name === 'cardBlock') {
+            // Check if the card content is empty or has only an empty paragraph
+            const cardContent = node.content
+            const isEmpty = cardContent.size === 0 ||
+              (cardContent.childCount === 1 &&
+               cardContent.firstChild?.type.name === 'paragraph' &&
+               cardContent.firstChild?.content.size === 0)
+
+            // If card is empty and cursor is at the start, prevent deletion
+            if (isEmpty) {
+              const posInCard = $from.pos - $from.start(depth)
+              if (posInCard <= 1) {
+                return true // Prevent backspace from deleting the card
+              }
+            }
+            break
+          }
+        }
+
+        return false // Let default behavior handle it
+      },
+    }
+  },
 
   addAttributes() {
     return {

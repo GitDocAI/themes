@@ -548,7 +548,7 @@ function Documentation() {
           backgroundColor:backgroundColor
         }}
       >
-        <Banner theme={theme} />
+        <Banner theme={theme} isDevMode={isProductionMode ? false : isDevMode} />
         <Navbar
           theme={theme}
           onThemeChange={toggleTheme}
