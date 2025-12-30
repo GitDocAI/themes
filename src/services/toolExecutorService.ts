@@ -207,7 +207,6 @@ This feature is coming soon! Currently, the following structural operations cann
       }
       case 'replace_in_file': {
         let { page, to_replace_text, new_text } = args
-
         // Ensure the file path has .mdx extension
         if (!page.endsWith('.mdx')) {
           page = `${page}.mdx`
@@ -230,6 +229,9 @@ This feature is coming soon! Currently, the following structural operations cann
 
             function traverse(node: any) {
               if (node.type === 'text' && node.text) {
+                if(to_replace_text==''){
+                  node.text= new_text + node.text
+                }
                 node.text = node.text.replaceAll(to_replace_text, new_text)
               }
               if (node.content && Array.isArray(node.content)) {
