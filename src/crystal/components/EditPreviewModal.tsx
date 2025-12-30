@@ -1,3 +1,5 @@
+import React, { useState } from 'react'
+
 interface EditPreviewModalProps {
   theme: 'light' | 'dark'
   originalText: string
@@ -16,9 +18,12 @@ export const EditPreviewModal: React.FC<EditPreviewModalProps> = ({
   onApply
 }) => {
   const isDark = theme === 'dark'
+  const [isLoading, setIsLoading] = useState(false)
 
   const handleApply = async () => {
+    setIsLoading(true)
     await onApply()
+    setIsLoading(false)
     onClose()
   }
 
@@ -253,6 +258,7 @@ export const EditPreviewModal: React.FC<EditPreviewModalProps> = ({
           </button>
           <button
             onClick={handleApply}
+            disabled={isLoading}
             style={{
               flex: 1,
               padding: '12px 20px',
@@ -260,7 +266,7 @@ export const EditPreviewModal: React.FC<EditPreviewModalProps> = ({
               color: 'white',
               border: 'none',
               borderRadius: '10px',
-              cursor: 'pointer',
+              cursor: isLoading ? 'not-allowed' : 'pointer',
               fontSize: '14px',
               fontWeight: '600',
               transition: 'all 0.2s',
@@ -268,19 +274,28 @@ export const EditPreviewModal: React.FC<EditPreviewModalProps> = ({
               alignItems: 'center',
               justifyContent: 'center',
               gap: '8px',
-              boxShadow: '0 4px 14px rgba(34, 197, 94, 0.4)'
+              boxShadow: '0 4px 14px rgba(34, 197, 94, 0.4)',
+              opacity: isLoading ? 0.7 : 1,
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'translateY(-1px)'
-              e.currentTarget.style.boxShadow = '0 6px 20px rgba(34, 197, 94, 0.5)'
+              if (!isLoading) {
+                e.currentTarget.style.transform = 'translateY(-1px)'
+                e.currentTarget.style.boxShadow = '0 6px 20px rgba(34, 197, 94, 0.5)'
+              }
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)'
-              e.currentTarget.style.boxShadow = '0 4px 14px rgba(34, 197, 94, 0.4)'
+              if (!isLoading) {
+                e.currentTarget.style.transform = 'translateY(0)'
+                e.currentTarget.style.boxShadow = '0 4px 14px rgba(34, 197, 94, 0.4)'
+              }
             }}
           >
-            <i className="pi pi-check"></i>
-            Apply Edit
+            {isLoading ? (
+              <i className="pi pi-spin pi-spinner" style={{ fontSize: '16px' }}></i>
+            ) : (
+              <i className="pi pi-check"></i>
+            )}
+            {isLoading ? 'Applying...' : 'Apply Edit'}
           </button>
         </div>
       </div>
