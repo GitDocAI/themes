@@ -17,9 +17,13 @@ export class ContentService {
    */
   static async saveContent(docId: string, content: string): Promise<void> {
     return new Promise( (then,reject)=>{
+
+      console.log(lastTimeout)
+
       if(lastTimeout!=-1){
         clearTimeout(lastTimeout)
       }
+
       lastTimeout = setTimeout(async ()=>{
           // Remove leading slash from docId if present to avoid double slashes
           const cleanDocId = docId.startsWith('/') ? docId.slice(1) : docId
@@ -55,7 +59,13 @@ export class ContentService {
                }
           }
           try{
+              const handleClosing = (event:any) => {
+                event.preventDefault();
+                event.returnValue = "";
+              }
+              window.addEventListener("beforeunload",handleClosing );
               await axiosInstance.post(url, body, { headers })
+              window.removeEventListener("beforeunload",handleClosing)
               then()
           }catch(error){
             reject(new Error(`Failed to save content: ${error}`))
@@ -64,7 +74,7 @@ export class ContentService {
           // Invalidate cache after successful save
           pageLoader.invalidateCache(docId)
           apiReferenceLoader.invalidateCache(docId)
-      },300)
+      },600)
     })
   }
 
@@ -107,7 +117,6 @@ export class ContentService {
     // Reload config after successful save to invalidate cache
     await configLoader.reloadConfig()
   }
-
   /**
    * Rename a file on the backend
    */
