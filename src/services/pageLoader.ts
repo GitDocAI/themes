@@ -35,7 +35,10 @@ class PageLoader {
    * In multi-tenant mode: loads from tenant-specific backend with auth
    */
   async loadPage(pagePath: string): Promise<PageData | null> {
+
     try {
+
+      const originalPagePath = pagePath
       // Check memory cache first
       if (this.cache.has(pagePath)) {
         return this.cache.get(pagePath)!
@@ -61,7 +64,7 @@ class PageLoader {
       }
 
       // Store in memory cache
-      this.cache.set(pagePath, pageData)
+      this.cache.set(originalPagePath, pageData)
 
       return pageData
     } catch (error) {
