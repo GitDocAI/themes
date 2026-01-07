@@ -35,8 +35,25 @@ class PageLoader {
    * In dev/preview: loads from backend API
    * In multi-tenant mode: loads from tenant-specific backend with auth
    */
+
+
+   private currentlyFetching = new Map<string,Promise<PageData|null>>
+
   async loadPage(pagePath: string): Promise<PageData | null> {
+
+    if(this.currentlyFetching.has(pagePath)){
+      return this.currentlyFetching.get(pagePath)!
+    }
+    const request = this._loadPage(pagePath)
+    this.currentlyFetching.set(pagePath,request)
+    return request
+  }
+
+
+  async _loadPage(pagePath:string): Promise<PageData | null>{
     try {
+
+      const originalPagePath = pagePath
       // Check memory cache first
       if (this.cache.has(pagePath)) {
         return this.cache.get(pagePath)!
@@ -52,6 +69,7 @@ class PageLoader {
 
        mdxPath = `/content/api/v1/filesystem/file?t=${Date.now()}`
       const response = await axiosInstance.post(mdxPath,{path:cleanPath})
+      this.currentlyFetching.delete(pagePath)
       const mdxContent =  response.data.content
 
       // Parse MDX to TipTap JSON
@@ -63,10 +81,11 @@ class PageLoader {
       }
 
       // Store in memory cache
-      this.cache.set(pagePath, pageData)
+      this.cache.set(originalPagePath, pageData)
 
       return pageData
     } catch (error) {
+      this.currentlyFetching.delete(pagePath)
       console.error(`Error loading page ${pagePath}:`, error)
       return null
     }

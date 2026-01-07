@@ -1,6 +1,5 @@
 import { configLoader as ConfigLoader, type Version } from './configLoader'
 import type { NavigationItem } from '../types/navigation'
-import { ContentService } from './contentService'
 import { searchService, type SearchHit, type SearchResponse } from './searchService'
 import { pageLoader } from './pageLoader'
 import axiosInstance from '../utils/axiosInstance'
@@ -9,7 +8,8 @@ const loadConfig = ConfigLoader.loadConfig.bind(ConfigLoader)
 const updateConfig = ConfigLoader.updateConfig.bind(ConfigLoader)
 
 import { type ChatContext } from './agentService'
-import { FindPagePathByName } from './navigationService'
+import { ContentService } from './contentService'
+import { mdxSerializer } from './mdxSerializer'
 
 
 export const toolExecutor = {
@@ -207,7 +207,6 @@ This feature is coming soon! Currently, the following structural operations cann
       }
       case 'replace_in_file': {
         let { page, to_replace_text, new_text } = args
-
         // Ensure the file path has .mdx extension
         if (!page.endsWith('.mdx')) {
           page = `${page}.mdx`
@@ -230,6 +229,9 @@ This feature is coming soon! Currently, the following structural operations cann
 
             function traverse(node: any) {
               if (node.type === 'text' && node.text) {
+                if(to_replace_text==''){
+                  node.text= new_text + node.text
+                }
                 node.text = node.text.replaceAll(to_replace_text, new_text)
               }
               if (node.content && Array.isArray(node.content)) {
@@ -327,17 +329,27 @@ This feature is coming soon! Currently, the following structural operations cann
       case 'open_page':
       case 'see_page': {
         if (uiCallbacks && uiCallbacks.onUpdateContext) {
-          const pagePath = FindPagePathByName(args.url);
-          if (pagePath) {
-            const context: ChatContext = {
-              id: `${pagePath}-${Date.now()}`,
-              type: 'file',
-              fileName: pagePath,
-            };
-            uiCallbacks.onUpdateContext(context);
+          try{
+            const pagePath=`${args.url}${args.url.endsWith('.mdx')?'':'.mdx'}`
+            const content = await pageLoader.loadPage(pagePath)
+            if(content){
+              const context: ChatContext = {
+                id: `${pagePath}-${Date.now()}`,
+                type: 'file',
+                fileName: pagePath,
+              };
+              uiCallbacks.onUpdateContext(context);
+
+              return { results: { success: 'true', content:mdxSerializer.serialize(content.content) } };
+            }else{
+              return { results: { success: 'false',error:'no content for that page' } };
+            }
+          }catch(e){
+            return { results: { success: 'false',error:e } };
           }
+        }else{
+            return { results: { success: 'false',error:'not implemented' } };
         }
-        return { results: { success: 'true' } };
       }
       case 'replace_configuration': {
         const { page, key, value } = args;
@@ -482,7 +494,7 @@ const addNewPage = async (tab:string,version:string,groupTitle:string,pageName: 
             {
               type: 'heading',
               attrs: { level: 1 },
-              
+
               content: [
                 {
                   type: 'text',

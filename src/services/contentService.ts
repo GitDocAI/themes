@@ -8,54 +8,74 @@ import { apiReferenceLoader } from './apiReferenceLoader'
 import { configLoader } from './configLoader'
 import { mdxSerializer } from './mdxSerializer'
 
+let lastTimeout = -1
+
 
 export class ContentService {
   /**
    * Save content to backend API
    */
   static async saveContent(docId: string, content: string): Promise<void> {
-    // Remove leading slash from docId if present to avoid double slashes
-    const cleanDocId = docId.startsWith('/') ? docId.slice(1) : docId
+    return new Promise( (then,reject)=>{
 
-    const url = '/content/api/v1/filesystem/entry'
-    // Detect content type based on file extension or content format
-    const isMdxFile = cleanDocId.endsWith('.mdx')
-    const isJsonContent = content.trim().startsWith('{') || content.trim().startsWith('[')
+      console.log(lastTimeout)
 
-    let headers: Record<string, string>
-    let body: any
-
-    if (isMdxFile || !isJsonContent) {
-      // Send as plain text (MDX content)
-      headers = {
-        'Content-Type': 'text/plain; charset=utf-8',
-      }
-      body = {
-          path: cleanDocId,
-          type:'file',
-          content:mdxSerializer.serialize(JSON.parse(content) as any)
+      if(lastTimeout!=-1){
+        clearTimeout(lastTimeout)
       }
 
-    } else {
-      // Send as JSON (legacy format or config)
-      headers = {
-        'Content-Type': 'application/json',
-      }
-      body = {
-          path: cleanDocId,
-          type:'file',
-          content:content
-         }
-    }
-    try{
-        await axiosInstance.post(url, body, { headers })
-    }catch(error){
-      throw new Error(`Failed to save content: ${error}`)
-    }
+      lastTimeout = setTimeout(async ()=>{
+          // Remove leading slash from docId if present to avoid double slashes
+          const cleanDocId = docId.startsWith('/') ? docId.slice(1) : docId
 
-    // Invalidate cache after successful save
-    pageLoader.invalidateCache(docId)
-    apiReferenceLoader.invalidateCache(docId)
+          const url = '/content/api/v1/filesystem/entry'
+          // Detect content type based on file extension or content format
+          const isMdxFile = cleanDocId.endsWith('.mdx')
+          const isJsonContent = content.trim().startsWith('{') || content.trim().startsWith('[')
+
+          let headers: Record<string, string>
+          let body: any
+
+          if (isMdxFile || !isJsonContent) {
+            // Send as plain text (MDX content)
+            headers = {
+              'Content-Type': 'text/plain; charset=utf-8',
+            }
+            body = {
+                path: cleanDocId,
+                type:'file',
+                content:mdxSerializer.serialize(JSON.parse(content) as any)
+            }
+
+          } else {
+            // Send as JSON (legacy format or config)
+            headers = {
+              'Content-Type': 'application/json',
+            }
+            body = {
+                path: cleanDocId,
+                type:'file',
+                content:content
+               }
+          }
+          try{
+              const handleClosing = (event:any) => {
+                event.preventDefault();
+                event.returnValue = "";
+              }
+              window.addEventListener("beforeunload",handleClosing );
+              await axiosInstance.post(url, body, { headers })
+              window.removeEventListener("beforeunload",handleClosing)
+              then()
+          }catch(error){
+            reject(new Error(`Failed to save content: ${error}`))
+            throw new Error(`Failed to save content: ${error}`)
+          }
+          // Invalidate cache after successful save
+          pageLoader.invalidateCache(docId)
+          apiReferenceLoader.invalidateCache(docId)
+      },600)
+    })
   }
 
 
@@ -97,7 +117,6 @@ export class ContentService {
     // Reload config after successful save to invalidate cache
     await configLoader.reloadConfig()
   }
-
   /**
    * Rename a file on the backend
    */

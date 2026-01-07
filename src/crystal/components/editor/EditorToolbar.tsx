@@ -44,7 +44,7 @@ const EditorToolbarComponent = forwardRef<EditorToolbarRef, EditorToolbarProps>(
     if (!editor) return
 
     const updateTextType = () => {
-      setCurrentTextType(getCurrentTextType())
+     setCurrentTextType(getCurrentTextType())
     }
 
     editor.on('selectionUpdate', updateTextType)
@@ -268,32 +268,24 @@ const EditorToolbarComponent = forwardRef<EditorToolbarRef, EditorToolbarProps>(
     }
 
     const { from, to } = editor.state.selection
-    const selectedText = editor.state.doc.textBetween(from, to)
     const isLinkActive = editor.isActive('link')
 
     if (linkTitle && linkTitle.trim() !== '') {
       // User provided a title
-      if (isLinkActive || selectedText !== '') {
         // Updating existing link or has selection - replace text and set link
         editor
           .chain()
           .focus()
-          .deleteRange({ from, to })
+          .extendMarkRange('link')
           .insertContent(`<a href="${linkUrl}">${linkTitle}</a>`)
           .run()
-      } else {
-        // No selection - insert new link with title
-        editor.chain().focus().insertContent(`<a href="${linkUrl}">${linkTitle}</a>`).run()
-      }
-    } else {
+  } else if(isLinkActive||from!==to) {
       // No title provided
-      if (selectedText !== '') {
-        // Has selection - just add/update link to existing text
-        editor.chain().focus().setLink({ href: linkUrl }).run()
-      } else {
-        // No selection - insert URL as both text and link
-        editor.chain().focus().insertContent(`<a href="${linkUrl}">${linkUrl}</a>`).run()
-      }
+        editor.chain()
+        .focus()
+        .extendMarkRange('link')
+        .setLink({ href: linkUrl })
+        .run()
     }
 
     setShowLinkModal(false)

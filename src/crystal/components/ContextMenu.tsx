@@ -9,6 +9,8 @@ export interface ContextMenuProps{
 
 // Context Menu - Floating toolbar style
 const ContextMenu = ({ menuPosition, onOptionSelect,theme,closeFunc }:ContextMenuProps) => {
+
+
   const ref = useRef<HTMLDivElement>(null);
   const isDark = theme === 'dark';
 
@@ -141,6 +143,19 @@ const TextSelectionContextMenu = ({theme,children,onAiChat,onAiUpgrade}:TextSele
   const [menuPosition, setMenuPosition] = useState<{x:number,y:number}|null>(null);
   const [selectedText, setSelectedText] = useState('');
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const viteMode = import.meta.env.VITE_MODE || 'production'
+  const isProductionMode = viteMode === 'production'
+
+  if(isProductionMode){
+    return (
+      <div>
+        {children}
+      </div>
+    )
+  }
+
+
 
   // Check if the selection is within the page content area
   const isSelectionInContentArea = (selection: Selection | null): boolean => {

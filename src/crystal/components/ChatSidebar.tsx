@@ -8,6 +8,7 @@ import { CreatePageModal } from './CreatePageModal'
 import { CreateVersionModal } from './CreateVersionModal'
 import { CreateTabModal } from './CreateTabModal'
 import { toolExecutor } from '../../services/toolExecutorService'
+import { useLocation } from 'react-router-dom';
 
 interface PendingEdit {
   originalText: string
@@ -83,6 +84,9 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
     tab_name: string
     parent_version: string
   } | null>(null)
+
+  const location = useLocation();
+
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
@@ -260,7 +264,7 @@ const handleSendMessage = async () => {
 
   aiStreamService.editWithAI(
     question,
-    contexts.filter(c=>c.type!=="intention"),
+    [...contexts.filter(c=>c.type!=="intention"),{fileName:location.pathname,type:"file",id:"current_file"}],
     chatResume,
     todoList,
     result,
@@ -621,6 +625,7 @@ const handleSendMessage = async () => {
     const uiCallbacks = {
       currentTodoList: todoList,
       onUpdateContext: (newContext: ChatContext) => {
+        if(newContext.fileName?.startsWith(location.pathname)&&contexts.find(c=>c.fileName == newContext.fileName))return
         onUpdateContext([...contexts, newContext]);
       }
     };
