@@ -6,6 +6,7 @@ import { apiReferenceLoader } from '../../services/apiReferenceLoader'
 import { openApiLoader } from '../../services/openApiLoader'
 import { isApiReferencePath } from '../../utils/apiReferenceUtils'
 import { ApiReference } from './ApiReference'
+import { ErrorBoundary } from './ErrorBoundary'
 import type { ApiReferenceProps } from '../../types/ApiReference'
 
 interface PageViewerProps {
@@ -140,7 +141,9 @@ export const PageViewer: React.FC<PageViewerProps> = ({ pagePath, theme, isDevMo
         transition: 'opacity 0.3s ease-in-out',
         minHeight: '400px'
       }}>
-        <ApiReference {...apiReferenceData} theme={theme} />
+        <ErrorBoundary>
+          <ApiReference {...apiReferenceData} theme={theme} />
+        </ErrorBoundary>
       </div>
     )
   }
@@ -149,6 +152,75 @@ export const PageViewer: React.FC<PageViewerProps> = ({ pagePath, theme, isDevMo
     return (
       <div style={{ padding: '20px', color: '#6b7280' }}>
         <p>Select a page from the sidebar to view its content.</p>
+      </div>
+    )
+  }
+
+  // Show parse error banner if MDX parsing failed
+  if (pageData.parseError) {
+    return (
+      <div style={{
+        opacity: isVisible ? 1 : 0,
+        transition: 'opacity 0.3s ease-in-out',
+        minHeight: '400px'
+      }}>
+        <div
+          style={{
+            padding: '24px',
+            margin: '0 0 16px 0',
+            backgroundColor: theme === 'dark' ? '#451a1a' : '#fef2f2',
+            border: `1px solid ${theme === 'dark' ? '#7f1d1d' : '#fecaca'}`,
+            borderRadius: '8px',
+            color: theme === 'dark' ? '#fca5a5' : '#991b1b'
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              style={{ flexShrink: 0 }}
+            >
+              <path
+                fillRule="evenodd"
+                clipRule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                fill={theme === 'dark' ? '#f87171' : '#dc2626'}
+              />
+            </svg>
+            <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 600 }}>
+              MDX Parsing Error
+            </h3>
+          </div>
+
+          <p style={{ margin: '0 0 12px 0', fontSize: '14px', lineHeight: 1.5 }}>
+            There was an error parsing this page. The MDX content contains syntax errors.
+            Please fix the errors in the source file to view and edit this page.
+          </p>
+
+          <pre
+            style={{
+              margin: 0,
+              padding: '12px',
+              backgroundColor: theme === 'dark' ? '#1f2937' : '#1f2937',
+              color: '#f3f4f6',
+              borderRadius: '4px',
+              fontSize: '13px',
+              overflow: 'auto',
+              maxHeight: '200px',
+              whiteSpace: 'pre-wrap',
+              wordBreak: 'break-word'
+            }}
+          >
+            {pageData.parseError}
+          </pre>
+
+          <p style={{ margin: '12px 0 0 0', fontSize: '13px', opacity: 0.8 }}>
+            Common issues: unclosed tags, missing closing brackets, or invalid JSX syntax.
+          </p>
+        </div>
       </div>
     )
   }
@@ -177,20 +249,22 @@ export const PageViewer: React.FC<PageViewerProps> = ({ pagePath, theme, isDevMo
         transition: 'opacity 0.3s ease-in-out',
         minHeight: '400px'
       }}>
-        <PageRenderer
-          pageData={editablePageData}
-          theme={theme}
-          isDevMode={true}
-          allowUpload={allowUpload}
-          onSave={async (pageId, updatedData) => {
-            // Serialize TipTap content to MDX format
-            const tiptapDoc = isTiptapDoc
-              ? updatedData.content  // Direct Tiptap doc
-              : { type: 'doc', content: updatedData.content?.content || [] } // Wrap in doc
-            // Save as MDX file
-            await ContentService.saveContent(pageId, JSON.stringify(tiptapDoc) as any)
-          }}
-        />
+        <ErrorBoundary>
+          <PageRenderer
+            pageData={editablePageData}
+            theme={theme}
+            isDevMode={true}
+            allowUpload={allowUpload}
+            onSave={async (pageId, updatedData) => {
+              // Serialize TipTap content to MDX format
+              const tiptapDoc = isTiptapDoc
+                ? updatedData.content  // Direct Tiptap doc
+                : { type: 'doc', content: updatedData.content?.content || [] } // Wrap in doc
+              // Save as MDX file
+              await ContentService.saveContent(pageId, JSON.stringify(tiptapDoc) as any)
+            }}
+          />
+        </ErrorBoundary>
       </div>
     )
   }
@@ -215,15 +289,17 @@ export const PageViewer: React.FC<PageViewerProps> = ({ pagePath, theme, isDevMo
       transition: 'opacity 0.3s ease-in-out',
       minHeight: '400px'
     }}>
-      <PageRenderer
-        pageData={previewPageData as any}
-        theme={theme}
-        isDevMode={false}
-        allowUpload={allowUpload}
-        onSave={async () => {
-          // No-op in preview mode
-        }}
-      />
+      <ErrorBoundary>
+        <PageRenderer
+          pageData={previewPageData as any}
+          theme={theme}
+          isDevMode={false}
+          allowUpload={allowUpload}
+          onSave={async () => {
+            // No-op in preview mode
+          }}
+        />
+      </ErrorBoundary>
     </div>
   )
 }

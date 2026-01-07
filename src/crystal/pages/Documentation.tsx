@@ -38,7 +38,7 @@ function Documentation() {
   const [isDevMode, setIsDevMode] = useState<boolean>(!isProductionMode) // Enabled by default in dev/preview, disabled in production
   const [isSettingsSidebarOpen, setIsSettingsSidebarOpen] = useState<boolean>(false)
   const [isChatSidebarOpen, setIsChatSidebarOpen] = useState<boolean>(false)
-  const [error, _setError] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
   const [currentVersion, setCurrentVersion] = useState<string>('')
   const [currentTab, setCurrentTab] = useState<string>('')
   const [tabs, setTabs] = useState<Tab[]>([])
@@ -98,6 +98,18 @@ function Documentation() {
         setBackgroundColor(configLoader.getBackgroundColor(theme))
         setAISearchConfig(configLoader.getAISearchConfig())
         setVersions(configLoader.getVersions())
+
+        // Check if navigation is empty
+        const navigation = configLoader.getNavigation()
+        const hasVersions = navigation?.versions && navigation.versions.length > 0
+        const hasTabs = navigation?.tabs && navigation.tabs.length > 0
+        const hasItems = navigation?.items && navigation.items.length > 0
+
+        if (!navigation || (!hasVersions && !hasTabs && !hasItems)) {
+          setError('Navigation configuration is empty. Please add navigation items to your gitdocai.config.json file.')
+          setIsContentAccessible(true) // Allow rendering error state
+          return
+        }
 
         // Initialize navigation state
         const navState = navigationService.initialize()
@@ -244,7 +256,8 @@ function Documentation() {
 
   // Show loading until config is loaded AND content access is verified
   // This prevents the layout from flashing before a 401 redirect to login
-  if (!isConfigLoaded || !isContentAccessible) {
+  // Don't show loading if there's an error - let the error state render
+  if (!isConfigLoaded || (!isContentAccessible && !error)) {
     return (
       <div style={{
         display: 'flex',

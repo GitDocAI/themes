@@ -20,6 +20,7 @@ export interface Block {
 export interface PageData {
   blocks?: Block[] // Legacy format
   content?: any // TipTap JSON format
+  parseError?: string // Error message if MDX parsing failed
 }
 
 class PageLoader {
@@ -54,10 +55,11 @@ class PageLoader {
       const mdxContent =  response.data.content
 
       // Parse MDX to TipTap JSON
-      const tiptapContent = await mdxParser.parse(mdxContent)
+      const parseResult = await mdxParser.parse(mdxContent)
 
       const pageData: PageData = {
-        content: tiptapContent
+        content: parseResult.doc,
+        parseError: parseResult.parseError
       }
 
       // Store in memory cache

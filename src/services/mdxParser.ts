@@ -34,11 +34,17 @@ interface TipTapNode {
   marks?: Array<{ type: string; attrs?: Record<string, any> }>
 }
 
+export interface ParseResult {
+  doc: any
+  parseError?: string
+}
+
 class MDXParserService {
   /**
    * Parse MDX content to TipTap JSON
+   * Returns ParseResult with doc and optional parseError
    */
-  async parse(mdxContent: string): Promise<any> {
+  async parse(mdxContent: string): Promise<ParseResult> {
     try {
       // Parse MDX to AST
       const processor = unified()
@@ -53,12 +59,24 @@ class MDXParserService {
       const tiptapContent = this.convertToTipTap(result as MdxNode)
 
       return {
-        type: 'doc',
-        content: tiptapContent
+        doc: {
+          type: 'doc',
+          content: tiptapContent
+        }
       }
     } catch (error) {
       console.error('[MDXParser] Error parsing MDX:', error)
-      throw error
+
+      // Return empty doc with error message - don't modify original content
+      const errorMessage = error instanceof Error ? error.message : 'Unknown parsing error'
+
+      return {
+        doc: {
+          type: 'doc',
+          content: []
+        },
+        parseError: errorMessage
+      }
     }
   }
 
