@@ -1,0 +1,102 @@
+#root {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* Remove orange focus outline from interactive elements */
+button:focus,
+button:focus-visible,
+a:focus,
+a:focus-visible,
+input:focus,
+input:focus-visible,
+select:focus,
+select:focus-visible,
+textarea:focus,
+textarea:focus-visible,
+[tabindex]:focus,
+[tabindex]:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* PrimeReact specific focus overrides */
+.p-component:focus,
+.p-inputtext:focus,
+.p-button:focus,
+.p-dropdown:focus,
+.p-checkbox:focus,
+.p-radiobutton:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Text selection styles */
+::selection {
+  background-color: #3b82f6;
+  color: #ffffff;
+}
+
+::-moz-selection {
+  background-color: #3b82f6;
+  color: #ffffff;
+}
+
+/* Dark mode selection - ensure text is visible */
+[data-theme="dark"] ::selection {
+  background-color: #3b82f6;
+  color: #ffffff;
+}
+
+[data-theme="dark"] ::-moz-selection {
+  background-color: #3b82f6;
+  color: #ffffff;
+}
+
+/* Light mode selection */
+[data-theme="light"] ::selection {
+  background-color: #3b82f6;
+  color: #ffffff;
+}
+
+[data-theme="light"] ::-moz-selection {
+  background-color: #3b82f6;
+  color: #ffffff;
+}
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
+}

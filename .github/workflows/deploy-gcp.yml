@@ -15,8 +15,6 @@ jobs:
       gcp_project: ${{ steps.set-env.outputs.gcp_project }}
       workload_identity_provider: ${{ steps.set-env.outputs.workload_identity_provider }}
       service_account: ${{ steps.set-env.outputs.service_account }}
-      vpc_connector: ${{ steps.set-env.outputs.vpc_connector }}
-      gcp_gcs_bucket_name: ${{ steps.set-env.outputs.gcp_gcs_bucket_name }}
       region: ${{ steps.set-env.outputs.region }}
       backend_url: ${{ steps.set-env.outputs.backend_url }}
     steps:
@@ -32,18 +30,14 @@ jobs:
             PROJECT="${{ vars.GCP_PROJECT_NONPROD }}"
             WI_PROVIDER="${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER_NONPROD }}"
             SA="${{ vars.GCP_SERVICE_ACCOUNT_NONPROD }}"
-            VPC_CONNECTOR="${{ vars.GCP_VPC_CONNECTOR_NONPROD }}"
-            GCP_GCS_BUCKET_NAME="${{ vars.GCP_GCS_BUCKET_NAME_NONPROD }}"
-            BACKEND_URL="${{ vars.BACKEND_URL_NONPROD }}/api"
+            BACKEND_URL="${{ vars.BACKEND_URL_NONPROD }}"
             echo "Deploying to DEV environment"
           elif ${{ github.event_name == 'release' }}; then
             ENV="prod"
             PROJECT="${{ vars.GCP_PROJECT_PROD }}"
             WI_PROVIDER="${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER_PROD }}"
             SA="${{ vars.GCP_SERVICE_ACCOUNT_PROD }}"
-            VPC_CONNECTOR="${{ vars.GCP_VPC_CONNECTOR_PROD }}"
-            GCP_GCS_BUCKET_NAME="${{ vars.GCP_GCS_BUCKET_NAME_PROD }}"
-            BACKEND_URL="${{ vars.BACKEND_URL_PROD }}/api"
+            BACKEND_URL="${{ vars.BACKEND_URL_PROD }}"
             echo "Deploying to PROD environment"
           else
             echo "No environment determined"
@@ -54,8 +48,6 @@ jobs:
           echo "gcp_project=$PROJECT" >> $GITHUB_OUTPUT
           echo "workload_identity_provider=$WI_PROVIDER" >> $GITHUB_OUTPUT
           echo "service_account=$SA" >> $GITHUB_OUTPUT
-          echo "vpc_connector=$VPC_CONNECTOR" >> $GITHUB_OUTPUT
-          echo "gcp_gcs_bucket_name=$GCP_GCS_BUCKET_NAME" >> $GITHUB_OUTPUT
           echo "region=${{ vars.GCP_REGION }}" >> $GITHUB_OUTPUT
           echo "backend_url=$BACKEND_URL" >> $GITHUB_OUTPUT
 
@@ -70,8 +62,8 @@ jobs:
       gcp_region: ${{ needs.setup.outputs.region }}
       workload_identity_provider: ${{ needs.setup.outputs.workload_identity_provider }}
       service_account: ${{ needs.setup.outputs.service_account }}
-      working_directory: crystal
       vite_mode: production
+      vite_backend_url: ${{ needs.setup.outputs.backend_url }}/api/v1/production/docs
 
   build-visual-editor:
     name: Build Visual Editor
@@ -84,9 +76,8 @@ jobs:
       gcp_region: ${{ needs.setup.outputs.region }}
       workload_identity_provider: ${{ needs.setup.outputs.workload_identity_provider }}
       service_account: ${{ needs.setup.outputs.service_account }}
-      working_directory: crystal
-      vite_mode: dev
-      vite_backend_url: ${{ needs.setup.outputs.backend_url }}
+      vite_mode: visual-editor
+      vite_backend_url: ${{ needs.setup.outputs.backend_url }}/api/v1/visual-editor/docs
 
   deploy-docsite-live:
     name: Deploy Docsite Live to Cloud Run
@@ -99,8 +90,6 @@ jobs:
       region: ${{ needs.setup.outputs.region }}
       workload_identity_provider: ${{ needs.setup.outputs.workload_identity_provider }}
       service_account: ${{ needs.setup.outputs.service_account }}
-      vpc_connector: ${{ needs.setup.outputs.vpc_connector }}
-      gcp_gcs_bucket_name: ${{ needs.setup.outputs.gcp_gcs_bucket_name }}
 
   deploy-visual-editor:
     name: Deploy Visual Editor to Cloud Run
@@ -113,5 +102,3 @@ jobs:
       region: ${{ needs.setup.outputs.region }}
       workload_identity_provider: ${{ needs.setup.outputs.workload_identity_provider }}
       service_account: ${{ needs.setup.outputs.service_account }}
-      vpc_connector: ${{ needs.setup.outputs.vpc_connector }}
-      gcp_gcs_bucket_name: ${{ needs.setup.outputs.gcp_gcs_bucket_name }}

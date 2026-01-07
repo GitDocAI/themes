@@ -27,14 +27,6 @@ on:
         required: true
         type: string
         description: 'Service Account'
-      vpc_connector:
-        required: true
-        type: string
-        description: 'VPC Connector'
-      gcp_gcs_bucket_name:
-        required: true
-        type: string
-        description: 'GCS Bucket Name'
     outputs:
       service_url:
         description: 'URL of the deployed service'
@@ -90,12 +82,11 @@ jobs:
         env:
           ENV: ${{ inputs.env }}
           SERVICE_NAME: ${{ inputs.service_name }}
-          GCP_VPC_CONNECTOR: ${{ inputs.vpc_connector }}
           GCP_SERVICE_ACCOUNT: ${{ inputs.service_account }}
-          GCP_GCS_BUCKET_NAME: ${{ inputs.gcp_gcs_bucket_name }}
           GCP_PROJECT: ${{ inputs.gcp_project }}
           REGION: ${{ inputs.region }}
           CURRENT_MIN: ${{ steps.get-current-config.outputs.current_min_instances }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
         run: |
           # Determine image name (core-ai services share the same image)
           if echo "$SERVICE_NAME" | grep -qE "^core-ai-(search|docgen|assistant)$"; then
@@ -113,9 +104,8 @@ jobs:
 
           # Replace dynamic placeholders
           sed -i "s|{{ IMAGE }}|$IMAGE|g" /tmp/${SERVICE_NAME}-config.yaml
-          sed -i "s|{{ GCP_VPC_CONNECTOR }}|$GCP_VPC_CONNECTOR|g" /tmp/${SERVICE_NAME}-config.yaml
           sed -i "s|{{ GCP_SERVICE_ACCOUNT }}|$GCP_SERVICE_ACCOUNT|g" /tmp/${SERVICE_NAME}-config.yaml
-          sed -i "s|{{ GCP_GCS_BUCKET_NAME }}|$GCP_GCS_BUCKET_NAME|g" /tmp/${SERVICE_NAME}-config.yaml
+          sed -i "s|{{ DEPLOYMENT_ID }}|${GITHUB_RUN_ID}|g" /tmp/${SERVICE_NAME}-config.yaml
 
           # Preserve current minInstances for orchestrated services (docgen/assistant/search)
           # This prevents losing scaled replicas during deployment

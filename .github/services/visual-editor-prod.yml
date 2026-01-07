@@ -1,16 +1,16 @@
-# Cloud Run service configuration for DocSite Live - DEV environment
+# Cloud Run service configuration for Visual Editor - PROD environment
 apiVersion: serving.knative.dev/v1
 kind: Service
 metadata:
-  name: docsite-live-dev
+  name: visual-editor-prod
   annotations:
-    run.googleapis.com/ingress: internal-and-cloud-load-balancing
+    run.googleapis.com/ingress: all
     run.googleapis.com/launch-stage: BETA
 spec:
   template:
     metadata:
       annotations:
-        autoscaling.knative.dev/minScale: "0"
+        autoscaling.knative.dev/minScale: "1"
         autoscaling.knative.dev/maxScale: "10"
         run.googleapis.com/execution-environment: gen2
     spec:
