@@ -699,6 +699,7 @@ class MDXParserService {
             type: 'accordionTab',
             attrs: {
               header: tabAttrs.title || 'Accordion Item',
+              icon:tabAttrs.icon,
               disabled: false,
               isActive: false
             },

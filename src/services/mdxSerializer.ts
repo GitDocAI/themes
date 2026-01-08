@@ -508,7 +508,8 @@ class MDXSerializerService {
     for (const tab of content) {
       if (tab.type === 'accordionTab') {
         const header = tab.attrs?.header || 'Accordion Item'
-        lines.push(`  <AccordionTab title="${this.escapeAttr(header)}">`)
+        const icon = tab.attrs?.icon?`icon="${tab.attrs.icon}"`:''
+        lines.push(`  <AccordionTab title="${this.escapeAttr(header)}" ${icon}>`)
         lines.push('')
 
         const tabContent = tab.content || []
