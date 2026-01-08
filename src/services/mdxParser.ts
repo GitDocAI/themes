@@ -41,18 +41,52 @@ export interface ParseResult {
 
 class MDXParserService {
   /**
+   * Pre-process MDX content to handle problematic patterns
+   * that could cause parsing errors
+   */
+  private preprocessContent(content: string): string {
+    const lines = content.split('\n')
+    const processed: string[] = []
+
+    for (let i = 0; i < lines.length; i++) {
+      let line = lines[i]
+
+      // If line is ONLY backslashes (with optional whitespace), skip it entirely
+      // This handles orphan backslash lines that break MDX parsing
+      if (/^\s*\\+\s*$/.test(line)) {
+        continue
+      }
+
+      // Remove trailing backslashes that are used as "soft line breaks"
+      // These cause issues in MDX when followed by certain content (headers, components, etc.)
+      // Example: "text\" followed by "# Heading" breaks MDX parsing
+      if (/\\+\s*$/.test(line)) {
+        line = line.replace(/\\+\s*$/, '')
+      }
+
+      processed.push(line)
+    }
+
+    return processed.join('\n')
+  }
+
+  /**
    * Parse MDX content to TipTap JSON
    * Returns ParseResult with doc and optional parseError
    */
   async parse(mdxContent: string): Promise<ParseResult> {
     try {
+      // Pre-process content to handle problematic patterns
+      const processedContent = this.preprocessContent(mdxContent)
+
       // Parse MDX to AST
       const processor = unified()
         .use(remarkParse)
         .use(remarkGfm)
         .use(remarkMdx)
 
-      const ast = processor.parse(mdxContent)
+      const ast = processor.parse(processedContent)
+
       const result = await processor.run(ast)
 
       // Convert AST to TipTap JSON
@@ -1230,7 +1264,8 @@ class MDXParserService {
           if (node.value) {
             const lines = node.value.split('\n')
             lines.forEach((line, index) => {
-              if (line || index === 0) {
+              // Only create text nodes with actual content (TipTap doesn't allow empty text nodes)
+              if (line) {
                 result.push({
                   type: 'text',
                   text: line,
@@ -1351,7 +1386,13 @@ class MDXParserService {
       }
     }
 
-    return processed
+    // Final safety filter: remove any empty text nodes (TipTap doesn't allow them)
+    return processed.filter(node => {
+      if (node.type === 'text') {
+        return node.text && node.text.length > 0
+      }
+      return true
+    })
   }
 }
 
