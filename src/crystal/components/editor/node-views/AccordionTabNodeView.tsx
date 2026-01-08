@@ -1,6 +1,43 @@
 import { NodeViewWrapper, NodeViewContent } from '@tiptap/react'
 import type { NodeViewProps } from '@tiptap/react'
-import { useState, useEffect, useTransition } from 'react'
+import { useState, useEffect, useTransition, useRef } from 'react'
+
+import * as solidIcons from '@heroicons/react/24/solid'
+import * as outlineIcons from '@heroicons/react/24/outline'
+import { IconPicker } from '../../common/IconPicker'
+import { configLoader } from '../../../../services/configLoader'
+
+// Helper to render icons from different libraries
+const IconRenderer = ({ iconKey, ...props }: { iconKey: string;[key: string]: any }) => {
+  if (!iconKey) return null
+
+  if (iconKey.startsWith('pi ')) {
+    return <i className={iconKey} {...props}></i>
+  }
+  if (iconKey.startsWith('fa ')) {
+    return <i className={iconKey} {...props}></i>
+  }
+  if (iconKey.startsWith('mi-')) {
+    const iconName = iconKey.substring(3)
+    return <span className="material-icons" {...props}>{iconName}</span>
+  }
+  if (iconKey.startsWith('hi-')) {
+    const keyParts = iconKey.substring(3).split('-')
+    const type = keyParts.pop()
+    const name = keyParts.join('-')
+
+    const componentName = name.charAt(0).toUpperCase() + name.slice(1) + 'Icon'
+
+    const iconLib = type === 'solid' ? solidIcons : outlineIcons
+    const IconComponent = (iconLib as any)[componentName]
+
+    if (IconComponent) {
+      return <IconComponent {...props} />
+    }
+  }
+  return <i className={iconKey} {...props}></i> // Fallback for old format
+}
+
 
 export const AccordionTabNodeView = ({ node, updateAttributes, editor, getPos }: NodeViewProps) => {
   const [_, startTransition] = useTransition()
@@ -8,6 +45,39 @@ export const AccordionTabNodeView = ({ node, updateAttributes, editor, getPos }:
   const [editingHeader, setEditingHeader] = useState(false)
   const [headerValue, setHeaderValue] = useState(node.attrs.header || 'Tab')
   const [theme, setTheme] = useState<'light' | 'dark'>('dark')
+  const [icon, setIcon] = useState(node.attrs.icon || '')
+  const [showInlineIconPicker, setShowInlineIconPicker] = useState(false)
+  const [iconPickerPosition, setIconPickerPosition] = useState({ top: 0, left: 0 })
+  const iconButtonRef = useRef<HTMLDivElement>(null)
+  const [iconColor, setIconColor] = useState('#3b82f6')
+
+
+  const handleRemoveIcon = () => {
+    setIcon('')
+    startTransition(() => {
+      updateAttributes({ icon: '' })
+    })
+  }
+
+
+  const handleInlineIconSelect = (selectedIcon: string) => {
+    setIcon(selectedIcon)
+    setShowInlineIconPicker(false)
+    startTransition(() => {
+      updateAttributes({ icon: selectedIcon })
+    })
+  }
+
+  const openInlineIconPicker = () => {
+    if (iconButtonRef.current) {
+      const rect = iconButtonRef.current.getBoundingClientRect()
+      setIconPickerPosition({
+        top: rect.bottom + window.scrollY + 8,
+        left: rect.left + window.scrollX,
+      })
+    }
+    setShowInlineIconPicker(true)
+  }
 
   // Detect theme
   useEffect(() => {
@@ -25,6 +95,9 @@ export const AccordionTabNodeView = ({ node, updateAttributes, editor, getPos }:
       }
 
       setTheme(currentTheme)
+
+      const primaryColor = configLoader.getPrimaryColor(currentTheme)
+      setIconColor(primaryColor)
     }
 
     detectTheme()
@@ -155,6 +228,62 @@ export const AccordionTabNodeView = ({ node, updateAttributes, editor, getPos }:
           borderBottom: isActive ? `1px solid ${theme === 'light' ? '#e5e7eb' : '#374151'}` : 'none',
         }}
       >
+
+
+      <div ref={iconButtonRef} style={{ position: 'relative' }}>
+        {icon ? (
+          <div
+            onMouseDown={(e) => {
+              if (isEditable) {
+                e.stopPropagation()
+                e.preventDefault()
+                openInlineIconPicker()
+              }
+            }}
+            className='h-fit flex flex-col justify-center items-center'
+            style={{ cursor: isEditable ? 'pointer' : 'default', borderRadius: '8px' }}
+            title={isEditable ? 'Click to change icon' : ''}
+          >
+            <IconRenderer iconKey={icon} style={{ fontSize: '1.2rem', color: iconColor,  }} />
+          </div>
+        ) : isEditable ? (
+          <div
+            onMouseDown={(e) => {
+              e.stopPropagation()
+              e.preventDefault()
+              openInlineIconPicker()
+            }}
+            style={{
+              width: '2.5rem',
+              height: '2.5rem',
+              borderRadius: '8px',
+              border: `2px dashed ${theme === 'light' ? '#d1d5db' : '#4b5563'}`,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+            }}
+            title="Click to add icon"
+          >
+            <i className="pi pi-plus" style={{ fontSize: '1rem', color: theme === 'light' ? '#9ca3af' : '#6b7280' }} />
+          </div>
+        ) : null}
+      </div>
+
+      {showInlineIconPicker && isEditable && (
+        <IconPicker
+          selectedIcon={icon}
+          onSelectIcon={handleInlineIconSelect}
+          onRemoveIcon={handleRemoveIcon}
+          showPicker={showInlineIconPicker}
+          onClosePicker={() => setShowInlineIconPicker(false)}
+          pickerPosition={iconPickerPosition}
+          theme={theme}
+          iconColor={iconColor}
+        />
+      )}
+
+
         {editingHeader && isEditable ? (
           <input
             type="text"

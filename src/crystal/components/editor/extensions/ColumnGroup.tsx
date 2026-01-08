@@ -3,7 +3,7 @@ import { ReactNodeViewRenderer } from '@tiptap/react'
 import { ColumnGroupNodeView } from '../node-views/ColumnGroupNodeView'
 
 export const ColumnGroup = Node.create({
-  name: 'columnGroup',
+  name: 'columnsBlock',
   group: 'block',
   content: 'column{1,3}', // Must have 1-3 columns
   atom: false,

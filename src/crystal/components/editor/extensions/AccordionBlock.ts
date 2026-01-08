@@ -15,6 +15,9 @@ export const AccordionTab = Node.create({
       header: {
         default: 'Tab',
       },
+      icon:{
+        default:null
+      },
       disabled: {
         default: false,
       },
@@ -90,7 +93,7 @@ export const AccordionBlock = Node.create({
             content: [
               {
                 type: 'accordionTab',
-                attrs: { header: 'Tab 1', disabled: false, isActive: true },
+                attrs: { header: 'Tab 1',icon:null, disabled: false, isActive: true },
                 content: [
                   {
                     type: 'paragraph',
@@ -100,7 +103,7 @@ export const AccordionBlock = Node.create({
               },
               {
                 type: 'accordionTab',
-                attrs: { header: 'Tab 2', disabled: false, isActive: false },
+                attrs: { header: 'Tab 2',icon:'pi pi-pencil', disabled: false, isActive: false },
                 content: [
                   {
                     type: 'paragraph',

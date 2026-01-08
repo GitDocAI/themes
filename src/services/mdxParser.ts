@@ -165,7 +165,7 @@ class MDXParserService {
         return this.convertImage(node)
 
       case 'thematicBreak':
-        return { type: 'horizontalRule' }
+        return { type: 'horizontalRuleBlock' }
 
       case 'table':
         return this.convertMarkdownTable(node)
@@ -699,6 +699,7 @@ class MDXParserService {
             type: 'accordionTab',
             attrs: {
               header: tabAttrs.title || 'Accordion Item',
+              icon:tabAttrs.icon,
               disabled: false,
               isActive: false
             },

@@ -15,6 +15,7 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({ block, theme }) =>
   const textColor = theme === 'light' ? '#111827' : '#f9fafb'
   const secondaryTextColor = theme === 'light' ? '#374151' : '#d1d5db'
   const borderColor = theme === 'light' ? '#e5e7eb' : '#4b5563'
+
   const blockquoteBg = theme === 'light' ? '#f3f4f6' : '#1f2937'
 
   // Helper function to render markdown-style text (bold, italic)

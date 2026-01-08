@@ -54,7 +54,7 @@ class MDXSerializerService {
    */
   private needsBlankLineAfter(current: TipTapNode, next: TipTapNode): boolean {
     // No blank line before horizontal rule
-    if (next.type === 'horizontalRule') {
+    if (next.type === 'horizontalRuleBlock') {
       return false
     }
 
@@ -127,7 +127,7 @@ class MDXSerializerService {
       case 'codeBlock':
         return this.serializeCodeBlock(node)
 
-      case 'horizontalRule':
+      case 'horizontalRuleBlock':
         return '---'
 
       case 'imageBlock':
@@ -507,7 +507,8 @@ class MDXSerializerService {
     for (const tab of content) {
       if (tab.type === 'accordionTab') {
         const header = tab.attrs?.header || 'Accordion Item'
-        lines.push(`  <AccordionTab title="${this.escapeAttr(header)}">`)
+        const icon = tab.attrs?.icon?`icon="${tab.attrs.icon}"`:''
+        lines.push(`  <AccordionTab title="${this.escapeAttr(header)}" ${icon}>`)
         lines.push('')
 
         const tabContent = tab.content || []

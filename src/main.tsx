@@ -1,4 +1,6 @@
 import 'primeicons/primeicons.css'
+import 'font-awesome/css/font-awesome.min.css'
+import 'material-icons/iconfont/material-icons.css'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
