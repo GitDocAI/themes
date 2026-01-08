@@ -165,7 +165,7 @@ class MDXParserService {
         return this.convertImage(node)
 
       case 'thematicBreak':
-        return { type: 'horizontalRule' }
+        return { type: 'horizontalRuleBlock' }
 
       case 'table':
         return this.convertMarkdownTable(node)

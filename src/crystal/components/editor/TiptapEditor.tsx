@@ -37,6 +37,7 @@ import { TrailingParagraph } from './extensions/TrailingParagraph'
 // Import toolbar
 import { EditorToolbar } from './EditorToolbar'
 import type { EditorToolbarRef } from './EditorToolbar'
+import { HorizontalRuleBlock } from './extensions/HorizontalRuleBlock'
 
 interface TiptapEditorProps {
   content: any // Tiptap JSON format
@@ -54,6 +55,7 @@ export const TiptapEditor: React.FC<TiptapEditorProps> = ({ content, theme, onUp
     extensions: [
       StarterKit.configure({
         heading: false, // Disable default heading to use custom one
+        horizontalRule: false,
         dropcursor: {
           color: '#3b82f6',
           width: 2,
@@ -88,6 +90,7 @@ export const TiptapEditor: React.FC<TiptapEditorProps> = ({ content, theme, onUp
       ImageBlock.configure({
         allowUpload,
       }),
+      HorizontalRuleBlock,
       EndpointBlock,
       LabelBlock,
       CodeGroup,

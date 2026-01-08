@@ -541,7 +541,7 @@ const EditorToolbarComponent = forwardRef<EditorToolbarRef, EditorToolbarProps>(
 
       {/* Horizontal Rule */}
       <button
-        onClick={() => editor.chain().focus().setHorizontalRule().run()}
+        onClick={() => editor.chain().focus().insertContent({type:'horizontalRuleBlock'}).run()}
         style={buttonStyle()}
         title="Horizontal Rule"
         onMouseEnter={(e) => {
