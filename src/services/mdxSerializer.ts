@@ -54,7 +54,7 @@ class MDXSerializerService {
    */
   private needsBlankLineAfter(current: TipTapNode, next: TipTapNode): boolean {
     // No blank line before horizontal rule
-    if (next.type === 'horizontalRule') {
+    if (next.type === 'horizontalRuleBlock') {
       return false
     }
 
@@ -127,7 +127,7 @@ class MDXSerializerService {
       case 'codeBlock':
         return this.serializeCodeBlock(node)
 
-      case 'horizontalRule':
+      case 'horizontalRuleBlock':
         return '---'
 
       case 'imageBlock':
