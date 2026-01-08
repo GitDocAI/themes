@@ -17,7 +17,6 @@ interface IconPickerProps {
 
 // Helper to render icons from different libraries
 export const IconRenderer = ({ iconKey, ...props }: { iconKey: string;[key: string]: any }) => {
-  console.log(iconKey,' icono')
   if (!iconKey) return null
 
   if (iconKey.startsWith('pi ')) {

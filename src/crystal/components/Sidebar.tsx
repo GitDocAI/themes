@@ -148,9 +148,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
     }
   }, [isMobile, theme,updateTrigger])
 
-  useEffect(()=>{
-    console.log('asasas')
-  },[theme,updateTrigger])
 
   // Close tab dropdown when clicking outside
   useEffect(() => {
