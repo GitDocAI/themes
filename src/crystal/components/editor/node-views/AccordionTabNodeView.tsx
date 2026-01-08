@@ -32,6 +32,7 @@ const IconRenderer = ({ iconKey, ...props }: { iconKey: string;[key: string]: an
     const IconComponent = (iconLib as any)[componentName]
 
     if (IconComponent) {
+      console.log('founded', IconComponent)
       return <IconComponent {...props} />
     }
   }

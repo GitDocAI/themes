@@ -571,10 +571,10 @@ class MDXSerializerService {
    * Serialize Columns block
    */
   private serializeColumnsBlock(node: TipTapNode): string {
-    const cols = node.attrs?.columns || 2
+    const cols = node.attrs?.columnCount || 2
     const content = node.content || []
 
-    const lines: string[] = [`<Columns columns={${cols}}>`]
+    const lines: string[] = [`<Columns columnCount={${cols}}>`]
 
     for (const column of content) {
       if (column.type === 'column') {
