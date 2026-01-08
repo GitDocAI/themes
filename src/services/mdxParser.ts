@@ -658,7 +658,7 @@ class MDXParserService {
     }
 
     return {
-      type: 'columnGroup',
+      type: 'columnsBlock',
       attrs: {
         columnCount: columns.length
       },
