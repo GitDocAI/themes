@@ -1,6 +1,40 @@
 import { NodeViewWrapper, NodeViewContent } from '@tiptap/react'
 import type { NodeViewProps } from '@tiptap/react'
 import { useState, useEffect,  useRef } from 'react'
+import { IconPicker } from '../../common/IconPicker'
+import * as solidIcons from '@heroicons/react/24/solid'
+import * as outlineIcons from '@heroicons/react/24/outline'
+
+// Helper to render icons from different libraries (copied from IconPicker.tsx)
+const IconRenderer = ({ iconKey, ...props }: { iconKey: string;[key: string]: any }) => {
+  if (!iconKey) return null
+
+  if (iconKey.startsWith('pi ')) {
+    return <i className={iconKey} {...props}></i>
+  }
+  if (iconKey.startsWith('fa ')) {
+    return <i className={iconKey} {...props}></i>
+  }
+  if (iconKey.startsWith('mi-')) {
+    const iconName = iconKey.substring(3)
+    return <span className="material-icons" {...props}>{iconName}</span>
+  }
+  if (iconKey.startsWith('hi-')) {
+    const keyParts = iconKey.substring(3).split('-')
+    const type = keyParts.pop()
+    const name = keyParts.join('-').replace(/(?:^|-)\w/g, (c) => c.toUpperCase()).replace(/-/g, '')
+
+    const componentName = name + 'Icon'
+
+    const iconLib = type === 'solid' ? solidIcons : outlineIcons
+    const IconComponent = (iconLib as any)[componentName]
+
+    if (IconComponent) {
+      return <IconComponent {...props} />
+    }
+  }
+  return <i className={iconKey} {...props}></i> // Fallback for old format
+}
 
 export const TabsNodeView = ({ node, editor, getPos }: NodeViewProps) => {
   const [theme, setTheme] = useState<'light' | 'dark'>('dark')
@@ -8,8 +42,9 @@ export const TabsNodeView = ({ node, editor, getPos }: NodeViewProps) => {
   const contentRefs = useRef<Map<number, HTMLDivElement>>(new Map())
   const [editingTabIndex, setEditingTabIndex] = useState<number | null>(null)
   const [editingLabel, setEditingLabel] = useState<string>('')
-  const [showIconModal, setShowIconModal] = useState<boolean>(false)
-  const [iconModalIndex, setIconModalIndex] = useState<number | null>(null)
+  const [showIconPicker, setShowIconPicker] = useState<boolean>(false)
+  const [iconPickerIndex, setIconPickerIndex] = useState<number | null>(null)
+  const [iconPickerPosition, setIconPickerPosition] = useState({ top: 0, left: 0 });
   const inputRef = useRef<HTMLInputElement>(null)
 
   // Focus input when editing starts
@@ -185,31 +220,46 @@ export const TabsNodeView = ({ node, editor, getPos }: NodeViewProps) => {
     editor.commands.deleteRange({ from: currentPos, to: currentPos + tabNode.nodeSize })
   }
 
-  const handleOpenIconModal = (index: number) => {
-    setIconModalIndex(index)
-    setShowIconModal(true)
-  }
+  const openIconPicker = (index: number, target: EventTarget) => {
+    if (target instanceof HTMLElement) {
+      const rect = target.getBoundingClientRect();
+      setIconPickerPosition({ top: rect.bottom + window.scrollY + 5, left: rect.left + window.scrollX });
+      setIconPickerIndex(index);
+      setShowIconPicker(true);
+    }
+  };
 
-  const handleSelectIcon = (iconClass: string | null) => {
-    if (iconModalIndex === null || !getPos || !editor) return
+  const onSelectIcon = (iconKey: string) => {
+    if (iconPickerIndex === null) return;
+    updateTabIcon(iconPickerIndex, iconKey);
+    setShowIconPicker(false);
+    setIconPickerIndex(null);
+  };
+
+  const onRemoveIcon = () => {
+    if (iconPickerIndex === null) return;
+    updateTabIcon(iconPickerIndex, null);
+    setShowIconPicker(false);
+    setIconPickerIndex(null);
+  };
+
+  const updateTabIcon = (_index: number, icon: string | null) => {
+    if (iconPickerIndex === null || !getPos || !editor) return
     const pos = getPos()
     if (typeof pos !== 'number') return
 
     let currentPos = pos + 1
-    for (let i = 0; i < iconModalIndex; i++) {
+    for (let i = 0; i < iconPickerIndex; i++) {
       currentPos += node.content.child(i).nodeSize
     }
 
     editor.commands.command(({ tr }) => {
       tr.setNodeMarkup(currentPos, undefined, {
-        ...node.content.child(iconModalIndex).attrs,
-        icon: iconClass,
+        ...node.content.child(iconPickerIndex).attrs,
+        icon: icon,
       })
       return true
     })
-
-    setShowIconModal(false)
-    setIconModalIndex(null)
   }
 
   const handleAlignmentChange = (alignment: 'left' | 'center' | 'right') => {
@@ -236,42 +286,6 @@ export const TabsNodeView = ({ node, editor, getPos }: NodeViewProps) => {
       isActive: child.attrs.isActive || false,
     })
   })
-
-  // Common PrimeIcons for the modal
-  const commonIcons = [
-    { class: null, label: 'No Icon' },
-    { class: 'pi-home', label: 'Home' },
-    { class: 'pi-star', label: 'Star' },
-    { class: 'pi-heart', label: 'Heart' },
-    { class: 'pi-check', label: 'Check' },
-    { class: 'pi-times', label: 'Times' },
-    { class: 'pi-search', label: 'Search' },
-    { class: 'pi-user', label: 'User' },
-    { class: 'pi-cog', label: 'Settings' },
-    { class: 'pi-bell', label: 'Bell' },
-    { class: 'pi-calendar', label: 'Calendar' },
-    { class: 'pi-envelope', label: 'Envelope' },
-    { class: 'pi-folder', label: 'Folder' },
-    { class: 'pi-file', label: 'File' },
-    { class: 'pi-database', label: 'Database' },
-    { class: 'pi-chart-line', label: 'Chart' },
-    { class: 'pi-lock', label: 'Lock' },
-    { class: 'pi-unlock', label: 'Unlock' },
-    { class: 'pi-book', label: 'Book' },
-    { class: 'pi-bookmark', label: 'Bookmark' },
-    { class: 'pi-code', label: 'Code' },
-    { class: 'pi-cloud', label: 'Cloud' },
-    { class: 'pi-download', label: 'Download' },
-    { class: 'pi-upload', label: 'Upload' },
-    { class: 'pi-image', label: 'Image' },
-    { class: 'pi-pencil', label: 'Pencil' },
-    { class: 'pi-trash', label: 'Trash' },
-    { class: 'pi-tag', label: 'Tag' },
-    { class: 'pi-flag', label: 'Flag' },
-    { class: 'pi-info-circle', label: 'Info' },
-    { class: 'pi-exclamation-triangle', label: 'Warning' },
-    { class: 'pi-question-circle', label: 'Question' },
-  ]
 
   return (
     <NodeViewWrapper className="tabs-node-view-wrapper" data-type="tabs-block">
@@ -509,25 +523,28 @@ export const TabsNodeView = ({ node, editor, getPos }: NodeViewProps) => {
                   >
                     {/* Icon area - left of text */}
                     {isEditable && (
-                      <i
-                        className={tab.icon ? `pi ${tab.icon}` : 'pi pi-plus-circle'}
-                        style={{
-                          fontSize: '14px',
-                          cursor: 'pointer',
-                          opacity: tab.icon ? 1 : 0.5,
-                        }}
+                      <span
                         onClick={(e) => {
                           e.stopPropagation()
-                          handleOpenIconModal(index)
+                          openIconPicker(index, e.currentTarget)
                         }}
                         title={tab.icon ? 'Change icon' : 'Add icon'}
-                      ></i>
+                        style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '24px', height: '24px' }}
+                      >
+                        <IconRenderer
+                          iconKey={tab.icon || 'pi pi-image'}
+                          style={{
+                            fontSize: '14px',
+                            opacity: tab.icon ? 1 : 0.5,
+                            color: tab.isActive
+                              ? (theme === 'light' ? '#3b82f6' : '#60a5fa')
+                              : (theme === 'light' ? '#6b7280' : '#9ca3af'),
+                          }}
+                        />
+                      </span>
                     )}
                     {!isEditable && tab.icon && (
-                      <i
-                        className={`pi ${tab.icon}`}
-                        style={{ fontSize: '14px' }}
-                      ></i>
+                      <IconRenderer iconKey={tab.icon} style={{ fontSize: '14px' }} />
                     )}
                     {tab.label}
                   </button>
@@ -598,139 +615,17 @@ export const TabsNodeView = ({ node, editor, getPos }: NodeViewProps) => {
         </div>
       </div>
 
-      {/* Icon Selector Modal */}
-      {showIconModal && (
-        <div
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 9999,
-          }}
-          onClick={() => {
-            setShowIconModal(false)
-            setIconModalIndex(null)
-          }}
-        >
-          <div
-            style={{
-              backgroundColor: theme === 'light' ? '#ffffff' : '#1f2937',
-              borderRadius: '8px',
-              padding: '20px',
-              maxWidth: '500px',
-              maxHeight: '70vh',
-              overflow: 'auto',
-              boxShadow: '0 10px 25px rgba(0, 0, 0, 0.3)',
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h3
-              style={{
-                margin: '0 0 16px 0',
-                fontSize: '18px',
-                fontWeight: '600',
-                color: theme === 'light' ? '#1f2937' : '#f9fafb',
-              }}
-            >
-              Select Icon
-            </h3>
-
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(4, 1fr)',
-                gap: '8px',
-              }}
-            >
-              {commonIcons.map((icon) => (
-                <button
-                  key={icon.class || 'none'}
-                  onClick={() => handleSelectIcon(icon.class)}
-                  style={{
-                    padding: '12px',
-                    backgroundColor: theme === 'light' ? '#f9fafb' : '#111827',
-                    border: `1px solid ${theme === 'light' ? '#e5e7eb' : '#374151'}`,
-                    borderRadius: '6px',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    gap: '6px',
-                    transition: 'all 0.2s',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = theme === 'light' ? '#eff6ff' : '#1e3a8a'
-                    e.currentTarget.style.borderColor = theme === 'light' ? '#3b82f6' : '#60a5fa'
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = theme === 'light' ? '#f9fafb' : '#111827'
-                    e.currentTarget.style.borderColor = theme === 'light' ? '#e5e7eb' : '#374151'
-                  }}
-                >
-                  {icon.class ? (
-                    <i
-                      className={`pi ${icon.class}`}
-                      style={{
-                        fontSize: '20px',
-                        color: theme === 'light' ? '#3b82f6' : '#60a5fa',
-                      }}
-                    ></i>
-                  ) : (
-                    <div
-                      style={{
-                        width: '20px',
-                        height: '20px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: '20px',
-                        color: theme === 'light' ? '#9ca3af' : '#6b7280',
-                      }}
-                    >
-                      ×
-                    </div>
-                  )}
-                  <span
-                    style={{
-                      fontSize: '11px',
-                      color: theme === 'light' ? '#6b7280' : '#9ca3af',
-                      textAlign: 'center',
-                    }}
-                  >
-                    {icon.label}
-                  </span>
-                </button>
-              ))}
-            </div>
-
-            <button
-              onClick={() => {
-                setShowIconModal(false)
-                setIconModalIndex(null)
-              }}
-              style={{
-                marginTop: '16px',
-                width: '100%',
-                padding: '8px 16px',
-                backgroundColor: theme === 'light' ? '#f3f4f6' : '#374151',
-                color: theme === 'light' ? '#374151' : '#f3f4f6',
-                border: 'none',
-                borderRadius: '6px',
-                cursor: 'pointer',
-                fontSize: '14px',
-                fontWeight: '500',
-              }}
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
+      {showIconPicker && (
+          <IconPicker
+            selectedIcon={iconPickerIndex !== null ? tabs[iconPickerIndex]?.icon||'' : ''}
+            onSelectIcon={onSelectIcon}
+            onRemoveIcon={onRemoveIcon}
+            showPicker={showIconPicker}
+            onClosePicker={() => setShowIconPicker(false)}
+            pickerPosition={iconPickerPosition}
+            theme={theme}
+            iconColor={'#3b82f6'}
+          />
       )}
     </NodeViewWrapper>
   )
