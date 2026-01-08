@@ -17,9 +17,6 @@ export class ContentService {
    */
   static async saveContent(docId: string, content: string): Promise<void> {
     return new Promise( (then,reject)=>{
-
-      console.log(lastTimeout)
-
       if(lastTimeout!=-1){
         clearTimeout(lastTimeout)
       }
@@ -66,14 +63,13 @@ export class ContentService {
           window.addEventListener("beforeunload",handleClosing );
           try{
               await axiosInstance.post(url, body, { headers })
-              window.removeEventListener("beforeunload",handleClosing)
               then()
           }catch(error){
-            window.removeEventListener("beforeunload",handleClosing)
             reject(new Error(`Failed to save content: ${error}`))
             throw new Error(`Failed to save content: ${error}`)
           }
           // Invalidate cache after successful save
+          window.removeEventListener("beforeunload",handleClosing)
           pageLoader.invalidateCache(docId)
           apiReferenceLoader.invalidateCache(docId)
       },600)
