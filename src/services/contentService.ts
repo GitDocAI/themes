@@ -58,16 +58,18 @@ export class ContentService {
                 content:content
                }
           }
-          try{
-              const handleClosing = (event:any) => {
+
+         const handleClosing = (event:any) => {
                 event.preventDefault();
                 event.returnValue = "";
               }
-              window.addEventListener("beforeunload",handleClosing );
+          window.addEventListener("beforeunload",handleClosing );
+          try{
               await axiosInstance.post(url, body, { headers })
               window.removeEventListener("beforeunload",handleClosing)
               then()
           }catch(error){
+            window.removeEventListener("beforeunload",handleClosing)
             reject(new Error(`Failed to save content: ${error}`))
             throw new Error(`Failed to save content: ${error}`)
           }
