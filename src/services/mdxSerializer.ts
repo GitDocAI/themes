@@ -96,6 +96,7 @@ class MDXSerializerService {
    */
   private serializeNode(node: TipTapNode, options: SerializeOptions = {}): string {
 
+    console.log(node.type)
     switch (node.type) {
 
 
