@@ -640,7 +640,7 @@ class MDXParserService {
 
     // Ensure at least 1 column exists
     if (columns.length === 0) {
-      const defaultColumnCount = attrs.columns || 2
+      const defaultColumnCount = attrs.columnCount || 2
       for (let i = 0; i < defaultColumnCount; i++) {
         columns.push({
           type: 'column',
@@ -658,7 +658,7 @@ class MDXParserService {
     }
 
     return {
-      type: 'columnGroup',
+      type: 'columnsBlock',
       attrs: {
         columnCount: columns.length
       },

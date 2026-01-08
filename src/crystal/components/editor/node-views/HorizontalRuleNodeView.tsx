@@ -42,6 +42,7 @@ export const HorizontalRuleNodeView = ({ node, editor, getPos }: NodeViewProps) 
 
   const borderColor = theme !== 'light' ? '#e5e7eb' : '#4b5563'
 
+  const isEditable = editor.isEditable
   return (
     <NodeViewWrapper
       className="horizontal-rule-block-wrapper"
@@ -54,9 +55,10 @@ export const HorizontalRuleNodeView = ({ node, editor, getPos }: NodeViewProps) 
         <hr
           className={`w-full !border-t-[0.5px] border-b-0  opacity-40 !border-color-[${borderColor}] my-32`}
         />
-            <button
+        {
+          isEditable && <button
               onClick={handleDelete}
-              className='absolute -top-3 right-0 -translate-y-full'
+              className={`absolute -top-3 right-0 -translate-y-full transition-opacity duration-500  `}
               style={{
                 padding: '4px 12px',
                 backgroundColor: '#ef4444',
@@ -70,6 +72,8 @@ export const HorizontalRuleNodeView = ({ node, editor, getPos }: NodeViewProps) 
             >
               <i className="pi pi-trash" style={{ fontSize: '10px', marginRight: '4px' }}></i>
             </button>
+
+        }
           </div>
     </NodeViewWrapper>
   )

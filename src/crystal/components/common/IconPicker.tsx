@@ -16,7 +16,8 @@ interface IconPickerProps {
 }
 
 // Helper to render icons from different libraries
-const IconRenderer = ({ iconKey, ...props }: { iconKey: string;[key: string]: any }) => {
+export const IconRenderer = ({ iconKey, ...props }: { iconKey: string;[key: string]: any }) => {
+  console.log(iconKey,' icono')
   if (!iconKey) return null
 
   if (iconKey.startsWith('pi ')) {
@@ -33,9 +34,9 @@ const IconRenderer = ({ iconKey, ...props }: { iconKey: string;[key: string]: an
     const keyParts = iconKey.substring(3).split('-')
     const type = keyParts.pop()
     const name = keyParts.join('-')
-    
+
     const componentName = name.charAt(0).toUpperCase() + name.slice(1) + 'Icon'
-    
+
     const iconLib = type === 'solid' ? solidIcons : outlineIcons
     const IconComponent = (iconLib as any)[componentName]
 
