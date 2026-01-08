@@ -2,40 +2,8 @@ import { NodeViewWrapper, NodeViewContent } from '@tiptap/react'
 import type { NodeViewProps } from '@tiptap/react'
 import { useState, useEffect, useRef, useTransition } from 'react'
 import { configLoader } from '../../../../services/configLoader'
-import * as solidIcons from '@heroicons/react/24/solid'
-import * as outlineIcons from '@heroicons/react/24/outline'
-import { IconPicker } from '../../common/IconPicker'
+import { IconPicker,IconRenderer } from '../../common/IconPicker'
 
-// Helper to render icons from different libraries
-const IconRenderer = ({ iconKey, ...props }: { iconKey: string;[key: string]: any }) => {
-  if (!iconKey) return null
-
-  if (iconKey.startsWith('pi ')) {
-    return <i className={iconKey} {...props}></i>
-  }
-  if (iconKey.startsWith('fa ')) {
-    return <i className={iconKey} {...props}></i>
-  }
-  if (iconKey.startsWith('mi-')) {
-    const iconName = iconKey.substring(3)
-    return <span className="material-icons" {...props}>{iconName}</span>
-  }
-  if (iconKey.startsWith('hi-')) {
-    const keyParts = iconKey.substring(3).split('-')
-    const type = keyParts.pop()
-    const name = keyParts.join('-')
-    
-    const componentName = name.charAt(0).toUpperCase() + name.slice(1) + 'Icon'
-    
-    const iconLib = type === 'solid' ? solidIcons : outlineIcons
-    const IconComponent = (iconLib as any)[componentName]
-
-    if (IconComponent) {
-      return <IconComponent {...props} />
-    }
-  }
-  return <i className={iconKey} {...props}></i> // Fallback for old format
-}
 
 export const CardNodeView = ({ node, updateAttributes, editor, getPos }: NodeViewProps) => {
   const [_, startTransition] = useTransition()

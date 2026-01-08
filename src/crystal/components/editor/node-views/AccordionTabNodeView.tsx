@@ -2,42 +2,8 @@ import { NodeViewWrapper, NodeViewContent } from '@tiptap/react'
 import type { NodeViewProps } from '@tiptap/react'
 import { useState, useEffect, useTransition, useRef } from 'react'
 
-import * as solidIcons from '@heroicons/react/24/solid'
-import * as outlineIcons from '@heroicons/react/24/outline'
-import { IconPicker } from '../../common/IconPicker'
+import { IconPicker,IconRenderer } from '../../common/IconPicker'
 import { configLoader } from '../../../../services/configLoader'
-
-// Helper to render icons from different libraries
-const IconRenderer = ({ iconKey, ...props }: { iconKey: string;[key: string]: any }) => {
-  if (!iconKey) return null
-
-  if (iconKey.startsWith('pi ')) {
-    return <i className={iconKey} {...props}></i>
-  }
-  if (iconKey.startsWith('fa ')) {
-    return <i className={iconKey} {...props}></i>
-  }
-  if (iconKey.startsWith('mi-')) {
-    const iconName = iconKey.substring(3)
-    return <span className="material-icons" {...props}>{iconName}</span>
-  }
-  if (iconKey.startsWith('hi-')) {
-    const keyParts = iconKey.substring(3).split('-')
-    const type = keyParts.pop()
-    const name = keyParts.join('-')
-
-    const componentName = name.charAt(0).toUpperCase() + name.slice(1) + 'Icon'
-
-    const iconLib = type === 'solid' ? solidIcons : outlineIcons
-    const IconComponent = (iconLib as any)[componentName]
-
-    if (IconComponent) {
-      console.log('founded', IconComponent)
-      return <IconComponent {...props} />
-    }
-  }
-  return <i className={iconKey} {...props}></i> // Fallback for old format
-}
 
 
 export const AccordionTabNodeView = ({ node, updateAttributes, editor, getPos }: NodeViewProps) => {
@@ -245,7 +211,7 @@ export const AccordionTabNodeView = ({ node, updateAttributes, editor, getPos }:
             style={{ cursor: isEditable ? 'pointer' : 'default', borderRadius: '8px' }}
             title={isEditable ? 'Click to change icon' : ''}
           >
-            <IconRenderer iconKey={icon} style={{ fontSize: '1.2rem', color: iconColor,  }} />
+            <IconRenderer iconKey={icon} style={{ fontSize: '1.2rem', color: iconColor,width: '1.2rem',height: '1.2rem'}} />
           </div>
         ) : isEditable ? (
           <div

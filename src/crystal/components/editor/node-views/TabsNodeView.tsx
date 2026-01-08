@@ -1,40 +1,8 @@
 import { NodeViewWrapper, NodeViewContent } from '@tiptap/react'
 import type { NodeViewProps } from '@tiptap/react'
 import { useState, useEffect,  useRef } from 'react'
-import { IconPicker } from '../../common/IconPicker'
-import * as solidIcons from '@heroicons/react/24/solid'
-import * as outlineIcons from '@heroicons/react/24/outline'
+import { IconPicker,IconRenderer } from '../../common/IconPicker'
 
-// Helper to render icons from different libraries (copied from IconPicker.tsx)
-const IconRenderer = ({ iconKey, ...props }: { iconKey: string;[key: string]: any }) => {
-  if (!iconKey) return null
-
-  if (iconKey.startsWith('pi ')) {
-    return <i className={iconKey} {...props}></i>
-  }
-  if (iconKey.startsWith('fa ')) {
-    return <i className={iconKey} {...props}></i>
-  }
-  if (iconKey.startsWith('mi-')) {
-    const iconName = iconKey.substring(3)
-    return <span className="material-icons" {...props}>{iconName}</span>
-  }
-  if (iconKey.startsWith('hi-')) {
-    const keyParts = iconKey.substring(3).split('-')
-    const type = keyParts.pop()
-    const name = keyParts.join('-').replace(/(?:^|-)\w/g, (c) => c.toUpperCase()).replace(/-/g, '')
-
-    const componentName = name + 'Icon'
-
-    const iconLib = type === 'solid' ? solidIcons : outlineIcons
-    const IconComponent = (iconLib as any)[componentName]
-
-    if (IconComponent) {
-      return <IconComponent {...props} />
-    }
-  }
-  return <i className={iconKey} {...props}></i> // Fallback for old format
-}
 
 export const TabsNodeView = ({ node, editor, getPos }: NodeViewProps) => {
   const [theme, setTheme] = useState<'light' | 'dark'>('dark')
