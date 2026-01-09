@@ -6,9 +6,17 @@ import TaskItem from '@tiptap/extension-task-item'
 import Link from '@tiptap/extension-link'
 import { DragHandle } from '@tiptap/extension-drag-handle-react'
 import NodeRange from '@tiptap/extension-node-range'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import './tiptap.css'
 import './types'
+
+// Import serializer and parser for code mode
+import { mdxSerializer } from '../../../services/mdxSerializer'
+import { mdxParser } from '../../../services/mdxParser'
+
+// Import code editor with syntax highlighting
+import Editor from 'react-simple-code-editor'
+import { codeToHtml } from 'shiki'
 
 // Import custom extensions
 import { CardBlock } from './extensions/CardBlock'
@@ -46,10 +54,119 @@ interface TiptapEditorProps {
   editable?: boolean
   allowUpload?: boolean
   minHeight?: string
+  initialMdx?: string // Raw MDX content for code editor when there's a parse error
+  initialParseError?: string // Initial parse error message
+  onParseErrorChange?: (hasError: boolean) => void // Called when parse error state changes
 }
 
-export const TiptapEditor: React.FC<TiptapEditorProps> = ({ content, theme, onUpdate, editable = true, allowUpload = false, minHeight = '200px' }) => {
+// Suppress flushSync warning from Tiptap (known issue with React 18+)
+const originalError = console.error
+console.error = (...args) => {
+  if (args[0]?.includes?.('flushSync was called from inside a lifecycle method')) {
+    return
+  }
+  originalError.apply(console, args)
+}
+
+// Helper to extract line number from error message
+const extractLineFromError = (message: string): number | null => {
+  const lineMatch = message.match(/\((\d+):\d+(?:-\d+:\d+)?\)/) ||  // (346:1-346:13) or (346:1)
+                    message.match(/^(\d+):\d+:/) ||                  // 1:1: at start
+                    message.match(/(?:at line |line )\s*(\d+)/i) ||  // at line X, line X
+                    message.match(/position (\d+)/i)
+  return lineMatch ? parseInt(lineMatch[1], 10) : null
+}
+
+export const TiptapEditor: React.FC<TiptapEditorProps> = ({ content, theme, onUpdate, editable = true, allowUpload = false, minHeight = '200px', initialMdx, initialParseError, onParseErrorChange }) => {
   const toolbarRef = useRef<EditorToolbarRef>(null)
+
+  // Editor mode state (visual or code) - start in code mode if there's an initial parse error
+  const [editorMode, setEditorMode] = useState<'visual' | 'code'>(initialParseError ? 'code' : 'visual')
+  const [mdxCode, setMdxCode] = useState<string>(initialMdx || '')
+  const [parseError, setParseError] = useState<string | null>(initialParseError || null)
+  const [errorLine, setErrorLine] = useState<number | null>(initialParseError ? extractLineFromError(initialParseError) : null)
+  const [isSwitching, setIsSwitching] = useState(false)
+  const [highlightedCode, setHighlightedCode] = useState<string>('')
+  const [isValidating, setIsValidating] = useState(false)
+  const validationTimeoutRef = useRef<number | null>(null)
+
+  // Notify parent when parse error state changes
+  useEffect(() => {
+    onParseErrorChange?.(!!parseError)
+  }, [parseError, onParseErrorChange])
+
+  // Highlight code using Shiki with error line highlighting
+  const highlightCode = useCallback(async (code: string, errLine: number | null) => {
+    try {
+      const html = await codeToHtml(code, {
+        lang: 'mdx',
+        theme: theme === 'dark' ? 'github-dark' : 'github-light',
+      })
+      // Extract just the code content from Shiki's output
+      const match = html.match(/<code[^>]*>([\s\S]*)<\/code>/)
+      const highlighted = match ? match[1] : code
+
+      // If there's an error line, wrap that line with error highlighting
+      if (errLine) {
+        const lines = highlighted.split('\n')
+        const withErrorHighlight = lines.map((line, index) => {
+          const lineNum = index + 1
+          if (lineNum === errLine) {
+            const bgColor = theme === 'dark' ? 'rgba(239, 68, 68, 0.15)' : 'rgba(239, 68, 68, 0.12)'
+            return `<span style="display:block;background:${bgColor};margin:0 -20px;padding:0 20px;border-left:3px solid ${theme === 'dark' ? '#f87171' : '#dc2626'};">${line}</span>`
+          }
+          return line
+        }).join('\n')
+        setHighlightedCode(withErrorHighlight)
+      } else {
+        setHighlightedCode(highlighted)
+      }
+    } catch {
+      // Fallback to plain text if highlighting fails
+      setHighlightedCode(code.replace(/</g, '&lt;').replace(/>/g, '&gt;'))
+    }
+  }, [theme])
+
+  // Update highlighting when code, theme, or error line changes
+  useEffect(() => {
+    if (editorMode === 'code' && mdxCode) {
+      highlightCode(mdxCode, errorLine)
+    }
+  }, [mdxCode, theme, editorMode, errorLine, highlightCode])
+
+  // Validate MDX code and detect errors
+  // Also updates editor content when validation succeeds (so saves work from code mode)
+  const validateCode = useCallback(async (code: string, editorInstance: ReturnType<typeof useEditor> | null) => {
+    if (!code.trim()) {
+      setParseError(null)
+      setErrorLine(null)
+      return
+    }
+
+    setIsValidating(true)
+    try {
+      const result = await mdxParser.parse(code)
+
+      if (result.parseError) {
+        setParseError(result.parseError)
+        setErrorLine(extractLineFromError(result.parseError))
+      } else if (result.doc) {
+        setParseError(null)
+        setErrorLine(null)
+        onParseErrorChange?.(false)
+        // Update editor content so saves work from code mode
+        if (editorInstance && !editorInstance.isDestroyed) {
+          editorInstance.commands.setContent(result.doc, { emitUpdate: true })
+        }
+      }
+    } catch (error: any) {
+      const message = error.message || 'Unknown error'
+      setParseError(message)
+      setErrorLine(extractLineFromError(message))
+    } finally {
+      setIsValidating(false)
+    }
+  }, [onParseErrorChange])
 
   const editor = useEditor({
     extensions: [
@@ -139,10 +256,12 @@ export const TiptapEditor: React.FC<TiptapEditorProps> = ({ content, theme, onUp
       const newContent = JSON.stringify(content)
 
       if (currentContent !== newContent) {
-        // Update immediately and don't emit update event to prevent cascading renders
-        if (!editor.isDestroyed) {
-          editor.commands.setContent(content, { emitUpdate: false })
-        }
+        // Defer setContent to avoid flushSync warning in React 18+
+        queueMicrotask(() => {
+          if (!editor.isDestroyed) {
+            editor.commands.setContent(content, { emitUpdate: false })
+          }
+        })
       }
     }
   }, [content, editor])
@@ -277,6 +396,82 @@ export const TiptapEditor: React.FC<TiptapEditorProps> = ({ content, theme, onUp
     }
   }, [editor, editable])
 
+  // Handle mode toggle between visual and code
+  const handleModeToggle = useCallback(async () => {
+    if (!editor || isSwitching) return
+
+    setIsSwitching(true)
+
+    try {
+      if (editorMode === 'visual') {
+        // Visual → Code: serialize current content to MDX
+        // BUT only if there's no parse error (if there's an error, editor content is invalid/empty)
+        if (!parseError) {
+          const json = editor.getJSON()
+          const mdx = mdxSerializer.serialize(json)
+          setMdxCode(mdx)
+        }
+        // Keep mdxCode as-is if there's a parse error (it still has the original content)
+        setEditorMode('code')
+      } else {
+        // Code → Visual: parse MDX and update content
+        try {
+          const result = await mdxParser.parse(mdxCode)
+          if (result.parseError) {
+            // Parse failed - keep error state but still switch to visual
+            setParseError(result.parseError)
+            setErrorLine(extractLineFromError(result.parseError))
+          } else if (result.doc) {
+            // Parse succeeded - clear error FIRST, then update content
+            // This ensures hasParseErrorRef is updated before onUpdate fires
+            setParseError(null)
+            setErrorLine(null)
+            onParseErrorChange?.(false) // Notify parent synchronously
+
+            await new Promise<void>((resolve) => {
+              setTimeout(() => {
+                if (!editor.isDestroyed) {
+                  editor.commands.setContent(result.doc, { emitUpdate: true })
+                }
+                resolve()
+              }, 0)
+            })
+          }
+        } catch (error: any) {
+          // Parse exception - keep error state
+          const message = error.message || 'Unknown error'
+          setParseError(message)
+          setErrorLine(extractLineFromError(message))
+        }
+        setEditorMode('visual')
+      }
+    } finally {
+      setIsSwitching(false)
+    }
+  }, [editor, editorMode, mdxCode, isSwitching, parseError])
+
+  // Handle code changes in code mode
+  const handleCodeChange = useCallback((code: string) => {
+    setMdxCode(code)
+
+    // Debounced validation (500ms delay)
+    if (validationTimeoutRef.current) {
+      clearTimeout(validationTimeoutRef.current)
+    }
+    validationTimeoutRef.current = window.setTimeout(() => {
+      validateCode(code, editor)
+    }, 500)
+  }, [validateCode, editor])
+
+  // Cleanup validation timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (validationTimeoutRef.current) {
+        clearTimeout(validationTimeoutRef.current)
+      }
+    }
+  }, [])
+
   if (!editor) {
     return null
   }
@@ -292,38 +487,225 @@ export const TiptapEditor: React.FC<TiptapEditorProps> = ({ content, theme, onUp
       }}
     >
       {/* Toolbar - only show in editable mode */}
-      {editor && editable && <EditorToolbar ref={toolbarRef} editor={editor} theme={theme} />}
+      {editor && editable && (
+        <EditorToolbar
+          ref={toolbarRef}
+          editor={editor}
+          theme={theme}
+          editorMode={editorMode}
+          onModeToggle={handleModeToggle}
+          isSwitching={isSwitching}
+        />
+      )}
 
-      {/* Editor Content with Drag Handle */}
-      <div style={{ position: 'relative', marginTop: editable ? '24px' : '0' }}>
-        {/* Drag Handle - only show in editable mode */}
-        {editor && editable && (
-          <DragHandle editor={editor}>
+      {/* Floating error notification */}
+      {editable && editorMode === 'code' && parseError && (
+        <div
+          style={{
+            position: 'fixed',
+            top: '20px',
+            right: '20px',
+            maxWidth: '400px',
+            padding: '12px 16px',
+            backgroundColor: theme === 'light' ? '#fef2f2' : '#450a0a',
+            border: `1px solid ${theme === 'light' ? '#fecaca' : '#7f1d1d'}`,
+            borderRadius: '8px',
+            color: theme === 'light' ? '#dc2626' : '#fca5a5',
+            fontSize: '13px',
+            boxShadow: theme === 'light'
+              ? '0 4px 12px rgba(0, 0, 0, 0.15)'
+              : '0 4px 12px rgba(0, 0, 0, 0.4)',
+            zIndex: 1000,
+            animation: 'slideIn 0.2s ease-out',
+          }}
+        >
+          <style>{`
+            @keyframes slideIn {
+              from {
+                opacity: 0;
+                transform: translateX(20px);
+              }
+              to {
+                opacity: 1;
+                transform: translateX(0);
+              }
+            }
+          `}</style>
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+            <i className="pi pi-exclamation-triangle" style={{ marginTop: '2px', flexShrink: 0 }}></i>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontWeight: 600, marginBottom: '4px' }}>
+                Parse Error{errorLine ? ` (Line ${errorLine})` : ''}
+              </div>
+              <div style={{
+                fontSize: '12px',
+                opacity: 0.9,
+                wordBreak: 'break-word',
+                maxHeight: '80px',
+                overflow: 'auto',
+              }}>
+                {parseError}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Code Editor - show when in code mode */}
+      {editable && editorMode === 'code' && (
+        <div style={{ marginTop: '24px' }}>
+          {/* Status bar */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: '8px',
+              fontSize: '12px',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              {isValidating ? (
+                <span style={{ color: theme === 'light' ? '#6b7280' : '#9ca3af' }}>
+                  <i className="pi pi-spin pi-spinner" style={{ marginRight: '6px' }}></i>
+                  Validating...
+                </span>
+              ) : parseError ? (
+                <span style={{ color: theme === 'light' ? '#dc2626' : '#fca5a5' }}>
+                  <i className="pi pi-times-circle" style={{ marginRight: '6px' }}></i>
+                  Error{errorLine ? ` on line ${errorLine}` : ''}
+                </span>
+              ) : null}
+            </div>
+            <span style={{ color: theme === 'light' ? '#9ca3af' : '#6b7280' }}>
+              {mdxCode.split('\n').length} lines
+            </span>
+          </div>
+
+          {/* Code editor with syntax highlighting */}
+          <div
+            className={theme === 'dark' ? 'dark-code-editor' : ''}
+            style={{
+              border: `1px solid ${theme === 'light' ? '#e2e8f0' : '#334155'}`,
+              borderRadius: '8px',
+              backgroundColor: theme === 'light' ? '#f8fafc' : '#0f172a',
+              overflow: 'auto',
+            }}
+          >
+            <Editor
+              value={mdxCode}
+              onValueChange={handleCodeChange}
+              highlight={(code) => highlightedCode || code.replace(/</g, '&lt;').replace(/>/g, '&gt;')}
+              padding={20}
+              textareaId="code-editor-textarea"
+              style={{
+                fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace',
+                fontSize: '14px',
+                minHeight: '300px',
+                backgroundColor: 'transparent',
+                whiteSpace: 'pre-wrap',
+                wordBreak: 'break-word',
+              }}
+              textareaClassName="code-editor-textarea"
+              preClassName="code-editor-pre"
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Visual Editor Content with Drag Handle - hide when in code mode */}
+      {editorMode === 'visual' && (
+        <div style={{ position: 'relative', marginTop: editable ? '24px' : '0' }}>
+          {/* Show error card if there's a parse error */}
+          {parseError ? (
             <div
               style={{
-                width: '18px',
-                height: '18px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'grab',
-                backgroundColor: theme === 'light' ? '#ffffff' : '#1f2937',
-                border: `1px solid ${theme === 'light' ? '#e5e7eb' : '#374151'}`,
-                borderRadius: '4px',
-                color: theme === 'light' ? '#6b7280' : '#9ca3af',
-                transition: 'all 0.2s',
-                boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+                padding: '24px',
+                backgroundColor: theme === 'dark' ? '#451a1a' : '#fef2f2',
+                border: `1px solid ${theme === 'dark' ? '#7f1d1d' : '#fecaca'}`,
+                borderRadius: '8px',
+                color: theme === 'dark' ? '#fca5a5' : '#991b1b'
               }}
-              className="drag-handle-official"
             >
-              <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor">
-                <path d="M6 3a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM6 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM6 13a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM12 3a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM12 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM12 13a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
-              </svg>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  style={{ flexShrink: 0 }}
+                >
+                  <path
+                    fillRule="evenodd"
+                    clipRule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                    fill={theme === 'dark' ? '#f87171' : '#dc2626'}
+                  />
+                </svg>
+                <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 600 }}>
+                  MDX Parsing Error
+                </h3>
+              </div>
+
+              <p style={{ margin: '0 0 12px 0', fontSize: '14px', lineHeight: 1.5 }}>
+                There was an error parsing this page. Switch to Code mode to fix the errors.
+              </p>
+
+              <pre
+                style={{
+                  margin: 0,
+                  padding: '12px',
+                  backgroundColor: theme === 'dark' ? '#1f2937' : '#1f2937',
+                  color: '#f3f4f6',
+                  borderRadius: '4px',
+                  fontSize: '13px',
+                  overflow: 'auto',
+                  maxHeight: '200px',
+                  whiteSpace: 'pre-wrap',
+                  wordBreak: 'break-word'
+                }}
+              >
+                {parseError}
+              </pre>
+
+              <p style={{ margin: '12px 0 0 0', fontSize: '13px', opacity: 0.8 }}>
+                Common issues: unclosed tags, missing closing brackets, or invalid JSX syntax.
+              </p>
             </div>
-          </DragHandle>
-        )}
-        <EditorContent editor={editor} />
-      </div>
+          ) : (
+            <>
+              {/* Drag Handle - only show in editable mode */}
+              {editor && editable && (
+                <DragHandle editor={editor}>
+                  <div
+                    style={{
+                      width: '18px',
+                      height: '18px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      cursor: 'grab',
+                      backgroundColor: theme === 'light' ? '#ffffff' : '#1f2937',
+                      border: `1px solid ${theme === 'light' ? '#e5e7eb' : '#374151'}`,
+                      borderRadius: '4px',
+                      color: theme === 'light' ? '#6b7280' : '#9ca3af',
+                      transition: 'all 0.2s',
+                      boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+                    }}
+                    className="drag-handle-official"
+                  >
+                    <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor">
+                      <path d="M6 3a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM6 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM6 13a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM12 3a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM12 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM12 13a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
+                    </svg>
+                  </div>
+                </DragHandle>
+              )}
+              <EditorContent editor={editor} />
+            </>
+          )}
+        </div>
+      )}
     </div>
   )
 }

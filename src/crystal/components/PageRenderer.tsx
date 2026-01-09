@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import type { Block } from './blocks/BlockRenderer'
 import { TiptapEditor } from './editor/TiptapEditor'
 import { SaveNotification } from './SaveNotification'
@@ -9,6 +9,8 @@ interface PageData {
   description?: string
   blocks?: Block[] // Legacy format
   content?: Record<string, any> // Tiptap JSON format
+  rawMdx?: string // Raw MDX content for code editor fallback
+  parseError?: string // Parse error message
 }
 
 interface PageRendererProps {
@@ -17,16 +19,19 @@ interface PageRendererProps {
   onSave: (pageId: string, updatedData: PageData) => Promise<void>
   isDevMode?: boolean
   allowUpload?: boolean
+  hasParseError?: boolean // Prevent auto-save when there's a parse error
 }
 
-export const PageRenderer: React.FC<PageRendererProps> = ({ pageData, theme, onSave, isDevMode = false, allowUpload = false }) => {
+export const PageRenderer: React.FC<PageRendererProps> = ({ pageData, theme, onSave, isDevMode = false, allowUpload = false, hasParseError: initialHasParseError = false }) => {
   // Convert legacy format to Tiptap JSON if needed
   const [content, setContent] = useState<Record<string, any>>(pageData.content || convertBlocksToTiptap(pageData.blocks || []))
   const [hasChanges, setHasChanges] = useState(false)
+  const [hasParseError, setHasParseError] = useState(initialHasParseError)
   const [showSaveNotification, setShowSaveNotification] = useState(false)
   const saveTimeoutRef = useRef<number | null>(null)
   const contentRef = useRef<Record<string, any>>(content)
   const hasChangesRef = useRef<boolean>(hasChanges)
+  const hasParseErrorRef = useRef<boolean>(hasParseError)
   const pageIdRef = useRef<string>(pageData.id)
   const pageDataRef = useRef<PageData>(pageData)
 
@@ -34,7 +39,15 @@ export const PageRenderer: React.FC<PageRendererProps> = ({ pageData, theme, onS
   useEffect(() => {
     contentRef.current = content
     hasChangesRef.current = hasChanges
-  }, [content, hasChanges])
+    hasParseErrorRef.current = hasParseError
+  }, [content, hasChanges, hasParseError])
+
+  // Callback to update parse error state AND ref immediately
+  // This is needed because the ref must be updated before onUpdate fires
+  const handleParseErrorChange = useCallback((hasError: boolean) => {
+    setHasParseError(hasError)
+    hasParseErrorRef.current = hasError // Update ref immediately
+  }, [])
 
   // Save before page changes
   useEffect(() => {
@@ -42,9 +55,16 @@ export const PageRenderer: React.FC<PageRendererProps> = ({ pageData, theme, onS
     return () => {
       // This runs before the component unmounts or before the effect runs again
       // At this point, the refs still have the OLD page's data
-      if (hasChangesRef.current && pageIdRef.current) {
+      // Don't save if there's a parse error (prevents saving empty/broken content)
+      if (hasChangesRef.current && pageIdRef.current && !hasParseErrorRef.current) {
+        // Extra guard: don't save empty content
+        const content = contentRef.current
+        if (!content || !content.content || content.content.length === 0) {
+          console.warn('[PageRenderer] Cleanup: skipping save of empty content')
+          return
+        }
         // Save using the refs which have the OLD page data
-        onSave(pageIdRef.current, { ...pageDataRef.current, content: contentRef.current }).catch(err => {
+        onSave(pageIdRef.current, { ...pageDataRef.current, content: content }).catch(err => {
           console.error('[PageRenderer] Failed to save on page change:', err)
         })
       }
@@ -64,9 +84,16 @@ export const PageRenderer: React.FC<PageRendererProps> = ({ pageData, theme, onS
     contentRef.current = newContent
     setHasChanges(false)
     hasChangesRef.current = false
-  }, [pageData.id, pageData.content, pageData.blocks])
+    setHasParseError(!!pageData.parseError)
+  }, [pageData.id, pageData.content, pageData.blocks, pageData.parseError])
 
   const handleTiptapUpdate = (updatedContent: Record<string, any>) => {
+    // Don't update content or mark as changed if there's a parse error
+    // This prevents saving empty/broken content when switching modes
+    if (hasParseErrorRef.current) {
+      return
+    }
+
     setContent(updatedContent)
     setHasChanges(true)
 
@@ -78,6 +105,11 @@ export const PageRenderer: React.FC<PageRendererProps> = ({ pageData, theme, onS
   }
 
   const handleSave = async (showNotification = false) => {
+    // Don't save if there's a parse error (prevents saving empty/broken content)
+    if (hasParseError) {
+      return
+    }
+
     if (!hasChangesRef.current) {
       if (showNotification) {
         // Show notification even if no changes (user pressed Ctrl+S)
@@ -87,9 +119,16 @@ export const PageRenderer: React.FC<PageRendererProps> = ({ pageData, theme, onS
       return
     }
 
+    // Extra guard: don't save empty or invalid content
+    const contentToSave = contentRef.current
+    if (!contentToSave || !contentToSave.content || contentToSave.content.length === 0) {
+      console.warn('[PageRenderer] Attempted to save empty content, skipping')
+      return
+    }
+
     try {
       // Save in Tiptap JSON format
-      await onSave(pageData.id, { ...pageData, content: contentRef.current })
+      await onSave(pageData.id, { ...pageData, content: contentToSave })
       setHasChanges(false)
 
       // Show success notification
@@ -137,8 +176,10 @@ export const PageRenderer: React.FC<PageRendererProps> = ({ pageData, theme, onS
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, []) // Empty deps because handleSave uses refs
 
-  // Save when navigating away or reloading
+  // Save when navigating away or reloading (only in dev mode)
   useEffect(() => {
+    if (!isDevMode) return
+
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (hasChangesRef.current) {
         // Synchronous save - browsers may block async operations
@@ -169,7 +210,7 @@ export const PageRenderer: React.FC<PageRendererProps> = ({ pageData, theme, onS
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload)
     }
-  }, [pageData.id])
+  }, [pageData.id, isDevMode])
 
   return (
     <div style={{ position: 'relative', margin: '0', padding: '0' }}>
@@ -184,6 +225,9 @@ export const PageRenderer: React.FC<PageRendererProps> = ({ pageData, theme, onS
         onUpdate={handleTiptapUpdate}
         editable={isDevMode}
         allowUpload={allowUpload}
+        initialMdx={pageData.rawMdx}
+        initialParseError={pageData.parseError}
+        onParseErrorChange={handleParseErrorChange}
       />
     </div>
   )

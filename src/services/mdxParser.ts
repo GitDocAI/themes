@@ -540,9 +540,10 @@ class MDXParserService {
   private convertCodeGroupComponent(node: MdxNode): TipTapNode {
     const files: Array<{ filename: string; language: string; code: string }> = []
 
-    // Extract Code children
+    // Extract code blocks from children
     if (node.children) {
       for (const child of node.children) {
+        // Handle <Code> JSX children (legacy format)
         if (child.name === 'Code') {
           const attrs = this.extractAttributes(child)
           const code = this.extractTextContent(child)
@@ -551,6 +552,19 @@ class MDXParserService {
           files.push({
             filename: attrs.filename || `example.${language}`,
             language: language,
+            code: code
+          })
+        }
+        // Handle fenced code blocks (```language filename)
+        else if (child.type === 'code') {
+          const lang = child.lang || 'plaintext'
+          const code = child.value || ''
+          // The meta field contains the filename (text after the language)
+          const filename = child.meta || `example.${lang}`
+
+          files.push({
+            filename: filename,
+            language: lang,
             code: code
           })
         }

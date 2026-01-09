@@ -21,6 +21,7 @@ export interface PageData {
   blocks?: Block[] // Legacy format
   content?: any // TipTap JSON format
   parseError?: string // Error message if MDX parsing failed
+  rawMdx?: string // Raw MDX content (available when there's a parse error)
 }
 
 class PageLoader {
@@ -77,7 +78,8 @@ class PageLoader {
 
       const pageData: PageData = {
         content: parseResult.doc,
-        parseError: parseResult.parseError
+        parseError: parseResult.parseError,
+        rawMdx: mdxContent
       }
 
       // Store in memory cache

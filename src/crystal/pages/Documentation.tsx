@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { Navbar } from '../components/Navbar'
 import { Banner } from '../components/Banner'
 import { SettingsSidebar } from '../components/SettingsSidebar'
@@ -11,6 +11,7 @@ import { RightPanel } from '../components/RightPanel'
 import { PrevNextNavigation } from '../components/PrevNextNavigation'
 import { SearchModal } from '../components/SearchModal'
 import { configLoader, type AISearchConfig, type Version } from '../../services/configLoader'
+import { ContentService } from '../../services/contentService'
 import { openApiLoader } from '../../services/openApiLoader'
 import { FindPagePathByName, navigationService } from '../../services/navigationService'
 import { pageLoader } from '../../services/pageLoader'
@@ -56,6 +57,65 @@ function Documentation() {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState<boolean>(false)
   const [versions, setVersions] = useState<Version[]>([])
   const [isMobile, setIsMobile] = useState<boolean>(() => window.innerWidth < 1024)
+
+  // Right panel resize state
+  const RIGHT_PANEL_MIN_WIDTH = 300
+  const RIGHT_PANEL_MAX_WIDTH = 600
+  const RIGHT_PANEL_DEFAULT_WIDTH = 450
+  const [rightPanelWidth, setRightPanelWidth] = useState<number>(() => {
+    const saved = localStorage.getItem('rightPanelWidth')
+    if (saved) {
+      const parsed = parseInt(saved, 10)
+      if (!isNaN(parsed) && parsed >= RIGHT_PANEL_MIN_WIDTH && parsed <= RIGHT_PANEL_MAX_WIDTH) {
+        return parsed
+      }
+    }
+    return RIGHT_PANEL_DEFAULT_WIDTH
+  })
+  const [isResizing, setIsResizing] = useState(false)
+  const resizeRef = useRef<{ startX: number; startWidth: number } | null>(null)
+
+  // Handle right panel resize
+  const handleResizeStart = useCallback((e: React.MouseEvent) => {
+    e.preventDefault()
+    setIsResizing(true)
+    resizeRef.current = { startX: e.clientX, startWidth: rightPanelWidth }
+  }, [rightPanelWidth])
+
+  useEffect(() => {
+    if (!isResizing) return
+
+    // Prevent text selection during resize
+    document.body.style.userSelect = 'none'
+    document.body.style.cursor = 'col-resize'
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!resizeRef.current) return
+      // Calculate new width (dragging left increases width, dragging right decreases)
+      const delta = resizeRef.current.startX - e.clientX
+      const newWidth = Math.min(RIGHT_PANEL_MAX_WIDTH, Math.max(RIGHT_PANEL_MIN_WIDTH, resizeRef.current.startWidth + delta))
+      setRightPanelWidth(newWidth)
+    }
+
+    const handleMouseUp = () => {
+      setIsResizing(false)
+      localStorage.setItem('rightPanelWidth', rightPanelWidth.toString())
+      resizeRef.current = null
+      // Restore text selection and cursor
+      document.body.style.userSelect = ''
+      document.body.style.cursor = ''
+    }
+
+    document.addEventListener('mousemove', handleMouseMove)
+    document.addEventListener('mouseup', handleMouseUp)
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove)
+      document.removeEventListener('mouseup', handleMouseUp)
+      document.body.style.userSelect = ''
+      document.body.style.cursor = ''
+    }
+  }, [isResizing, rightPanelWidth])
 
   // Detect mobile/tablet screen
   useEffect(() => {
@@ -515,6 +575,36 @@ function Documentation() {
     setIsSettingsSidebarOpen(prev => !prev)
   }
 
+  // Handle AI Search toggle - enable or disable AI Search in config
+  const handleAISearchToggle = async (enabled: boolean) => {
+    try {
+      const config = await configLoader.loadConfig()
+
+      if (enabled) {
+        // Create default AI Search config
+        const defaultAISearchConfig: AISearchConfig = {
+          triggerLabel: 'Ask to AI',
+          chatTitle: 'AI Assistant',
+          welcomeMessage: 'Hello! How can I help you today? Feel free to ask me anything about the documentation.',
+          placeholder: 'Ask a question...',
+          suggestedQuestions: []
+        }
+        config.aiSearch = defaultAISearchConfig
+        await ContentService.saveConfig(config)
+        configLoader.updateConfig(config)
+        setAISearchConfig(defaultAISearchConfig)
+      } else {
+        // Remove AI Search config
+        delete config.aiSearch
+        await ContentService.saveConfig(config)
+        configLoader.updateConfig(config)
+        setAISearchConfig(undefined)
+      }
+    } catch (error) {
+      console.error('Error toggling AI Search config:', error)
+    }
+  }
+
   const passContextoAi=(contextText:string,intention:string)=>{
     const currentFileName = window.location.href.replace(window.location.origin,"");
 
@@ -571,6 +661,7 @@ function Documentation() {
           allowUpload={isDevEnvironment}
           onSearchClick={() => setShowSearchModal(true)}
           onAISearchClick={() => setIsAISearchSidebarOpen(true)}
+          showAISearchInDev={!isProductionMode && isDevMode}
         />
         {tabs.length > 0 && (
           <TabBar
@@ -683,21 +774,68 @@ function Documentation() {
           rightPanelContent && rightPanelContent.length > 0 ? (
             <div
               style={{
-                width: '450px',
+                width: `${rightPanelWidth}px`,
                 position: 'sticky',
                 top: 'var(--sidebar-top, 128px)',
                 height: 'calc(100vh - var(--sidebar-top, 128px))',
                 overflowY: 'auto',
+                display: 'flex',
+                flexShrink: 0,
               }}
             >
-              {rightPanelContent.map((panel, index) => (
-                <RightPanel
-                  key={panel.attrs?.id || `panel-${index}`}
-                  theme={theme}
-                  content={panel}
-                  isDevMode={isProductionMode ? false : isDevMode}
+              {/* Resize handle */}
+              <div
+                onMouseDown={handleResizeStart}
+                style={{
+                  width: '6px',
+                  cursor: 'col-resize',
+                  backgroundColor: isResizing
+                    ? (theme === 'light' ? '#3b82f6' : '#60a5fa')
+                    : 'transparent',
+                  transition: isResizing ? 'none' : 'background-color 0.2s',
+                  flexShrink: 0,
+                  position: 'relative',
+                }}
+                onMouseEnter={(e) => {
+                  if (!isResizing) {
+                    e.currentTarget.style.backgroundColor = theme === 'light' ? '#e5e7eb' : '#374151'
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isResizing) {
+                    e.currentTarget.style.backgroundColor = 'transparent'
+                  }
+                }}
+              >
+                {/* Visual indicator line */}
+                <div
+                  style={{
+                    position: 'absolute',
+                    left: '2px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    width: '2px',
+                    height: '40px',
+                    backgroundColor: isResizing
+                      ? '#ffffff'
+                      : (theme === 'light' ? '#d1d5db' : '#4b5563'),
+                    borderRadius: '1px',
+                    opacity: isResizing ? 1 : 0,
+                    transition: 'opacity 0.2s',
+                  }}
                 />
-              ))}
+              </div>
+              {/* Right panel content */}
+              <div style={{ flex: 1, overflow: 'auto' }}>
+                {rightPanelContent.map((panel, index) => (
+                  <RightPanel
+                    key={panel.attrs?.id || `panel-${index}`}
+                    theme={theme}
+                    content={panel}
+                    isDevMode={isProductionMode ? false : isDevMode}
+                  />
+                ))}
+              </div>
             </div>
           ) : (
             <TOC theme={theme} currentPath={currentPath} />
@@ -715,15 +853,18 @@ function Documentation() {
         isDevMode={!isProductionMode && isDevMode}
       />
 
-      {/* AI Search Sidebar */}
-      {aiSearchConfig && (
+      {/* AI Search Sidebar - Show in dev mode even without config */}
+      {(aiSearchConfig || (!isProductionMode && isDevMode)) && (
         <AISearchSidebar
-          config={aiSearchConfig}
+          config={aiSearchConfig || {}}
           theme={theme}
           primaryColor={primaryColor}
           isOpen={isAISearchSidebarOpen}
           onClose={() => setIsAISearchSidebarOpen(false)}
           isDevMode={!isProductionMode && isDevMode}
+          isEnabled={!!aiSearchConfig}
+          onToggleEnabled={handleAISearchToggle}
+          isProductionMode={isProductionMode}
         />
       )}
     </TextSelectionContextMenu>
