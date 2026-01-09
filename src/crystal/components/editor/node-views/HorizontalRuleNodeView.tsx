@@ -40,7 +40,7 @@ export const HorizontalRuleNodeView = ({ node, editor, getPos }: NodeViewProps) 
   }
 
 
-  const borderColor = theme !== 'light' ? '#e5e7eb' : '#4b5563'
+  const borderColor = theme === 'light' ? '#e5e7eb' : '#374151'
   const isEditable = editor.isEditable
   return (
     <NodeViewWrapper
@@ -48,31 +48,37 @@ export const HorizontalRuleNodeView = ({ node, editor, getPos }: NodeViewProps) 
       data-type="horizontal-rule-block"
       style={{ outline: 'none' }}
     >
-      <div
-        className="relative"
-      >
+      <div style={{ position: 'relative', margin: '1rem 0' }}>
         <hr
-          className={`w-full !border-t-[0.5px] border-b-0  !opacity-40 !border-color-[${borderColor}] my-32`}
+          style={{
+            width: '100%',
+            border: 'none',
+            borderTop: `1px solid ${borderColor}`,
+            margin: 0,
+            opacity: 0.5,
+          }}
         />
-        {isEditable&&
+        {isEditable && (
           <button
-              onClick={handleDelete}
-              className="absolute -top-2  right-0 -translate-y-full "
-              style={{
-                padding: '4px 12px',
-                backgroundColor: '#ef4444',
-                color: 'white',
-                border: 'none',
-                borderRadius: '6px',
-                cursor: 'pointer',
-                fontSize: '12px',
-                fontWeight: '500',
-              }}
-            >
-              <i className="pi pi-trash" style={{ fontSize: '10px', marginRight: '4px' }}></i>
-            </button>
-}
-          </div>
+            onClick={handleDelete}
+            style={{
+              position: 'absolute',
+              top: '-12px',
+              right: '0',
+              padding: '4px 12px',
+              backgroundColor: '#ef4444',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '12px',
+              fontWeight: '500',
+            }}
+          >
+            <i className="pi pi-trash" style={{ fontSize: '10px', marginRight: '4px' }}></i>
+          </button>
+        )}
+      </div>
     </NodeViewWrapper>
   )
 }

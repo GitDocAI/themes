@@ -485,6 +485,20 @@ class MDXParserService {
       case 'Label':
         return this.convertLabelComponent(node)
 
+      case 'Labels':
+        return this.convertLabelsComponent(node)
+
+      case 'ParamField':
+      case 'Param':
+        return this.convertParamFieldComponent(node)
+
+      case 'Steps':
+        return this.convertStepsComponent(node)
+
+      case 'Step':
+        // Individual Steps are handled by Steps container
+        return null
+
       case 'CheckList':
         return this.convertCheckListComponent(node)
 
@@ -1081,20 +1095,147 @@ class MDXParserService {
   }
 
   /**
-   * Convert Label component
+   * Convert Label component (single label)
    */
   private convertLabelComponent(node: MdxNode): TipTapNode {
     const attrs = this.extractAttributes(node)
     const label = attrs.label || this.extractTextContent(node) || 'Label'
 
+    const labelItem: Record<string, any> = {
+      id: `label-item-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
+      text: label,
+      color: attrs.color || '#3b82f6',
+      size: attrs.size || 'md'
+    }
+    if (attrs.icon) {
+      labelItem.icon = attrs.icon
+    }
+
     return {
       type: 'labelBlock',
       attrs: {
         id: `label-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
-        label,
-        color: attrs.color || '#3b82f6',
-        size: attrs.size || 'md'
+        labels: JSON.stringify([labelItem])
       }
+    }
+  }
+
+  /**
+   * Convert Labels component (multiple labels wrapper)
+   * <Labels>
+   *   <Label label="First" color="#3b82f6" />
+   *   <Label label="Second" color="#10b981" />
+   * </Labels>
+   */
+  private convertLabelsComponent(node: MdxNode): TipTapNode {
+    const labels: Array<{ id: string; text: string; color: string; size: string; icon?: string }> = []
+
+    // Extract Label children
+    const children = node.children || []
+    for (const child of children) {
+      if (child.type === 'mdxJsxFlowElement' || child.type === 'mdxJsxTextElement') {
+        if (child.name === 'Label') {
+          const attrs = this.extractAttributes(child)
+          const labelItem: { id: string; text: string; color: string; size: string; icon?: string } = {
+            id: `label-item-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
+            text: attrs.label || this.extractTextContent(child) || 'Label',
+            color: attrs.color || '#3b82f6',
+            size: attrs.size || 'md'
+          }
+          if (attrs.icon) {
+            labelItem.icon = attrs.icon
+          }
+          labels.push(labelItem)
+        }
+      }
+    }
+
+    // If no labels found, create one default
+    if (labels.length === 0) {
+      labels.push({
+        id: `label-item-${Date.now()}`,
+        text: 'Label',
+        color: '#3b82f6',
+        size: 'md'
+      })
+    }
+
+    return {
+      type: 'labelBlock',
+      attrs: {
+        id: `label-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
+        labels: JSON.stringify(labels)
+      }
+    }
+  }
+
+  /**
+   * Convert ParamField component
+   * <ParamField path="user_id" type="string" required>
+   *   Description of the parameter
+   * </ParamField>
+   */
+  private convertParamFieldComponent(node: MdxNode): TipTapNode {
+    const attrs = this.extractAttributes(node)
+    const description = this.extractTextContent(node) || ''
+
+    return {
+      type: 'paramBlock',
+      attrs: {
+        id: `param-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
+        path: attrs.path || 'param',
+        type: attrs.type || 'string',
+        required: attrs.required === true || attrs.required === 'true',
+        description: description.trim(),
+      }
+    }
+  }
+
+  /**
+   * Convert Steps component
+   * <Steps>
+   *   <Step title="First Step">Content</Step>
+   *   <Step title="Second Step">Content</Step>
+   * </Steps>
+   */
+  private convertStepsComponent(node: MdxNode): TipTapNode {
+    const steps: TipTapNode[] = []
+
+    const children = node.children || []
+    for (const child of children) {
+      if (child.type === 'mdxJsxFlowElement' || child.type === 'mdxJsxTextElement') {
+        if (child.name === 'Step') {
+          const attrs = this.extractAttributes(child)
+          const stepContent = this.convertToTipTap(child)
+
+          steps.push({
+            type: 'stepBlock',
+            attrs: {
+              title: attrs.title || 'Step',
+            },
+            content: stepContent.length > 0 ? stepContent : [
+              { type: 'paragraph', content: [{ type: 'text', text: 'Step content' }] }
+            ],
+          })
+        }
+      }
+    }
+
+    // If no steps found, create a default one
+    if (steps.length === 0) {
+      steps.push({
+        type: 'stepBlock',
+        attrs: { title: 'Step 1' },
+        content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Step content' }] }],
+      })
+    }
+
+    return {
+      type: 'stepsBlock',
+      attrs: {
+        id: `steps-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
+      },
+      content: steps,
     }
   }
 

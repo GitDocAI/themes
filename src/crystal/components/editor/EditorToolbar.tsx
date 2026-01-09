@@ -230,6 +230,16 @@ const EditorToolbarComponent = forwardRef<EditorToolbarRef, EditorToolbarProps>(
     setShowInsertDropdown(false)
   }
 
+  const insertParamField = () => {
+    editor.chain().focus().setParamBlock({ path: 'param', type: 'string', required: false, description: 'Parameter description' }).run()
+    setShowInsertDropdown(false)
+  }
+
+  const insertSteps = () => {
+    editor.chain().focus().setStepsBlock(3).run()
+    setShowInsertDropdown(false)
+  }
+
   const openLinkModal = () => {
     // Check if we have link data from hover event
     const currentLinkData = (window as any).__currentLinkData
@@ -1021,6 +1031,60 @@ const EditorToolbarComponent = forwardRef<EditorToolbarRef, EditorToolbarProps>(
             >
               <i className="pi pi-tag" style={{ fontSize: '16px', color: '#3b82f6' }}></i>
               Label
+            </button>
+
+            <button
+              onClick={insertParamField}
+              style={{
+                width: '100%',
+                padding: '10px 12px',
+                backgroundColor: 'transparent',
+                color: theme === 'light' ? '#374151' : '#d1d5db',
+                border: 'none',
+                textAlign: 'left',
+                cursor: 'pointer',
+                fontSize: '14px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                transition: 'background-color 0.2s',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = theme === 'light' ? '#f3f4f6' : '#374151'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent'
+              }}
+            >
+              <i className="pi pi-sliders-h" style={{ fontSize: '16px', color: '#8b5cf6' }}></i>
+              Param Field
+            </button>
+
+            <button
+              onClick={insertSteps}
+              style={{
+                width: '100%',
+                padding: '10px 12px',
+                backgroundColor: 'transparent',
+                color: theme === 'light' ? '#374151' : '#d1d5db',
+                border: 'none',
+                textAlign: 'left',
+                cursor: 'pointer',
+                fontSize: '14px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                transition: 'background-color 0.2s',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = theme === 'light' ? '#f3f4f6' : '#374151'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent'
+              }}
+            >
+              <i className="pi pi-list-check" style={{ fontSize: '16px', color: '#06b6d4' }}></i>
+              Steps
             </button>
           </div>
         )}

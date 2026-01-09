@@ -2,6 +2,14 @@ import { Node, mergeAttributes } from '@tiptap/core'
 import { ReactNodeViewRenderer } from '@tiptap/react'
 import { LabelNodeView } from '../node-views/LabelNodeView'
 
+export interface LabelItem {
+  id: string
+  text: string
+  color: string
+  size: 'sm' | 'md' | 'lg'
+  icon?: string
+}
+
 export const LabelBlock = Node.create({
   name: 'labelBlock',
   group: 'block',
@@ -13,14 +21,29 @@ export const LabelBlock = Node.create({
       id: {
         default: null,
       },
+      // Support both old single label format and new multi-label format
       label: {
-        default: 'Label',
+        default: null, // Deprecated: single label text
       },
       color: {
-        default: '#3b82f6',
+        default: null, // Deprecated: single label color
       },
       size: {
-        default: 'md',
+        default: null, // Deprecated: single label size
+      },
+      // New: array of labels stored as JSON string to ensure proper change detection
+      labels: {
+        default: '[]',
+        parseHTML: element => {
+          const labelsAttr = element.getAttribute('data-labels')
+          return labelsAttr || '[]'
+        },
+        renderHTML: attributes => {
+          if (attributes.labels && attributes.labels !== '[]') {
+            return { 'data-labels': attributes.labels }
+          }
+          return {}
+        },
       },
     }
   },
@@ -46,11 +69,25 @@ export const LabelBlock = Node.create({
       setLabelBlock:
         (attributes: any) =>
         ({ commands }: any) => {
+          // Create initial label if not provided
+          let labels = attributes.labels
+          if (!labels) {
+            labels = [{
+              id: `label-item-${Date.now()}`,
+              text: attributes.label || 'Label',
+              color: attributes.color || '#3b82f6',
+              size: attributes.size || 'md',
+            }]
+          }
+
+          // Ensure labels is stored as JSON string for proper change detection
+          const labelsString = typeof labels === 'string' ? labels : JSON.stringify(labels)
+
           return commands.insertContent({
             type: this.name,
             attrs: {
               id: `label-${Date.now()}`,
-              ...attributes,
+              labels: labelsString,
             },
           })
         },
