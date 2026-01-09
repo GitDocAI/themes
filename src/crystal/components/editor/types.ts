@@ -54,6 +54,17 @@ declare module '@tiptap/core' {
         size?: 'sm' | 'md' | 'lg'
       }) => ReturnType
     }
+    paramBlock: {
+      setParamBlock: (attributes?: {
+        path?: string
+        type?: string
+        required?: boolean
+        description?: string
+      }) => ReturnType
+    }
+    stepsBlock: {
+      setStepsBlock: (stepCount?: number) => ReturnType
+    }
     tabsBlock: {
       setTabsBlock: (attributes?: {
         alignment?: 'left' | 'center' | 'right'

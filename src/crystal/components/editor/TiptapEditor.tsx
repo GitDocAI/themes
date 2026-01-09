@@ -26,6 +26,8 @@ import { TableBlock } from './extensions/TableBlock'
 import { ImageBlock } from './extensions/ImageBlock'
 import { EndpointBlock } from './extensions/EndpointBlock'
 import { LabelBlock } from './extensions/LabelBlock'
+import { ParamBlock } from './extensions/ParamBlock'
+import { StepsBlock, StepBlock } from './extensions/StepsBlock'
 import { CodeGroup } from './extensions/CodeGroup'
 import { CodeBlockWithLanguage } from './extensions/CodeBlockWithLanguage'
 import { HeadingWithLink } from './extensions/HeadingWithLink'
@@ -210,6 +212,9 @@ export const TiptapEditor: React.FC<TiptapEditorProps> = ({ content, theme, onUp
       HorizontalRuleBlock,
       EndpointBlock,
       LabelBlock,
+      ParamBlock,
+      StepsBlock,
+      StepBlock,
       CodeGroup,
       Column,
       ColumnGroup,

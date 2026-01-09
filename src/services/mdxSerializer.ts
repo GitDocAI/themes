@@ -170,6 +170,16 @@ class MDXSerializerService {
       case 'labelBlock':
         return this.serializeLabelBlock(node)
 
+      case 'paramBlock':
+        return this.serializeParamBlock(node)
+
+      case 'stepsBlock':
+        return this.serializeStepsBlock(node)
+
+      case 'stepBlock':
+        // Individual steps are handled by stepsBlock
+        return ''
+
       default:
         console.warn(`[MDXSerializer] Unknown node type: ${node.type}`)
         return ''
@@ -744,13 +754,92 @@ class MDXSerializerService {
 
   /**
    * Serialize Label block
+   * Supports both old format (single label) and new format (labels array or JSON string)
    */
   private serializeLabelBlock(node: TipTapNode): string {
+    // Check for new labels format (could be array or JSON string)
+    let labels = node.attrs?.labels
+
+    // Parse JSON string if necessary
+    if (typeof labels === 'string' && labels !== '[]') {
+      try {
+        labels = JSON.parse(labels)
+      } catch {
+        labels = null
+      }
+    }
+
+    if (labels && Array.isArray(labels) && labels.length > 0) {
+      if (labels.length === 1) {
+        // Single label - use simple format
+        const label = labels[0]
+        const iconAttr = label.icon ? ` icon="${this.escapeAttr(label.icon)}"` : ''
+        return `<Label label="${this.escapeAttr(label.text)}" color="${label.color || '#3b82f6'}" size="${label.size || 'md'}"${iconAttr} />`
+      } else {
+        // Multiple labels - use Labels wrapper
+        const labelElements = labels.map((label: { text: string; color?: string; size?: string; icon?: string }) => {
+          const iconAttr = label.icon ? ` icon="${this.escapeAttr(label.icon)}"` : ''
+          return `  <Label label="${this.escapeAttr(label.text)}" color="${label.color || '#3b82f6'}" size="${label.size || 'md'}"${iconAttr} />`
+        }).join('\n')
+        return `<Labels>\n${labelElements}\n</Labels>`
+      }
+    }
+
+    // Fallback to old format
     const label = node.attrs?.label || ''
     const color = node.attrs?.color || '#3b82f6'
     const size = node.attrs?.size || 'md'
 
     return `<Label label="${this.escapeAttr(label)}" color="${color}" size="${size}" />`
+  }
+
+  /**
+   * Serialize ParamField block
+   */
+  private serializeParamBlock(node: TipTapNode): string {
+    const path = node.attrs?.path || 'param'
+    const type = node.attrs?.type || 'string'
+    const required = node.attrs?.required || false
+    const description = node.attrs?.description || ''
+
+    const requiredAttr = required ? ' required' : ''
+
+    if (description) {
+      return `<ParamField path="${this.escapeAttr(path)}" type="${this.escapeAttr(type)}"${requiredAttr}>\n  ${this.escapeAttr(description)}\n</ParamField>`
+    }
+
+    return `<ParamField path="${this.escapeAttr(path)}" type="${this.escapeAttr(type)}"${requiredAttr} />`
+  }
+
+  /**
+   * Serialize Steps block
+   */
+  private serializeStepsBlock(node: TipTapNode): string {
+    const steps = node.content || []
+    const lines: string[] = ['<Steps>']
+
+    for (const step of steps) {
+      if (step.type === 'stepBlock') {
+        const title = step.attrs?.title || 'Step'
+        lines.push(`  <Step title="${this.escapeAttr(title)}">`)
+
+        const stepContent = step.content || []
+        for (const child of stepContent) {
+          const serialized = this.serializeNode(child)
+          if (serialized) {
+            serialized.split('\n').forEach(line => {
+              lines.push(`    ${line}`)
+            })
+          }
+        }
+
+        lines.push('  </Step>')
+      }
+    }
+
+    lines.push('</Steps>')
+
+    return lines.join('\n')
   }
 
   /**
