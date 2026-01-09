@@ -713,17 +713,18 @@ class MDXSerializerService {
    */
   private serializeCodeGroup(node: TipTapNode): string {
     const files = node.attrs?.files || []
-    const lines: string[] = ['<CodeGroup>']
+    const lines: string[] = ['<CodeGroup>', '']
 
     for (const file of files) {
       const lang = file.language || ''
+      const filename = file.filename || ''
       const code = file.code || ''
 
-      lines.push(`  <Code lang="${lang}">`)
-      code.split('\n').forEach((line: string) => {
-        lines.push(`    ${line}`)
-      })
-      lines.push('  </Code>')
+      // Format: ```language filename
+      lines.push(`\`\`\`${lang} ${filename}`.trim())
+      lines.push(code)
+      lines.push('```')
+      lines.push('')
     }
 
     lines.push('</CodeGroup>')

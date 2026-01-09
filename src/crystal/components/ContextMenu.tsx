@@ -57,7 +57,7 @@ const ContextMenu = ({ menuPosition, onOptionSelect,theme,closeFunc }:ContextMen
     <div
       ref={ref}
       style={{
-        position: 'absolute',
+        position: 'fixed',
         top: menuPosition.y,
         left: menuPosition.x,
         backgroundColor: isDark ? '#1f2937' : '#ffffff',
@@ -143,6 +143,7 @@ const TextSelectionContextMenu = ({theme,children,onAiChat,onAiUpgrade}:TextSele
   const [menuPosition, setMenuPosition] = useState<{x:number,y:number}|null>(null);
   const [selectedText, setSelectedText] = useState('');
   const containerRef = useRef<HTMLDivElement>(null);
+  const lastMousePosition = useRef<{x: number, y: number}>({x: 0, y: 0});
 
   const viteMode = import.meta.env.VITE_MODE || 'production'
   const isProductionMode = viteMode === 'production'
@@ -180,14 +181,29 @@ const TextSelectionContextMenu = ({theme,children,onAiChat,onAiUpgrade}:TextSele
       if (range) {
         const rect = range.getBoundingClientRect();
 
-        // Position the menu to the right of the selection, slightly above
-        const x = rect.right + window.scrollX + 8;
-        const y = rect.top + window.scrollY - 8;
+        // Check if rect has valid coordinates (code editors may return 0,0)
+        // Only check width > 0, as left could legitimately be near 0
+        const hasValidRect = rect.width > 0 && (rect.left > 0 || rect.right > 0);
+
+        let x: number;
+        let y: number;
+
+        if (hasValidRect) {
+          // Position the menu to the right of the selection, slightly above
+          // Use viewport coordinates for fixed positioning (no scroll offset needed)
+          x = rect.right + 8;
+          y = rect.top - 8;
+        } else {
+          // Fallback to last mouse position for code editors
+          // clientX/clientY are viewport coordinates
+          x = lastMousePosition.current.x + 8;
+          y = lastMousePosition.current.y - 8;
+        }
 
         // Make sure menu doesn't go off-screen to the right
         const menuWidth = 320; // Approximate menu width
         const adjustedX = x + menuWidth > window.innerWidth
-          ? rect.left + window.scrollX - menuWidth - 8
+          ? (hasValidRect ? rect.left : lastMousePosition.current.x) - menuWidth - 8
           : x;
 
         setSelectedText(text);
@@ -212,7 +228,11 @@ const TextSelectionContextMenu = ({theme,children,onAiChat,onAiUpgrade}:TextSele
   };
 
   useEffect(() => {
-    const handleMouseUp = () => {
+    const handleMouseUp = (e: MouseEvent) => {
+      // Store mouse position for fallback (code editors return invalid rect)
+      // Use clientX/clientY for viewport coordinates (works with fixed positioning)
+      lastMousePosition.current = { x: e.clientX, y: e.clientY };
+
       // Small delay to ensure selection is complete
       setTimeout(() => {
         handleTextSelection();
@@ -236,9 +256,9 @@ const TextSelectionContextMenu = ({theme,children,onAiChat,onAiUpgrade}:TextSele
       if (text && text.length > 0 && isSelectionInContentArea(selection)) {
         e.preventDefault();
 
-        // Position menu at cursor position
-        const x = e.pageX;
-        const y = e.pageY;
+        // Position menu at cursor position (use clientX/Y for viewport coords)
+        const x = e.clientX;
+        const y = e.clientY;
 
         // Make sure menu doesn't go off-screen
         const menuWidth = 320;

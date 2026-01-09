@@ -38,10 +38,19 @@ export class ContentService {
             headers = {
               'Content-Type': 'text/plain; charset=utf-8',
             }
+            const serializedContent = mdxSerializer.serialize(JSON.parse(content) as any)
+
+            // Guard: don't save empty content
+            if (!serializedContent || serializedContent.trim() === '') {
+              console.warn('[ContentService] Attempted to save empty MDX content, skipping')
+              then()
+              return
+            }
+
             body = {
                 path: cleanDocId,
                 type:'file',
-                content:mdxSerializer.serialize(JSON.parse(content) as any)
+                content: serializedContent
             }
 
           } else {

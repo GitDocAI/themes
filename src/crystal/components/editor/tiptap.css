@@ -779,3 +779,66 @@ body[style*="background-color: rgb(255, 255, 255)"] .hljs-meta {
   }
 }
 
+
+/* Code Editor Styles (Visual/Code toggle) */
+.code-editor-textarea,
+.code-editor-pre {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace !important;
+  font-size: 14px !important;
+  line-height: 1.6 !important;
+  letter-spacing: normal !important;
+  word-spacing: normal !important;
+  white-space: pre-wrap !important;
+  word-break: keep-all !important;
+  tab-size: 2 !important;
+  margin: 0 !important;
+  background: transparent !important;
+}
+
+.code-editor-textarea {
+  outline: none !important;
+  border: none !important;
+  caret-color: #3b82f6 !important;
+  color: transparent !important;
+  resize: none !important;
+  overflow: hidden !important;
+}
+
+/* Dark theme cursor */
+.dark-code-editor .code-editor-textarea {
+  caret-color: #60a5fa !important;
+}
+
+.code-editor-textarea::selection {
+  background: rgba(59, 130, 246, 0.3) !important;
+  color: transparent !important;
+}
+
+.code-editor-textarea:focus {
+  outline: none !important;
+}
+
+/* Shiki code highlighting overrides */
+.code-editor-pre code {
+  background: transparent !important;
+  font-family: inherit !important;
+  font-size: inherit !important;
+  line-height: inherit !important;
+}
+
+.code-editor-pre .line {
+  display: inline;
+}
+
+/* Allow word wrapping in code editor */
+.code-editor-textarea,
+.code-editor-pre {
+  white-space: pre-wrap !important;
+  word-break: break-word !important;
+  overflow-wrap: break-word !important;
+}
+
+/* Code editor textarea */
+.code-editor-textarea {
+  text-indent: 0 !important;
+}

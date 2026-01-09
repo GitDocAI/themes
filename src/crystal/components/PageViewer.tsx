@@ -156,8 +156,9 @@ export const PageViewer: React.FC<PageViewerProps> = ({ pagePath, theme, isDevMo
     )
   }
 
-  // Show parse error banner if MDX parsing failed
-  if (pageData.parseError) {
+  // Show parse error banner if MDX parsing failed (only in non-dev mode)
+  // In dev mode, we pass through to show the editor with rawMdx
+  if (pageData.parseError && !isDevMode) {
     return (
       <div style={{
         opacity: isVisible ? 1 : 0,
@@ -240,7 +241,10 @@ export const PageViewer: React.FC<PageViewerProps> = ({ pagePath, theme, isDevMo
         id: `block-${idx}`
       })) : undefined,
       // If it's a direct Tiptap doc, use it as content, otherwise pass the whole pageData
-      content: isTiptapDoc ? pageData.content : pageData.content || undefined
+      content: isTiptapDoc ? pageData.content : pageData.content || undefined,
+      // Pass raw MDX and parse error for code editor fallback
+      rawMdx: pageData.rawMdx,
+      parseError: pageData.parseError
     }
 
     return (
@@ -255,11 +259,18 @@ export const PageViewer: React.FC<PageViewerProps> = ({ pagePath, theme, isDevMo
             theme={theme}
             isDevMode={true}
             allowUpload={allowUpload}
+            hasParseError={!!pageData.parseError}
             onSave={async (pageId, updatedData) => {
+              // Guard: don't save empty content
+              const contentArr = updatedData.content?.content || []
+              if (!contentArr || contentArr.length === 0) {
+                console.warn('[PageViewer] Attempted to save empty content, skipping')
+                return
+              }
               // Serialize TipTap content to MDX format
               const tiptapDoc = isTiptapDoc
                 ? updatedData.content  // Direct Tiptap doc
-                : { type: 'doc', content: updatedData.content?.content || [] } // Wrap in doc
+                : { type: 'doc', content: contentArr } // Wrap in doc
               // Save as MDX file
               await ContentService.saveContent(pageId, JSON.stringify(tiptapDoc) as any)
             }}

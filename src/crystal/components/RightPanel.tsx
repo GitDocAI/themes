@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { TiptapEditor } from './editor/TiptapEditor'
 
 interface RightPanelProps {
@@ -14,6 +14,11 @@ export const RightPanel: React.FC<RightPanelProps> = ({ theme, content, isDevMod
     type: 'doc',
     content: content.content
   } : { type: 'doc', content: [] }
+
+  // Generate a key based on content to force TiptapEditor re-render when content changes
+  const contentKey = useMemo(() => {
+    return JSON.stringify(content?.content || [])
+  }, [content])
 
 
   return (
@@ -56,6 +61,7 @@ export const RightPanel: React.FC<RightPanelProps> = ({ theme, content, isDevMod
         }}
       >
         <TiptapEditor
+          key={contentKey}
           content={editorContent}
           theme={theme}
           onUpdate={() => {}}

@@ -6,13 +6,16 @@ import { ContentService } from '../../../services/contentService'
 interface EditorToolbarProps {
   editor: Editor
   theme: 'light' | 'dark'
+  editorMode?: 'visual' | 'code'
+  onModeToggle?: () => void
+  isSwitching?: boolean
 }
 
 export type EditorToolbarRef = {
   openLinkModal: () => void
 }
 
-const EditorToolbarComponent = forwardRef<EditorToolbarRef, EditorToolbarProps>(({ editor, theme }, ref) => {
+const EditorToolbarComponent = forwardRef<EditorToolbarRef, EditorToolbarProps>(({ editor, theme, editorMode = 'visual', onModeToggle, isSwitching = false }, ref) => {
   const [showInsertDropdown, setShowInsertDropdown] = useState(false)
   const [currentTextType, setCurrentTextType] = useState('paragraph')
   const [showLinkModal, setShowLinkModal] = useState(false)
@@ -318,8 +321,11 @@ const EditorToolbarComponent = forwardRef<EditorToolbarRef, EditorToolbarProps>(
         flexWrap: 'wrap',
       }}
     >
-      {/* Text Type Selector */}
-      <select
+      {/* Only show formatting tools in visual mode */}
+      {editorMode === 'visual' && (
+        <>
+          {/* Text Type Selector */}
+          <select
         value={currentTextType}
         onChange={handleTextTypeChange}
         style={{
@@ -1019,6 +1025,83 @@ const EditorToolbarComponent = forwardRef<EditorToolbarRef, EditorToolbarProps>(
           </div>
         )}
       </div>
+        </>
+      )}
+
+      {/* Spacer to push mode toggle to the right */}
+      <div style={{ flex: 1 }} />
+
+      {/* Visual/Code Mode Toggle */}
+      {onModeToggle && (
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            padding: '4px 8px',
+            backgroundColor: theme === 'light' ? '#f3f4f6' : '#374151',
+            borderRadius: '6px',
+            marginLeft: '8px',
+          }}
+        >
+          <span
+            style={{
+              fontSize: '12px',
+              fontWeight: editorMode === 'visual' ? '600' : '400',
+              color: editorMode === 'visual'
+                ? (theme === 'light' ? '#1f2937' : '#f3f4f6')
+                : (theme === 'light' ? '#9ca3af' : '#6b7280'),
+              transition: 'all 0.2s',
+            }}
+          >
+            Visual
+          </span>
+          <button
+            onClick={onModeToggle}
+            disabled={isSwitching}
+            style={{
+              position: 'relative',
+              width: '40px',
+              height: '22px',
+              backgroundColor: editorMode === 'code'
+                ? '#3b82f6'
+                : (theme === 'light' ? '#d1d5db' : '#4b5563'),
+              borderRadius: '11px',
+              border: 'none',
+              cursor: isSwitching ? 'wait' : 'pointer',
+              transition: 'background-color 0.2s',
+              opacity: isSwitching ? 0.7 : 1,
+            }}
+            title={`Switch to ${editorMode === 'visual' ? 'Code' : 'Visual'} mode`}
+          >
+            <div
+              style={{
+                position: 'absolute',
+                top: '2px',
+                left: editorMode === 'code' ? '20px' : '2px',
+                width: '18px',
+                height: '18px',
+                backgroundColor: '#ffffff',
+                borderRadius: '50%',
+                boxShadow: '0 1px 3px rgba(0, 0, 0, 0.2)',
+                transition: 'left 0.2s',
+              }}
+            />
+          </button>
+          <span
+            style={{
+              fontSize: '12px',
+              fontWeight: editorMode === 'code' ? '600' : '400',
+              color: editorMode === 'code'
+                ? (theme === 'light' ? '#1f2937' : '#f3f4f6')
+                : (theme === 'light' ? '#9ca3af' : '#6b7280'),
+              transition: 'all 0.2s',
+            }}
+          >
+            Code
+          </span>
+        </div>
+      )}
 
       {/* Link Modal */}
       {showLinkModal && (
