@@ -13,6 +13,9 @@ interface AISearchSidebarProps {
   isOpen: boolean
   onClose: () => void
   isDevMode?: boolean
+  isEnabled?: boolean // Whether AI Search is enabled in config
+  onToggleEnabled?: (enabled: boolean) => void // Callback to enable/disable AI Search
+  isProductionMode?: boolean // Whether we're in real production (not preview)
 }
 
 const DEFAULT_TITLE = 'AI Assistant'
@@ -29,8 +32,13 @@ export const AISearchSidebar: React.FC<AISearchSidebarProps> = ({
   primaryColor,
   isOpen,
   onClose,
-  isDevMode = false
+  isDevMode = false,
+  isEnabled = true,
+  onToggleEnabled,
+  isProductionMode = false
 }) => {
+  // In preview mode (not dev, not production), interactions should be disabled
+  const isPreviewMode = !isDevMode && !isProductionMode
   const [inputValue, setInputValue] = useState('')
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [isLoading, setIsLoading] = useState(false)
@@ -548,6 +556,59 @@ export const AISearchSidebar: React.FC<AISearchSidebarProps> = ({
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            {/* Enable/Disable Toggle - Only in Dev Mode */}
+            {isDevMode && onToggleEnabled && (
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '4px 12px',
+                  backgroundColor: colors.inputBg,
+                  borderRadius: '20px',
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: '0.75rem',
+                    color: colors.secondaryText,
+                    fontWeight: 500,
+                  }}
+                >
+                  {isEnabled ? 'Enabled' : 'Disabled'}
+                </span>
+                <button
+                  onClick={() => onToggleEnabled(!isEnabled)}
+                  style={{
+                    position: 'relative',
+                    width: '36px',
+                    height: '20px',
+                    borderRadius: '10px',
+                    border: 'none',
+                    backgroundColor: isEnabled ? primaryColor : (theme === 'light' ? '#d1d5db' : '#4b5563'),
+                    cursor: 'pointer',
+                    transition: 'background-color 0.2s ease',
+                    padding: 0,
+                  }}
+                  title={isEnabled ? 'Disable AI Search' : 'Enable AI Search'}
+                >
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: '2px',
+                      left: isEnabled ? '18px' : '2px',
+                      width: '16px',
+                      height: '16px',
+                      borderRadius: '50%',
+                      backgroundColor: '#ffffff',
+                      transition: 'left 0.2s ease',
+                      boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+                    }}
+                  />
+                </button>
+              </div>
+            )}
+
             {/* Clear History Button */}
             {messages.length > 1 && (
               <button
@@ -1049,15 +1110,15 @@ export const AISearchSidebar: React.FC<AISearchSidebarProps> = ({
                 ref={inputRef}
                 type="text"
                 value={isDevMode ? '' : inputValue}
-                onChange={(e) => !isDevMode && setInputValue(e.target.value)}
+                onChange={(e) => !isDevMode && !isPreviewMode && setInputValue(e.target.value)}
                 onClick={() => {
                   if (isDevMode && !editingPlaceholder) {
                     setEditingPlaceholder(true)
                   }
                 }}
-                placeholder={placeholder}
-                disabled={isLoading}
-                readOnly={isDevMode}
+                placeholder={isPreviewMode ? 'Preview mode - interactions disabled' : placeholder}
+                disabled={isLoading || isPreviewMode}
+                readOnly={isDevMode || isPreviewMode}
                 style={{
                   flex: 1,
                   border: 'none',
@@ -1066,8 +1127,8 @@ export const AISearchSidebar: React.FC<AISearchSidebarProps> = ({
                   fontSize: '0.95rem',
                   outline: 'none',
                   padding: '10px 0',
-                  opacity: isLoading ? 0.5 : 1,
-                  cursor: isDevMode ? 'pointer' : 'text',
+                  opacity: (isLoading || isPreviewMode) ? 0.5 : 1,
+                  cursor: isDevMode ? 'pointer' : (isPreviewMode ? 'not-allowed' : 'text'),
                 }}
               />
             )}
@@ -1096,27 +1157,27 @@ export const AISearchSidebar: React.FC<AISearchSidebarProps> = ({
             ) : (
               <button
                 type="submit"
-                disabled={isDevMode || !inputValue.trim()}
+                disabled={isDevMode || isPreviewMode || !inputValue.trim()}
                 style={{
                   width: '40px',
                   height: '40px',
                   borderRadius: '10px',
                   border: 'none',
-                  background: isDevMode
+                  background: (isDevMode || isPreviewMode)
                     ? colors.border
                     : inputValue.trim()
                       ? `linear-gradient(135deg, ${primaryColor} 0%, ${primaryColor}dd 100%)`
                       : colors.border,
-                  color: isDevMode ? colors.secondaryText : (inputValue.trim() ? '#ffffff' : colors.secondaryText),
-                  cursor: isDevMode ? 'not-allowed' : (inputValue.trim() ? 'pointer' : 'not-allowed'),
+                  color: (isDevMode || isPreviewMode) ? colors.secondaryText : (inputValue.trim() ? '#ffffff' : colors.secondaryText),
+                  cursor: (isDevMode || isPreviewMode) ? 'not-allowed' : (inputValue.trim() ? 'pointer' : 'not-allowed'),
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   transition: 'all 0.2s ease',
                   flexShrink: 0,
-                  opacity: isDevMode ? 0.5 : 1,
+                  opacity: (isDevMode || isPreviewMode) ? 0.5 : 1,
                 }}
-                title={isDevMode ? 'Disabled in edit mode' : 'Send message'}
+                title={isDevMode ? 'Disabled in edit mode' : (isPreviewMode ? 'Disabled in preview mode' : 'Send message')}
               >
                 <i className="pi pi-send" style={{ fontSize: '1rem' }} />
               </button>

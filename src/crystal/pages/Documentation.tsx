@@ -11,6 +11,7 @@ import { RightPanel } from '../components/RightPanel'
 import { PrevNextNavigation } from '../components/PrevNextNavigation'
 import { SearchModal } from '../components/SearchModal'
 import { configLoader, type AISearchConfig, type Version } from '../../services/configLoader'
+import { ContentService } from '../../services/contentService'
 import { openApiLoader } from '../../services/openApiLoader'
 import { FindPagePathByName, navigationService } from '../../services/navigationService'
 import { pageLoader } from '../../services/pageLoader'
@@ -574,6 +575,36 @@ function Documentation() {
     setIsSettingsSidebarOpen(prev => !prev)
   }
 
+  // Handle AI Search toggle - enable or disable AI Search in config
+  const handleAISearchToggle = async (enabled: boolean) => {
+    try {
+      const config = await configLoader.loadConfig()
+
+      if (enabled) {
+        // Create default AI Search config
+        const defaultAISearchConfig: AISearchConfig = {
+          triggerLabel: 'Ask to AI',
+          chatTitle: 'AI Assistant',
+          welcomeMessage: 'Hello! How can I help you today? Feel free to ask me anything about the documentation.',
+          placeholder: 'Ask a question...',
+          suggestedQuestions: []
+        }
+        config.aiSearch = defaultAISearchConfig
+        await ContentService.saveConfig(config)
+        configLoader.updateConfig(config)
+        setAISearchConfig(defaultAISearchConfig)
+      } else {
+        // Remove AI Search config
+        delete config.aiSearch
+        await ContentService.saveConfig(config)
+        configLoader.updateConfig(config)
+        setAISearchConfig(undefined)
+      }
+    } catch (error) {
+      console.error('Error toggling AI Search config:', error)
+    }
+  }
+
   const passContextoAi=(contextText:string,intention:string)=>{
     const currentFileName = window.location.href.replace(window.location.origin,"");
 
@@ -630,6 +661,7 @@ function Documentation() {
           allowUpload={isDevEnvironment}
           onSearchClick={() => setShowSearchModal(true)}
           onAISearchClick={() => setIsAISearchSidebarOpen(true)}
+          showAISearchInDev={!isProductionMode && isDevMode}
         />
         {tabs.length > 0 && (
           <TabBar
@@ -821,15 +853,18 @@ function Documentation() {
         isDevMode={!isProductionMode && isDevMode}
       />
 
-      {/* AI Search Sidebar */}
-      {aiSearchConfig && (
+      {/* AI Search Sidebar - Show in dev mode even without config */}
+      {(aiSearchConfig || (!isProductionMode && isDevMode)) && (
         <AISearchSidebar
-          config={aiSearchConfig}
+          config={aiSearchConfig || {}}
           theme={theme}
           primaryColor={primaryColor}
           isOpen={isAISearchSidebarOpen}
           onClose={() => setIsAISearchSidebarOpen(false)}
           isDevMode={!isProductionMode && isDevMode}
+          isEnabled={!!aiSearchConfig}
+          onToggleEnabled={handleAISearchToggle}
+          isProductionMode={isProductionMode}
         />
       )}
     </TextSelectionContextMenu>

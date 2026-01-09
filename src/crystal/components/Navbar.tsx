@@ -20,9 +20,10 @@ interface NavbarProps {
   allowUpload?: boolean
   onSearchClick?: () => void
   onAISearchClick?: () => void
+  showAISearchInDev?: boolean // Show AI Search button in dev mode even without config
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ theme, onThemeChange, onVersionChange, currentVersion, isDevMode = false, allowUpload = false, onSearchClick = () => {}, onAISearchClick }) => {
+export const Navbar: React.FC<NavbarProps> = ({ theme, onThemeChange, onVersionChange, currentVersion, isDevMode = false, allowUpload = false, onSearchClick = () => {}, onAISearchClick, showAISearchInDev = false }) => {
   const navigate = useNavigate()
   const { updateTrigger } = useConfig()
   const viteMode = import.meta.env.VITE_MODE || 'production'
@@ -564,10 +565,10 @@ export const Navbar: React.FC<NavbarProps> = ({ theme, onThemeChange, onVersionC
           </button>
         )}
 
-        {/* AI Search Button (hide on mobile) */}
-        {aiSearchConfig && !isMobile && (
+        {/* AI Search Button (hide on mobile, show in dev mode even without config) */}
+        {(aiSearchConfig || showAISearchInDev) && !isMobile && (
           <AISearchButton
-            config={aiSearchConfig}
+            config={aiSearchConfig || { triggerLabel: 'Ask to AI' }}
             theme={theme}
             primaryColor={colors.primary}
             onClick={onAISearchClick}
@@ -1331,8 +1332,8 @@ export const Navbar: React.FC<NavbarProps> = ({ theme, onThemeChange, onVersionC
         </div>
       )}
 
-      {/* Floating AI Search Button - Mobile only */}
-      {isMobile && aiSearchConfig && onAISearchClick && (
+      {/* Floating AI Search Button - Mobile only (show in dev mode even without config) */}
+      {isMobile && (aiSearchConfig || showAISearchInDev) && onAISearchClick && (
         <button
           onClick={onAISearchClick}
           style={{
