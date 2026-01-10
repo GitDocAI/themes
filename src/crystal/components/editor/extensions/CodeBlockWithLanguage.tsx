@@ -14,7 +14,6 @@ const CodeBlockComponent = ({ node, updateAttributes, editor, getPos }: NodeView
   const selectorRef = useRef<HTMLDivElement>(null)
   const [theme, setTheme] = useState<'light' | 'dark'>('dark')
   const [copied, setCopied] = useState(false)
-  const [showCopyButton, setShowCopyButton] = useState(false)
   const [highlightedCode, setHighlightedCode] = useState<string>('')
   const [primaryColor, setPrimaryColor] = useState('#3b82f6')
   const [showCopyTooltip, setShowCopyTooltip] = useState(false)

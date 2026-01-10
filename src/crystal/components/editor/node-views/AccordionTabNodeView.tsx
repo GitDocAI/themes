@@ -180,12 +180,12 @@ export const AccordionTabNodeView = ({ node, updateAttributes, editor, getPos }:
         opacity: disabled ? 0.5 : 1,
         marginBottom: '0.5rem',
       }}
-      onMouseEnter={(e) => {
+      onMouseEnter={(e: React.MouseEvent<HTMLDivElement>) => {
         if (!isEditable) {
           e.currentTarget.style.borderColor = iconColor
         }
       }}
-      onMouseLeave={(e) => {
+      onMouseLeave={(e: React.MouseEvent<HTMLDivElement>) => {
         if (!isEditable) {
           e.currentTarget.style.borderColor = theme === 'light' ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.08)'
         }
