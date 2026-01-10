@@ -10,6 +10,7 @@ interface AISearchSidebarProps {
   config: AISearchConfig
   theme: 'light' | 'dark'
   primaryColor: string
+  backgroundColor?: string
   isOpen: boolean
   onClose: () => void
   isDevMode?: boolean
@@ -30,6 +31,7 @@ export const AISearchSidebar: React.FC<AISearchSidebarProps> = ({
   config,
   theme,
   primaryColor,
+  backgroundColor,
   isOpen,
   onClose,
   isDevMode = false,
@@ -343,19 +345,31 @@ export const AISearchSidebar: React.FC<AISearchSidebarProps> = ({
     }
   }
 
-  // Theme colors
+  // Helper to convert hex to rgba
+  const hexToRgba = (hex: string, alpha: number): string => {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
+    if (result) {
+      const r = parseInt(result[1], 16)
+      const g = parseInt(result[2], 16)
+      const b = parseInt(result[3], 16)
+      return `rgba(${r}, ${g}, ${b}, ${alpha})`
+    }
+    return hex
+  }
+
+  // Theme colors - using primaryColor from config
   const colors = {
-    background: theme === 'dark' ? '#0f172a' : '#ffffff',
-    headerBg: theme === 'dark' ? '#1e293b' : '#f8fafc',
-    border: theme === 'dark' ? '#334155' : '#e2e8f0',
+    background: 'transparent',
+    headerBg: theme === 'dark' ? 'rgba(255, 255, 255, 0.03)' : 'rgba(0, 0, 0, 0.02)',
+    border: theme === 'dark' ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)',
     text: theme === 'dark' ? '#f1f5f9' : '#1e293b',
     secondaryText: theme === 'dark' ? '#94a3b8' : '#64748b',
-    inputBg: theme === 'dark' ? '#1e293b' : '#f1f5f9',
+    inputBg: theme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.03)',
     userMessageBg: primaryColor,
-    assistantMessageBg: theme === 'dark' ? '#1e293b' : '#f1f5f9',
-    suggestionBg: theme === 'dark' ? 'rgba(139, 92, 246, 0.1)' : 'rgba(59, 130, 246, 0.08)',
-    suggestionBorder: theme === 'dark' ? 'rgba(139, 92, 246, 0.3)' : 'rgba(59, 130, 246, 0.2)',
-    suggestionHoverBg: theme === 'dark' ? 'rgba(139, 92, 246, 0.2)' : 'rgba(59, 130, 246, 0.15)',
+    assistantMessageBg: theme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.03)',
+    suggestionBg: hexToRgba(primaryColor, theme === 'dark' ? 0.1 : 0.08),
+    suggestionBorder: hexToRgba(primaryColor, theme === 'dark' ? 0.3 : 0.2),
+    suggestionHoverBg: hexToRgba(primaryColor, theme === 'dark' ? 0.2 : 0.15),
   }
 
   return (
@@ -387,7 +401,7 @@ export const AISearchSidebar: React.FC<AISearchSidebarProps> = ({
           right: isOpen ? 0 : (isMobile ? '-100%' : `-${sidebarWidth}px`),
           width: isMobile ? '100%' : `${sidebarWidth}px`,
           height: '100vh',
-          backgroundColor: colors.background,
+          backgroundColor: backgroundColor || (theme === 'dark' ? '#0a0a0f' : '#ffffff'),
           borderLeft: isMobile ? 'none' : `1px solid ${colors.border}`,
           boxShadow: isOpen ? '-8px 0 30px rgba(0, 0, 0, 0.15)' : 'none',
           zIndex: 9999,

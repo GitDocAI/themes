@@ -199,9 +199,7 @@ export const AccordionTabNodeView = ({ node, updateAttributes, editor, getPos }:
           gap: '12px',
           padding: '1rem 1.25rem',
           cursor: 'default',
-          backgroundColor: isActive
-            ? (theme === 'light' ? 'rgba(59, 130, 246, 0.05)' : 'rgba(59, 130, 246, 0.1)')
-            : 'transparent',
+          backgroundColor: 'transparent',
           borderBottom: isActive ? `1px solid ${theme === 'light' ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.08)'}` : 'none',
         }}
       >

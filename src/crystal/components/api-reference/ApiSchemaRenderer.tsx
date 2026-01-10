@@ -85,8 +85,8 @@ export const ApiSchemaRenderer: React.FC<ApiSchemaRendererProps> = ({
               style={{
                 display: 'inline-block',
                 margin: '0.125rem',
-                padding: '0.125rem 0.375rem',
-                borderRadius: '4px',
+                padding: '0.125rem 0.5rem',
+                borderRadius: '8px',
                 backgroundColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.04)',
                 fontSize: '0.7rem',
                 color: theme === 'dark' ? '#e5e7eb' : '#374151',
@@ -130,10 +130,10 @@ export const ApiSchemaRenderer: React.FC<ApiSchemaRendererProps> = ({
   return (
     <div
       style={{
-        padding: '0.75rem',
-        borderRadius: '6px',
-        border: theme === 'dark' ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid rgba(0, 0, 0, 0.1)',
-        backgroundColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.02)',
+        padding: '1rem',
+        borderRadius: '16px',
+        border: theme === 'dark' ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(0, 0, 0, 0.08)',
+        backgroundColor: 'transparent',
       }}
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
@@ -144,8 +144,8 @@ export const ApiSchemaRenderer: React.FC<ApiSchemaRendererProps> = ({
               color: theme === 'dark' ? '#60a5fa' : '#3b82f6',
               fontFamily: 'monospace',
               fontSize: '0.875rem',
-              padding: '0.125rem 0.375rem',
-              borderRadius: '4px',
+              padding: '0.125rem 0.5rem',
+              borderRadius: '8px',
               backgroundColor: theme === 'dark' ? 'rgba(96, 165, 250, 0.15)' : 'rgba(59, 130, 246, 0.1)',
             }}
           >
@@ -156,11 +156,11 @@ export const ApiSchemaRenderer: React.FC<ApiSchemaRendererProps> = ({
             <span
               style={{
                 fontSize: '0.7rem',
-                padding: '0.125rem 0.375rem',
-                borderRadius: '4px',
+                padding: '0.125rem 0.5rem',
+                borderRadius: '8px',
                 backgroundColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.04)',
                 color: theme === 'dark' ? '#9ca3af' : '#6b7280',
-                border: theme === 'dark' ? '1px solid rgba(255, 255, 255, 0.15)' : '1px solid rgba(0, 0, 0, 0.15)',
+                border: theme === 'dark' ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid rgba(0, 0, 0, 0.1)',
               }}
             >
               {paramIn}
@@ -170,11 +170,11 @@ export const ApiSchemaRenderer: React.FC<ApiSchemaRendererProps> = ({
           <span
             style={{
               fontSize: '0.7rem',
-              padding: '0.125rem 0.375rem',
-              borderRadius: '4px',
+              padding: '0.125rem 0.5rem',
+              borderRadius: '8px',
               backgroundColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.04)',
               color: theme === 'dark' ? '#9ca3af' : '#6b7280',
-              border: theme === 'dark' ? '1px solid rgba(255, 255, 255, 0.15)' : '1px solid rgba(0, 0, 0, 0.15)',
+              border: theme === 'dark' ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid rgba(0, 0, 0, 0.1)',
               fontFamily: 'monospace',
             }}
           >
@@ -185,10 +185,10 @@ export const ApiSchemaRenderer: React.FC<ApiSchemaRendererProps> = ({
             <span
               style={{
                 fontSize: '0.7rem',
-                padding: '0.125rem 0.375rem',
-                borderRadius: '4px',
+                padding: '0.125rem 0.5rem',
+                borderRadius: '8px',
                 backgroundColor: theme === 'dark' ? 'rgba(239, 68, 68, 0.15)' : 'rgba(220, 38, 38, 0.1)',
-                color: theme === 'dark' ? '#f87171' : '#dc2626',
+                color: '#ef4444',
                 fontWeight: '500',
               }}
             >
@@ -200,10 +200,10 @@ export const ApiSchemaRenderer: React.FC<ApiSchemaRendererProps> = ({
             <span
               style={{
                 fontSize: '0.7rem',
-                padding: '0.125rem 0.375rem',
-                borderRadius: '4px',
-                backgroundColor: '#fef3c7',
-                color: '#92400e',
+                padding: '0.125rem 0.5rem',
+                borderRadius: '8px',
+                backgroundColor: theme === 'dark' ? 'rgba(245, 158, 11, 0.15)' : 'rgba(245, 158, 11, 0.1)',
+                color: '#f59e0b',
                 fontWeight: '600',
               }}
             >
@@ -215,10 +215,10 @@ export const ApiSchemaRenderer: React.FC<ApiSchemaRendererProps> = ({
             <span
               style={{
                 fontSize: '0.7rem',
-                padding: '0.125rem 0.375rem',
-                borderRadius: '4px',
-                backgroundColor: '#dbeafe',
-                color: '#1e40af',
+                padding: '0.125rem 0.5rem',
+                borderRadius: '8px',
+                backgroundColor: theme === 'dark' ? 'rgba(59, 130, 246, 0.15)' : 'rgba(59, 130, 246, 0.1)',
+                color: '#3b82f6',
               }}
             >
               read-only
@@ -229,10 +229,10 @@ export const ApiSchemaRenderer: React.FC<ApiSchemaRendererProps> = ({
             <span
               style={{
                 fontSize: '0.7rem',
-                padding: '0.125rem 0.375rem',
-                borderRadius: '4px',
-                backgroundColor: '#dbeafe',
-                color: '#1e40af',
+                padding: '0.125rem 0.5rem',
+                borderRadius: '8px',
+                backgroundColor: theme === 'dark' ? 'rgba(59, 130, 246, 0.15)' : 'rgba(59, 130, 246, 0.1)',
+                color: '#3b82f6',
               }}
             >
               write-only
@@ -262,8 +262,8 @@ export const ApiSchemaRenderer: React.FC<ApiSchemaRendererProps> = ({
               padding: '0.5rem 0.75rem',
               fontSize: '0.75rem',
               color: 'var(--primary-color)',
-              border: `1px solid var(--surface-border)`,
-              borderRadius: '6px',
+              border: theme === 'dark' ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(0, 0, 0, 0.08)',
+              borderRadius: '12px',
               backgroundColor: 'transparent',
               cursor: 'pointer',
               display: 'flex',

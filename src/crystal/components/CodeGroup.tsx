@@ -351,9 +351,8 @@ export const CodeGroup: React.FC<CodeGroupProps> = ({
         <div
           className={`${containerId}-content`}
           style={{
-            backgroundColor: innerBg,
             borderRadius: '12px',
-            padding: '16px',
+            overflow: 'hidden',
             maxHeight: '80vh',
             overflowY: 'auto',
             userSelect: 'text'

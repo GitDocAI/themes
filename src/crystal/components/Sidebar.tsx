@@ -201,11 +201,23 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const primaryRgb = hexToRgb(primaryColor)
 
   const methodColors: Record<string, string> = {
-    GET: 'linear-gradient(135deg, #10b981, #059669)',
-    POST: 'linear-gradient(135deg, #3b82f6, #2563eb)',
-    PUT: 'linear-gradient(135deg, #f59e0b, #d97706)',
-    DELETE: 'linear-gradient(135deg, #ef4444, #dc2626)',
-    PATCH: 'linear-gradient(135deg, #8b5cf6, #7c3aed)',
+    GET: '#10b981',
+    POST: '#3b82f6',
+    PUT: '#f59e0b',
+    DELETE: '#ef4444',
+    PATCH: '#8b5cf6',
+  }
+
+  // Helper function to convert hex to rgba
+  const hexToRgba = (hex: string, alpha: number): string => {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
+    if (result) {
+      const r = parseInt(result[1], 16)
+      const g = parseInt(result[2], 16)
+      const b = parseInt(result[3], 16)
+      return `rgba(${r}, ${g}, ${b}, ${alpha})`
+    }
+    return hex
   }
 
   const toggleDropdown = (title: string) => {
@@ -1178,13 +1190,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
             {item.method && (
               <span
                 style={{
-                  padding: '5px 12px',
+                  padding: '4px 10px',
                   borderRadius: '8px',
-                  fontSize: '12px',
-                  fontWeight: 'bold',
-                  color: '#ffffff',
-                  background: methodColors[item.method] || methodColors.GET,
-                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                  fontSize: '11px',
+                  fontWeight: '600',
+                  color: methodColors[item.method] || methodColors.GET,
+                  backgroundColor: hexToRgba(methodColors[item.method] || methodColors.GET, theme === 'light' ? 0.1 : 0.15),
                   flexShrink: 0
                 }}
               >
