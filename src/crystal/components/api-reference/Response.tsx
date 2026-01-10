@@ -37,9 +37,9 @@ export const Response: React.FC<ResponseProps> = ({ responses, theme = 'light' }
               key={statusCode}
               style={{
                 padding: '1rem',
-                borderRadius: '8px',
-                border: theme === 'dark' ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid rgba(0, 0, 0, 0.1)',
-                backgroundColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.02)',
+                borderRadius: '16px',
+                border: theme === 'dark' ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(0, 0, 0, 0.08)',
+                backgroundColor: 'transparent',
               }}
             >
               <div
@@ -83,10 +83,10 @@ export const Response: React.FC<ResponseProps> = ({ responses, theme = 'light' }
                     style={{
                       fontSize: '0.75rem',
                       padding: '0.25rem 0.5rem',
-                      borderRadius: '4px',
+                      borderRadius: '8px',
                       backgroundColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.04)',
                       color: theme === 'dark' ? '#9ca3af' : '#6b7280',
-                      border: theme === 'dark' ? '1px solid rgba(255, 255, 255, 0.15)' : '1px solid rgba(0, 0, 0, 0.15)',
+                      border: theme === 'dark' ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid rgba(0, 0, 0, 0.1)',
                     }}
                   >
                     {contentType}

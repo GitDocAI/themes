@@ -874,6 +874,7 @@ function Documentation() {
           config={aiSearchConfig || {}}
           theme={theme}
           primaryColor={primaryColor}
+          backgroundColor={backgroundColor}
           isOpen={isAISearchSidebarOpen}
           onClose={() => setIsAISearchSidebarOpen(false)}
           isDevMode={!isProductionMode && isDevMode}

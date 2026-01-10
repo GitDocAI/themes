@@ -390,7 +390,7 @@ export const TabsNodeView = ({ node, editor, getPos }: NodeViewProps) => {
         {/* Tab Headers with separator */}
         <div
           style={{
-            backgroundColor: theme === 'light' ? '#ffffff' : '#1f2937',
+            backgroundColor: 'transparent',
             paddingTop: '12px',
             paddingLeft: '16px',
             paddingRight: '16px',
@@ -571,7 +571,7 @@ export const TabsNodeView = ({ node, editor, getPos }: NodeViewProps) => {
         {/* Tab Content */}
         <div
           style={{
-            backgroundColor: theme === 'light' ? '#ffffff' : '#1f2937',
+            backgroundColor: 'transparent',
             minHeight: maxHeight > 0 ? `${maxHeight}px` : '200px',
             maxHeight: '600px',
             overflow: 'auto',

@@ -6,6 +6,18 @@ interface EndpointProps {
   theme?: 'light' | 'dark'
 }
 
+// Helper function to convert hex to rgba
+const hexToRgba = (hex: string, alpha: number): string => {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
+  if (result) {
+    const r = parseInt(result[1], 16)
+    const g = parseInt(result[2], 16)
+    const b = parseInt(result[3], 16)
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`
+  }
+  return hex
+}
+
 export const Endpoint: React.FC<EndpointProps> = ({
   method,
   path,
@@ -13,18 +25,18 @@ export const Endpoint: React.FC<EndpointProps> = ({
 }) => {
   const [copied, setCopied] = useState(false)
 
-  const methodColors: Record<string, { bg: string; text: string; bgDark: string; textDark: string }> = {
-    GET: { bg: '#d1fae5', text: '#065f46', bgDark: '#064e3b', textDark: '#6ee7b7' },
-    POST: { bg: '#dbeafe', text: '#1e40af', bgDark: '#1e3a8a', textDark: '#93c5fd' },
-    PUT: { bg: '#fef3c7', text: '#92400e', bgDark: '#78350f', textDark: '#fcd34d' },
-    PATCH: { bg: '#fef3c7', text: '#92400e', bgDark: '#78350f', textDark: '#fcd34d' },
-    DELETE: { bg: '#ffe4e6', text: '#9f1239', bgDark: '#881337', textDark: '#fda4af' },
+  const methodColors: Record<string, string> = {
+    GET: '#10b981',
+    POST: '#3b82f6',
+    PUT: '#f59e0b',
+    PATCH: '#8b5cf6',
+    DELETE: '#ef4444',
   }
 
   const getMethodColor = (method: string) => {
-    const colors = methodColors[method]
-    if (!colors) return { bg: '#e5e7eb', text: '#374151' }
-    return theme === 'dark' ? { bg: colors.bgDark, text: colors.textDark } : { bg: colors.bg, text: colors.text }
+    const color = methodColors[method] || '#6b7280'
+    const bgOpacity = theme === 'light' ? 0.1 : 0.15
+    return { bg: hexToRgba(color, bgOpacity), text: color }
   }
 
   const handleCopy = async () => {
@@ -41,16 +53,16 @@ export const Endpoint: React.FC<EndpointProps> = ({
         display: 'flex',
         alignItems: 'center',
         gap: '0.75rem',
-        padding: '0.5rem',
-        border: theme === 'dark' ? '1px solid rgba(255, 255, 255, 0.05)' : '1px solid rgba(0, 0, 0, 0.05)',
-        borderRadius: '8px',
-        backgroundColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.02)' : 'rgba(0, 0, 0, 0.01)',
+        padding: '0.75rem',
+        border: theme === 'dark' ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(0, 0, 0, 0.08)',
+        borderRadius: '16px',
+        backgroundColor: 'transparent',
       }}
     >
       <span
         style={{
           padding: '0.25rem 0.5rem',
-          borderRadius: '4px',
+          borderRadius: '8px',
           fontSize: '0.75rem',
           fontWeight: '600',
           flexShrink: 0,
@@ -64,8 +76,8 @@ export const Endpoint: React.FC<EndpointProps> = ({
         style={{
           flex: 1,
           padding: '0.5rem 0.75rem',
-          borderRadius: '6px',
-          backgroundColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.03)' : 'rgba(0, 0, 0, 0.02)',
+          borderRadius: '12px',
+          backgroundColor: 'transparent',
           border: theme === 'dark' ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(0, 0, 0, 0.08)',
           fontFamily: 'monospace',
           fontSize: '0.75rem',

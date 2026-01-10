@@ -61,9 +61,9 @@ export const Authentication: React.FC<AuthenticationProps> = ({ security, securi
               key={index}
               style={{
                 padding: '1rem',
-                borderRadius: '8px',
-                border: theme === 'dark' ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid rgba(0, 0, 0, 0.1)',
-                backgroundColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.02)',
+                borderRadius: '16px',
+                border: theme === 'dark' ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(0, 0, 0, 0.08)',
+                backgroundColor: 'transparent',
               }}
             >
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
@@ -81,9 +81,9 @@ export const Authentication: React.FC<AuthenticationProps> = ({ security, securi
                     style={{
                       padding: '0.125rem 0.5rem',
                       fontSize: '0.625rem',
-                      borderRadius: '4px',
-                      backgroundColor: theme === 'dark' ? '#1e3a8a' : '#dbeafe',
-                      color: theme === 'dark' ? '#93c5fd' : '#1e40af',
+                      borderRadius: '8px',
+                      backgroundColor: theme === 'dark' ? 'rgba(59, 130, 246, 0.15)' : 'rgba(59, 130, 246, 0.1)',
+                      color: '#3b82f6',
                       fontWeight: '500',
                     }}
                   >
@@ -95,9 +95,10 @@ export const Authentication: React.FC<AuthenticationProps> = ({ security, securi
                     fontFamily: 'monospace',
                     fontSize: '0.75rem',
                     color: theme === 'dark' ? '#9ca3af' : '#6b7280',
-                    padding: '0.5rem',
-                    borderRadius: '4px',
-                    backgroundColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.04)',
+                    padding: '0.5rem 0.75rem',
+                    borderRadius: '12px',
+                    backgroundColor: 'transparent',
+                    border: theme === 'dark' ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(0, 0, 0, 0.08)',
                   }}
                 >
                   {authValue}
