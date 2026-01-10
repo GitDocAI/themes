@@ -23,7 +23,7 @@ export const TOC: React.FC<TOCProps> = ({ theme, currentPath }) => {
 
   // Hide TOC on small screens
   useEffect(() => {
-    const mediaQuery = window.matchMedia('(min-width: 2048px)')
+    const mediaQuery = window.matchMedia('(min-width: 1280px)')
     setIsLargeScreen(mediaQuery.matches)
     const handleMediaQueryChange = (e: MediaQueryListEvent) => {
       setIsLargeScreen(e.matches)
@@ -279,16 +279,15 @@ export const TOC: React.FC<TOCProps> = ({ theme, currentPath }) => {
   return (
     <aside
       style={{
-        width: '180px',
-        minWidth: '180px',
-        maxWidth: '180px',
-        flexShrink: 0,
+        flex: '0 0 250px',
+        minWidth: '200px',
         position: 'sticky',
         top: 'var(--sidebar-top, 128px)',
         height: 'calc(100vh - var(--sidebar-top, 128px))',
         alignSelf: 'flex-start',
         margin: 0,
-        padding: '0px 8px 24px 16px',
+        marginLeft: '40px',
+        padding: '0px 0px 24px 24px',
         overflowY: 'auto',
         willChange: 'position',
       }}
@@ -304,8 +303,12 @@ export const TOC: React.FC<TOCProps> = ({ theme, currentPath }) => {
               color: theme === 'light' ? '#6b7280' : '#9ca3af',
               textTransform: 'uppercase',
               letterSpacing: '0.05em',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
             }}
           >
+            <i className="pi pi-list" style={{ fontSize: '14px' }}></i>
             On this page
           </h3>
           <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>

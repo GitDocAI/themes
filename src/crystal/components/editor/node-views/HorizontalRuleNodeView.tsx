@@ -48,7 +48,7 @@ export const HorizontalRuleNodeView = ({ node, editor, getPos }: NodeViewProps) 
       data-type="horizontal-rule-block"
       style={{ outline: 'none' }}
     >
-      <div style={{ position: 'relative', margin: '1rem 0' }}>
+      <div style={{ position: 'relative', margin: '48px 0' }}>
         <hr
           style={{
             width: '100%',

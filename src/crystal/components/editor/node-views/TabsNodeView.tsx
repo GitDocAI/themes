@@ -261,8 +261,8 @@ export const TabsNodeView = ({ node, editor, getPos }: NodeViewProps) => {
         style={{
           margin: '1rem 0',
           position: 'relative',
-          border: `1px solid ${theme === 'light' ? '#e5e7eb' : '#374151'}`,
-          borderRadius: '8px',
+          border: `1px solid ${theme === 'light' ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.08)'}`,
+          borderRadius: '16px',
           overflow: 'hidden',
         }}
       >
@@ -563,7 +563,7 @@ export const TabsNodeView = ({ node, editor, getPos }: NodeViewProps) => {
             style={{
               marginTop: '0px',
               height: '1px',
-              backgroundColor: theme === 'light' ? '#e5e7eb' : '#374151',
+              backgroundColor: theme === 'light' ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.08)',
             }}
           />
         </div>

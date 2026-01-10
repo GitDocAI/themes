@@ -60,15 +60,15 @@ export const InfoNodeView = ({ node, updateAttributes, editor, getPos }: NodeVie
   const getTypeConfig = (infoType: string) => {
     switch (infoType) {
       case 'warning':
-        return { icon: 'pi pi-exclamation-triangle', color: '#f59e0b', bgColor: '#fef3c7', borderColor: '#f59e0b' }
+        return { icon: 'pi pi-exclamation-triangle', color: '#f59e0b', textColor: 'rgba(255, 230, 150, 0.7)', bgColor: theme === 'light' ? '#fef3c7' : 'rgba(234, 179, 8, 0.1)', borderColor: '#f59e0b' }
       case 'error':
-        return { icon: 'pi pi-times-circle', color: '#ef4444', bgColor: '#fee2e2', borderColor: '#ef4444' }
+        return { icon: 'pi pi-times-circle', color: '#ef4444', textColor: 'rgba(255, 180, 180, 0.7)', bgColor: theme === 'light' ? '#fee2e2' : 'rgba(239, 68, 68, 0.1)', borderColor: '#ef4444' }
       case 'success':
-        return { icon: 'pi pi-check-circle', color: '#10b981', bgColor: '#d1fae5', borderColor: '#10b981' }
+        return { icon: 'pi pi-check-circle', color: '#10b981', textColor: 'rgba(180, 230, 180, 0.7)', bgColor: theme === 'light' ? '#d1fae5' : 'rgba(16, 185, 129, 0.1)', borderColor: '#10b981' }
       case 'tip':
-        return { icon: 'pi pi-lightbulb', color: '#8b5cf6', bgColor: '#ede9fe', borderColor: '#8b5cf6' }
+        return { icon: 'pi pi-lightbulb', color: '#8b5cf6', textColor: 'rgba(200, 180, 255, 0.7)', bgColor: theme === 'light' ? '#ede9fe' : 'rgba(139, 92, 246, 0.1)', borderColor: '#8b5cf6' }
       default:
-        return { icon: 'pi pi-info-circle', color: '#3b82f6', bgColor: '#dbeafe', borderColor: '#3b82f6' }
+        return { icon: 'pi pi-info-circle', color: '#3b82f6', textColor: 'rgba(170, 200, 255, 0.7)', bgColor: theme === 'light' ? '#dbeafe' : 'rgba(59, 130, 246, 0.1)', borderColor: '#3b82f6' }
     }
   }
 
@@ -123,7 +123,7 @@ export const InfoNodeView = ({ node, updateAttributes, editor, getPos }: NodeVie
           <div
             style={{
               border: '2px solid #3b82f6',
-              borderRadius: '8px',
+              borderRadius: '16px',
               padding: '16px',
               backgroundColor: '#f9fafb',
             }}
@@ -276,7 +276,7 @@ export const InfoNodeView = ({ node, updateAttributes, editor, getPos }: NodeVie
           onClick={() => setIsEditing(true)}
           style={{
             border: `2px solid ${typeConfig.borderColor}`,
-            borderRadius: '8px',
+            borderRadius: '16px',
             padding: '16px',
             cursor: 'pointer',
             transition: 'all 0.2s',
@@ -293,11 +293,11 @@ export const InfoNodeView = ({ node, updateAttributes, editor, getPos }: NodeVie
             <i className={typeConfig.icon} style={{ fontSize: '24px', color: typeConfig.color, marginTop: '2px' }} />
             <div style={{ flex: 1 }}>
               {title && (
-                <h4 style={{ margin: '0 0 8px 0', fontSize: '16px', fontWeight: '600', color: theme === 'light' ? '#1f2937' : '#f9fafb' }}>
+                <h4 style={{ margin: '0 0 8px 0', fontSize: '16px', fontWeight: '600', color: theme === 'light' ? '#1f2937' : '#ffffff' }}>
                   {title}
                 </h4>
               )}
-              <p style={{ margin: 0, fontSize: '14px', lineHeight: '1.6', color: theme === 'light' ? '#1f2937' : '#f9fafb' }}>
+              <p style={{ margin: 0, fontSize: '14px', lineHeight: '1.6', color: theme === 'light' ? '#1f2937' : typeConfig.textColor }}>
                 {content || 'No content'}
               </p>
             </div>

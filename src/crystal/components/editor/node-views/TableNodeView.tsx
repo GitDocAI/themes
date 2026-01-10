@@ -491,10 +491,10 @@ export const TableNodeView = ({ node, editor, getPos }: NodeViewProps) => {
         style={{
           margin: '1rem 0',
           position: 'relative',
-          border: `1px solid ${theme === 'light' ? '#e5e7eb' : '#374151'}`,
-          borderRadius: '8px',
+          border: 'none',
+          borderRadius: '16px',
           overflow: 'hidden',
-          backgroundColor: theme === 'light' ? '#ffffff' : '#1f2937',
+          backgroundColor: 'transparent',
           userSelect: isEditable ? 'none' : 'auto',
           WebkitUserSelect: isEditable ? 'none' : 'auto',
           MozUserSelect: isEditable ? 'none' : 'auto',
@@ -509,8 +509,8 @@ export const TableNodeView = ({ node, editor, getPos }: NodeViewProps) => {
               alignItems: 'center',
               gap: '8px',
               padding: '8px 12px',
-              backgroundColor: theme === 'light' ? '#f9fafb' : '#1f2937',
-              borderBottom: `1px solid ${theme === 'light' ? '#e5e7eb' : '#374151'}`,
+              backgroundColor: 'transparent',
+              borderBottom: `1px solid ${theme === 'light' ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.08)'}`,
               flexWrap: 'wrap',
             }}
           >
@@ -664,7 +664,7 @@ export const TableNodeView = ({ node, editor, getPos }: NodeViewProps) => {
             <thead>
               <tr
                 style={{
-                  backgroundColor: theme === 'light' ? '#f9fafb' : '#111827',
+                  backgroundColor: 'transparent',
                   position: scrollable ? 'sticky' : 'static',
                   top: 0,
                   zIndex: 10,
@@ -679,7 +679,7 @@ export const TableNodeView = ({ node, editor, getPos }: NodeViewProps) => {
                       fontWeight: '600',
                       fontSize: '14px',
                       color: theme === 'light' ? '#374151' : '#f9fafb',
-                      borderBottom: `2px solid ${theme === 'light' ? '#e5e7eb' : '#374151'}`,
+                      borderBottom: `1px solid ${theme === 'light' ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.08)'}`,
                       position: 'relative',
                     }}
                   >
@@ -830,7 +830,7 @@ export const TableNodeView = ({ node, editor, getPos }: NodeViewProps) => {
                     style={{
                       padding: '12px',
                       width: '50px',
-                      borderBottom: `2px solid ${theme === 'light' ? '#e5e7eb' : '#374151'}`,
+                      borderBottom: `1px solid ${theme === 'light' ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.08)'}`,
                     }}
                   ></th>
                 )}
@@ -841,7 +841,7 @@ export const TableNodeView = ({ node, editor, getPos }: NodeViewProps) => {
                 <tr
                   key={row.id}
                   style={{
-                    borderBottom: `1px solid ${theme === 'light' ? '#e5e7eb' : '#374151'}`,
+                    borderBottom: `1px solid ${theme === 'light' ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.08)'}`,
                   }}
                 >
                   {columns.map((col) => (
@@ -920,8 +920,8 @@ export const TableNodeView = ({ node, editor, getPos }: NodeViewProps) => {
               alignItems: 'center',
               justifyContent: 'space-between',
               padding: '12px',
-              borderTop: `1px solid ${theme === 'light' ? '#e5e7eb' : '#374151'}`,
-              backgroundColor: theme === 'light' ? '#f9fafb' : '#111827',
+              borderTop: `1px solid ${theme === 'light' ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.08)'}`,
+              backgroundColor: 'transparent',
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>

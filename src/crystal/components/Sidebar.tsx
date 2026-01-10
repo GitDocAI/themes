@@ -814,7 +814,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     borderRadius: '6px',
                     outline: 'none',
                     backgroundColor: theme === 'light' ? '#ffffff' : '#1f2937',
-                    color: theme === 'light' ? '#6b7280' : '#9ca3af',
+                    color: theme === 'light' ? '#374151' : '#e5e7eb',
                   }}
                 />
               ) : (
@@ -832,7 +832,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     letterSpacing: '0.05em',
                     paddingLeft: '8px',
                     borderLeft: `0px solid rgba(${primaryRgb}, 0.5)`,
-                    color: theme === 'light' ? '#6b7280' : '#9ca3af',
+                    color: theme === 'light' ? '#374151' : '#e5e7eb',
                     textAlign: 'left',
                     cursor: isDevMode && !isAPIReferenceTab() ? 'pointer' : 'default',
                   }}
@@ -934,7 +934,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                padding: '12px 16px',
+                padding: '6px 12px',
                 fontSize: '15px',
                 fontWeight: '600',
                 color: theme === 'light' ? '#374151' : '#d1d5db',
@@ -1059,7 +1059,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 autoFocus
                 style={{
                   flex: 1,
-                  padding: '12px 16px',
+                  paddingTop: '6px',
+                  paddingRight: '12px',
+                  paddingBottom: '6px',
                   paddingLeft: `${paddingLeft + 16}px`,
                   fontSize: '15px',
                   fontWeight: '600',
@@ -1088,7 +1090,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 style={{
                   flex: 1,
                   display: 'block',
-                  padding: '12px 16px',
+                  paddingTop: '6px',
+                  paddingRight: '12px',
+                  paddingBottom: '6px',
                   paddingLeft: `${paddingLeft + 16}px`,
                   fontSize: '15px',
                   fontWeight: isActive ? '600' : '500',
@@ -1142,7 +1146,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
               display: 'flex',
               alignItems: 'center',
               gap: '12px',
-              padding: '12px 16px',
+              paddingTop: '6px',
+              paddingRight: '12px',
+              paddingBottom: '6px',
               paddingLeft: `${paddingLeft + 16}px`,
               fontSize: '15px',
               fontWeight: isApiActive ? '600' : '500',
@@ -1230,7 +1236,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             flex: 1,
             overflowY: 'auto',
             overflowX: 'hidden',
-            padding: '0px 16px 24px 0px',
+            padding: '0px 16px 24px 8px',
             minWidth: 0,
           }}
         >

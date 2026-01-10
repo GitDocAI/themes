@@ -143,7 +143,6 @@ const TextSelectionContextMenu = ({theme,children,onAiChat,onAiUpgrade}:TextSele
   const [menuPosition, setMenuPosition] = useState<{x:number,y:number}|null>(null);
   const [selectedText, setSelectedText] = useState('');
   const containerRef = useRef<HTMLDivElement>(null);
-  const lastMousePosition = useRef<{x: number, y: number}>({x: 0, y: 0});
 
   const viteMode = import.meta.env.VITE_MODE || 'production'
   const isProductionMode = viteMode === 'production'
@@ -156,8 +155,6 @@ const TextSelectionContextMenu = ({theme,children,onAiChat,onAiUpgrade}:TextSele
     )
   }
 
-
-
   // Check if the selection is within the page content area
   const isSelectionInContentArea = (selection: Selection | null): boolean => {
     if (!selection || selection.rangeCount === 0) return false;
@@ -169,49 +166,6 @@ const TextSelectionContextMenu = ({theme,children,onAiChat,onAiUpgrade}:TextSele
 
     // Check if the selection's common ancestor is within the content area
     return contentArea.contains(range.commonAncestorContainer);
-  };
-
-  const handleTextSelection = () => {
-    const selection = window.getSelection();
-    const text = selection?.toString().trim();
-
-    // Only show menu if selection is within the page content area
-    if (text && text.length > 0 && isSelectionInContentArea(selection)) {
-      const range = selection?.getRangeAt(0);
-      if (range) {
-        const rect = range.getBoundingClientRect();
-
-        // Check if rect has valid coordinates (code editors may return 0,0)
-        // Only check width > 0, as left could legitimately be near 0
-        const hasValidRect = rect.width > 0 && (rect.left > 0 || rect.right > 0);
-
-        let x: number;
-        let y: number;
-
-        if (hasValidRect) {
-          // Position the menu to the right of the selection, slightly above
-          // Use viewport coordinates for fixed positioning (no scroll offset needed)
-          x = rect.right + 8;
-          y = rect.top - 8;
-        } else {
-          // Fallback to last mouse position for code editors
-          // clientX/clientY are viewport coordinates
-          x = lastMousePosition.current.x + 8;
-          y = lastMousePosition.current.y - 8;
-        }
-
-        // Make sure menu doesn't go off-screen to the right
-        const menuWidth = 320; // Approximate menu width
-        const adjustedX = x + menuWidth > window.innerWidth
-          ? (hasValidRect ? rect.left : lastMousePosition.current.x) - menuWidth - 8
-          : x;
-
-        setSelectedText(text);
-        setMenuPosition({ x: adjustedX, y });
-      }
-    } else {
-      setMenuPosition(null);
-    }
   };
 
   const handleOptionSelect = (option:string) => {
@@ -228,26 +182,6 @@ const TextSelectionContextMenu = ({theme,children,onAiChat,onAiUpgrade}:TextSele
   };
 
   useEffect(() => {
-    const handleMouseUp = (e: MouseEvent) => {
-      // Store mouse position for fallback (code editors return invalid rect)
-      // Use clientX/clientY for viewport coordinates (works with fixed positioning)
-      lastMousePosition.current = { x: e.clientX, y: e.clientY };
-
-      // Small delay to ensure selection is complete
-      setTimeout(() => {
-        handleTextSelection();
-      }, 10);
-    };
-
-    const handleKeyUp = (e: KeyboardEvent) => {
-      // Handle keyboard selection (Shift + Arrow keys)
-      if (e.shiftKey) {
-        setTimeout(() => {
-          handleTextSelection();
-        }, 10);
-      }
-    };
-
     const handleContextMenu = (e: MouseEvent) => {
       const selection = window.getSelection();
       const text = selection?.toString().trim();
@@ -271,13 +205,9 @@ const TextSelectionContextMenu = ({theme,children,onAiChat,onAiUpgrade}:TextSele
       }
     };
 
-    document.addEventListener('mouseup', handleMouseUp);
-    document.addEventListener('keyup', handleKeyUp);
     document.addEventListener('contextmenu', handleContextMenu);
 
     return () => {
-      document.removeEventListener('mouseup', handleMouseUp);
-      document.removeEventListener('keyup', handleKeyUp);
       document.removeEventListener('contextmenu', handleContextMenu);
     };
   }, []);
