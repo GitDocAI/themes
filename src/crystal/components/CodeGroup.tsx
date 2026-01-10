@@ -157,7 +157,6 @@ export const CodeGroup: React.FC<CodeGroupProps> = ({
 
   // Colors based on theme
   const outerBg = theme === 'dark' ? '#131722' : '#f3f4f6'
-  const innerBg = theme === 'dark' ? '#0a0f1c' : '#ffffff'
   const borderColor = theme === 'light' ? '#d1d5db' : '#1e293b'
   const textSecondary = theme === 'dark' ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.6)'
 
