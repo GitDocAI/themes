@@ -2,6 +2,7 @@ import { NodeViewWrapper } from '@tiptap/react'
 import type { NodeViewProps } from '@tiptap/react'
 import { useState, useRef, useEffect } from 'react'
 import { codeToHtml } from 'shiki'
+import { configLoader } from '../../../../services/configLoader'
 
 interface CodeFile {
   filename: string
@@ -20,10 +21,11 @@ export const CodeGroupNodeView = ({ node, updateAttributes, editor, getPos }: No
   const [showLanguageSelector, setShowLanguageSelector] = useState(false)
   const selectorRef = useRef<HTMLDivElement>(null)
   const filenameInputRef = useRef<HTMLInputElement>(null)
-  const [_, _setCopied] = useState(false)
+  const [copied, setCopied] = useState(false)
+  const [showCopyTooltip, setShowCopyTooltip] = useState(false)
   const codeRef = useRef<HTMLElement>(null)
   const [highlightedCode, setHighlightedCode] = useState<string[]>([])
-  const [containerId] = useState(() => `cg-${Math.random().toString(36).substring(2, 11)}`)
+  const [primaryColor, setPrimaryColor] = useState('#3b82f6')
 
   const languages = [
     'javascript',
@@ -67,14 +69,20 @@ export const CodeGroupNodeView = ({ node, updateAttributes, editor, getPos }: No
     const detectTheme = () => {
       const bgColor = window.getComputedStyle(document.body).backgroundColor
       const rgbMatch = bgColor.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/)
+      let currentTheme: 'light' | 'dark' = 'dark'
       if (rgbMatch) {
         const r = parseInt(rgbMatch[1])
         const g = parseInt(rgbMatch[2])
         const b = parseInt(rgbMatch[3])
         const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
-        setTheme(luminance < 0.5 ? 'dark' : 'light')
-      } else {
-        setTheme('dark')
+        currentTheme = luminance < 0.5 ? 'dark' : 'light'
+      }
+      setTheme(currentTheme)
+
+      // Load primary color from config
+      const color = configLoader.getPrimaryColor(currentTheme)
+      if (color) {
+        setPrimaryColor(color)
       }
     }
 
@@ -119,25 +127,17 @@ export const CodeGroupNodeView = ({ node, updateAttributes, editor, getPos }: No
         const highlighted = await Promise.all(
           files.map(async (file) => {
             try {
-              const html = await codeToHtml(file.code, {
+              let html = await codeToHtml(file.code, {
                 lang: file.language,
-                theme: theme === 'dark' ? 'tokyo-night' : 'github-light',
+                themes: {
+                  light: 'github-light-default',
+                  dark: 'dark-plus',
+                },
+                defaultColor: false,
               })
-
-              // Remove inline background-color from the generated HTML
-              // This ensures our CSS takes precedence
-              const cleanedHtml = html
-                .replace(/style="([^"]*)"/g, (_match, styles) => {
-                  // Remove background-color and background properties
-                  const cleaned = styles
-                    .replace(/background-color\s*:\s*[^;]+;?/g, '')
-                    .replace(/background\s*:\s*[^;]+;?/g, '')
-                    .trim()
-
-                  return cleaned ? `style="${cleaned}"` : ''
-                })
-
-              return cleanedHtml
+              // Replace the dark background with custom color
+              html = html.replace('--shiki-dark-bg:#1E1E1E', '--shiki-dark-bg:#0B0C0E')
+              return html
             } catch (error) {
               console.error(`Error highlighting ${file.language}:`, error)
               return `<pre><code>${file.code}</code></pre>`
@@ -221,8 +221,8 @@ export const CodeGroupNodeView = ({ node, updateAttributes, editor, getPos }: No
     const codeText = files[activeTab]?.code || ''
     if (codeText) {
       await navigator.clipboard.writeText(codeText)
-      _setCopied(true)
-      setTimeout(() => _setCopied(false), 2000)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
     }
   }
 
@@ -238,9 +238,8 @@ export const CodeGroupNodeView = ({ node, updateAttributes, editor, getPos }: No
   // Colors matching the new CodeGroup design
   const outerBg = theme === 'dark' ? '#131722' : '#f3f4f6'
   const innerBg = theme === 'dark' ? '#0a0f1c' : '#ffffff'
-  const borderColor = theme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.1)'
+  const borderColor = theme === 'light' ? '#d1d5db' : '#1e293b'
   const textSecondary = theme === 'dark' ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.6)'
-  const primaryColor = '#3b82f6'
 
   // Legacy color mappings (keep for compatibility)
   const bgColor = outerBg
@@ -588,10 +587,20 @@ export const CodeGroupNodeView = ({ node, updateAttributes, editor, getPos }: No
       style={{ outline: 'none' }}
       data-drag-handle
     >
+      <style>{`
+        .code-group-wrapper .shiki {
+          background-color: var(${theme === 'dark' ? '--shiki-dark-bg' : '--shiki-light-bg'}) !important;
+          margin: 0 !important;
+        }
+        .code-group-wrapper .shiki span {
+          color: var(${theme === 'dark' ? '--shiki-dark' : '--shiki-light'}) !important;
+          background-color: transparent !important;
+        }
+      `}</style>
       <div
         style={{
           margin: '20px 0',
-          padding: '16px 4px',
+          padding: '4px',
           border: `1px solid ${borderColor}`,
           borderRadius: '12px',
           backgroundColor: outerBg,
@@ -600,136 +609,117 @@ export const CodeGroupNodeView = ({ node, updateAttributes, editor, getPos }: No
         tabIndex={-1}
       >
         {/* Tabs header */}
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
-          {/* Tabs */}
-          {files.map((file, index) => (
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          {/* Tabs container with scroll */}
+          <div style={{
+            display: 'flex',
+            gap: '4px',
+            overflowX: 'auto',
+            flexWrap: 'nowrap',
+            flex: 1,
+            alignItems: 'center',
+            maskImage: 'linear-gradient(to right, black calc(100% - 50px), transparent 100%)',
+            WebkitMaskImage: 'linear-gradient(to right, black calc(100% - 50px), transparent 100%)',
+            paddingRight: '40px',
+          }}>
+            {files.map((file, index) => (
+              <button
+                key={index}
+                onClick={() => handleTabChange(index)}
+                style={{
+                  padding: '8px 10px',
+                  fontFamily: 'monospace',
+                  fontWeight: '600',
+                  fontSize: '13px',
+                  letterSpacing: '-0.02em',
+                  borderRadius: '6px',
+                  border: 'none',
+                  backgroundColor: 'transparent',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                  color: activeTab === index ? primaryColor : textSecondary,
+                  textDecoration: activeTab === index ? 'underline' : 'none',
+                  textUnderlineOffset: '6px',
+                  flexShrink: 0,
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {file.filename}
+              </button>
+            ))}
+          </div>
+
+          {/* Copy button - fixed position */}
+          <div style={{ flexShrink: 0, backgroundColor: outerBg, zIndex: 30, display: 'flex', alignItems: 'center' }}>
             <button
-              key={index}
-              onClick={() => handleTabChange(index)}
+              onClick={handleCopy}
+              onMouseEnter={() => setShowCopyTooltip(true)}
+              onMouseLeave={() => setShowCopyTooltip(false)}
               style={{
-                padding: '12px',
-                fontFamily: 'monospace',
-                fontWeight: '700',
-                borderRadius: '6px',
+                padding: '6px',
+                borderRadius: '4px',
                 border: 'none',
-                backgroundColor: 'transparent',
-                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
                 transition: 'all 0.2s',
-                color: activeTab === index ? primaryColor : textSecondary,
-                textDecoration: activeTab === index ? 'underline' : 'none',
-                textUnderlineOffset: '8px',
+                cursor: 'pointer',
+                backgroundColor: 'transparent',
+                color: textSecondary,
+                outline: 'none',
               }}
             >
-              {file.filename}
+              {copied ? (
+                <i className="pi pi-check" style={{ fontSize: '18px' }}></i>
+              ) : (
+                <svg
+                  style={{ width: '18px', height: '18px' }}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                  />
+                </svg>
+              )}
             </button>
-          ))}
-
-          {/* Copy button */}
-          <button
-            onClick={handleCopy}
-            style={{
-              marginLeft: 'auto',
-              marginTop: 'auto',
-              marginBottom: 'auto',
-              padding: '8px',
-              borderRadius: '4px',
-              border: 'none',
-              fontSize: '12px',
-              fontWeight: '500',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px',
-              transition: 'all 0.2s',
-              cursor: 'pointer',
-              backgroundColor: 'rgba(255, 255, 255, 0)',
-              color: textSecondary,
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0)'
-            }}
-            title="Copy code"
-          >
-            <svg
-              style={{ width: '12px', height: '12px' }}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
-              />
-            </svg>
-          </button>
+            {showCopyTooltip && (
+              <div
+                style={{
+                  position: 'absolute',
+                  bottom: '100%',
+                  right: '0',
+                  marginBottom: '8px',
+                  padding: '4px 8px',
+                  backgroundColor: primaryColor,
+                  color: '#ffffff',
+                  borderRadius: '4px',
+                  fontSize: '11px',
+                  fontWeight: '500',
+                  whiteSpace: 'nowrap',
+                  zIndex: 100,
+                }}
+              >
+                {copied ? 'Copied!' : 'Copy'}
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* Code content */}
+        {/* Code content - Shiki handles all styling */}
         <div
-          id={containerId}
           style={{
-            backgroundColor: innerBg,
             borderRadius: '12px',
-            padding: '16px',
-            maxHeight: '80vh',
-            overflowY: 'auto',
+            overflow: 'hidden',
           }}
         >
-          <style>{`
-            #${containerId} .code-group-syntax-highlight .shiki,
-            #${containerId} .code-group-syntax-highlight pre.shiki {
-              background-color: ${innerBg} !important;
-              background: ${innerBg} !important;
-            }
-            #${containerId} .code-group-syntax-highlight pre {
-              margin: 0 !important;
-              padding: 0 !important;
-              background-color: ${innerBg} !important;
-              background: ${innerBg} !important;
-              overflow-x: auto !important;
-              scrollbar-color: ${theme === 'dark' ? 'rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.2) rgba(0, 0, 0, 0.05)'} !important;
-              scrollbar-width: thin !important;
-            }
-            #${containerId} .code-group-syntax-highlight pre code {
-              background-color: transparent !important;
-              background: transparent !important;
-            }
-            #${containerId} .code-group-syntax-highlight pre code span {
-              background-color: transparent !important;
-              background: transparent !important;
-            }
-            #${containerId} .code-group-syntax-highlight pre::-webkit-scrollbar,
-            #${containerId} .code-group-syntax-highlight .shiki::-webkit-scrollbar,
-            #${containerId} .code-group-syntax-highlight pre.shiki::-webkit-scrollbar {
-              height: 8px !important;
-              width: 8px !important;
-            }
-            #${containerId} .code-group-syntax-highlight pre::-webkit-scrollbar-track,
-            #${containerId} .code-group-syntax-highlight .shiki::-webkit-scrollbar-track,
-            #${containerId} .code-group-syntax-highlight pre.shiki::-webkit-scrollbar-track {
-              background: ${theme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)'} !important;
-              border-radius: 4px !important;
-            }
-            #${containerId} .code-group-syntax-highlight pre::-webkit-scrollbar-thumb,
-            #${containerId} .code-group-syntax-highlight .shiki::-webkit-scrollbar-thumb,
-            #${containerId} .code-group-syntax-highlight pre.shiki::-webkit-scrollbar-thumb {
-              background: ${theme === 'dark' ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.2)'} !important;
-              border-radius: 4px !important;
-            }
-            #${containerId} .code-group-syntax-highlight pre::-webkit-scrollbar-thumb:hover,
-            #${containerId} .code-group-syntax-highlight .shiki::-webkit-scrollbar-thumb:hover,
-            #${containerId} .code-group-syntax-highlight pre.shiki::-webkit-scrollbar-thumb:hover {
-              background: ${theme === 'dark' ? 'rgba(255, 255, 255, 0.3)' : 'rgba(0, 0, 0, 0.3)'} !important;
-            }
-          `}</style>
           {highlightedCode[activeTab] ? (
             <div
               ref={codeRef as React.RefObject<HTMLDivElement>}
-              className="code-group-syntax-highlight"
               dangerouslySetInnerHTML={{ __html: highlightedCode[activeTab] }}
             />
           ) : (
@@ -737,8 +727,8 @@ export const CodeGroupNodeView = ({ node, updateAttributes, editor, getPos }: No
               ref={codeRef as React.RefObject<HTMLPreElement>}
               style={{
                 margin: 0,
-                padding: 0,
-                backgroundColor: 'transparent',
+                padding: '16px',
+                backgroundColor: codeBg,
                 color: codeColor,
                 overflow: 'auto',
                 fontSize: '15px',

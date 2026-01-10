@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import { codeToHtml } from 'shiki'
+import { configLoader } from '../../services/configLoader'
 
 interface CodeFile {
   filename: string
@@ -43,6 +44,9 @@ export const CodeGroup: React.FC<CodeGroupProps> = ({
   const [files, setFiles] = useState<CodeFile[]>([])
   const [activeIndex, setActiveIndex] = useState(0)
   const [highlightedCode, setHighlightedCode] = useState<string[]>([])
+  const [copied, setCopied] = useState(false)
+  const [showCopyTooltip, setShowCopyTooltip] = useState(false)
+  const [primaryColor, setPrimaryColor] = useState('#3b82f6')
 
   // Auto-detect theme if not provided
   const [autoTheme, setAutoTheme] = useState<'light' | 'dark'>('light')
@@ -68,6 +72,14 @@ export const CodeGroup: React.FC<CodeGroupProps> = ({
   }, [propTheme])
 
   const theme = propTheme || autoTheme
+
+  // Load primary color from config
+  useEffect(() => {
+    const color = configLoader.getPrimaryColor(theme)
+    if (color) {
+      setPrimaryColor(color)
+    }
+  }, [theme])
 
   useEffect(() => {
     const parsedFiles: CodeFile[] = []
@@ -103,22 +115,17 @@ export const CodeGroup: React.FC<CodeGroupProps> = ({
       const highlighted = await Promise.all(
         files.map(async (file) => {
           try {
-            const html = await codeToHtml(file.code, {
+            let html = await codeToHtml(file.code, {
               lang: file.language,
-              theme: theme === 'dark' ? 'tokyo-night' : 'github-light',
+              themes: {
+                light: 'github-light-default',
+                dark: 'dark-plus',
+              },
+              defaultColor: false,
             })
-
-            // Remove inline background-color from the generated HTML
-            // This is a workaround to ensure our CSS takes precedence
-            const cleanedHtml = html
-              .replace(/style="[^"]*background-color:[^";]*;?[^"]*"/g, (match) => {
-                // Keep other styles but remove background-color
-                const cleaned = match.replace(/background-color:[^";]+;?/g, '')
-                return cleaned
-              })
-              .replace(/style=""/g, '') // Remove empty style attributes
-
-            return cleanedHtml
+            // Replace the dark background with custom color
+            html = html.replace('--shiki-dark-bg:#1E1E1E', '--shiki-dark-bg:#0B0C0E')
+            return html
           } catch (error) {
             console.error(`Error highlighting ${file.language}:`, error)
             return `<pre><code>${file.code}</code></pre>`
@@ -139,6 +146,8 @@ export const CodeGroup: React.FC<CodeGroupProps> = ({
   const handleCopy = async () => {
     if (files[activeIndex]) {
       await navigator.clipboard.writeText(files[activeIndex].code)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
     }
   }
 
@@ -149,9 +158,8 @@ export const CodeGroup: React.FC<CodeGroupProps> = ({
   // Colors based on theme
   const outerBg = theme === 'dark' ? '#131722' : '#f3f4f6'
   const innerBg = theme === 'dark' ? '#0a0f1c' : '#ffffff'
-  const borderColor = theme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.1)'
+  const borderColor = theme === 'light' ? '#d1d5db' : '#1e293b'
   const textSecondary = theme === 'dark' ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.6)'
-  const primaryColor = '#3b82f6'
 
 
   return (
@@ -167,16 +175,18 @@ export const CodeGroup: React.FC<CodeGroupProps> = ({
         }
         .${containerId}-content .shiki,
         .${containerId}-content pre.shiki {
-          background-color: ${innerBg} !important;
-          background: ${innerBg} !important;
+          background-color: var(${theme === 'dark' ? '--shiki-dark-bg' : '--shiki-light-bg'}) !important;
+          margin: 0 !important;
+        }
+        .${containerId}-content .shiki span {
+          color: var(${theme === 'dark' ? '--shiki-dark' : '--shiki-light'}) !important;
+          background-color: transparent !important;
         }
         .${containerId}-content pre {
           margin: 0 !important;
           padding: 16px !important;
           border-radius: 12px !important;
           overflow-x: auto !important;
-          background-color: ${innerBg} !important;
-          background: ${innerBg} !important;
           scrollbar-color: ${theme === 'dark' ? 'rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.2) rgba(0, 0, 0, 0.05)'} !important;
           scrollbar-width: thin !important;
         }
@@ -222,87 +232,119 @@ export const CodeGroup: React.FC<CodeGroupProps> = ({
         className={containerId}
         style={{
           margin: '20px 0',
-          padding: '16px 4px',
+          padding: '4px',
           border: `1px solid ${borderColor}`,
           borderRadius: '12px',
           backgroundColor: outerBg,
         }}
       >
         {/* Tabs header */}
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
-          {/* Tabs */}
-          {files.map((file, index) => (
+        <div style={{ display: 'flex', alignItems: 'center', position: 'relative' }}>
+          {/* Tabs container with scroll */}
+          <div style={{
+            display: 'flex',
+            gap: '4px',
+            overflowX: 'auto',
+            flexWrap: 'nowrap',
+            flex: 1,
+            alignItems: 'center',
+            maskImage: 'linear-gradient(to right, black calc(100% - 50px), transparent 100%)',
+            WebkitMaskImage: 'linear-gradient(to right, black calc(100% - 50px), transparent 100%)',
+            paddingRight: '40px',
+          }}>
+            {files.map((file, index) => (
+              <button
+                key={index}
+                style={{
+                  padding: '8px 10px',
+                  fontFamily: 'monospace',
+                  fontWeight: '600',
+                  fontSize: '13px',
+                  letterSpacing: '-0.02em',
+                  borderRadius: '6px',
+                  border: 'none',
+                  backgroundColor: 'transparent',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                  color: index === activeIndex ? primaryColor : textSecondary,
+                  textDecoration: index === activeIndex ? 'underline' : 'none',
+                  textUnderlineOffset: '6px',
+                  outline: 'none',
+                  flexShrink: 0,
+                  whiteSpace: 'nowrap',
+                }}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setActiveIndex(index)
+                }}
+              >
+                {file.filename}
+              </button>
+            ))}
+          </div>
+
+          {/* Copy button - fixed position */}
+          <div style={{ flexShrink: 0, backgroundColor: outerBg, zIndex: 30, display: 'flex', alignItems: 'center' }}>
             <button
-              key={index}
               style={{
-                padding: '12px',
-                fontFamily: 'monospace',
-                fontWeight: '700',
-                borderRadius: '6px',
+                padding: '6px',
+                borderRadius: '4px',
                 border: 'none',
-                backgroundColor: 'transparent',
-                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
                 transition: 'all 0.2s',
-                color: index === activeIndex ? primaryColor : textSecondary,
-                textDecoration: index === activeIndex ? 'underline' : 'none',
-                textUnderlineOffset: '8px',
+                cursor: 'pointer',
+                backgroundColor: 'transparent',
+                color: textSecondary,
                 outline: 'none',
               }}
               onClick={(e) => {
                 e.stopPropagation()
-                setActiveIndex(index)
+                handleCopy()
               }}
+              onMouseEnter={() => setShowCopyTooltip(true)}
+              onMouseLeave={() => setShowCopyTooltip(false)}
             >
-              {file.filename}
+              {copied ? (
+                <i className="pi pi-check" style={{ fontSize: '18px' }}></i>
+              ) : (
+                <svg
+                  style={{ width: '18px', height: '18px' }}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                  />
+                </svg>
+              )}
             </button>
-          ))}
-
-          {/* Copy button */}
-          <button
-            style={{
-              marginLeft: 'auto',
-              marginTop: 'auto',
-              marginBottom: 'auto',
-              padding: '8px',
-              borderRadius: '4px',
-              border: 'none',
-              fontSize: '12px',
-              fontWeight: '500',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px',
-              transition: 'all 0.2s',
-              cursor: 'pointer',
-              backgroundColor: 'rgba(255, 255, 255, 0)',
-              color: textSecondary,
-              outline: 'none',
-            }}
-            onClick={(e) => {
-              e.stopPropagation()
-              handleCopy()
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0)'
-            }}
-            title="Copy code"
-          >
-            <svg
-              style={{ width: '12px', height: '12px' }}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
-              />
-            </svg>
-          </button>
+            {showCopyTooltip && (
+              <div
+                style={{
+                  position: 'absolute',
+                  bottom: '100%',
+                  right: '0',
+                  marginBottom: '8px',
+                  padding: '4px 8px',
+                  backgroundColor: primaryColor,
+                  color: '#ffffff',
+                  borderRadius: '4px',
+                  fontSize: '11px',
+                  fontWeight: '500',
+                  whiteSpace: 'nowrap',
+                  zIndex: 100,
+                }}
+              >
+                {copied ? 'Copied!' : 'Copy'}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Code content */}

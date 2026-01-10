@@ -126,7 +126,6 @@ export const CardNodeView = ({ node, updateAttributes, editor, getPos }: NodeVie
     <NodeViewWrapper className="card-node-view">
       <div
         style={{
-          margin: '1rem 0',
           position: 'relative',
         }}
       >
@@ -162,14 +161,24 @@ export const CardNodeView = ({ node, updateAttributes, editor, getPos }: NodeVie
         <div
           style={{
             position: 'relative',
-            border: `1px solid ${theme === 'light' ? '#e5e7eb' : '#374151'}`,
-            borderRadius: '8px',
+            border: `1px solid ${theme === 'light' ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.08)'}`,
+            borderRadius: '16px',
             overflow: 'hidden',
             cursor: !isEditable && href ? 'pointer' : 'default',
             transition: 'all 0.15s ease',
             backgroundColor: 'transparent',
             boxShadow: 'none',
             outline: 'none',
+          }}
+          onMouseEnter={(e) => {
+            if (href && !isEditable) {
+              e.currentTarget.style.borderColor = iconColor
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (href && !isEditable) {
+              e.currentTarget.style.borderColor = theme === 'light' ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.08)'
+            }
           }}
           onClick={() => {
             if (!isEditable && href) {
@@ -251,7 +260,7 @@ export const CardNodeView = ({ node, updateAttributes, editor, getPos }: NodeVie
                 flexDirection: iconAlign === 'center' ? 'column' : iconAlign === 'right' ? 'row-reverse' : 'row',
               }}
             >
-              <div ref={iconButtonRef} style={{ position: 'relative' }}>
+              <div ref={iconButtonRef} style={{ position: 'relative', flexShrink: 0 }}>
                 {icon ? (
                   <div
                     onMouseDown={(e) => {
@@ -261,10 +270,19 @@ export const CardNodeView = ({ node, updateAttributes, editor, getPos }: NodeVie
                         openInlineIconPicker()
                       }
                     }}
-                    style={{ cursor: isEditable ? 'pointer' : 'default', padding: '4px', borderRadius: '8px' }}
+                    style={{
+                      cursor: isEditable ? 'pointer' : 'default',
+                      borderRadius: '6px',
+                      width: '36px',
+                      height: '36px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      overflow: 'hidden',
+                    }}
                     title={isEditable ? 'Click to change icon' : ''}
                   >
-                    <IconRenderer iconKey={icon} style={{ fontSize: '2.5rem', color: iconColor, width: '2.5rem', height: '2.5rem' }} />
+                    <IconRenderer iconKey={icon} style={{ fontSize: '1.75rem', color: iconColor, width: '28px', height: '28px', maxWidth: '28px', maxHeight: '28px' }} />
                   </div>
                 ) : isEditable ? (
                   <div
@@ -274,9 +292,9 @@ export const CardNodeView = ({ node, updateAttributes, editor, getPos }: NodeVie
                       openInlineIconPicker()
                     }}
                     style={{
-                      width: '2.5rem',
-                      height: '2.5rem',
-                      borderRadius: '8px',
+                      width: '36px',
+                      height: '36px',
+                      borderRadius: '6px',
                       border: `2px dashed ${theme === 'light' ? '#d1d5db' : '#4b5563'}`,
                       display: 'flex',
                       alignItems: 'center',
@@ -285,7 +303,7 @@ export const CardNodeView = ({ node, updateAttributes, editor, getPos }: NodeVie
                     }}
                     title="Click to add icon"
                   >
-                    <i className="pi pi-plus" style={{ fontSize: '1rem', color: theme === 'light' ? '#9ca3af' : '#6b7280' }} />
+                    <i className="pi pi-plus" style={{ fontSize: '0.875rem', color: theme === 'light' ? '#9ca3af' : '#6b7280' }} />
                   </div>
                 ) : null}
               </div>
@@ -313,7 +331,7 @@ export const CardNodeView = ({ node, updateAttributes, editor, getPos }: NodeVie
                   onKeyDown={handleTitleKeyDown}
                   onMouseDown={(e) => e.stopPropagation()}
                   style={{
-                    margin: 0, fontSize: '1.5rem', fontWeight: '700',
+                    margin: 0, fontSize: '1.125rem', fontWeight: '600',
                     color: theme === 'light' ? '#111827' : '#f3f4f6',
                     textAlign: iconAlign === 'center' ? 'center' : iconAlign === 'right' ? 'right' : 'left',
                     backgroundColor: 'transparent', border: 'none',
@@ -331,7 +349,7 @@ export const CardNodeView = ({ node, updateAttributes, editor, getPos }: NodeVie
                     }
                   }}
                   style={{
-                    margin: 0, fontSize: '1.5rem', fontWeight: '700',
+                    margin: 0, fontSize: '1.125rem', fontWeight: '600',
                     color: theme === 'light' ? '#111827' : '#f3f4f6',
                     textAlign: iconAlign === 'center' ? 'center' : iconAlign === 'right' ? 'right' : 'left',
                     cursor: isEditable ? 'text' : 'default', flex: 1, minWidth: 0,
@@ -357,21 +375,6 @@ export const CardNodeView = ({ node, updateAttributes, editor, getPos }: NodeVie
             </div>
           </div>
 
-          {href && (
-            <div
-              className="link-indicator"
-              style={{
-                position: 'absolute', bottom: '1rem', right: '1rem',
-                width: '32px', height: '32px', display: 'flex', alignItems: 'center',
-                justifyContent: 'center', background: theme === 'light' ? 'rgba(255, 255, 255, 0.95)' : 'rgba(31, 41, 55, 0.95)',
-                backdropFilter: 'blur(8px)', border: `1px solid ${iconColor}`, borderRadius: '50%',
-                opacity: isEditable ? 0 : undefined, // Hide in edit mode
-                transition: 'all 0.2s ease', pointerEvents: 'none',
-              }}
-            >
-              <i className="pi pi-arrow-right" style={{ fontSize: '0.9rem', color: iconColor }}></i>
-            </div>
-          )}
         </div>
       </div>
     </NodeViewWrapper>

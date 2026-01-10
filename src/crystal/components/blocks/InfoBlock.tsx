@@ -27,7 +27,7 @@ export const InfoBlock: React.FC<InfoBlockProps> = ({
           padding: '12px',
           backgroundColor: theme === 'light' ? '#f0f9ff' : '#1e293b',
           border: `2px solid ${theme === 'light' ? '#3b82f6' : '#6366f1'}`,
-          borderRadius: '8px',
+          borderRadius: '16px',
           marginBottom: '16px',
         }}
       >
@@ -87,7 +87,7 @@ export const InfoBlock: React.FC<InfoBlockProps> = ({
         marginBottom: '16px',
         backgroundColor: '#eff6ff',
         border: '1px solid #bfdbfe',
-        borderRadius: '8px',
+        borderRadius: '16px',
         cursor: 'pointer',
         transition: 'background-color 0.2s',
       }}

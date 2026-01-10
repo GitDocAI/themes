@@ -44,6 +44,7 @@ export const InfoBlockNodeView = ({ node, editor, getPos }: NodeViewProps) => {
         return {
           icon: 'pi pi-lightbulb',
           color: 'rgb(74, 222, 128)', // green-400
+          textColor: 'rgba(180, 230, 180, 0.7)', // muted green
           bgColor: 'rgba(34, 197, 94, 0.1)', // green-500/10
           borderColor: 'rgba(34, 197, 94, 0.3)', // green-500/30
         }
@@ -51,6 +52,7 @@ export const InfoBlockNodeView = ({ node, editor, getPos }: NodeViewProps) => {
         return {
           icon: 'pi pi-pencil',
           color: 'rgb(96, 165, 250)', // blue-400
+          textColor: 'rgba(170, 200, 255, 0.7)', // muted blue
           bgColor: 'rgba(59, 130, 246, 0.1)', // blue-500/10
           borderColor: 'rgba(59, 130, 246, 0.3)', // blue-500/30
         }
@@ -58,6 +60,7 @@ export const InfoBlockNodeView = ({ node, editor, getPos }: NodeViewProps) => {
         return {
           icon: 'pi pi-exclamation-triangle',
           color: 'rgb(250, 204, 21)', // yellow-400
+          textColor: 'rgba(255, 230, 150, 0.7)', // muted yellow
           bgColor: 'rgba(234, 179, 8, 0.1)', // yellow-500/10
           borderColor: 'rgba(234, 179, 8, 0.3)', // yellow-500/30
         }
@@ -65,6 +68,7 @@ export const InfoBlockNodeView = ({ node, editor, getPos }: NodeViewProps) => {
         return {
           icon: 'pi pi-times-circle',
           color: 'rgb(248, 113, 113)', // red-400
+          textColor: 'rgba(255, 180, 180, 0.7)', // muted red
           bgColor: 'rgba(239, 68, 68, 0.1)', // red-500/10
           borderColor: 'rgba(239, 68, 68, 0.3)', // red-500/30
         }
@@ -72,6 +76,7 @@ export const InfoBlockNodeView = ({ node, editor, getPos }: NodeViewProps) => {
         return {
           icon: 'pi pi-info-circle',
           color: 'rgb(56, 189, 248)', // sky-400
+          textColor: 'rgba(170, 220, 255, 0.7)', // muted sky
           bgColor: 'rgba(14, 165, 233, 0.1)', // sky-500/10
           borderColor: 'rgba(14, 165, 233, 0.3)', // sky-500/30
         }
@@ -126,16 +131,30 @@ export const InfoBlockNodeView = ({ node, editor, getPos }: NodeViewProps) => {
           </button>
         )}
 
+        <style>{`
+          .info-block-content-${type} {
+            color: ${theme === 'light' ? '#1f2937' : typeConfig.textColor};
+          }
+          .info-block-content-${type} strong,
+          .info-block-content-${type} b,
+          .info-block-content-${type} h1,
+          .info-block-content-${type} h2,
+          .info-block-content-${type} h3,
+          .info-block-content-${type} h4,
+          .info-block-content-${type} h5,
+          .info-block-content-${type} h6 {
+            color: ${theme === 'light' ? '#1f2937' : '#ffffff'};
+          }
+        `}</style>
         <div
           style={{
             display: 'flex',
             alignItems: 'start',
             gap: '1rem',
-            borderRadius: '0.5rem',
+            borderRadius: '16px',
             border: `1px solid ${typeConfig.borderColor}`,
             padding: '1rem',
             backgroundColor: typeConfig.bgColor,
-            color: theme === 'light' ? '#1f2937' : '#f9fafb',
           }}
         >
           <i
@@ -154,7 +173,7 @@ export const InfoBlockNodeView = ({ node, editor, getPos }: NodeViewProps) => {
             }}
           >
             <NodeViewContent
-              className="info-block-content"
+              className={`info-block-content info-block-content-${type}`}
               style={{
                 outline: 'none',
               }}

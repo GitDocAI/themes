@@ -31,74 +31,77 @@
   font-weight: 700;
 }
 
-.tiptap-editor h1 {
-  font-size: 2.25rem;
-  margin-top: 2rem;
-  margin-bottom: 1rem;
-  padding-top: 1.5rem;
-  padding-bottom: 1rem;
+.tiptap-editor h1,
+.tiptap-editor h2,
+.tiptap-editor h3 {
+  margin: 0;
+  padding: 0;
 }
 
-.tiptap-editor h1:first-child {
-  margin-top: 0;
-  padding-top: 0;
+.tiptap-editor h1 {
+  font-size: 30px;
 }
 
 .tiptap-editor h2 {
-  font-size: 1.875rem;
-  margin-top: 1.75rem;
-  margin-bottom: 0.875rem;
-  padding-top: 1rem;
-  padding-bottom: 0.75rem;
-}
-
-.tiptap-editor h2:first-child {
-  margin-top: 0;
+  font-size: 24px;
+  margin-bottom: 16px;
 }
 
 .tiptap-editor h3 {
-  font-size: 1.5rem;
-  margin-top: 1.5rem;
-  margin-bottom: 0.75rem;
-  padding-top: 0.75rem;
-  padding-bottom: 0.5rem;
+  font-size: 20px;
+  margin-bottom: 12px;
 }
 
-.tiptap-editor h3:first-child {
+/* Header wrappers - default 48px top margin */
+.tiptap-editor .node-heading {
+  margin-top: 48px;
+}
+
+/* Remove top margin when header wrapper is first child */
+.tiptap-editor .node-heading:first-child {
+  margin-top: 0;
+}
+
+/* Remove top margin when preceded by another header */
+.tiptap-editor .node-heading + .node-heading {
+  margin-top: 0;
+}
+
+/* Remove top margin when preceded by separator */
+.tiptap-editor .horizontal-rule-block-wrapper + .node-heading {
+  margin-top: 0;
+}
+
+/* Remove top margin when preceded by paragraph */
+.tiptap-editor p + .node-heading {
   margin-top: 0;
 }
 
 /* Mobile/tablet responsive headings */
 @media (max-width: 1024px) {
   .tiptap-editor h1 {
-    font-size: 1.5rem;
-    margin-top: 1.25rem;
-    margin-bottom: 0.75rem;
-    padding-top: 1rem;
-    padding-bottom: 0.5rem;
+    font-size: 24px;
   }
 
   .tiptap-editor h2 {
-    font-size: 1.25rem;
-    margin-top: 1rem;
-    margin-bottom: 0.5rem;
-    padding-top: 0.75rem;
-    padding-bottom: 0.5rem;
+    font-size: 20px;
+    margin-bottom: 12px;
   }
 
   .tiptap-editor h3 {
-    font-size: 1.125rem;
-    margin-top: 0.875rem;
-    margin-bottom: 0.5rem;
-    padding-top: 0.5rem;
-    padding-bottom: 0.25rem;
+    font-size: 18px;
+    margin-bottom: 10px;
+  }
+
+  .tiptap-editor .node-heading {
+    margin-top: 32px;
   }
 }
 
 .tiptap-editor p {
   font-size: 1rem;
   line-height: 1.8;
-  margin: 0 0 1rem 0;
+  margin: 0 0 20px 0;
 }
 
 .tiptap-editor ul,
@@ -237,6 +240,7 @@ body[style*="background-color: rgb(13"] .tiptap-editor ol li::marker,
   color: #6b7280;
 }
 
+/* Inline code styling */
 .tiptap-editor code {
   background-color: #f3f4f6;
   color: #1f2937;
@@ -252,6 +256,56 @@ body[style*="background-color: rgb(13"] .tiptap-editor ol li::marker,
   color: #f3f4f6;
 }
 
+/* Reset ALL styles for code inside ANY pre block - Shiki handles everything */
+.tiptap-editor pre code,
+.tiptap-editor pre.shiki code,
+.tiptap-editor .shiki code {
+  background: transparent !important;
+  color: inherit !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  font-size: inherit !important;
+}
+
+/* Ensure Shiki spans use their CSS variable colors - Light theme */
+.tiptap-editor pre.shiki span,
+.tiptap-editor .shiki span,
+.tiptap-editor pre.shiki code span,
+.tiptap-editor .shiki code span {
+  color: var(--shiki-light) !important;
+  background: transparent !important;
+}
+
+.tiptap-editor pre.shiki,
+.tiptap-editor .shiki {
+  background-color: var(--shiki-light-bg) !important;
+}
+
+/* Ensure Shiki spans use their CSS variable colors - Dark theme */
+.tiptap-editor.dark-theme pre.shiki span,
+.tiptap-editor.dark-theme .shiki span,
+.tiptap-editor.dark-theme pre.shiki code span,
+.tiptap-editor.dark-theme .shiki code span {
+  color: var(--shiki-dark) !important;
+  background: transparent !important;
+}
+
+.tiptap-editor.dark-theme pre.shiki,
+.tiptap-editor.dark-theme .shiki {
+  background-color: var(--shiki-dark-bg) !important;
+}
+
+/* Font for Shiki code blocks */
+.tiptap-editor pre.shiki,
+.tiptap-editor .shiki,
+.tiptap-editor pre.shiki code,
+.tiptap-editor .shiki code {
+  font-family: 'JetBrains Mono', 'Fira Code', 'SF Mono', Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace !important;
+  font-weight: 500 !important;
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
+}
+
 .tiptap-editor pre {
   background-color: #1f2937;
   color: #f9fafb;
@@ -263,21 +317,29 @@ body[style*="background-color: rgb(13"] .tiptap-editor ol li::marker,
   position: relative;
 }
 
+/* Allow Shiki pre elements to use their own colors */
+.tiptap-editor pre.shiki,
+.tiptap-editor .shiki pre,
+.code-block-syntax-highlight pre {
+  color: unset;
+}
+
 /* Light theme for code blocks - removed, now handled inline */
 
-/* Code inside pre blocks should inherit styles */
-.tiptap-editor pre code {
+/* Code inside pre blocks should inherit styles - except syntax highlighted blocks */
+.tiptap-editor pre:not(.shiki) code {
   background: none !important;
   color: inherit !important;
   font-size: 0.875rem;
   padding: 0;
 }
 
-/* Also apply to dark theme */
-.tiptap-editor.dark-theme pre code {
+/* Also apply to dark theme - except syntax highlighted blocks */
+.tiptap-editor.dark-theme pre:not(.shiki) code {
   background: none !important;
   color: inherit !important;
 }
+
 
 .tiptap-editor hr {
   border: none;
@@ -493,19 +555,35 @@ body[style*="background-color: rgb(255, 255, 255)"] .tiptap-editor a.custom-link
 
 /* Code block syntax highlighting styles */
 .code-block-syntax-highlight {
-  border-radius: 8px !important;
-  overflow: hidden !important;
+  border-radius: 16px !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
 }
 
 .code-block-syntax-highlight pre {
   margin: 0 !important;
   padding: 1rem !important;
-  border-radius: 8px !important;
+  border-radius: 16px !important;
   min-height: 100%;
+  white-space: pre !important;
+  overflow-x: auto !important;
 }
 
 .code-block-syntax-highlight code {
   font-family: 'JetBrainsMono', 'Courier New', Courier, monospace !important;
+  white-space: pre !important;
+  word-wrap: normal !important;
+  overflow-wrap: normal !important;
+  font-weight: 500 !important;
+}
+
+.code-block-syntax-highlight code span {
+  font-weight: 500 !important;
+}
+
+.code-block-syntax-highlight code .line {
+  display: block !important;
+  white-space: pre !important;
 }
 
 /* Code group syntax highlighting styles */
@@ -524,6 +602,11 @@ body[style*="background-color: rgb(255, 255, 255)"] .tiptap-editor a.custom-link
 
 .code-group-syntax-highlight code {
   font-family: 'JetBrainsMono', 'Courier New', Courier, monospace !important;
+  font-weight: 500 !important;
+}
+
+.code-group-syntax-highlight code span {
+  font-weight: 500 !important;
 }
 
 .is-dragging {
@@ -578,12 +661,31 @@ span[data-label]::before {
 .tiptap-editor [data-type="column"] {
   flex: 1 !important;
   min-width: 0 !important;
-  padding: 16px !important;
   border-radius: 8px !important;
-  min-height: 120px !important;
+  min-height: 60px !important;
   transition: border-color 0.2s ease !important;
   display: flex !important;
   flex-direction: column !important;
+  gap: 16px !important;
+}
+
+/* Make cards inside columns have equal height */
+.tiptap-editor [data-type="column"] > .card-node-view {
+  flex: 1 !important;
+}
+
+.tiptap-editor [data-type="column"] > .card-node-view > div {
+  height: 100% !important;
+}
+
+.tiptap-editor [data-type="column"] > .card-node-view > div > div {
+  height: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.tiptap-editor [data-type="column"] > .card-node-view > div > div > div:last-child {
+  flex: 1 !important;
 }
 
 /* Column borders - only in editable mode */

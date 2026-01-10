@@ -7,6 +7,7 @@ export interface ParamBlockAttrs {
   path: string
   type: string
   required: boolean
+  default: string
   description: string
 }
 
@@ -33,6 +34,9 @@ export const ParamBlock = Node.create({
         renderHTML: attributes => {
           return { 'data-required': attributes.required ? 'true' : 'false' }
         },
+      },
+      default: {
+        default: '',
       },
       description: {
         default: '',
@@ -68,6 +72,7 @@ export const ParamBlock = Node.create({
               path: attributes?.path || 'param',
               type: attributes?.type || 'string',
               required: attributes?.required || false,
+              default: attributes?.default || '',
               description: attributes?.description || 'Parameter description',
             },
           })

@@ -749,6 +749,21 @@ function Documentation() {
           minWidth: 0,
           minHeight: 'calc(100vh - var(--navbar-height, 64px) - var(--tabbar-height, 64px) - 40px)',
         }}>
+          {/* Group Name */}
+          {currentGroup && !isMobile && (
+            <div
+              style={{
+                fontSize: '13px',
+                fontWeight: '600',
+                color: primaryColor,
+                marginBottom: '8px',
+                letterSpacing: '-0.02em',
+              }}
+            >
+              {currentGroup}
+            </div>
+          )}
+
           {/* Page Viewer */}
           <div id="page-content-area" style={{ flex: '1 0 auto' }}>
             <PageViewer key={`${currentPath}-${pageRefreshKey}`} pagePath={currentPath} theme={theme} isDevMode={isProductionMode ? false : isDevMode} allowUpload={isDevEnvironment} openApiSpec={currentOpenApiSpec} />
@@ -867,6 +882,7 @@ function Documentation() {
           isProductionMode={isProductionMode}
         />
       )}
+
     </TextSelectionContextMenu>
   )
 }

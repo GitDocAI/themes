@@ -16,18 +16,27 @@ interface IconPickerProps {
 }
 
 // Helper to render icons from different libraries
-export const IconRenderer = ({ iconKey, ...props }: { iconKey: string;[key: string]: any }) => {
+export const IconRenderer = ({ iconKey, style, ...props }: { iconKey: string; style?: React.CSSProperties; [key: string]: any }) => {
   if (!iconKey) return null
 
+  // Extract size from style for consistent sizing
+  const size = style?.width || style?.height || style?.fontSize
+  const iconStyle: React.CSSProperties = {
+    ...style,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }
+
   if (iconKey.startsWith('pi ')) {
-    return <i className={iconKey} {...props}></i>
+    return <i className={iconKey} style={iconStyle} {...props}></i>
   }
   if (iconKey.startsWith('fa ')) {
-    return <i className={iconKey} {...props}></i>
+    return <i className={iconKey} style={iconStyle} {...props}></i>
   }
   if (iconKey.startsWith('mi-')) {
     const iconName = iconKey.substring(3)
-    return <span className="material-icons" {...props}>{iconName}</span>
+    return <span className="material-icons" style={iconStyle} {...props}>{iconName}</span>
   }
   if (iconKey.startsWith('hi-')) {
     const keyParts = iconKey.substring(3).split('-')
@@ -40,10 +49,20 @@ export const IconRenderer = ({ iconKey, ...props }: { iconKey: string;[key: stri
     const IconComponent = (iconLib as any)[componentName]
 
     if (IconComponent) {
-      return <IconComponent {...props} />
+      // For Heroicons (SVG), use width/height directly
+      const svgStyle: React.CSSProperties = {
+        width: size,
+        height: size,
+        minWidth: size,
+        minHeight: size,
+        maxWidth: size,
+        maxHeight: size,
+        color: style?.color,
+      }
+      return <IconComponent style={svgStyle} {...props} />
     }
   }
-  return <i className={iconKey} {...props}></i> // Fallback for old format
+  return <i className={iconKey} style={iconStyle} {...props}></i> // Fallback for old format
 }
 
 // Helper to get the library name

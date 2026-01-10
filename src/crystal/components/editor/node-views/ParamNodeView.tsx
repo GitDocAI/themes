@@ -9,6 +9,7 @@ export const ParamNodeView = ({ node, updateAttributes, editor, getPos }: NodeVi
   const [editPath, setEditPath] = useState(node.attrs.path || 'param')
   const [editType, setEditType] = useState(node.attrs.type || 'string')
   const [editRequired, setEditRequired] = useState(node.attrs.required || false)
+  const [editDefault, setEditDefault] = useState(node.attrs.default || '')
   const [editDescription, setEditDescription] = useState(node.attrs.description || '')
 
   // Sync with node attrs
@@ -16,8 +17,9 @@ export const ParamNodeView = ({ node, updateAttributes, editor, getPos }: NodeVi
     setEditPath(node.attrs.path || 'param')
     setEditType(node.attrs.type || 'string')
     setEditRequired(node.attrs.required || false)
+    setEditDefault(node.attrs.default || '')
     setEditDescription(node.attrs.description || '')
-  }, [node.attrs.path, node.attrs.type, node.attrs.required, node.attrs.description])
+  }, [node.attrs.path, node.attrs.type, node.attrs.required, node.attrs.default, node.attrs.description])
 
   // Detect theme
   useEffect(() => {
@@ -58,6 +60,7 @@ export const ParamNodeView = ({ node, updateAttributes, editor, getPos }: NodeVi
       path: editPath,
       type: editType,
       required: editRequired,
+      default: editDefault,
       description: editDescription,
     })
     setIsEditing(false)
@@ -67,6 +70,7 @@ export const ParamNodeView = ({ node, updateAttributes, editor, getPos }: NodeVi
     setEditPath(node.attrs.path || 'param')
     setEditType(node.attrs.type || 'string')
     setEditRequired(node.attrs.required || false)
+    setEditDefault(node.attrs.default || '')
     setEditDescription(node.attrs.description || '')
     setIsEditing(false)
   }
@@ -196,6 +200,29 @@ export const ParamNodeView = ({ node, updateAttributes, editor, getPos }: NodeVi
               </label>
             </div>
 
+            {/* Default */}
+            <div style={{ marginBottom: '12px' }}>
+              <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px', fontWeight: '500', color: colors.text }}>
+                Default Value
+              </label>
+              <input
+                type="text"
+                value={editDefault}
+                onChange={(e) => setEditDefault(e.target.value)}
+                placeholder="Default value (optional)"
+                style={{
+                  width: '100%',
+                  padding: '8px',
+                  border: `1px solid ${colors.border}`,
+                  borderRadius: '4px',
+                  fontSize: '14px',
+                  backgroundColor: theme === 'light' ? '#ffffff' : '#374151',
+                  color: colors.text,
+                  boxSizing: 'border-box',
+                }}
+              />
+            </div>
+
             {/* Description */}
             <div style={{ marginBottom: '12px' }}>
               <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px', fontWeight: '500', color: colors.text }}>
@@ -313,6 +340,7 @@ export const ParamNodeView = ({ node, updateAttributes, editor, getPos }: NodeVi
             path={node.attrs.path}
             type={node.attrs.type}
             required={node.attrs.required}
+            default={node.attrs.default}
             description={node.attrs.description}
             theme={theme}
           />

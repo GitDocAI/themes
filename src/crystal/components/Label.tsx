@@ -9,6 +9,18 @@ interface LabelProps {
   icon?: string
 }
 
+// Helper function to convert hex to rgba
+const hexToRgba = (hex: string, alpha: number): string => {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
+  if (result) {
+    const r = parseInt(result[1], 16)
+    const g = parseInt(result[2], 16)
+    const b = parseInt(result[3], 16)
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`
+  }
+  return hex
+}
+
 export const Label: React.FC<LabelProps> = ({
   label,
   color = '#3b82f6',
@@ -34,7 +46,8 @@ export const Label: React.FC<LabelProps> = ({
     },
   }
 
-  const textColor = theme === 'light' ? '#000000' : '#ffffff'
+  const bgOpacity = theme === 'light' ? 0.1 : 0.15
+  const backgroundColor = hexToRgba(color, bgOpacity)
 
   return (
     <span
@@ -43,10 +56,9 @@ export const Label: React.FC<LabelProps> = ({
         alignItems: 'center',
         gap: '0.375rem',
         borderRadius: '4px',
-        fontWeight: '500',
-        backgroundColor: color,
-        color: textColor,
-        border: `1px solid ${color}`,
+        fontWeight: '600',
+        backgroundColor: backgroundColor,
+        color: color,
         padding: sizes[size].padding,
         fontSize: sizes[size].fontSize,
       }}
@@ -58,7 +70,7 @@ export const Label: React.FC<LabelProps> = ({
             fontSize: sizes[size].iconSize,
             width: sizes[size].iconSize,
             height: sizes[size].iconSize,
-            color: textColor,
+            color: color,
           }}
         />
       )}

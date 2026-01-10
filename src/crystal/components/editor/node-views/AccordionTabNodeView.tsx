@@ -173,12 +173,22 @@ export const AccordionTabNodeView = ({ node, updateAttributes, editor, getPos }:
       className="accordion-tab-wrapper"
       style={{
         backgroundColor: 'transparent',
-        border: `1px solid ${theme === 'light' ? '#e5e7eb' : '#374151'}`,
-        borderRadius: '8px',
+        border: `1px solid ${theme === 'light' ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.08)'}`,
+        borderRadius: '16px',
         overflow: 'hidden',
         transition: 'all 0.15s ease',
         opacity: disabled ? 0.5 : 1,
         marginBottom: '0.5rem',
+      }}
+      onMouseEnter={(e) => {
+        if (!isEditable) {
+          e.currentTarget.style.borderColor = iconColor
+        }
+      }}
+      onMouseLeave={(e) => {
+        if (!isEditable) {
+          e.currentTarget.style.borderColor = theme === 'light' ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.08)'
+        }
       }}
     >
       {/* Tab Header */}
@@ -192,7 +202,7 @@ export const AccordionTabNodeView = ({ node, updateAttributes, editor, getPos }:
           backgroundColor: isActive
             ? (theme === 'light' ? 'rgba(59, 130, 246, 0.05)' : 'rgba(59, 130, 246, 0.1)')
             : 'transparent',
-          borderBottom: isActive ? `1px solid ${theme === 'light' ? '#e5e7eb' : '#374151'}` : 'none',
+          borderBottom: isActive ? `1px solid ${theme === 'light' ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.08)'}` : 'none',
         }}
       >
 

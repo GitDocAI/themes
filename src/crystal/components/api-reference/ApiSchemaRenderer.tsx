@@ -140,10 +140,13 @@ export const ApiSchemaRenderer: React.FC<ApiSchemaRendererProps> = ({
         <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '0.5rem' }}>
           <span
             style={{
-              fontWeight: '600',
-              color: '#3b82f6',
+              fontWeight: '500',
+              color: theme === 'dark' ? '#60a5fa' : '#3b82f6',
               fontFamily: 'monospace',
               fontSize: '0.875rem',
+              padding: '0.125rem 0.375rem',
+              borderRadius: '4px',
+              backgroundColor: theme === 'dark' ? 'rgba(96, 165, 250, 0.15)' : 'rgba(59, 130, 246, 0.1)',
             }}
           >
             {name}
@@ -184,9 +187,9 @@ export const ApiSchemaRenderer: React.FC<ApiSchemaRendererProps> = ({
                 fontSize: '0.7rem',
                 padding: '0.125rem 0.375rem',
                 borderRadius: '4px',
-                backgroundColor: '#fee2e2',
-                color: '#dc2626',
-                fontWeight: '600',
+                backgroundColor: theme === 'dark' ? 'rgba(239, 68, 68, 0.15)' : 'rgba(220, 38, 38, 0.1)',
+                color: theme === 'dark' ? '#f87171' : '#dc2626',
+                fontWeight: '500',
               }}
             >
               required

@@ -4,6 +4,7 @@ import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
 import { common, createLowlight } from 'lowlight'
 import { useState, useRef, useEffect } from 'react'
 import { codeToHtml } from 'shiki'
+import { configLoader } from '../../../../services/configLoader'
 
 const lowlight = createLowlight(common)
 
@@ -13,9 +14,10 @@ const CodeBlockComponent = ({ node, updateAttributes, editor, getPos }: NodeView
   const selectorRef = useRef<HTMLDivElement>(null)
   const [theme, setTheme] = useState<'light' | 'dark'>('dark')
   const [copied, setCopied] = useState(false)
-  const codeRef = useRef<HTMLPreElement>(null)
   const [showCopyButton, setShowCopyButton] = useState(false)
   const [highlightedCode, setHighlightedCode] = useState<string>('')
+  const [primaryColor, setPrimaryColor] = useState('#3b82f6')
+  const [showCopyTooltip, setShowCopyTooltip] = useState(false)
 
   const languages = [
     'javascript',
@@ -81,6 +83,14 @@ const CodeBlockComponent = ({ node, updateAttributes, editor, getPos }: NodeView
     return () => observer.disconnect()
   }, [])
 
+  // Load primary color from config
+  useEffect(() => {
+    const color = configLoader.getPrimaryColor(theme)
+    if (color) {
+      setPrimaryColor(color)
+    }
+  }, [theme])
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (selectorRef.current && !selectorRef.current.contains(event.target as HTMLElement)) {
@@ -109,35 +119,38 @@ const CodeBlockComponent = ({ node, updateAttributes, editor, getPos }: NodeView
 
   const isEditable = editor.isEditable
 
-  // Generate syntax highlighted code for preview mode
+  // Get code content directly from node
+  const nodeTextContent = node.textContent || ''
+
+  // Generate syntax highlighted code for preview mode using dual themes
   useEffect(() => {
-    if (!isEditable && codeRef.current) {
+    if (!isEditable && nodeTextContent.trim()) {
       const generateHighlight = async () => {
-        const codeContent = codeRef.current?.textContent || ''
-        if (codeContent.trim()) {
-          try {
-            const html = await codeToHtml(codeContent, {
-              lang: selectedLanguage,
-              theme: theme === 'dark' ? 'tokyo-night' : 'github-light',
-            })
-            setHighlightedCode(html)
-          } catch (error) {
-            console.error(`Error highlighting ${selectedLanguage}:`, error)
-            setHighlightedCode('')
-          }
+        try {
+          let html = await codeToHtml(nodeTextContent, {
+            lang: selectedLanguage,
+            themes: {
+              light: 'github-light-default',
+              dark: 'dark-plus',
+            },
+            defaultColor: false,
+          })
+          // Replace the dark background with custom color
+          html = html.replace('--shiki-dark-bg:#1E1E1E', '--shiki-dark-bg:#0B0C0E')
+          setHighlightedCode(html)
+        } catch (error) {
+          console.error(`Error highlighting ${selectedLanguage}:`, error)
+          setHighlightedCode('')
         }
       }
       generateHighlight()
     }
-  }, [isEditable, selectedLanguage, theme, codeRef.current?.textContent])
+  }, [isEditable, nodeTextContent, selectedLanguage, theme])
 
   const handleCopy = async () => {
-    if (codeRef.current) {
-      const codeText = codeRef.current.textContent || ''
-      await navigator.clipboard.writeText(codeText)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    }
+    await navigator.clipboard.writeText(nodeTextContent)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
   }
 
   const handleDelete = () => {
@@ -164,7 +177,7 @@ const CodeBlockComponent = ({ node, updateAttributes, editor, getPos }: NodeView
       <NodeViewWrapper className="code-block-wrapper">
         <div
           style={{
-            margin: '1rem 0',
+            margin: '20px 0 32px 0',
             position: 'relative',
           }}
         >
@@ -206,7 +219,7 @@ const CodeBlockComponent = ({ node, updateAttributes, editor, getPos }: NodeView
           <div
             style={{
               border: `1px solid ${borderColor}`,
-              borderRadius: '8px',
+              borderRadius: '16px',
               overflow: 'visible',
               backgroundColor: bgColor,
             }}
@@ -220,7 +233,7 @@ const CodeBlockComponent = ({ node, updateAttributes, editor, getPos }: NodeView
               padding: '8px 16px',
               backgroundColor: headerBg,
               borderBottom: `1px solid ${borderColor}`,
-              borderRadius: '8px 8px 0 0',
+              borderRadius: '16px 16px 0 0',
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -345,7 +358,7 @@ const CodeBlockComponent = ({ node, updateAttributes, editor, getPos }: NodeView
           <pre style={{
             margin: 0,
             padding: '1rem',
-            borderRadius: '0 0 8px 8px',
+            borderRadius: '0 0 16px 16px',
             backgroundColor: codeBg,
             color: codeColor,
           }}>
@@ -357,82 +370,126 @@ const CodeBlockComponent = ({ node, updateAttributes, editor, getPos }: NodeView
     )
   }
 
-  // Preview mode - with copy button on hover
+  // Preview mode - with fixed copy button
   return (
     <NodeViewWrapper className="code-block-wrapper">
       <div
         style={{
           position: 'relative',
           border: `1px solid ${borderColor}`,
-          borderRadius: '8px',
-          overflow: 'visible',
-          margin: '1rem 0',
-          backgroundColor: codeBg,
+          borderRadius: '16px',
+          overflow: 'hidden',
+          margin: '20px 0 32px 0',
         }}
-        onMouseEnter={() => setShowCopyButton(true)}
-        onMouseLeave={() => setShowCopyButton(false)}
       >
-        {/* Copy button - appears on hover */}
-        {showCopyButton && (
+        {/* Fade gradient on top right corner */}
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            right: 0,
+            width: '80px',
+            height: '40px',
+            background: `linear-gradient(to left, ${theme === 'dark' ? '#0B0C0E' : '#ffffff'} 40%, transparent 100%)`,
+            zIndex: 5,
+            pointerEvents: 'none',
+            borderRadius: '0 16px 0 0',
+          }}
+        />
+
+        {/* Copy button - always visible */}
+        <div style={{ position: 'absolute', top: '12px', right: '12px', zIndex: 10 }}>
           <button
             onClick={handleCopy}
+            onMouseEnter={() => setShowCopyTooltip(true)}
+            onMouseLeave={() => setShowCopyTooltip(false)}
             style={{
-              position: 'absolute',
-              top: '8px',
-              right: '8px',
-              padding: '4px 6px',
-              backgroundColor: theme === 'light' ? 'rgba(255, 255, 255, 0.9)' : 'rgba(55, 65, 81, 0.9)',
-              color: theme === 'light' ? '#374151' : '#e5e7eb',
-              border: `1px solid ${theme === 'light' ? '#d1d5db' : '#4b5563'}`,
+              padding: '6px',
+              backgroundColor: 'transparent',
+              color: theme === 'light' ? '#6b7280' : '#9ca3af',
+              border: 'none',
               borderRadius: '4px',
-              fontSize: '11px',
+              fontSize: '14px',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
+              justifyContent: 'center',
               transition: 'all 0.2s',
-              zIndex: 10,
-              backdropFilter: 'blur(8px)',
             }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = theme === 'light' ? 'rgba(243, 244, 246, 0.95)' : 'rgba(75, 85, 99, 0.95)'
-              e.currentTarget.style.borderColor = '#60a5fa'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = theme === 'light' ? 'rgba(255, 255, 255, 0.9)' : 'rgba(55, 65, 81, 0.9)'
-              e.currentTarget.style.borderColor = theme === 'light' ? '#d1d5db' : '#4b5563'
-            }}
-            title={copied ? 'Copied!' : 'Copy code'}
           >
-            <i className={copied ? 'pi pi-check' : 'pi pi-copy'} style={{ fontSize: '11px' }}></i>
+            {copied ? (
+              <i className="pi pi-check" style={{ fontSize: '18px' }}></i>
+            ) : (
+              <svg
+                style={{ width: '18px', height: '18px' }}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                />
+              </svg>
+            )}
           </button>
-        )}
-
-        {/* Hidden element to extract text content */}
-        <div style={{ display: 'none' }}>
-          <pre ref={codeRef}>
-            <NodeViewContent as={'code' as any} />
-          </pre>
+          {/* Tooltip */}
+          {showCopyTooltip && (
+            <div
+              style={{
+                position: 'absolute',
+                top: '100%',
+                right: '-8px',
+                marginTop: '8px',
+                padding: '4px 8px',
+                backgroundColor: primaryColor,
+                color: '#ffffff',
+                borderRadius: '4px',
+                fontSize: '11px',
+                fontWeight: '500',
+                whiteSpace: 'nowrap',
+                pointerEvents: 'none',
+                zIndex: 9999,
+              }}
+            >
+              {copied ? 'Copied!' : 'Copy'}
+            </div>
+          )}
         </div>
 
-        {/* Visible highlighted code or fallback */}
+        {/* Visible highlighted code or fallback - Shiki handles all styling */}
         {highlightedCode ? (
-          <div
-            className="code-block-syntax-highlight"
-            style={{
-              margin: 0,
-              borderRadius: '8px',
-              overflow: 'auto',
-            }}
-            dangerouslySetInnerHTML={{ __html: highlightedCode }}
-          />
+          <>
+            <style>{`
+              .shiki-code-container .shiki {
+                background-color: var(${theme === 'dark' ? '--shiki-dark-bg' : '--shiki-light-bg'}) !important;
+                margin: 0 !important;
+                padding: 0.75rem 1rem !important;
+                border-radius: 16px !important;
+              }
+              .shiki-code-container .shiki span {
+                color: var(${theme === 'dark' ? '--shiki-dark' : '--shiki-light'}) !important;
+                background-color: transparent !important;
+              }
+            `}</style>
+            <div
+              className="shiki-code-container"
+              dangerouslySetInnerHTML={{ __html: highlightedCode }}
+            />
+          </>
         ) : (
           <pre
             style={{
               margin: 0,
               padding: '1rem',
-              borderRadius: '8px',
+              borderRadius: '16px',
               backgroundColor: codeBg,
               color: codeColor,
+              overflowX: 'auto',
+              overflowY: 'hidden',
+              whiteSpace: 'pre',
             }}
           >
             <NodeViewContent as={'code' as any} />

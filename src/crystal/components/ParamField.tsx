@@ -4,52 +4,53 @@ interface ParamFieldProps {
   path: string
   type?: string
   required?: boolean
+  default?: string
   description?: string
   theme?: 'light' | 'dark'
 }
 
-// Get type-specific colors (syntax highlighting style)
+// Get type-specific colors with transparent backgrounds
 const getTypeColors = (type: string, theme: 'light' | 'dark') => {
   const typeColorMap: Record<string, { light: { bg: string; text: string }; dark: { bg: string; text: string } }> = {
-    // String - Red/Orange (like string literals)
+    // String - Orange
     string: {
-      light: { bg: '#fee2e2', text: '#dc2626' },
-      dark: { bg: '#450a0a', text: '#fca5a5' },
+      light: { bg: 'rgba(234, 88, 12, 0.1)', text: '#ea580c' },
+      dark: { bg: 'rgba(251, 146, 60, 0.15)', text: '#fb923c' },
     },
-    // Number/Integer - Blue (like numeric literals)
+    // Number/Integer - Blue
     number: {
-      light: { bg: '#dbeafe', text: '#2563eb' },
-      dark: { bg: '#1e3a8a', text: '#93c5fd' },
+      light: { bg: 'rgba(37, 99, 235, 0.1)', text: '#2563eb' },
+      dark: { bg: 'rgba(96, 165, 250, 0.15)', text: '#60a5fa' },
     },
     integer: {
-      light: { bg: '#dbeafe', text: '#2563eb' },
-      dark: { bg: '#1e3a8a', text: '#93c5fd' },
+      light: { bg: 'rgba(37, 99, 235, 0.1)', text: '#2563eb' },
+      dark: { bg: 'rgba(96, 165, 250, 0.15)', text: '#60a5fa' },
     },
-    // Boolean - Purple/Magenta (like keywords true/false)
+    // Boolean - Purple
     boolean: {
-      light: { bg: '#f3e8ff', text: '#9333ea' },
-      dark: { bg: '#581c87', text: '#d8b4fe' },
+      light: { bg: 'rgba(147, 51, 234, 0.1)', text: '#9333ea' },
+      dark: { bg: 'rgba(192, 132, 252, 0.15)', text: '#c084fc' },
     },
-    // Object - Yellow/Gold (like object types)
+    // Object - Yellow
     object: {
-      light: { bg: '#fef3c7', text: '#d97706' },
-      dark: { bg: '#78350f', text: '#fcd34d' },
+      light: { bg: 'rgba(217, 119, 6, 0.1)', text: '#d97706' },
+      dark: { bg: 'rgba(252, 211, 77, 0.15)', text: '#fcd34d' },
     },
-    // Array - Cyan/Teal (like array brackets)
+    // Array - Cyan
     array: {
-      light: { bg: '#cffafe', text: '#0891b2' },
-      dark: { bg: '#164e63', text: '#67e8f9' },
+      light: { bg: 'rgba(8, 145, 178, 0.1)', text: '#0891b2' },
+      dark: { bg: 'rgba(103, 232, 249, 0.15)', text: '#67e8f9' },
     },
     // File - Green
     file: {
-      light: { bg: '#dcfce7', text: '#16a34a' },
-      dark: { bg: '#14532d', text: '#86efac' },
+      light: { bg: 'rgba(22, 163, 74, 0.1)', text: '#16a34a' },
+      dark: { bg: 'rgba(134, 239, 172, 0.15)', text: '#86efac' },
     },
   }
 
   const defaultColors = {
-    light: { bg: '#f3f4f6', text: '#4b5563' },
-    dark: { bg: '#374151', text: '#9ca3af' },
+    light: { bg: 'rgba(0, 0, 0, 0.06)', text: '#6b7280' },
+    dark: { bg: 'rgba(255, 255, 255, 0.08)', text: '#9ca3af' },
   }
 
   const colors = typeColorMap[type.toLowerCase()] || defaultColors
@@ -60,16 +61,17 @@ export const ParamField: React.FC<ParamFieldProps> = ({
   path,
   type = 'string',
   required = false,
+  default: defaultValue,
   description = '',
   theme = 'dark'
 }) => {
   const colors = {
     border: theme === 'light' ? '#e5e7eb' : '#374151',
     secondaryText: theme === 'light' ? '#6b7280' : '#9ca3af',
-    pathText: theme === 'light' ? '#059669' : '#34d399', // Green color for path
-    requiredBg: theme === 'light' ? '#fef3c7' : '#78350f',
-    requiredText: theme === 'light' ? '#92400e' : '#fcd34d',
-    requiredBorder: theme === 'light' ? '#fde68a' : '#b45309',
+    pathText: theme === 'light' ? '#3b82f6' : '#60a5fa', // Blue color for path
+    pathBg: theme === 'light' ? 'rgba(59, 130, 246, 0.1)' : 'rgba(96, 165, 250, 0.15)',
+    requiredBg: theme === 'light' ? 'rgba(220, 38, 38, 0.1)' : 'rgba(239, 68, 68, 0.15)',
+    requiredText: theme === 'light' ? '#dc2626' : '#f87171',
   }
 
   const typeColors = getTypeColors(type, theme)
@@ -91,11 +93,11 @@ export const ParamField: React.FC<ParamFieldProps> = ({
           marginBottom: '8px',
         }}
       >
-        {/* Parameter name - Green */}
+        {/* Parameter name - Blue */}
         <span
           style={{
-            fontWeight: '600',
-            fontSize: '14px',
+            fontWeight: '500',
+            fontSize: '13px',
             color: colors.pathText,
             fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace',
           }}
@@ -103,12 +105,13 @@ export const ParamField: React.FC<ParamFieldProps> = ({
           {path}
         </span>
 
-        {/* Type - with background color based on type */}
+        {/* Type - with transparent background */}
         <span
           style={{
-            fontSize: '12px',
-            color: typeColors.text,
-            backgroundColor: typeColors.bg,
+            fontWeight: '500',
+            fontSize: '13px',
+            color: theme === 'dark' ? '#e5e7eb' : '#4b5563',
+            backgroundColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)',
             fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace',
             padding: '2px 6px',
             borderRadius: '4px',
@@ -117,20 +120,37 @@ export const ParamField: React.FC<ParamFieldProps> = ({
           {type}
         </span>
 
-        {/* Required badge */}
+        {/* Required badge - Red */}
         {required && (
           <span
             style={{
-              fontSize: '11px',
+              fontSize: '13px',
               fontWeight: '500',
-              color: colors.requiredText,
-              backgroundColor: colors.requiredBg,
-              border: `1px solid ${colors.requiredBorder}`,
+              color: '#f87171',
+              backgroundColor: 'rgba(239, 68, 68, 0.15)',
               borderRadius: '4px',
-              padding: '1px 6px',
+              padding: '2px 6px',
+              fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace',
             }}
           >
             required
+          </span>
+        )}
+
+        {/* Default value */}
+        {defaultValue !== undefined && defaultValue !== '' && (
+          <span
+            style={{
+              fontSize: '13px',
+              fontWeight: '500',
+              color: theme === 'dark' ? '#e5e7eb' : '#4b5563',
+              backgroundColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)',
+              borderRadius: '4px',
+              padding: '2px 6px',
+              fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace',
+            }}
+          >
+            <span style={{ opacity: 0.6 }}>default:</span> "{defaultValue}"
           </span>
         )}
       </div>
@@ -148,6 +168,17 @@ export const ParamField: React.FC<ParamFieldProps> = ({
           {description}
         </p>
       )}
+
+      {/* Separator */}
+      <hr
+        style={{
+          width: '100%',
+          border: 'none',
+          borderTop: `1px solid ${colors.border}`,
+          margin: '16px 0 0 0',
+          opacity: 0.5,
+        }}
+      />
     </div>
   )
 }
