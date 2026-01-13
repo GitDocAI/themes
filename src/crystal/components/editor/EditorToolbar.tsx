@@ -174,7 +174,6 @@ const EditorToolbarComponent = forwardRef<EditorToolbarRef, EditorToolbarProps>(
 
 
   const insertImageNode =(src:string, alt:string, caption:string, type:any) => {
-        setClipboardImage(null)
         editor.chain().focus().setImageBlock({ src, alt, caption, type  }).run()
         setShowImageModal(false)
     }
@@ -239,6 +238,7 @@ const EditorToolbarComponent = forwardRef<EditorToolbarRef, EditorToolbarProps>(
   }
 
   const insertImage = () => {
+    setClipboardImage(null)
     setShowImageModal(true)
   }
 
@@ -1363,7 +1363,6 @@ const EditorToolbarComponent = forwardRef<EditorToolbarRef, EditorToolbarProps>(
           defaultImage={clipboardImage||undefined}
           onSave={insertImageNode}
           onCancel={() => {
-            setClipboardImage(null);
             setShowImageModal(false);
           }}
         />
