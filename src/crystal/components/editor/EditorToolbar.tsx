@@ -26,6 +26,8 @@ const EditorToolbarComponent = forwardRef<EditorToolbarRef, EditorToolbarProps>(
   const dropdownRef = useRef<HTMLDivElement>(null)
   const linkModalRef = useRef<HTMLDivElement>(null)
   const [clipboardImage,setClipboardImage]= useState<File|null>(null)
+  const [lastClipboardPreview,setLastClipboardPreview]= useState<string|null>(null)
+  const [clipboardImageSrc,setClipboardImageSrc]= useState<string|null>(null)
 
 
   // Close dropdown when clicking outside
@@ -65,23 +67,43 @@ const EditorToolbarComponent = forwardRef<EditorToolbarRef, EditorToolbarProps>(
   }, [editor])
 
   useEffect(()=>{
+    window.addEventListener('paste',handlePasteEvent );
+    return ()=>{
+      window.removeEventListener('paste',handlePasteEvent)
+    }
+  },[])
 
-    const pasteEvent =(event:any) => {
+
+  const handlePasteEvent =async (event:any) => {
       const items = (event.clipboardData || event.originalEvent.clipboardData).items;
       for (let item of items) {
           if (item.type.indexOf('image') !== -1) {
               const blob = item.getAsFile();
-              setClipboardImage(blob)
-              setShowImageModal(true)
+              handleExternalFileInsertion(blob)
           }
       }
   }
 
-  window.addEventListener('paste',pasteEvent );
-    return ()=>{
-      window.removeEventListener('paste',pasteEvent)
-    }
-  },[])
+
+  const handleExternalFileInsertion = async(blob:File)=>{
+      const hashBuffer = await crypto.subtle.digest('SHA-256', await blob.arrayBuffer());
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
+
+      if(!!lastClipboardPreview && lastClipboardPreview===hashHex){
+          setShowImageModal(true)
+      }else{
+          setLastClipboardPreview(hashHex)
+          setClipboardImage(blob)
+          setClipboardImageSrc(null)
+          setShowImageModal(true)
+      }
+    setTimeout(()=>{
+      console.log(hashHex,clipboardImage,clipboardImageSrc," asasasas")
+    },1)
+  }
+
 
   // Get current text type
   const getCurrentTextType = () => {
@@ -176,6 +198,13 @@ const EditorToolbarComponent = forwardRef<EditorToolbarRef, EditorToolbarProps>(
   const insertImageNode =(src:string, alt:string, caption:string, type:any) => {
         editor.chain().focus().setImageBlock({ src, alt, caption, type  }).run()
         setShowImageModal(false)
+        //await for component rendering to end
+        setTimeout(()=>{
+          if(!!clipboardImage){
+             setClipboardImageSrc(src)
+             setClipboardImage(null)
+          }
+        },0)
     }
 
   const insertColumnGroup = () => {
@@ -239,6 +268,7 @@ const EditorToolbarComponent = forwardRef<EditorToolbarRef, EditorToolbarProps>(
 
   const insertImage = () => {
     setClipboardImage(null)
+    setClipboardImageSrc(null)
     setShowImageModal(true)
   }
 
@@ -1361,6 +1391,7 @@ const EditorToolbarComponent = forwardRef<EditorToolbarRef, EditorToolbarProps>(
         <ImageInsertModal
           theme={theme}
           defaultImage={clipboardImage||undefined}
+          defaultImageSrc={clipboardImageSrc||undefined}
           onSave={insertImageNode}
           onCancel={() => {
             setShowImageModal(false);
@@ -1379,11 +1410,12 @@ export { EditorToolbarComponent as EditorToolbar }
 interface ImageInsertModalProps {
   theme: 'light' | 'dark'
   defaultImage?:File
+  defaultImageSrc?:string
   onSave: (src: string, alt: string, caption: string, type: 'url' | 'local') => void
   onCancel: () => void
 }
 
-const ImageInsertModal: React.FC<ImageInsertModalProps> = ({ theme, onSave,defaultImage, onCancel }) => {
+const ImageInsertModal: React.FC<ImageInsertModalProps> = ({ theme, onSave,defaultImage,defaultImageSrc, onCancel }) => {
   const isProduction = import.meta.env.MODE === 'production' || import.meta.env.PROD
   const [imageType, setImageType] = useState<'url' | 'local'>('url')
   const [imageSrc, setImageSrc] = useState<string>('')
@@ -1392,11 +1424,6 @@ const ImageInsertModal: React.FC<ImageInsertModalProps> = ({ theme, onSave,defau
   const [uploading, setUploading] = useState<boolean>(false)
   const [error, setError] = useState<string>('')
   const fileInputRef = useRef<HTMLInputElement>(null)
-
-  useEffect(()=>{
-    if(!defaultImage)return
-    uploadFile(defaultImage)
-  },[defaultImage])
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -1426,6 +1453,9 @@ const ImageInsertModal: React.FC<ImageInsertModalProps> = ({ theme, onSave,defau
           setImageSrc(`${data.file_path}`)
           setImageType('local')
           setUploading(false)
+          if(!!defaultImage){
+              handleSave();
+          }
         } catch (err) {
           console.error('Upload error:', err)
           setError('Failed to upload file. Please try again.')
@@ -1457,6 +1487,24 @@ const ImageInsertModal: React.FC<ImageInsertModalProps> = ({ theme, onSave,defau
     }
     onSave(imageSrc.trim(), imageAlt.trim(), imageCaption.trim(), imageType)
   }
+
+
+    if(defaultImage && !uploading){
+      uploadFile(defaultImage)
+    }
+
+    if(defaultImageSrc){
+      setImageSrc(defaultImageSrc)
+      setImageAlt("Image")
+      setImageType("local")
+      handleSave()
+    }
+
+
+  if(defaultImage || defaultImageSrc){
+    return (<></>)
+  }
+
 
   return (
     <div
