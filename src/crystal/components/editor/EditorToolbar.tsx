@@ -1,5 +1,5 @@
 import { Editor } from '@tiptap/react'
-import { useState, useRef, useEffect, useImperativeHandle, forwardRef } from 'react'
+import {useCallback, useState, useRef, useEffect, useImperativeHandle, forwardRef } from 'react'
 import './types'
 import { ContentService } from '../../../services/contentService'
 
@@ -66,15 +66,9 @@ const EditorToolbarComponent = forwardRef<EditorToolbarRef, EditorToolbarProps>(
     }
   }, [editor])
 
-  useEffect(()=>{
-    window.addEventListener('paste',handlePasteEvent );
-    return ()=>{
-      window.removeEventListener('paste',handlePasteEvent)
-    }
-  },[])
 
 
-  const handlePasteEvent =async (event:any) => {
+  const handlePasteEvent = useCallback(async (event:any) => {
       const items = (event.clipboardData || event.originalEvent.clipboardData).items;
       for (let item of items) {
           if (item.type.indexOf('image') !== -1) {
@@ -82,8 +76,27 @@ const EditorToolbarComponent = forwardRef<EditorToolbarRef, EditorToolbarProps>(
               handleExternalFileInsertion(blob)
           }
       }
-  }
+  },[lastClipboardPreview,clipboardImageSrc,clipboardImage])
 
+  const handleDropEvent =useCallback(async(event:any)=>{
+      event.preventDefault()
+      const dt = event.dataTransfer;
+      const files = dt.files;
+      for(let file of files){
+         handleExternalFileInsertion(file)
+      }
+  },[lastClipboardPreview,clipboardImageSrc,clipboardImage])
+
+
+  useEffect(()=>{
+    window.addEventListener('paste',handlePasteEvent );
+    window.addEventListener('drop',handleDropEvent );
+    window.addEventListener('dragover',(e)=>e.preventDefault() );
+    return ()=>{
+      window.removeEventListener('paste',handlePasteEvent)
+      window.removeEventListener('drop',handleDropEvent );
+    }
+  },[handlePasteEvent])
 
   const handleExternalFileInsertion = async(blob:File)=>{
       const hashBuffer = await crypto.subtle.digest('SHA-256', await blob.arrayBuffer());
@@ -99,9 +112,6 @@ const EditorToolbarComponent = forwardRef<EditorToolbarRef, EditorToolbarProps>(
           setClipboardImageSrc(null)
           setShowImageModal(true)
       }
-    setTimeout(()=>{
-      console.log(hashHex,clipboardImage,clipboardImageSrc," asasasas")
-    },1)
   }
 
 
@@ -196,15 +206,12 @@ const EditorToolbarComponent = forwardRef<EditorToolbarRef, EditorToolbarProps>(
 
 
   const insertImageNode =(src:string, alt:string, caption:string, type:any) => {
+        if(!!clipboardImage){
+           setClipboardImageSrc(src)
+           setClipboardImage(null)
+        }
         editor.chain().focus().setImageBlock({ src, alt, caption, type  }).run()
         setShowImageModal(false)
-        //await for component rendering to end
-        setTimeout(()=>{
-          if(!!clipboardImage){
-             setClipboardImageSrc(src)
-             setClipboardImage(null)
-          }
-        },0)
     }
 
   const insertColumnGroup = () => {
@@ -1454,7 +1461,7 @@ const ImageInsertModal: React.FC<ImageInsertModalProps> = ({ theme, onSave,defau
           setImageType('local')
           setUploading(false)
           if(!!defaultImage){
-              handleSave();
+             handleSave();
           }
         } catch (err) {
           console.error('Upload error:', err)
@@ -1489,19 +1496,26 @@ const ImageInsertModal: React.FC<ImageInsertModalProps> = ({ theme, onSave,defau
   }
 
 
-    if(defaultImage && !uploading){
-      uploadFile(defaultImage)
+  if(defaultImage && !uploading){
+    uploadFile(defaultImage)
+  }
+
+
+  useEffect(()=>{
+    if(!!defaultImageSrc && imageSrc.trim()===''){
+        setImageSrc(`${defaultImageSrc}`)
+        setImageAlt("Image")
+        setImageType("local")
+    }else if(!!defaultImageSrc && !defaultImage){
+      setTimeout(()=>{
+        handleSave()
+      },100)
     }
 
-    if(defaultImageSrc){
-      setImageSrc(defaultImageSrc)
-      setImageAlt("Image")
-      setImageType("local")
-      handleSave()
-    }
+  },[imageSrc])
 
 
-  if(defaultImage || defaultImageSrc){
+  if(!!defaultImage || !!defaultImageSrc){
     return (<></>)
   }
 
