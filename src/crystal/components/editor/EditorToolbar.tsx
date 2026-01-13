@@ -25,6 +25,8 @@ const EditorToolbarComponent = forwardRef<EditorToolbarRef, EditorToolbarProps>(
   const [showImageModal, setShowImageModal] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const linkModalRef = useRef<HTMLDivElement>(null)
+  const [clipboardImage,setClipboardImage]= useState<File|null>(null)
+
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -61,6 +63,25 @@ const EditorToolbarComponent = forwardRef<EditorToolbarRef, EditorToolbarProps>(
       editor.off('update', updateTextType)
     }
   }, [editor])
+
+  useEffect(()=>{
+
+    const pasteEvent =(event:any) => {
+      const items = (event.clipboardData || event.originalEvent.clipboardData).items;
+      for (let item of items) {
+          if (item.type.indexOf('image') !== -1) {
+              const blob = item.getAsFile();
+              setClipboardImage(blob)
+              setShowImageModal(true)
+          }
+      }
+  }
+
+  window.addEventListener('paste',pasteEvent );
+    return ()=>{
+      window.removeEventListener('paste',pasteEvent)
+    }
+  },[])
 
   // Get current text type
   const getCurrentTextType = () => {
@@ -153,6 +174,7 @@ const EditorToolbarComponent = forwardRef<EditorToolbarRef, EditorToolbarProps>(
 
 
   const insertImageNode =(src:string, alt:string, caption:string, type:any) => {
+        setClipboardImage(null)
         editor.chain().focus().setImageBlock({ src, alt, caption, type  }).run()
         setShowImageModal(false)
     }
@@ -1338,8 +1360,12 @@ const EditorToolbarComponent = forwardRef<EditorToolbarRef, EditorToolbarProps>(
       {showImageModal && (
         <ImageInsertModal
           theme={theme}
+          defaultImage={clipboardImage||undefined}
           onSave={insertImageNode}
-          onCancel={() => setShowImageModal(false)}
+          onCancel={() => {
+            setClipboardImage(null);
+            setShowImageModal(false);
+          }}
         />
       )}
     </div>
@@ -1353,11 +1379,12 @@ export { EditorToolbarComponent as EditorToolbar }
 // Image Insert Modal Component (simplified version for toolbar)
 interface ImageInsertModalProps {
   theme: 'light' | 'dark'
+  defaultImage?:File
   onSave: (src: string, alt: string, caption: string, type: 'url' | 'local') => void
   onCancel: () => void
 }
 
-const ImageInsertModal: React.FC<ImageInsertModalProps> = ({ theme, onSave, onCancel }) => {
+const ImageInsertModal: React.FC<ImageInsertModalProps> = ({ theme, onSave,defaultImage, onCancel }) => {
   const isProduction = import.meta.env.MODE === 'production' || import.meta.env.PROD
   const [imageType, setImageType] = useState<'url' | 'local'>('url')
   const [imageSrc, setImageSrc] = useState<string>('')
@@ -1367,10 +1394,18 @@ const ImageInsertModal: React.FC<ImageInsertModalProps> = ({ theme, onSave, onCa
   const [error, setError] = useState<string>('')
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  useEffect(()=>{
+    if(!defaultImage)return
+    uploadFile(defaultImage)
+  },[defaultImage])
+
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
+    uploadFile(file)
+  }
 
+  const uploadFile=(file:File)=>{
     if (!file.type.startsWith('image/')) {
       setError('Please select a valid image file')
       return
