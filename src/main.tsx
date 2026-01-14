@@ -21,6 +21,9 @@ function extractAndSaveToken(){
   const value = params.get('token');
   if(!!value)localStorage.setItem("accessToken",value)
   if(!!value)localStorage.setItem("refreshToken",value)
+
+  const show_chat = params.get('ai_edit')||'false';
+  if(!!show_chat)localStorage.setItem("show_chat",show_chat)
 }
 
 /**

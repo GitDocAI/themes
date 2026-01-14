@@ -54,6 +54,15 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
   currentTab = '',
   currentGroup = ''
 }) => {
+
+  const show_chat = localStorage.getItem("show_chat")
+
+
+  if(!show_chat || show_chat=='false'){
+    return (<></>)
+  }
+
+
   const [isOpen, setIsOpen] = useState(false)
   const [chatResume,setChatResume] = useState<string>("")
   const [todoList,setTodoList] = useState<string>("")
