@@ -7,7 +7,6 @@ import {configLoader} from "../../../../services/configLoader";
 export const EmojiList = forwardRef((props, ref) => {
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [theme, setTheme] = useState('light')
-  const config = configLoader.getConfig()
 
 
   useEffect(() => {
@@ -24,7 +23,6 @@ export const EmojiList = forwardRef((props, ref) => {
         currentTheme = luminance < 0.5 ? 'dark' : 'light'
       }
       setTheme(currentTheme)
-      const primaryColor = configLoader.getPrimaryColor(currentTheme)
     }
 
     detectTheme()
@@ -84,7 +82,6 @@ export const EmojiList = forwardRef((props, ref) => {
   const text_color =configLoader.getSecondaryTextColor(theme)
   const background_color=configLoader.getBackgroundColor(theme)
 
-  console.log(text_color,background_color)
 
   return (
     <div className="dropdown-menu"

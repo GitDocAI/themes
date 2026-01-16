@@ -2,11 +2,11 @@
  * MDX Parser Service
  * Converts MDX content to TipTap JSON format
  */
-
 import { unified } from 'unified'
 import remarkParse from 'remark-parse'
 import remarkMdx from 'remark-mdx'
 import remarkGfm from 'remark-gfm'
+import remarkGemoji from 'remark-gemoji';
 
 // MDX AST Node types
 interface MdxNode {
@@ -83,6 +83,7 @@ class MDXParserService {
       const processor = unified()
         .use(remarkParse)
         .use(remarkGfm)
+        .use(remarkGemoji)
         .use(remarkMdx)
 
       const ast = processor.parse(processedContent)

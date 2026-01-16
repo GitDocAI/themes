@@ -369,6 +369,14 @@ class MDXSerializerService {
       return '  \n' // Two spaces + newline
     }
 
+
+    if (node.type === 'emoji') {
+      const name = node.attrs?.name || ''
+      if (name) {
+        return `:${name}:`
+      }
+    }
+
     return ''
   }
 

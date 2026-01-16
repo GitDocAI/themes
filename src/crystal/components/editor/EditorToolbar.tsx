@@ -2,6 +2,7 @@ import { Editor } from '@tiptap/react'
 import {useCallback, useState, useRef, useEffect, useImperativeHandle, forwardRef } from 'react'
 import './types'
 import { ContentService } from '../../../services/contentService'
+import EmojiPicker from './emoji/EmojiPicker'
 
 interface EditorToolbarProps {
   editor: Editor
@@ -19,6 +20,7 @@ const EditorToolbarComponent = forwardRef<EditorToolbarRef, EditorToolbarProps>(
   const [showInsertDropdown, setShowInsertDropdown] = useState(false)
   const [currentTextType, setCurrentTextType] = useState('paragraph')
   const [showLinkModal, setShowLinkModal] = useState(false)
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false)
   const [linkUrl, setLinkUrl] = useState('')
   const [linkTitle, setLinkTitle] = useState('')
   const [linkModalPosition, setLinkModalPosition] = useState<{ top: number; left: number } | null>(null)
@@ -699,6 +701,29 @@ const EditorToolbarComponent = forwardRef<EditorToolbarRef, EditorToolbarProps>(
       >
         <i className="pi pi-image" style={iconStyle}></i>
       </button>
+
+      <div style={{ position: 'relative' }}>
+        <button
+          onClick={() => setShowEmojiPicker(prev => !prev)}
+          style={buttonStyle()}
+          title="Insert Emoji"
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = theme === 'light' ? '#f3f4f6' : '#374151'
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'transparent'
+          }}
+        >
+            😃
+        </button>
+        {showEmojiPicker && (
+          <EmojiPicker
+            editor={editor}
+            theme={theme}
+            onClose={() => setShowEmojiPicker(false)}
+          />
+        )}
+      </div>
 
       {/* Divider */}
       <div

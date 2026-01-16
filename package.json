@@ -50,6 +50,8 @@
     "react-markdown": "^10.1.0",
     "react-router-dom": "^7.9.6",
     "react-simple-code-editor": "^0.14.1",
+    "remark-emoji": "^5.0.2",
+    "remark-gemoji": "^8.0.0",
     "remark-gfm": "^4.0.1",
     "remark-mdx": "^3.1.1",
     "remark-parse": "^11.0.0",
