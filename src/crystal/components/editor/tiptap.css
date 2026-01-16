@@ -945,3 +945,21 @@ body[style*="background-color: rgb(255, 255, 255)"] .hljs-meta {
   text-indent: 0 !important;
 }
 
+.tiptap {
+  :first-child {
+    margin-top: 0;
+  }
+
+  [data-type='emoji'] {
+    display: inline-block;
+    height: fit-content;
+    width: fit-content;
+    transform: translateY(20%);
+
+    img {
+      height: 1.3em;
+      width: 1.3em;
+    }
+  }
+}
+

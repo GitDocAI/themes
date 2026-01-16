@@ -7,6 +7,7 @@ import Link from '@tiptap/extension-link'
 import { DragHandle } from '@tiptap/extension-drag-handle-react'
 import NodeRange from '@tiptap/extension-node-range'
 import { useEffect, useRef, useState, useCallback } from 'react'
+import Emoji, { gitHubEmojis } from '@tiptap/extension-emoji'
 import './tiptap.css'
 import './types'
 
@@ -43,6 +44,7 @@ import {
 } from './extensions/InfoBlockExtension'
 import { LabelExtension } from './extensions/LabelExtension'
 import { TrailingParagraph } from './extensions/TrailingParagraph'
+import suggestion  from './emoji/suggestion'
 
 // Import toolbar
 import { EditorToolbar } from './EditorToolbar'
@@ -172,6 +174,12 @@ export const TiptapEditor: React.FC<TiptapEditorProps> = ({ content, theme, onUp
 
   const editor = useEditor({
     extensions: [
+      Emoji.configure({
+        emojis: gitHubEmojis,
+        enableEmoticons: true,
+        forceFallbackImages: true,
+        suggestion,
+      }),
       StarterKit.configure({
         heading: false, // Disable default heading to use custom one
         horizontalRule: false,

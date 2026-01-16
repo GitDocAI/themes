@@ -1,0 +1,33 @@
+.dropdown-menu {
+  border-radius: 0.7rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  overflow: auto;
+  padding: 0.4rem;
+  position: relative;
+}
+
+.dropdown-menu button {
+  align-items: center;
+  background-color: transparent;
+  display: flex;
+  gap: 0.5rem;
+  text-align: left;
+  width: 100%;
+  padding: 0.4rem 0.6rem;
+  border-radius: 0.5rem;
+  transition: background-color 0.15s ease-in-out;
+}
+
+
+.dropdown-menu .emoji {
+  font-size: 1.2em;
+  line-height: 1;
+}
+
+.dropdown-menu .emoji-name {
+  font-size: 0.9em;
+  opacity: 0.8;
+}
