@@ -419,6 +419,43 @@ const EditorToolbarComponent = forwardRef<EditorToolbarRef, EditorToolbarProps>(
         <option value="blockquote">Quote</option>
       </select>
 
+        <button
+          onClick={() => editor.chain().focus().undo().run()}
+          style={buttonStyle(editor.isActive('bold'))}
+          onMouseEnter={(e) => {
+            if (!editor.isActive('bold')) {
+              e.currentTarget.style.backgroundColor = theme === 'light' ? '#f3f4f6' : '#374151'
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (!editor.isActive('bold')) {
+              e.currentTarget.style.backgroundColor = 'transparent'
+            }
+          }}
+          title="undo"
+        >
+            <i style={iconStyle} className="pi pi-undo"></i>
+        </button>
+
+        {/* Botón Redo */}
+        <button
+          onClick={() => editor.chain().focus().redo().run()}
+          style={buttonStyle(editor.isActive('bold'))}
+          onMouseEnter={(e) => {
+            if (!editor.isActive('bold')) {
+              e.currentTarget.style.backgroundColor = theme === 'light' ? '#f3f4f6' : '#374151'
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (!editor.isActive('bold')) {
+              e.currentTarget.style.backgroundColor = 'transparent'
+            }
+          }}
+          title="redo"
+        >
+            <i style={iconStyle} className=" pi pi-undo rotate-y-180"></i>
+        </button>
+
       {/* Divider */}
       <div
         style={{
