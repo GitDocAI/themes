@@ -421,7 +421,7 @@ const EditorToolbarComponent = forwardRef<EditorToolbarRef, EditorToolbarProps>(
 
         <button
           onClick={() => editor.chain().focus().undo().run()}
-          style={buttonStyle(editor.isActive('bold'))}
+          style={buttonStyle(false)}
           onMouseEnter={(e) => {
             if (!editor.isActive('bold')) {
               e.currentTarget.style.backgroundColor = theme === 'light' ? '#f3f4f6' : '#374151'
@@ -440,7 +440,7 @@ const EditorToolbarComponent = forwardRef<EditorToolbarRef, EditorToolbarProps>(
         {/* Botón Redo */}
         <button
           onClick={() => editor.chain().focus().redo().run()}
-          style={buttonStyle(editor.isActive('bold'))}
+          style={buttonStyle(false)}
           onMouseEnter={(e) => {
             if (!editor.isActive('bold')) {
               e.currentTarget.style.backgroundColor = theme === 'light' ? '#f3f4f6' : '#374151'
