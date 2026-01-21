@@ -1,0 +1,114 @@
+name: Deploy Service to Google Cloud Run
+
+on:
+  workflow_call:
+    inputs:
+      service_name:
+        required: true
+        type: string
+        description: 'Name of the service to deploy (e.g., backend, batcher)'
+      env:
+        required: true
+        type: string
+        description: 'Environment (dev or prod)'
+      gcp_project:
+        required: true
+        type: string
+        description: 'GCP Project ID'
+      region:
+        required: true
+        type: string
+        description: 'GCP Region'
+      workload_identity_provider:
+        required: true
+        type: string
+        description: 'Workload Identity Provider'
+      service_account:
+        required: true
+        type: string
+        description: 'Service Account'
+      vpc_connector:
+        required: false
+        type: string
+        default: ''
+        description: 'VPC Connector'
+      artifact_repo:
+        required: true
+        type: string
+        description: 'Artifact Registry repository name'
+      config_file:
+        required: true
+        type: string
+        description: 'Path to the Cloud Run service config file'
+      image_name:
+        required: false
+        type: string
+        description: 'Docker image name (without registry prefix or tag). Defaults to service_name if not provided.'
+    outputs:
+      service_url:
+        description: 'URL of the deployed service'
+        value: ${{ jobs.deploy.outputs.url }}
+
+jobs:
+  deploy:
+    name: Deploy ${{ inputs.service_name }} to Cloud Run
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    outputs:
+      url: ${{ steps.deploy.outputs.url }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ inputs.workload_identity_provider }}
+          service_account: ${{ inputs.service_account }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Prepare Service Config
+        env:
+          ENV: ${{ inputs.env }}
+          SERVICE_NAME: ${{ inputs.service_name }}
+          GCP_VPC_CONNECTOR: ${{ inputs.vpc_connector }}
+          GCP_SERVICE_ACCOUNT: ${{ inputs.service_account }}
+          GCP_PROJECT: ${{ inputs.gcp_project }}
+          REGION: ${{ inputs.region }}
+          ARTIFACT_REPO: ${{ inputs.artifact_repo }}
+          CONFIG_FILE: ${{ inputs.config_file }}
+          IMAGE_NAME: ${{ inputs.image_name || inputs.service_name }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
+        run: |
+          IMAGE="${REGION}-docker.pkg.dev/${GCP_PROJECT}/${ARTIFACT_REPO}/${IMAGE_NAME}:${ENV}"
+          echo "📦 Using image: $IMAGE"
+
+          # Copy configuration file
+          cp $CONFIG_FILE /tmp/${SERVICE_NAME}-config.yaml
+
+          # Replace dynamic placeholders
+          sed -i "s|{{ IMAGE }}|$IMAGE|g" /tmp/${SERVICE_NAME}-config.yaml
+          sed -i "s|{{ GCP_VPC_CONNECTOR }}|$GCP_VPC_CONNECTOR|g" /tmp/${SERVICE_NAME}-config.yaml
+          sed -i "s|{{ GCP_SERVICE_ACCOUNT }}|$GCP_SERVICE_ACCOUNT|g" /tmp/${SERVICE_NAME}-config.yaml
+
+          # Replace deployment ID to force new revision on each deploy
+          sed -i "s|{{ DEPLOYMENT_ID }}|${GITHUB_RUN_ID}|g" /tmp/${SERVICE_NAME}-config.yaml
+
+      - name: Deploy to Cloud Run
+        id: deploy
+        run: |
+          gcloud run services replace /tmp/${{ inputs.service_name }}-config.yaml \
+            --region=${{ inputs.region }} \
+            --project=${{ inputs.gcp_project }}
+
+          URL=$(gcloud run services describe ${{ inputs.service_name }}-${{ inputs.env }} \
+            --region=${{ inputs.region }} \
+            --project=${{ inputs.gcp_project }} \
+            --format='value(status.url)')
+
+          echo "url=$URL" >> $GITHUB_OUTPUT
+          echo "Deployed ${{ inputs.service_name }} to: $URL"

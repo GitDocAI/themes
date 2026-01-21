@@ -1,0 +1,105 @@
+name: Build Frontend Image (GCP)
+
+on:
+  workflow_call:
+    inputs:
+      image_name:
+        required: true
+        type: string
+        description: 'Name of the image (frontend)'
+      tag:
+        required: true
+        type: string
+        description: 'Tag for the image (e.g., dev, prod)'
+      gcp_project:
+        required: true
+        type: string
+        description: 'GCP Project ID'
+      gcp_region:
+        required: true
+        type: string
+        description: 'GCP Region'
+      workload_identity_provider:
+        required: true
+        type: string
+        description: 'Workload Identity Provider'
+      service_account:
+        required: true
+        type: string
+        description: 'Service Account'
+      artifact_repo:
+        required: true
+        type: string
+      working_directory:
+        required: false
+        type: string
+        default: '.'
+        description: 'Working directory for build and Docker context'
+      node_version:
+        required: false
+        type: string
+        default: '20.18.0'
+        description: 'Node.js version'
+      build_env:
+        required: false
+        type: string
+        default: '{"NODE_OPTIONS": "--max_old_space_size=8192"}'
+        description: 'JSON object with environment variables for build'
+      install_command:
+        required: false
+        type: string
+        default: 'npm ci'
+        description: 'Command to install dependencies'
+
+jobs:
+  build-and-push:
+    name: Build & Push Frontend
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node_version }}
+
+      - name: Install dependencies
+        working-directory: ${{ inputs.working_directory }}
+        run: ${{ inputs.install_command }}
+
+      - name: Build application
+        working-directory: ${{ inputs.working_directory }}
+        env: ${{ fromJson(inputs.build_env) }}
+        run: npm run build
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ inputs.workload_identity_provider }}
+          service_account: ${{ inputs.service_account }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker to use gcloud as credential helper
+        run: |
+          set -euo pipefail
+          gcloud auth configure-docker ${{ inputs.gcp_region }}-docker.pkg.dev
+
+      - name: Build and Push Docker Image
+        env:
+          IMAGE_TAG: ${{ inputs.gcp_region }}-docker.pkg.dev/${{ inputs.gcp_project }}/${{ inputs.artifact_repo }}/${{ inputs.image_name }}:${{ inputs.tag }}
+        run: |
+          set -euo pipefail
+
+          echo "Building Docker image: $IMAGE_TAG"
+          docker build -t $IMAGE_TAG ${{ inputs.working_directory }}
+
+          echo "Pushing Docker image: $IMAGE_TAG"
+          docker push $IMAGE_TAG
+
+          echo "✅ Image pushed successfully: $IMAGE_TAG"

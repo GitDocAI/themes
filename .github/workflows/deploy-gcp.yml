@@ -54,7 +54,7 @@ jobs:
   build-docsite-live:
     name: Build DocSite Live
     needs: [setup]
-    uses: GitDocAI/github-actions/.github/workflows/build-frontend-gcp-image.yml@v1.0.0
+    uses: ./.github/workflows/reusable-build-frontend.yml
     with:
       image_name: docsite-live
       tag: ${{ needs.setup.outputs.env }}
@@ -68,7 +68,7 @@ jobs:
   build-visual-editor:
     name: Build Visual Editor
     needs: [setup]
-    uses: GitDocAI/github-actions/.github/workflows/build-frontend-gcp-image.yml@v1.0.0
+    uses: ./.github/workflows/reusable-build-frontend.yml
     with:
       image_name: visual-editor
       tag: ${{ needs.setup.outputs.env }}
@@ -82,7 +82,7 @@ jobs:
   deploy-docsite-live:
     name: Deploy Docsite Live to Cloud Run
     needs: [setup, build-docsite-live]
-    uses: GitDocAI/github-actions/.github/workflows/deploy-cloudrun-service.yml@v1.0.0
+    uses: ./.github/workflows/reusable-deploy-cloudrun.yml
     with:
       service_name: docsite-live
       env: ${{ needs.setup.outputs.env }}
@@ -97,7 +97,7 @@ jobs:
   deploy-visual-editor:
     name: Deploy Visual Editor to Cloud Run
     needs: [setup, build-visual-editor]
-    uses: GitDocAI/github-actions/.github/workflows/deploy-cloudrun-service.yml@v1.0.0
+    uses: ./.github/workflows/reusable-deploy-cloudrun.yml
     with:
       service_name: visual-editor
       env: ${{ needs.setup.outputs.env }}
@@ -129,7 +129,7 @@ jobs:
     name: Generate AI Changelog
     if: github.event_name == 'release' && !github.event.release.prerelease
     needs: [deploy-docsite-live, deploy-visual-editor]
-    uses: GitDocAI/github-actions/.github/workflows/generate-changelog.yml@v1.0.0
+    uses: ./.github/workflows/reusable-generate-changelog.yml
     with:
       current_tag: ${{ github.event.release.tag_name }}
       product_name: GitDocAI Themes
