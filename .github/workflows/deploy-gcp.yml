@@ -54,7 +54,7 @@ jobs:
   build-docsite-live:
     name: Build DocSite Live
     needs: [setup]
-    uses: ./.github/workflows/reusable-node.yml
+    uses: GitDocAI/github-actions/.github/workflows/build-frontend-gcp-image.yml@v1.0.0
     with:
       image_name: docsite-live
       tag: ${{ needs.setup.outputs.env }}
@@ -62,13 +62,13 @@ jobs:
       gcp_region: ${{ needs.setup.outputs.region }}
       workload_identity_provider: ${{ needs.setup.outputs.workload_identity_provider }}
       service_account: ${{ needs.setup.outputs.service_account }}
-      vite_mode: production
-      vite_backend_url: ${{ needs.setup.outputs.backend_url }}/api/v1/production/docs
+      artifact_repo: gitdocai
+      build_env: '{"NODE_OPTIONS": "--max_old_space_size=8192", "VITE_MODE": "production", "VITE_BACKEND_URL": "${{ needs.setup.outputs.backend_url }}/api/v1/production/docs"}'
 
   build-visual-editor:
     name: Build Visual Editor
     needs: [setup]
-    uses: ./.github/workflows/reusable-node.yml
+    uses: GitDocAI/github-actions/.github/workflows/build-frontend-gcp-image.yml@v1.0.0
     with:
       image_name: visual-editor
       tag: ${{ needs.setup.outputs.env }}
@@ -76,13 +76,13 @@ jobs:
       gcp_region: ${{ needs.setup.outputs.region }}
       workload_identity_provider: ${{ needs.setup.outputs.workload_identity_provider }}
       service_account: ${{ needs.setup.outputs.service_account }}
-      vite_mode: visual-editor
-      vite_backend_url: ${{ needs.setup.outputs.backend_url }}/api/v1/visual-editor/docs
+      artifact_repo: gitdocai
+      build_env: '{"NODE_OPTIONS": "--max_old_space_size=8192", "VITE_MODE": "visual-editor", "VITE_BACKEND_URL": "${{ needs.setup.outputs.backend_url }}/api/v1/visual-editor/docs"}'
 
   deploy-docsite-live:
     name: Deploy Docsite Live to Cloud Run
     needs: [setup, build-docsite-live]
-    uses: ./.github/workflows/reusable-deploy-cloudrun.yml
+    uses: GitDocAI/github-actions/.github/workflows/deploy-cloudrun-service.yml@v1.0.0
     with:
       service_name: docsite-live
       env: ${{ needs.setup.outputs.env }}
@@ -90,11 +90,14 @@ jobs:
       region: ${{ needs.setup.outputs.region }}
       workload_identity_provider: ${{ needs.setup.outputs.workload_identity_provider }}
       service_account: ${{ needs.setup.outputs.service_account }}
+      vpc_connector: ''
+      artifact_repo: gitdocai
+      config_file: .github/services/docsite-live-${{ needs.setup.outputs.env }}.yml
 
   deploy-visual-editor:
     name: Deploy Visual Editor to Cloud Run
     needs: [setup, build-visual-editor]
-    uses: ./.github/workflows/reusable-deploy-cloudrun.yml
+    uses: GitDocAI/github-actions/.github/workflows/deploy-cloudrun-service.yml@v1.0.0
     with:
       service_name: visual-editor
       env: ${{ needs.setup.outputs.env }}
@@ -102,3 +105,55 @@ jobs:
       region: ${{ needs.setup.outputs.region }}
       workload_identity_provider: ${{ needs.setup.outputs.workload_identity_provider }}
       service_account: ${{ needs.setup.outputs.service_account }}
+      vpc_connector: ''
+      artifact_repo: gitdocai
+      config_file: .github/services/visual-editor-${{ needs.setup.outputs.env }}.yml
+
+  # Purge Cloudflare cache after deploy
+  purge-cloudflare-cache:
+    name: Purge Cloudflare Cache
+    needs: [deploy-docsite-live, deploy-visual-editor]
+    if: always() && needs.deploy-docsite-live.result == 'success' && needs.deploy-visual-editor.result == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Purge entire cache
+        run: |
+          curl -X POST "https://api.cloudflare.com/client/v4/zones/${{ secrets.CLOUDFLARE_ZONE_ID }}/purge_cache" \
+            -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            --data '{"purge_everything":true}' \
+            --fail
+
+  # Generate changelog only for releases
+  generate-changelog:
+    name: Generate AI Changelog
+    if: github.event_name == 'release' && !github.event.release.prerelease
+    needs: [deploy-docsite-live, deploy-visual-editor]
+    uses: GitDocAI/github-actions/.github/workflows/generate-changelog.yml@v1.0.0
+    with:
+      current_tag: ${{ github.event.release.tag_name }}
+      product_name: GitDocAI Themes
+      product_description: 'Documentation themes and visual editor for GitDocAI - AI-powered documentation platform.'
+    secrets:
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+
+  update-release:
+    name: Update Release Notes
+    if: github.event_name == 'release' && !github.event.release.prerelease
+    needs: [generate-changelog]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Update release body
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CHANGELOG: ${{ needs.generate-changelog.outputs.changelog }}
+        run: |
+          echo "Updating release ${{ github.event.release.tag_name }} with generated changelog"
+
+          gh release edit "${{ github.event.release.tag_name }}" \
+            --notes "$CHANGELOG" \
+            --repo "${{ github.repository }}"
+
+          echo "Release updated successfully!"
