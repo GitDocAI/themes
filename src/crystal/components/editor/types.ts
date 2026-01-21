@@ -1,5 +1,6 @@
 import '@tiptap/core'
 
+// Extend @tiptap/core module
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {
     cardBlock: {

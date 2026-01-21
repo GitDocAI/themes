@@ -1,4 +1,4 @@
-import { fetchWithAuth } from '../utils/fetchWithAuth'
+import { fetchWithAuth, getDashboardUrl } from '../utils/fetchWithAuth'
 import {buildAxiosConfig} from './searchService'
 
 export interface ChatContext {
@@ -136,7 +136,8 @@ class AIStreamService {
 
               // Check for AI generation limit error
               if (payload && payload.includes("AI generation limit reached")) {
-                errorMessage = "⚠️ **AI generation limit reached**\n\nYou've reached your plan's AI usage limit. [Upgrade your plan](https://dashboard.dev.gitdocs.ai/profile/plans) to continue using AI features.";
+                const upgradeUrl = getDashboardUrl('/organization/billing')
+                errorMessage = `⚠️ **AI generation limit reached**\n\nYou've reached your plan's AI usage limit. [Upgrade your plan](${upgradeUrl}) to continue using AI features.`;
               }
 
               onData({

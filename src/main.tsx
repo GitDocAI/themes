@@ -6,6 +6,7 @@ import './index.css'
 import App from './App.tsx'
 import React from 'react';
 import {BrowserRouter } from 'react-router-dom'
+import { decodeToken } from './utils/tokenUtils'
 
 // StrictMode is disabled to avoid TipTap flushSync warnings
 // TipTap uses flushSync internally for custom node views which conflicts with React 18's StrictMode
@@ -15,15 +16,20 @@ const root = createRoot(document.getElementById('root')!)
 
 function extractAndSaveToken(){
   const url = new URL(window.location.href);
-
   const params = url.searchParams;
 
-  const value = params.get('token');
-  if(!!value)localStorage.setItem("accessToken",value)
-  if(!!value)localStorage.setItem("refreshToken",value)
+  const token = params.get('token');
+  if (token) {
+    localStorage.setItem("accessToken", token)
+    localStorage.setItem("refreshToken", token)
 
-  const show_chat = params.get('ai_edit')||'false';
-  if(!!show_chat)localStorage.setItem("show_chat",show_chat)
+    // Decode token to extract claims
+    const claims = decodeToken(token)
+    if (claims) {
+      // Store ai_edit feature flag from token claims
+      localStorage.setItem("show_chat", claims.ai_edit ? 'true' : 'false')
+    }
+  }
 }
 
 /**

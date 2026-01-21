@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { aiStreamService,type ChatContext, type AIStreamResponse } from '../../services/agentService'
+import { getDashboardUrl } from '../../utils/fetchWithAuth'
 import Markdown from 'react-markdown';
 import { ConfirmationModal } from './ConfirmationModal'
 import { EditPreviewModal } from './EditPreviewModal'
@@ -55,13 +56,8 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
   currentGroup = ''
 }) => {
 
-  const show_chat = localStorage.getItem("show_chat")
-
-
-  if(!show_chat || show_chat=='false'){
-    return (<></>)
-  }
-
+  // Check if AI edit feature is enabled from token claims
+  const isAiEditEnabled = localStorage.getItem("show_chat") === 'true'
 
   const [isOpen, setIsOpen] = useState(false)
   const [chatResume,setChatResume] = useState<string>("")
@@ -1285,108 +1281,161 @@ const handleSendMessage = async () => {
             backgroundColor: theme === 'light' ? '#f9fafb' : '#111827'
           }}
         >
-          <div
-            style={{
-              display: 'flex',
-              gap: '8px',
-              alignItems: 'flex-end'
-            }}
-          >
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-              <textarea
-                ref={inputRef}
-                value={inputValue}
-                onChange={(e) => {
-                  setInputValue(e.target.value)
-                  // Auto-resize textarea
-                  const textarea = e.target
-                  textarea.style.height = 'auto'
-                  const maxHeight = 264 // ~12 lines (22px per line)
-                  if (textarea.scrollHeight <= maxHeight) {
-                    textarea.style.height = `${textarea.scrollHeight}px`
-                    textarea.style.overflowY = 'hidden'
-                  } else {
-                    textarea.style.height = `${maxHeight}px`
-                    textarea.style.overflowY = 'auto'
-                  }
-                }}
-                onKeyDown={handleKeyDown}
-                placeholder="Ask AI to edit your docs..."
-                style={{
-                  padding: '12px 16px',
-                  backgroundColor: theme === 'light' ? '#ffffff' : '#374151',
-                  border: `1px solid ${theme === 'light' ? '#d1d5db' : '#4b5563'}`,
-                  borderRadius: '16px',
-                  color: theme === 'light' ? '#374151' : '#e5e7eb',
-                  fontSize: '14px',
-                  outline: 'none',
-                  transition: 'border-color 0.2s',
-                  resize: 'none',
-                  height: '44px',
-                  lineHeight: '22px',
-                  overflowY: 'hidden'
-                }}
-                rows={1}
-                onFocus={(e) => {
-                  e.currentTarget.style.borderColor = theme === 'light' ? '#3b82f6' : '#6366f1'
-                }}
-                onBlur={(e) => {
-                  e.currentTarget.style.borderColor = theme === 'light' ? '#d1d5db' : '#4b5563'
-                }}
-              ></textarea>
-              {/* <div style={{ display: 'flex', alignItems: 'center', paddingLeft: '16px', paddingTop: '8px' }}> */}
-              {/*   <input */}
-              {/*     type="checkbox" */}
-              {/*     id="alwaysApprove" */}
-              {/*     checked={alwaysApprove} */}
-              {/*     onChange={(e) => setAlwaysApprove(e.target.checked)} */}
-              {/*     style={{ marginRight: '8px' }} */}
-              {/*   /> */}
-              {/*   <label htmlFor="alwaysApprove" style={{ color: theme === 'light' ? '#374151' : '#e5e7eb', fontSize: '12px' }}> */}
-              {/*     Always approve */}
-              {/*   </label> */}
-              {/* </div> */}
-            </div>
-            <button
-              onClick={handleSendMessage}
-              disabled={!inputValue.trim()}
+          {!isAiEditEnabled ? (
+            // Upgrade prompt when AI edit is not available
+            <div
               style={{
-                width: '44px',
-                height: '44px',
-                borderRadius: '50%',
-                backgroundColor: inputValue.trim()
-                  ? theme === 'light'
-                    ? '#3b82f6'
-                    : '#6366f1'
-                  : theme === 'light'
-                  ? '#e5e7eb'
-                  : '#4b5563',
-                color: inputValue.trim()
-                  ? '#ffffff'
-                  : theme === 'light'
-                  ? '#9ca3af'
-                  : '#6b7280',
-                border: 'none',
-                cursor: inputValue.trim() ? 'pointer' : 'not-allowed',
                 display: 'flex',
+                flexDirection: 'column',
                 alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '18px',
-                transition: 'all 0.2s',
-                flexShrink: 0
-              }}
-              onMouseEnter={(e) => {
-                if (inputValue.trim()) {
-                  e.currentTarget.style.transform = 'scale(1.05)'
-                }
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'scale(1)'
+                gap: '12px',
+                padding: '16px',
+                backgroundColor: theme === 'light' ? '#fef3c7' : '#422006',
+                borderRadius: '12px',
+                border: `1px solid ${theme === 'light' ? '#fcd34d' : '#854d0e'}`
               }}
             >
-              ➤
-            </button>
-          </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <i className="pi pi-lock" style={{ fontSize: '18px', color: theme === 'light' ? '#b45309' : '#fbbf24' }}></i>
+                <span style={{
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  color: theme === 'light' ? '#92400e' : '#fcd34d'
+                }}>
+                  AI Editor not available in your plan
+                </span>
+              </div>
+              <p style={{
+                fontSize: '13px',
+                color: theme === 'light' ? '#a16207' : '#fde68a',
+                margin: 0,
+                textAlign: 'center'
+              }}>
+                Upgrade your plan to unlock AI-powered documentation editing
+              </p>
+              <a
+                href={getDashboardUrl('/organization/billing')}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '10px 20px',
+                  backgroundColor: theme === 'light' ? '#3b82f6' : '#6366f1',
+                  color: '#ffffff',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  textDecoration: 'none',
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-2px)'
+                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.4)'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)'
+                  e.currentTarget.style.boxShadow = 'none'
+                }}
+              >
+                <i className="pi pi-arrow-up-right" style={{ fontSize: '14px' }}></i>
+                Upgrade Plan
+              </a>
+            </div>
+          ) : (
+            // Normal input when AI edit is enabled
+            <div
+              style={{
+                display: 'flex',
+                gap: '8px',
+                alignItems: 'flex-end'
+              }}
+            >
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                <textarea
+                  ref={inputRef}
+                  value={inputValue}
+                  onChange={(e) => {
+                    setInputValue(e.target.value)
+                    // Auto-resize textarea
+                    const textarea = e.target
+                    textarea.style.height = 'auto'
+                    const maxHeight = 264 // ~12 lines (22px per line)
+                    if (textarea.scrollHeight <= maxHeight) {
+                      textarea.style.height = `${textarea.scrollHeight}px`
+                      textarea.style.overflowY = 'hidden'
+                    } else {
+                      textarea.style.height = `${maxHeight}px`
+                      textarea.style.overflowY = 'auto'
+                    }
+                  }}
+                  onKeyDown={handleKeyDown}
+                  placeholder="Ask AI to edit your docs..."
+                  style={{
+                    padding: '12px 16px',
+                    backgroundColor: theme === 'light' ? '#ffffff' : '#374151',
+                    border: `1px solid ${theme === 'light' ? '#d1d5db' : '#4b5563'}`,
+                    borderRadius: '16px',
+                    color: theme === 'light' ? '#374151' : '#e5e7eb',
+                    fontSize: '14px',
+                    outline: 'none',
+                    transition: 'border-color 0.2s',
+                    resize: 'none',
+                    height: '44px',
+                    lineHeight: '22px',
+                    overflowY: 'hidden'
+                  }}
+                  rows={1}
+                  onFocus={(e) => {
+                    e.currentTarget.style.borderColor = theme === 'light' ? '#3b82f6' : '#6366f1'
+                  }}
+                  onBlur={(e) => {
+                    e.currentTarget.style.borderColor = theme === 'light' ? '#d1d5db' : '#4b5563'
+                  }}
+                ></textarea>
+              </div>
+              <button
+                onClick={handleSendMessage}
+                disabled={!inputValue.trim()}
+                style={{
+                  width: '44px',
+                  height: '44px',
+                  borderRadius: '50%',
+                  backgroundColor: inputValue.trim()
+                    ? theme === 'light'
+                      ? '#3b82f6'
+                      : '#6366f1'
+                    : theme === 'light'
+                    ? '#e5e7eb'
+                    : '#4b5563',
+                  color: inputValue.trim()
+                    ? '#ffffff'
+                    : theme === 'light'
+                    ? '#9ca3af'
+                    : '#6b7280',
+                  border: 'none',
+                  cursor: inputValue.trim() ? 'pointer' : 'not-allowed',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '18px',
+                  transition: 'all 0.2s',
+                  flexShrink: 0
+                }}
+                onMouseEnter={(e) => {
+                  if (inputValue.trim()) {
+                    e.currentTarget.style.transform = 'scale(1.05)'
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'scale(1)'
+                }}
+              >
+                ➤
+              </button>
+            </div>
+          )}
         </div>
       </div>
 

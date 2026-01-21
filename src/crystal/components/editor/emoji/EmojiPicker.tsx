@@ -1,13 +1,7 @@
 import { Editor } from '@tiptap/react';
 import React, { useState, useEffect, useRef } from 'react';
 import { configLoader } from '../../../../services/configLoader';
-
-interface Emoji {
-  name: string;
-  shortcodes: string[];
-  tags: string[];
-  emoji: string;
-}
+import type { EmojiItem } from '@tiptap/extension-emoji';
 
 interface EmojiPickerProps {
   editor: Editor;
@@ -17,12 +11,12 @@ interface EmojiPickerProps {
 
 const EmojiPicker: React.FC<EmojiPickerProps> = ({ editor, onClose, theme }) => {
   const [search, setSearch] = useState('');
-  const [emojis, setEmojis] = useState<Emoji[]>([]);
+  const [emojis, setEmojis] = useState<EmojiItem[]>([]);
   const pickerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const allEmojis = editor.storage.emoji?.emojis || [];
-    setEmojis(allEmojis);
+    setEmojis(allEmojis as EmojiItem[]);
   }, [editor]);
 
   useEffect(() => {
@@ -42,7 +36,7 @@ const EmojiPicker: React.FC<EmojiPickerProps> = ({ editor, onClose, theme }) => 
     emoji.shortcodes.some(code => code.toLowerCase().includes(search.toLowerCase()))
   );
 
-  const handleEmojiClick = (emoji: Emoji) => {
+  const handleEmojiClick = (emoji: EmojiItem) => {
     editor.chain().focus().insertContent({
       type: 'emoji',
       attrs: { name: emoji.name },
@@ -109,7 +103,7 @@ const EmojiPicker: React.FC<EmojiPickerProps> = ({ editor, onClose, theme }) => 
               justifyContent: 'center',
             }}
           >
-            {emoji.emoji}
+            {emoji.emoji || emoji.fallbackImage}
           </button>
         ))}
       </div>

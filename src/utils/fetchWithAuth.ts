@@ -91,6 +91,27 @@ export function isMultiTenantMode(): boolean {
 }
 
 /**
+ * Get dashboard URL dynamically
+ * Constructs the dashboard URL based on current environment
+ */
+export function getDashboardUrl(path: string = ''): string {
+  const backendUrl = getBackendUrl()
+
+  try {
+    const url = new URL(backendUrl, window.location.origin)
+    // Extract base domain and construct dashboard URL
+    // e.g., api.dev.gitdoc.ai -> dashboard.dev.gitdoc.ai
+    const host = url.host
+    const dashboardHost = host.replace(/^api\./, 'dashboard.').replace(/^[^.]+\./, 'dashboard.')
+    const protocol = url.protocol || window.location.protocol
+    return `${protocol}//${dashboardHost}${path}`
+  } catch {
+    // Fallback: use current origin
+    return `${window.location.origin}${path}`
+  }
+}
+
+/**
  * Get tenant-specific URL for resource
  * Useful for constructing URLs that need tenant context
  */
