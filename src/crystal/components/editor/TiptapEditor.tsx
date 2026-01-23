@@ -597,23 +597,23 @@ export const TiptapEditor: React.FC<TiptapEditorProps> = ({ content, theme, onUp
               overflow: 'auto',
             }}
           >
-            <Editor
-              value={mdxCode}
-              onValueChange={handleCodeChange}
-              highlight={(code) => highlightedCode || code.replace(/</g, '&lt;').replace(/>/g, '&gt;')}
-              padding={20}
-              textareaId="code-editor-textarea"
-              style={{
-                fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace',
-                fontSize: '14px',
-                minHeight: '300px',
-                backgroundColor: 'transparent',
-                whiteSpace: 'pre-wrap',
-                wordBreak: 'break-word',
-              }}
-              textareaClassName="code-editor-textarea"
-              preClassName="code-editor-pre"
-            />
+            {/* <Editor */}
+            {/*   value={mdxCode} */}
+            {/*   onValueChange={handleCodeChange} */}
+            {/*   highlight={(code) => highlightedCode || code.replace(/</g, '&lt;').replace(/>/g, '&gt;')} */}
+            {/*   padding={20} */}
+            {/*   textareaId="code-editor-textarea" */}
+            {/*   style={{ */}
+            {/*     fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace', */}
+            {/*     fontSize: '14px', */}
+            {/*     minHeight: '300px', */}
+            {/*     backgroundColor: 'transparent', */}
+            {/*     whiteSpace: 'pre-wrap', */}
+            {/*     wordBreak: 'break-word', */}
+            {/*   }} */}
+            {/*   textareaClassName="code-editor-textarea" */}
+            {/*   preClassName="code-editor-pre" */}
+            {/* /> */}
           </div>
         </div>
       )}

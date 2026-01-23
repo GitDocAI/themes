@@ -38,3 +38,13 @@ function renderApp() {
 }
 renderApp()
 
+
+if ('service_worker' in navigator) {
+  window.addEventListener('load', () => {
+      const swUrl = `/sw.js?baseURL=${encodeURIComponent(import.meta.env.VITE_BACKEND_URL)}`;
+      navigator.serviceWorker.register(swUrl)
+      .then(_reg => console.log('SW registered successfully'))
+      .catch(err => console.error('error registering SW', err));
+  });
+}
+
