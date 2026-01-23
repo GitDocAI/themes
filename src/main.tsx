@@ -48,7 +48,8 @@ function renderApp() {
 renderApp()
 
 
-if ('service_worker' in navigator) {
+
+if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
       const swUrl = `/sw.js?baseURL=${encodeURIComponent(import.meta.env.VITE_BACKEND_URL)}`;
       navigator.serviceWorker.register(swUrl)
@@ -56,4 +57,3 @@ if ('service_worker' in navigator) {
       .catch(err => console.error('error registering SW', err));
   });
 }
-
