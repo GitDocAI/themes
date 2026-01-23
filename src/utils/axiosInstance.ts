@@ -35,7 +35,18 @@ authAxiosInstance.interceptors.request.use(
 export const setTokens = (accessToken: string, refreshToken: string) => {
   localStorage.setItem('accessToken', accessToken)
   localStorage.setItem('refreshToken', refreshToken)
+  syncTokenWithSW(accessToken)
 }
+
+
+export const syncTokenWithSW = (token: string) => {
+  if (navigator.serviceWorker.controller) {
+    navigator.serviceWorker.controller.postMessage({
+      type: 'SET_TOKEN',
+      token: token
+    });
+  }
+};
 
 export const getAccessToken = () => localStorage.getItem('accessToken')
 export const getRefreshToken = () => localStorage.getItem('refreshToken')
