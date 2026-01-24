@@ -51,7 +51,9 @@ renderApp()
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-      const swUrl = `/sw.js?baseURL=${encodeURIComponent(import.meta.env.VITE_BACKEND_URL)}`;
+      const token=localStorage.getItem("accessToken")
+      const swUrl = `/sw.js?baseURL=${encodeURI(import.meta.env.VITE_BACKEND_URL)}&token=${token}`;
+      console.log(swUrl)
       navigator.serviceWorker.register(swUrl)
       .then(_reg => console.log('SW registered successfully'))
       .catch(err => console.error('error registering SW', err));
